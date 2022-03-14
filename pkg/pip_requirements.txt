@@ -1,0 +1,6 @@
+spaceone-core
+spaceone-api
+spaceone-tester
+google-api-python-client
+schematics
+MarkupSafe>=2.0.0rc2

@@ -1,0 +1,7 @@
+GLOBAL:
+  SERVICE: inventory
+  ENDPOINTS:
+    inventory:
+      plugin: localhost:50051
+      #plugin: dev-docker.pyengine.net:50062
+
