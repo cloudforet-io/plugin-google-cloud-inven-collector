@@ -50,9 +50,6 @@ Please, set authentication privilege for followings:
     * [BigQuery](#bigquery)
         * [SQLWorkspace](#SQLWorkspace)
 
-
----
-
 #### [Compute Engine](https://cloud.google.com/compute/docs/apis)
 
 - ##### VM Instance
