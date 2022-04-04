@@ -1,6 +1,15 @@
-# plugin-google-cloud-inven-collector
+<h1 align="center">Google Cloud Collector</h1>  
 
-![Google Cloud](https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Google_Cloud.svg)
+<br/>  
+<div align="center" style="display:flex;">  
+  <img width="245" src="https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Google_Cloud.svg">
+  <p> 
+    <br>
+    <img alt="Version"  src="https://img.shields.io/badge/version-1.13.5-blue.svg?cacheSeconds=2592000"  />    
+    <a href="https://www.apache.org/licenses/LICENSE-2.0"  target="_blank"><img alt="License: Apache 2.0"  src="https://img.shields.io/badge/License-Apache 2.0-yellow.svg" /></a> 
+  </p> 
+</div>    
+
 **Plugin to collect Google Cloud**
 
 > SpaceONE's [plugin-google-cloud](https://github.com/spaceone-dev/plugin-google-cloud-inven-collector) is a convenient tool to
@@ -43,6 +52,7 @@ Please, set authentication privilege for followings:
 
 
 ---
+
 #### [Compute Engine](https://cloud.google.com/compute/docs/apis)
 
 - ##### VM Instance
@@ -295,6 +305,7 @@ Please, set authentication privilege for followings:
         - https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/{resource}
 
 ---
+
 ## Options
 
 ### Cloud Service Type : Specify what to collect
@@ -347,6 +358,8 @@ Update plugin through spacectl command with the created yaml file.
 <pre><code>
 > spacectl exec update_plugin inventory.Collector -f update_collector.yaml
 </code></pre>
+
+---
 
 ### Service list
 
