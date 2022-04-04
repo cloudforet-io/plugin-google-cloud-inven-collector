@@ -12,7 +12,7 @@
 
 **Plugin to collect Google Cloud**
 
-> SpaceONE's [plugin-google-cloud](https://github.com/spaceone-dev/plugin-google-cloud-inven-collector) is a convenient tool to
+> SpaceONE's [plugin-google-cloud-inven-collector](https://github.com/spaceone-dev/plugin-google-cloud-inven-collector) is a convenient tool to
 get cloud service data from Google Cloud platform.
 
 
