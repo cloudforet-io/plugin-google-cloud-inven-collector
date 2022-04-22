@@ -1,6 +1,8 @@
 import math
 import json
 import logging
+import ipaddress
+from urllib.parse import urlparse
 
 from spaceone.core.manager import BaseManager
 from spaceone.inventory.libs.connector import GoogleCloudConnector
@@ -99,9 +101,31 @@ class GoogleCloudManager(BaseManager):
         if region not in self.collected_region_codes:
             self.collected_region_codes.append(region)
 
-    def generate_region_from_zone_self_link(self, zone_self_link):
-        _split = zone_self_link.split('/')
-        return self.generate_region_from_zone(_split[-1])
+    @staticmethod
+    def get_param_in_url(url, key):
+        param = ""
+        raw_path = urlparse(url).path
+        list_path = raw_path.split('/')
+        # Google cloud resource representation rules is /{key}/{value}/{key}/{value}
+        if key in list_path:
+            index_key = list_path.index(key)
+            index_value = index_key+1
+            param = list_path[index_value]
+        return param
+
+    @staticmethod
+    def check_is_ipaddress(string_to_check):
+        try:
+            ip = ipaddress.ip_address(string_to_check)
+            return True
+        except ValueError:
+            return False
+
+    def get_region(self, resource_info):
+        if 'region' in resource_info:
+            return self.get_param_in_url(resource_info.get('region', ''), 'regions')
+        else:
+            return 'global'
 
     @staticmethod
     def generate_error_response(e, cloud_service_group, cloud_service_type):
@@ -142,10 +166,12 @@ class GoogleCloudManager(BaseManager):
                 }})
         return error_resource_response
 
+    # TODO: Remove it
+    '''
     @staticmethod
     def generate_region_from_zone(zone):
         return zone[:-2]
-
+    '''
     @staticmethod
     def match_region_info(region_code):
         match_region_info = REGION_INFO.get(region_code)
@@ -179,6 +205,7 @@ class GoogleCloudManager(BaseManager):
         s = round(size_bytes / p, 2)
         return "%s %s" % (s, size_name[i])
 
+
     @staticmethod
     def convertMillis(millis):
         s = millis / 1000
@@ -187,3 +214,14 @@ class GoogleCloudManager(BaseManager):
         d, h = divmod(h, 24)
 
         return d, h, m, s
+
+    @staticmethod
+    def parse_region_from_zone(zone):
+        '''
+        EX> zone = 'ap-northeast2-a'
+        '''
+        parsed_zone = zone.split('-')
+        if len(parsed_zone) >= 2:
+            return parsed_zone[0]+'-'+parsed_zone[1]
+        else:
+            return ''

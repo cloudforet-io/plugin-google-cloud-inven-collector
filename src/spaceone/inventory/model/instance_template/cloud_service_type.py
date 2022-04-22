@@ -26,7 +26,7 @@ cst_instance_template.tags = {
 cst_instance_template._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source('Name', 'data.name'),
-        TextDyField.data_source('Machine Type', 'data.machine.machine_display'),
+        TextDyField.data_source('Machine Type', 'data.machine_type'),
         TextDyField.data_source('Image', 'data.image'),
         TextDyField.data_source('Disk Type', 'data.disk_display'),
         ListDyField.data_source('In Used By', 'data.in_used_by',
@@ -38,15 +38,12 @@ cst_instance_template._metadata = CloudServiceTypeMeta.set_meta(
         ListDyField.data_source('Network Tags', 'data.network_tags',
                                 default_badge={'type': 'outline', 'delimiter': '<br>'}, options={'is_optional': True}),
         TextDyField.data_source('Fingerprint', 'data.fingerprint', options={'is_optional': True}),
-        TextDyField.data_source('(Machine Info) Machine Type', 'data.machine.machine_type', options={'is_optional': True}),
-        TextDyField.data_source('(Machine Info) Core', 'data.machine.core', options={'is_optional': True}),
-        TextDyField.data_source('(Machine Info) Memory', 'data.machine.memory', options={'is_optional': True}),
-
+        TextDyField.data_source('Machine Type', 'data.machine_type', options={'is_optional': True}),
         DateTimeDyField.data_source('Creation Time', 'data.creation_timestamp'),
     ],
     search=[
         SearchField.set(name='Name', key='data.name'),
-        SearchField.set(name='Machine Type', key='data.machine.machine_type'),
+        SearchField.set(name='Machine Type', key='data.machine_type'),
         SearchField.set(name='Image', key='data.image'),
         SearchField.set(name='Disk Type', key='data.disk_display'),
         SearchField.set(name='In Use By', key='data.in_used_by'),

@@ -208,6 +208,9 @@ class DiskManager(GoogleCloudManager):
             snapshot_schedule.append(policy[policy.rfind('/') + 1:])
         return snapshot_schedule
 
+    '''
+    TODO: 
+    '''
     @staticmethod
     def _get_in_used_by(users):
         in_used_by = []
@@ -231,6 +234,9 @@ class DiskManager(GoogleCloudManager):
                 encryption = 'Customer supplied'
         return encryption
 
+    '''
+    TODO: 
+    '''
     @staticmethod
     def _get_last_target(target):
         # target can be Null

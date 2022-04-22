@@ -13,7 +13,7 @@ instance_template_meta = ItemDynamicLayout.set_fields('Instance', fields=[
     TextDyField.data_source('ID', 'data.id'),
     TextDyField.data_source('Name', 'data.name'),
     TextDyField.data_source('Description', 'data.description'),
-
+    TextDyField.data_source('Machine Type', 'data.machine_type'),
     ListDyField.data_source('In Used By', 'data.in_used_by',
                             default_badge={'type': 'outline', 'delimiter': '<br>'}),
     EnumDyField.data_source('IP Forward', 'data.ip_forward', default_badge={
@@ -24,14 +24,6 @@ instance_template_meta = ItemDynamicLayout.set_fields('Instance', fields=[
                             default_badge={'type': 'outline', 'delimiter': '<br>'}),
     TextDyField.data_source('Fingerprint', 'data.fingerprint'),
     DateTimeDyField.data_source('Creation Time', 'data.creation_timestamp'),
-])
-
-# TAB - Network
-# instance_template_meta_network
-it_meta_machine = ItemDynamicLayout.set_fields('Machine Info', root_path='data.machine', fields=[
-    TextDyField.data_source('Machine Type', 'machine_type'),
-    TextDyField.data_source('Core', 'core'),
-    TextDyField.data_source('Memory', 'memory')
 ])
 
 meta_available_policy = ItemDynamicLayout.set_fields('Available policies', fields=[
@@ -55,7 +47,6 @@ it_meta_service_account = ItemDynamicLayout.set_fields('Service Account', root_p
 ])
 
 instance_template = ListDynamicLayout.set_layouts('Instance Template', layouts=[instance_template_meta,
-                                                                                it_meta_machine,
                                                                                 meta_available_policy,
                                                                                 it_meta_service_account])
 

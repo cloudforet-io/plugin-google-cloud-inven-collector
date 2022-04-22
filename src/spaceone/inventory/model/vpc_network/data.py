@@ -91,9 +91,11 @@ class Route(Model):
     self_link = StringType(deserialize_from='selfLink')
     creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
 
+
 class RouteConfig(Model):
     total_number = IntType(default=0)
     route = ListType(ModelType(Route), default=[])
+
 
 class VPNRoutingConfig(Model):
     routing_mode = StringType(choices=('REGIONAL', 'GLOBAL'), deserialize_from='routingMode')
@@ -107,6 +109,7 @@ class Allowed(Model):
 class LogConfig(Model):
     enable = BooleanType(serialize_when_none=False)
     metadata = StringType(serialize_when_none=False)
+
 
 class FirewallDisplay(Model):
     type_display = StringType()
@@ -138,6 +141,7 @@ class Firewall(Model):
     creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
     display = ModelType(FirewallDisplay, serialize_when_none=False)
 
+
 class FirewallConfig(Model):
     total_number = IntType(default=0)
     firewall = ListType(ModelType(Firewall), default=[])
@@ -159,7 +163,7 @@ class IPAddress(Model):
     ip_version = StringType(choices=('IPV4', 'IPV6'), deserialize_from='ipVersion', serialize_when_none=False)
     ip_version_display = StringType()
     status = StringType(choices=('RESERVED', 'RESERVING', 'IN_USE'))
-    users = ListType(StringType(), default= [])
+    users = ListType(StringType(), default=[])
     labels = ListType(ModelType(Labels), default=[])
     creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
 

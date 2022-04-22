@@ -40,7 +40,6 @@ class InstanceTemplateManager(GoogleCloudManager):
         # Get Instance Templates
         instance_templates = instance_template_conn.list_instance_templates()
         instance_groups = instance_template_conn.list_instance_group_managers()
-        machine_types = instance_template_conn.list_machine_types()
 
         for inst_template in instance_templates:
             try:
@@ -56,7 +55,7 @@ class InstanceTemplateManager(GoogleCloudManager):
                     'project': secret_data['project_id'],
                     'in_used_by': in_used_by,
                     'ip_forward': properties.get('canIpForward', False),
-                    'machine': MachineType(self._get_machine_type(properties, machine_types), strict=False),
+                    'machine_type': properties.get('machineType', ''),
                     'network_tags': tags.get('items', []),
                     'scheduling': self._get_scheduling(properties),
                     'disk_display': self._get_disk_type_display(disks, 'disk_type'),
@@ -95,18 +94,17 @@ class InstanceTemplateManager(GoogleCloudManager):
         _LOGGER.debug(f'** Instance Template Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
+    # Returns matched instance group and user(instance) related to instance template.
     def match_instance_group(self, instance_template, instance_group_managers: list):
         in_used_by = []
         instance_group_infos = []
         for instance_group in instance_group_managers:
-            version_info = instance_group.get('versions', [])
-            for version in version_info:
-                template_self_link_source = instance_template.get('selfLink', '')
-                template_self_link_target = version.get('instanceTemplate', '')
-                if self._check_self_link_matched(template_self_link_source, '/projects/', 10,
-                                                 template_self_link_target, '/projects/', 10, ):
-                    in_used_by.append(instance_group.get('name', ''))
-                    instance_group_infos.append(InstanceGroup(instance_group, strict=False))
+            template_self_link_source = instance_template.get('selfLink', '')
+            template_self_link_target = instance_group.get('instanceTemplate', '')
+            if template_self_link_source != '' and template_self_link_target != '' and \
+                    template_self_link_source == template_self_link_target:
+                in_used_by.append(instance_group.get('name', ''))
+                instance_group_infos.append(InstanceGroup(instance_group, strict=False))
 
         return in_used_by, instance_group_infos
 
@@ -133,14 +131,13 @@ class InstanceTemplateManager(GoogleCloudManager):
 
     def get_tags_info(self, disk):
         init_param = disk.get('initializeParams', {})
-        #disk_size = float(init_param.get('diskSizeGb'))
         disk_size = self.get_disk_size(init_param)
         disk_type = init_param.get('diskType')
         sc_image = init_param.get('sourceImage', '')
         return {
             'disk_type': init_param.get('diskType'),
             'source_image': sc_image,
-            'source_image_display': sc_image[sc_image.rfind('/')+1:],
+            'source_image_display': self.get_param_in_url(sc_image, 'images'),
             'auto_delete': disk.get('autoDelete'),
             'read_iops': self.get_iops_rate(disk_type, disk_size, 'read'),
             'write_iops': self.get_iops_rate(disk_type, disk_size, 'write'),
@@ -155,7 +152,7 @@ class InstanceTemplateManager(GoogleCloudManager):
             network_interface_info.append({
                 'idx_name': network_interface.get('name', ''),
                 'network': network_interface.get('network', ''),
-                'network_display': self._get_display_info(network_interface.get('network', '')),
+                'network_display': self.get_param_in_url(network_interface.get('network', ''), 'networks'),
                 'configs': configs,
                 'network_tier': tiers,
                 'access_configs': network_interface.get('accessConfigs', []),
@@ -181,30 +178,6 @@ class InstanceTemplateManager(GoogleCloudManager):
         return disk_size
 
     @staticmethod
-    def _get_machine_type(instance, machine_types):
-        machine = None
-        machine_type = instance.get('machineType', '')
-        machine_vo = {'machine_type': machine_type}
-
-        if machine_type != '':
-            for item in machine_types:
-                if item.get('name') == machine_type:
-                    machine = item
-
-        if machine:
-            core = machine.get('guestCpus')
-            memory = float(machine.get('memoryMb')) * 0.0009765625
-            m_str = str(memory)
-            display_memory = m_str if m_str[m_str.find('.'):] != '.0' else m_str[:m_str.find('.')]
-            machine_vo.update({
-                'machine_display': f'{machine_type} : {core} vCPUs {display_memory} GB RAM',
-                'machine_detail': machine.get('description'),
-                'core': core,
-                'memory': memory
-            })
-        return machine_vo
-
-    @staticmethod
     def _get_access_configs_type_and_tier(access_configs):
         configs = []
         tiers = []
@@ -224,17 +197,6 @@ class InstanceTemplateManager(GoogleCloudManager):
         }
 
     @staticmethod
-    def _check_self_link_matched(source_self_link: str,
-                                 source_context: str,
-                                 source_idx: int,
-                                 target_self_link: str,
-                                 target_context: str,
-                                 target_idx: int):
-
-        return source_self_link[source_self_link.find(source_context) + source_idx:] == \
-               target_self_link[target_self_link.find(target_context) + target_idx:]
-
-    @staticmethod
     def _get_iops_constant(disk_type, flag):
         constant = 0.0
         if flag == 'read':
@@ -252,13 +214,6 @@ class InstanceTemplateManager(GoogleCloudManager):
             elif disk_type == 'pd-ssd':
                 constant = 30.0
         return constant
-
-    @staticmethod
-    def _get_display_info(network):
-        network_display = ''
-        if network != '':
-            network_display = network[network.rfind('/') + 1:]
-        return network_display
 
     @staticmethod
     def _get_disk_type_display(disk, key):

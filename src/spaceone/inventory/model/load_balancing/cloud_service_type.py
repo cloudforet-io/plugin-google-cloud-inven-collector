@@ -28,22 +28,25 @@ cst_load_balancing.tags = {
 cst_load_balancing._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source('Name', 'data.name'),
-        EnumDyField.data_source('Protocol', 'data.lead_protocol', default_badge={
-            'primary': ['HTTP', 'HTTPS', 'HTTP(S)'], 'indigo.500': ['TCP', 'TCP (Proxy)'],
-            'coral.600': ['UDP', 'UDP (Proxy)']
+        TextDyField.data_source('Type', 'data.type'),
+        EnumDyField.data_source('Source', 'data.internal_or_external', default_badge={
+
+        }),
+        EnumDyField.data_source('Protocol', 'data.protocol', default_badge={
+            'primary': ['HTTP', 'HTTPS'], 'indigo.500': ['TCP', 'UDP'],
+            'coral.600': ['ESP', 'AH', 'SCTP', 'ICMP', 'L3_DEFAULT', 'UnKnown']
         }),
         TextDyField.data_source('Region', 'data.region'),
-        TextDyField.data_source('Frontends', 'data.frontend_display'),
-        TextDyField.data_source('Backends', 'data.backends_display'),
         DateTimeDyField.data_source('Creation Time', 'data.creation_timestamp'),
     ],
 
     search=[
         SearchField.set(name='ID', key='data.id'),
         SearchField.set(name='Name', key='data.name'),
-        SearchField.set(name='Protocol', key='data.lead_protocol'),
+        SearchField.set(name='Type', key='data.type'),
+        SearchField.set(name='Source', key='data.internal_or_external'),
+        SearchField.set(name='Protocol', key='data.protocol'),
         SearchField.set(name='Region', key='data.region'),
-        SearchField.set(name='description', key='data.description'),
         SearchField.set(name='Creation Time', key='data.creation_timestamp', data_type='datetime'),
     ],
 

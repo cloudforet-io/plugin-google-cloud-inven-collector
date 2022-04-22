@@ -104,15 +104,3 @@ class CloudSQLManager(GoogleCloudManager):
             return 'ON-DEMAND'
         else:
             return 'UNKNOWN'
-
-# Check SQL Instance status
-    def _check_sql_instance_is_available(self, instance):
-        power_state = self._get_display_state(instance)
-        create_state = instance.get('state', '')
-
-        if create_state == 'RUNNABLE' and power_state == 'RUNNING':
-            return True
-        else:
-            instance_name = instance.get('name', '')
-            _LOGGER.debug(f'[_check_sql_instance_is_available] instance {instance_name} is not available')
-            return False

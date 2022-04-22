@@ -47,7 +47,7 @@ class RouteManager(GoogleCloudManager):
         for route in routes:
             try:
                 display = {
-                    'network_display': self._get_matched_last_target('network', route),
+                    'network_display': self.get_param_in_url(route.get('network', ''), 'networks'),
                     'next_hop': self.get_next_hop(route),
                     'instance_tags_on_list': self._get_tags_display(route, 'list'),
                     'instance_tags': self._get_tags_display(route, 'not list'),
@@ -57,7 +57,7 @@ class RouteManager(GoogleCloudManager):
                 route.update({
                     'display': display,
                     'project': secret_data['project_id'],
-                    'applicable_instance': self.get_matched_instace(route,
+                    'applicable_instance': self.get_matched_instance(route,
                                                                     secret_data['project_id'],
                                                                     compute_vms),
                 })
@@ -85,25 +85,27 @@ class RouteManager(GoogleCloudManager):
         _LOGGER.debug(f'** Route Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
-    def get_matched_instace(self, route, project_id, instances_over_region):
+    def get_matched_instance(self, route, project_id, instances_over_region):
         all_compute_vms = []
         route_network = route.get('network')
 
         for instance in instances_over_region:
             network_interfaces = instance.get('networkInterfaces', [])
-            zone = self._get_matched_last_target('zone', instance)
-            region = zone[:-2]
+            zone = self.get_param_in_url(instance.get('zone', ''), 'zones')
+            region = self.parse_region_from_zone(zone)
+
             for network_interface in network_interfaces:
 
                 if route_network == network_interface.get('network'):
                     instance_name = instance.get('name')
+                    url_subnetwork = instance.get('subnetwork', '')
                     instance = {
                         'id': instance.get('id'),
                         'name': instance_name,
                         'zone': zone,
                         'region': region,
                         'address': network_interface.get('networkIP'),
-                        'subnetwork': self._get_matched_last_target('subnetwork', network_interface),
+                        'subnetwork': self.get_param_in_url(url_subnetwork, 'subnetworks'),
                         'project': project_id,
                         'service_accounts': self._get_service_accounts(instance.get('serviceAccounts', [])),
                         'creation_timestamp': instance.get('creationTimestamp'),
@@ -117,28 +119,37 @@ class RouteManager(GoogleCloudManager):
     def get_next_hop(self, route):
         next_hop = ''
         if 'nextHopInstance' in route:
-            target = self._get_matched_last_target('nextHopInstance', route).capitalize()
-            zone = self._get_zone_from_target('nextHopInstance', route)
+            url_next_hop_instance = route.get('nextHopInstance', '')
+            target = self.get_param_in_url(url_next_hop_instance, 'instances').capitalize()
+            zone = self.get_param_in_url(url_next_hop_instance, 'zones').capitalize()
             next_hop = f'Instance {target} (zone  {zone})'
 
         elif 'nextHopIp' in route:
-            target = self._get_matched_last_target('nextHopIp', route).capitalize()
+            # IP address
+            target = route.get('nextHopIp', '')
             next_hop = f'IP address lie within {target}'
 
         elif 'nextHopNetwork' in route:
-            target = self._get_matched_last_target('nextHopNetwork', route)
+            url_next_hop_network = route.get('nextHopNetwork', '')
+            target = self.get_param_in_url(url_next_hop_network, 'networks')
             next_hop = f'Virtual network {target}'
 
         elif 'nextHopGateway' in route:
-            target = self._get_matched_last_target('nextHopGateway', route).capitalize()
+            url_next_hop_gateway = route.get('nextHopGateway')
+            target = self.get_param_in_url(url_next_hop_gateway, 'gateways')
             next_hop = f'{target} internet gateway'
 
         elif 'nextHopIlb' in route:
-            target = self._get_matched_last_target('nextHopIlb', route).capitalize()
-            next_hop = f' Loadbalancer on {target}'
+            # Both ip address and Url string are possible value
+            next_hop_ilb = route.get('nextHopIlb', '')
+            if self.check_is_ipaddress(next_hop_ilb):
+                target = next_hop_ilb
+            else:
+                target = self.get_param_in_url(next_hop_ilb, 'forwardingRules')
+            next_hop = f'Loadbalancer on {target}'
 
         elif 'nextHopPeering' in route:
-            target = self._get_matched_last_target('nextHopPeering', route).capitalize()
+            target = route.get('nextHopPeering', '')
             next_hop = f'Peering : {target}'
 
         return next_hop
@@ -165,13 +176,3 @@ class RouteManager(GoogleCloudManager):
             value = labels.get(label, '')
             displays.append(f'{label}: {value}')
         return displays
-
-    @staticmethod
-    def _get_matched_last_target(key, source):
-        a = source.get(key, '')
-        return a[a.rfind('/') + 1:]
-
-    @staticmethod
-    def _get_zone_from_target(key, source):
-        a = source.get(key, '')
-        return a[a.find('zones') + 6:a.find('/instances')]

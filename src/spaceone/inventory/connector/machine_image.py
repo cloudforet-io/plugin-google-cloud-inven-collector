@@ -62,5 +62,4 @@ class MachineImageConnector(GoogleCloudConnector):
             image = response.get('items', [])
             k = public_image.get('key')
             public_images[k] = image
-
         return public_images

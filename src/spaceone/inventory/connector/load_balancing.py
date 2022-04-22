@@ -26,7 +26,7 @@ class LoadBalancingConnector(GoogleCloudConnector):
 
         return url_map_list
 
-    def list_back_end_services(self, **query):
+    def list_backend_services(self, **query):
         backend_svc_list = []
         query.update({'project': self.project_id})
         request = self.client.backendServices().aggregatedList(**query)
@@ -104,7 +104,7 @@ class LoadBalancingConnector(GoogleCloudConnector):
 
         return grpc_proxy_list
 
-    def list_back_end_buckets(self, **query):
+    def list_backend_buckets(self, **query):
         bucket_bucket_list = []
         query.update({'project': self.project_id})
         request = self.client.backendBuckets().list(**query)

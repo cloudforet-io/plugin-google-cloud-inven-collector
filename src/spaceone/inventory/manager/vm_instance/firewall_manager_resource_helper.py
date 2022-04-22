@@ -21,7 +21,6 @@ class FirewallManagerResourceHelper(GoogleCloudManager):
         for firewall_rule in firewall_rules:
             if firewall_rule.get('network') in inst_network_info:
                 # 0. network target tag matching
-                _LOGGER.debug(f'firewall => {firewall_rule}')
                 if self._chk_network_tag_is_matched(instance, firewall_rule):
                     firewall_rules_results.extend(self.list_firewall_rule_data(firewall_rule))
                 # 1. target service account matching
@@ -30,8 +29,6 @@ class FirewallManagerResourceHelper(GoogleCloudManager):
                 # 2. FW rule applies to all instances in subnet
                 elif ('targetTags' not in firewall_rule) & ('targetServiceAccounts' not in firewall_rule):
                     firewall_rules_results.extend(self.list_firewall_rule_data(firewall_rule))
-
-                _LOGGER.debug(f'list_firewall_rules_info firewall_data => {firewall_rules_results}')
             else:
                 pass
         return firewall_rules_results

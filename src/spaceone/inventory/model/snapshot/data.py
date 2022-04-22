@@ -41,33 +41,12 @@ class RetentionPolicy(Model):
     on_source_disk_delete = StringType(deserialize_from='onSourceDiskDelete', serialize_when_none=False)
 
 
-class SnapshotSchedulePolicy(Model):
-    schedule_display = ListType(StringType(), default=[])
-    schedule = ModelType(Schedule, deserialize_from='schedule', serialize_when_none=False)
-    retention_policy = ModelType(RetentionPolicy, deserialize_from='retentionPolicy', serialize_when_none=False)
-
-
-class SnapShotSchedule(Model):
-    id = StringType()
-    name = StringType()
-    status = StringType()
-    description = StringType()
-    region = StringType()
-    self_link = StringType(deserialize_from='selfLink')
-    snapshot_schedule_policy = ModelType(SnapshotSchedulePolicy, deserialize_from='snapshotSchedulePolicy')
-    storage_locations = ListType(StringType(), default=[])
-    labels = ListType(ModelType(Labels), default=[])
-    tags = ListType(ModelType(Labels), default=[])
-    creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
-
-
 class Disk(Model):
     source_disk = StringType()
     source_disk_display = StringType()
     source_disk_id = StringType()
     disk_size = FloatType()
     storage_bytes = IntType()
-
 
 
 class Encryption(Model):
@@ -88,8 +67,6 @@ class Snapshot(Model):
     snapshot_encryption_key = ModelType(Encryption, serialize_when_none=False, deserialize_from='snapshotEncryptionKey')
     source_disk_encryption_key = ModelType(Encryption, serialize_when_none=False, deserialize_from='sourceDiskEncryptionKey')
     storage_locations = ListType(StringType(), default=[], deserialize_from='storageLocations')
-    snapshot_schedule = ListType(ModelType(SnapShotSchedule), default=[])
-    snapshot_schedule_display = ListType(StringType(), default=[])
     creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
     creation_type = StringType(choices=('Manual', 'Scheduled'))
     encryption = StringType(choices=('Google managed', 'Customer managed', 'Customer supplied'))

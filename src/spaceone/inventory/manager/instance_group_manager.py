@@ -92,7 +92,7 @@ class InstanceGroupManager(GoogleCloudManager):
                     scheduler.update({'instance_group_type': 'UNMANAGED'})
 
                 loc_type, location = self.get_instance_group_loc(instance_group)
-                region = self.generate_region_from_zone(location) if loc_type == 'zone' else location
+                region = self.parse_region_from_zone(location) if loc_type == 'zone' else location
                 instances = instance_group_conn.list_instances(instance_group.get('name'), location, loc_type)
 
                 display_loc = {'region': location, 'zone': ''} if loc_type == 'region' \

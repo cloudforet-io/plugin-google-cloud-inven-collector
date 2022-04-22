@@ -59,7 +59,6 @@ class InstanceGroupManagerResourceHelper(GoogleCloudManager):
     def list_managed_instances_in_instance_groups(self) -> list:
         instances = []
         instancegroup_managers = self.instance_conn.list_instance_group_managers()
-        _LOGGER.debug(f' instancegroup_managers => {instancegroup_managers}')
         for instance_group in instancegroup_managers:
             if 'region' in instance_group:
                 region_name = self.get_region_from_instance_group(instance_group.get('region', ''))

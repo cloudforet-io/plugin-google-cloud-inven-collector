@@ -38,48 +38,41 @@ class MachineImageManager(GoogleCloudManager):
         project_id = secret_data['project_id']
         machine_image_conn: MachineImageConnector = self.locator.get_connector(self.connector_name, **params)
 
-        # Get Instance Templates
+        # Get machine image
         machine_images = machine_image_conn.list_machine_images()
-        machine_types = []
         disk_types = []
         public_images = {}
 
         if machine_images:
             public_images = machine_image_conn.list_public_images()
             for zone in params.get('zones', []):
-                if not machine_types:
-                    list_machine_types = machine_image_conn.list_machine_types(zone)
-                    machine_types.extend(list_machine_types)
-
-                if not disk_types:
-                    list_disk_types = machine_image_conn.list_disks(zone)
-                    disk_types.extend(list_disk_types)
+                list_disk_types = machine_image_conn.list_disks(zone)
+                disk_types.extend(list_disk_types)
 
         for machine_image in machine_images:
             try:
                 machine_image_id = machine_image.get('id')
-                properties = machine_image.get('sourceInstanceProperties', {})
+                properties = machine_image.get('instanceProperties', {})
                 tags = properties.get('tags', {})
-
-                boot_image = self.get_boot_image_data(properties, public_images)
+                boot_image = self.get_boot_image_data(properties)
                 disks = self.get_disks(properties, boot_image)
-
                 region = self.get_matching_region(machine_image.get('storageLocations'))
+                _LOGGER.debug(f'machine_image => {machine_image}')
 
                 machine_image.update({
                     'project': secret_data['project_id'],
                     'deletion_protection': properties.get('deletionProtection', False),
-                    'machine': MachineType(self._get_machine_type(properties, machine_types), strict=False),
+                    'machine_type': MachineType(self.get_machine_type(properties), strict=False),
                     'network_tags': tags.get('items', []),
                     'disk_display': self._get_disk_type_display(disks, 'disk_type'),
                     'image': self._get_disk_type_display(disks, 'source_image_display'),
                     'disks': disks,
                     'scheduling': self._get_scheduling(properties),
-                    'network_interfaces': self.get_network_interface(properties, properties.get('canIpForward', False)),
+                    'network_interfaces': self.get_network_interface(properties),
                     'total_storage_bytes': float(machine_image.get('totalStorageBytes', 0.0)),
                     'total_storage_display': self._convert_size(float(machine_image.get('totalStorageBytes', 0.0))),
-                    'fingerprint': self._get_properties_item(properties, 'metadata', 'fingerprint'),
-                    'location': region.get('location')
+                    'fingerprint': properties.get('metadata', {}).get('fingerprint', ''),
+                    'location': properties.get('storageLocations', [])
                 })
 
                 svc_account = properties.get('serviceAccounts', [])
@@ -109,12 +102,9 @@ class MachineImageManager(GoogleCloudManager):
 
     def get_disks(self, instance, boot_image):
         disk_info = []
-
-        encryption_dict = instance.get('machineImageEncryptionKey', {})
-
         # if there's another option for disk encryption
         # encryption_list = instance.get('sourceDiskEncryptionKeys', [])
-        for idx, disk in enumerate(instance.get('disks', [])):
+        for disk in instance.get('disks', []):
             size = self._get_bytes(int(disk.get('diskSizeGb')))
             single_disk = {
                 'device_index': disk.get('index'),
@@ -124,12 +114,13 @@ class MachineImageManager(GoogleCloudManager):
                 'size': float(size),
                 'tags': self.get_tags_info(disk)
             }
-            if idx == 0:
+            if disk.get('boot', False) == True:
                 single_disk.update({'boot_image': boot_image, 'is_boot_image': True})
 
-            if not encryption_dict:
+            # Check image is encrypted
+            if 'machineImageEncryptionKey' in instance:
                 single_disk.update({'encryption': 'Google managed'})
-            elif 'kmsKeyServiceAccount' in encryption_dict:
+            elif 'kmsKeyServiceAccount' in instance:
                 single_disk.update({'encryption': 'Customer managed'})
             else:
                 single_disk.update({'encryption': 'Customer supplied'})
@@ -150,28 +141,26 @@ class MachineImageManager(GoogleCloudManager):
             'write_throughput': self.get_throughput_rate(disk_type, disk_size),
         }
 
-    def get_network_interface(self, instance, can_ip_forward):
+    def get_network_interface(self, instance):
         network_interface_info = []
         for idx, network_interface in enumerate(instance.get('networkInterfaces', [])):
             access_configs = network_interface.get('accessConfigs', [])
             alias_ip_ranges = network_interface.get('AliasIPRanges', [])
-            network_interface_vo = {'name': network_interface.get('name', ''),
-                                    'network': network_interface.get('network', ''),
-                                    'network_tier_display': access_configs[0].get('networkTier') if len(
-                                        access_configs) > 0 else 'STANDARD',
-                                    'subnetwork': network_interface.get('subnetwork', ''),
-                                    'network_display': self._get_display_info(
-                                        network_interface.get('network', '')),
-                                    'subnetwork_display': self._get_display_info(
-                                        network_interface.get('subnetwork', '')),
-                                    'primary_ip_address': network_interface.get('networkIP', ''),
-                                    'public_ip_address': self._get_public_ip(access_configs),
-                                    'access_configs': access_configs,
-                                    'ip_ranges': [ipr.get('ipCidrRange') for ipr in alias_ip_ranges],
-                                    'alias_ip_ranges': alias_ip_ranges,
-                                    'kind': network_interface.get('kind', [])}
+            network_interface_vo = {
+                'name': network_interface.get('name', ''),
+                'network': network_interface.get('network', ''),
+                'network_tier_display': access_configs[0].get('networkTier') if len(access_configs) > 0 else 'STANDARD',
+                'subnetwork': network_interface.get('subnetwork', ''),
+                'network_display': self.get_param_in_url(network_interface.get('network', ''), 'networks'),
+                'subnetwork_display': self.get_param_in_url(network_interface.get('subnetwork', ''), 'subnetworks'),
+                'primary_ip_address': network_interface.get('networkIP', ''),
+                'public_ip_address': self._get_public_ip(access_configs),
+                'access_configs': access_configs,
+                'ip_ranges': self._get_alias_ip_range(alias_ip_ranges),
+                'alias_ip_ranges': alias_ip_ranges,
+                'kind': network_interface.get('kind', '')}
             if idx == 0:
-                ip_forward = 'On' if can_ip_forward else 'Off'
+                ip_forward = 'On' if instance.get('canIpForward', '') else 'Off'
                 network_interface_vo.update({'ip_forward': ip_forward})
 
             network_interface_info.append(network_interface_vo)
@@ -186,108 +175,37 @@ class MachineImageManager(GoogleCloudManager):
         const = self._get_throughput_constant(disk_type)
         return disk_size * const
 
-    def get_boot_image_data(self, instance, public_images):
+    def get_boot_image_data(self, instance):
+        list_disk_info = instance.get("disks", [])
+        bootdisk_info = self.get_boot_disk(list_disk_info)
+        return bootdisk_info.get('deviceName', '')
 
-        disk_info = instance.get("disks", [])
-        os_dists = disk_info[0].get('licenses', []) if len(disk_info) > 0 else []
-        licenses = disk_info[0].get('licenses', []) if len(disk_info) > 0 else []
-        os_type = "LINUX"
-        os_identity = ''
-
-        for idx, val in enumerate(os_dists):
-            os_items = val.split("/")
-            os_identity = os_items[-1].lower()
-            if idx == 0:
-                if "windows" in os_identity:
-                    os_type = "WINDOWS"
-                break
-
-        os_data = self.get_appropriate_image_info(os_identity, licenses, public_images)
-        os_data.update({
-            'os_type': os_type
-        })
-        return BootImage(os_data, strict=False)
-
-    def get_appropriate_image_info(self, os_identity, licenses, public_images):
-        # temp arch lists will be updated when full list has prepared.
-        arch_list = ['x86_64', 'x86_32', 'x64', 'x86', 'amd64']
-        os_data = {'name': '', 'details': '', 'os_distro': '', 'os_arch': ''}
-        for key, images in public_images.items():
-            find = False
-            if key in os_identity:
-                for image in images:
-                    image_license = image.get('licenses', [])
-                    if self._check_matched(licenses, image_license):
-                        os_arch_index = [i for i, e in enumerate(arch_list) if e in image.get('description', '')]
-                        os_data.update({'os_distro': 'windows-server' if key == 'windows' else key,
-                                        'details': image.get('description', ''),
-                                        'name': image.get('name'),
-                                        'os_arch': arch_list[os_arch_index[0]] if len(os_arch_index) > 0 else ''})
-                        find = True
-                        break
-            if find:
-                break
-
-        return os_data
-
-    def get_matching_region(self, svc_location):
-        region_code = svc_location[0] if len(svc_location) > 0 else 'global'
+    def get_matching_region(self, storage_location):
+        region_code = storage_location[0] if len(storage_location) > 0 else 'global'
         matched_info = self.match_region_info(region_code)
         return {'region_code': region_code, 'location': 'regional'} if matched_info \
             else {'region_code': 'global', 'location': 'multi'}
 
+    # Returns first boot disk of instance
     @staticmethod
-    def _check_matched(licenses, image):
-        check_matched = False
-        if len(licenses) > 0 and len(image) > 0:
-            check_license = licenses[0][licenses[0].find('/global/'):]
-            matching_license = image[0][image[0].find('/global/'):]
-            if check_license == matching_license:
-                check_matched = True
-        return check_matched
+    def get_boot_disk(list_disk_info) -> dict:
+        for disk_info in list_disk_info:
+            if disk_info.get('boot', False) == True:
+                return disk_info
+        return {}
 
-    @staticmethod
-    def _get_machine_type(instance, machine_types):
-        machine = None
-        machine_type = instance.get('machineType', '')
-        machine_vo = {'machine_type': machine_type}
+    def get_machine_type(self, instance):
+        machine_vo = {
+            'machine_type': instance.get('machineType', '')
+        }
         disks = instance.get('disks', [])
         source_disk = disks[0] if len(disks) > 0 else {}
-        if machine_type != '':
-            for item in machine_types:
-                if item.get('name') == machine_type:
-                    machine = item
-
-        if machine:
-            core = machine.get('guestCpus')
-            memory = float(machine.get('memoryMb')) * 0.0009765625
-            m_str = str(memory)
-            display_memory = m_str if m_str[m_str.find('.'):] != '.0' else m_str[:m_str.find('.')]
-            machine_vo.update({
-                'machine_display': f'{machine_type} : {core} vCPUs {display_memory} GB RAM',
-                'machine_detail': machine.get('description'),
-                'core': core,
-                'memory': memory,
-
-            })
-        # source_image_from
-        sdn = source_disk.get('source', '')
+        url_source = source_disk.get('source', '')
         machine_vo.update({
-            'source_image_from': sdn[sdn.rfind('/')+1:]
+            'source_image_from': self.get_param_in_url(url_source, 'disks')
         })
 
         return machine_vo
-
-    @staticmethod
-    def _get_access_configs_type_and_tier(access_configs):
-        configs = []
-        tiers = []
-        for access_config in access_configs:
-            ac_name = access_config.get('name', '')
-            ac_type = access_config.get('type', '')
-            configs.append(f' {ac_name} : {ac_type}')
-            tiers.append(access_config.get('networkTier', ''))
-        return configs, tiers
 
     @staticmethod
     def _get_service_account(svc_account):
@@ -326,19 +244,6 @@ class MachineImageManager(GoogleCloudManager):
             return ''
 
     @staticmethod
-    def _get_properties_item(properties: dict, item_key: str, key: str):
-        item = properties.get(item_key)
-        selected_prop_item = item.get(key) if item else ''
-        return selected_prop_item
-
-    @staticmethod
-    def _get_display_info(network):
-        network_display = ''
-        if network != '':
-            network_display = network[network.rfind('/') + 1:]
-        return network_display
-
-    @staticmethod
     def _get_throughput_constant(disk_type):
         constant = 0.0
         if disk_type == 'pd-standard':
@@ -369,3 +274,10 @@ class MachineImageManager(GoogleCloudManager):
         if access_configs:
             public_ip = access_configs[0].get('natIP')
         return public_ip
+
+    @staticmethod
+    def _get_alias_ip_range(alias_ip_ranges):
+        ip_range = []
+        for ip in alias_ip_ranges:
+            ip_range.append(ip.get('ipCidrRange', ''))
+        return ip_range

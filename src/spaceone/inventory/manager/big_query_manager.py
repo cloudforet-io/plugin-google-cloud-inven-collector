@@ -60,6 +60,9 @@ class BigQueryManager(GoogleCloudManager):
                 creation_time = bq_dataset.get('creationTime')
 
                 if creation_time:
+                    '''
+                    ToDo: Check why datetime.fromtimestamp(int(creation_time) / 1000)
+                    '''
                     bq_dataset.update({'creationTime': datetime.fromtimestamp(int(creation_time) / 1000)})
 
                 last_modified_time = bq_dataset.get('lastModifiedTime')
@@ -113,6 +116,9 @@ class BigQueryManager(GoogleCloudManager):
         matched_info = self.match_region_info(location)
         return matched_info.get('region_code') if matched_info else 'global'
 
+    '''
+    ToDo: Modify method
+    '''
     def get_ms_display(self, mills):
         display = ''
         _mills = int(mills) if isinstance(mills,str) else mills
@@ -141,6 +147,9 @@ class BigQueryManager(GoogleCloudManager):
     def get_visible_on_console(dataset_id):
         return False if dataset_id.startswith('_') else True
 
+    '''
+    TODO:  
+    '''
     @staticmethod
     def _get_table_list_with_schema(big_conn: BigQueryConnector, bq_dt_tables):
         update_bq_dt_tables = []

@@ -278,7 +278,6 @@ class VMInstanceConnector(GoogleCloudConnector):
 
     def get_instance_in_group(self, key, value, instance_group, **query):
         query.update({'project': self.project_id, key: value, 'instanceGroup': instance_group})
-        _LOGGER.debug(f'[get_instance_in_group] query => {query}')
         response = self.client.instanceGroups().listInstances(**query).execute() if key == 'zone' else \
             self.client.regionInstanceGroups().listInstances(**query).execute()
         # NoneType error occurs sometimes. To prevent them insert default value.

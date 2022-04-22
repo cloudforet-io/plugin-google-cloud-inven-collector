@@ -51,7 +51,7 @@ class VPCNetworkManager(GoogleCloudManager):
                 network_identifier = network.get('selfLink')
                 matched_firewall = self._get_matched_firewalls(network_identifier, firewalls)
                 matched_route = self.get_matched_route(network_identifier, routes)
-                matched_subnets = self._get_matched_subnets(network_identifier, subnets)
+                matched_subnets = self.get_matched_subnets(network_identifier, subnets)
                 region = self.match_region_info('global')
                 peerings = self.get_peering(network)
 
@@ -99,30 +99,31 @@ class VPCNetworkManager(GoogleCloudManager):
         return collected_cloud_services, error_responses
 
     def get_internal_ip_address_in_use(self, network, regional_address):
-        all_Internal_addresses = []
+        all_internal_addresses = []
+
         for ip_address in regional_address:
             ip_type = ip_address.get('addressType', '')
             subnetwork = ip_address.get('subnetwork', '')
 
             if ip_type == 'INTERNAL' and subnetwork in network.get('subnetworks', []):
-                simple_region = ip_address.get('region')
+                url_region = ip_address.get('region')
                 users = ip_address.get('users')
                 ip_address.update({
                     'subnet_name': network.get('name'),
                     'ip_version_display': self._valid_ip_address(ip_address.get('address')),
-                    'region': simple_region[simple_region.rfind('/') + 1:] if simple_region else 'global',
+                    'region': self.get_param_in_url(url_region, 'regions') if url_region else 'global',
                     'used_by': self._get_parse_users(users) if users else ['None'],
                     'is_ephemeral': 'Static'
                 })
 
-                all_Internal_addresses.append(IPAddress(ip_address, strict=False))
+                all_internal_addresses.append(IPAddress(ip_address, strict=False))
 
-        return all_Internal_addresses
+        return all_internal_addresses
 
     def get_peering(self, network):
         updated_peering = []
         for peer in network.get('peerings', []):
-            peer_network = peer.get('network')[peer.get('network').find('/projects/') + 10:]
+            url_network = peer.get('network', '')
 
             ex_custom = 'None'
             if peer.get('exportCustomRoutes') and peer.get('importCustomRoutes'):
@@ -141,9 +142,9 @@ class VPCNetworkManager(GoogleCloudManager):
                 ex_route = 'Import subnet routes with public IP'
 
             display = {
-                'your_network': self._get_matched_last_target('selfLink', network),
-                'peered_network': self._get_matched_last_target('network', peer),
-                'project_id': peer_network[:peer_network.find('/')],
+                'your_network': network.get('name', ''),
+                'peered_network': self.get_param_in_url(url_network, 'networks'),
+                'project_id': self.get_param_in_url(url_network, 'projects'),
                 'state_display': peer.get('state').capitalize(),
                 'ex_custom_route': ex_custom,
                 'ex_route_public_ip_display': ex_route
@@ -161,28 +162,32 @@ class VPCNetworkManager(GoogleCloudManager):
             if network == route.get('network', ''):
                 next_hop = ''
                 if 'nextHopInstance' in route:
-                    target = self._get_matched_last_target('nextHopInstance', route).capitalize()
-                    zone = self._get_zone_from_target('nextHopInstance', route)
+                    url_next_hop_instance = route.get('nextHopInstance', '')
+                    target = self.get_param_in_url(url_next_hop_instance, 'instances')
+                    zone = self.get_param_in_url(url_next_hop_instance, 'zones')
                     next_hop = f'Instance {target} (zone  {zone})'
 
                 elif 'nextHopIp' in route:
-                    target = self._get_matched_last_target('nextHopIp', route).capitalize()
+                    target = route.get('nextHopIp')
                     next_hop = f'IP address lie within {target}'
 
                 elif 'nextHopNetwork' in route:
-                    target = self._get_matched_last_target('nextHopNetwork', route)
+                    url_next_hop_network = route.get('nextHopNetwork', '')
+                    target = self.get_param_in_url(url_next_hop_network, 'networks')
                     next_hop = f'Virtual network {target}'
 
                 elif 'nextHopGateway' in route:
-                    target = self._get_matched_last_target('nextHopGateway', route).capitalize()
+                    url_next_hop_gateway = route.get('nextHopGateway', '')
+                    target = self.get_param_in_url(url_next_hop_gateway, 'gateways')
                     next_hop = f'{target} internet gateway'
-
+                # TODO: some type is ipaddress => 10.128.0.56
                 elif 'nextHopIlb' in route:
-                    target = self._get_matched_last_target('nextHopIlb', route).capitalize()
+                    url_next_hop_ilb = route.get('nextHopIlb', '')
+                    target = self.get_param_in_url(url_next_hop_ilb, 'forwardingRules')
                     next_hop = f' Loadbalancer on {target}'
 
                 elif 'nextHopPeering' in route:
-                    target = self._get_matched_last_target('nextHopPeering', route).capitalize()
+                    target = route.get('nextHopPeering')
                     next_hop = f'Peering : {target}'
 
                 route.update({
@@ -191,25 +196,15 @@ class VPCNetworkManager(GoogleCloudManager):
                 route_vos.append(route)
         return route_vos
 
-    @staticmethod
-    def _get_matched_last_target(key, source):
-        a = source.get(key, '')
-        return a[a.rfind('/') + 1:]
-
-    @staticmethod
-    def _get_zone_from_target(key, source):
-        a = source.get(key, '')
-        return a[a.find('zones') + 6:a.find('/instances')]
-
-    @staticmethod
-    def _get_matched_subnets(network, subnets):
+    # TODO: "https://www.googleapis.com/compute/v1/projects/bluese-cloudone-20200113/regions/us-central1"
+    def get_matched_subnets(self, network, subnets):
         matched_subnet = []
         for subnet in subnets:
             if network == subnet.get('network', ''):
                 log_config = subnet.get('logConfig', {})
-                r_ref = subnet.get('region')
+                url_region = subnet.get('region')
                 subnet.update({
-                    'region': r_ref[r_ref.rfind('/') + 1:],
+                    'region': self.get_param_in_url(url_region, 'regions'),
                     'google_access': 'On' if subnet.get('privateIpGoogleAccess') else 'Off',
                     'flow_log': 'On' if log_config.get('enable') else 'Off'
                 })
@@ -265,12 +260,11 @@ class VPCNetworkManager(GoogleCloudManager):
         else:
             return 'Off' if routing_config == 'REGIONAL' else 'On'
 
-    @staticmethod
-    def _get_parse_users(users):
+    def _get_parse_users(self, users):
         parsed_used_by = []
-        for user in users:
-            zone = user[user.find('zones') + 6:user.find('/instances')]
-            instance = user[user.rfind('/') + 1:]
+        for url_user in users:
+            zone = self.get_param_in_url(url_user, 'zones')
+            instance = self.get_param_in_url(url_user, 'instances')
             used = f'VM instance {instance} (Zone: {zone})'
             parsed_used_by.append(used)
 

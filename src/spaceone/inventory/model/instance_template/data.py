@@ -96,7 +96,7 @@ class InstanceTemplate(Model):
     fingerprint = StringType()
     disk_display = StringType()
     image = StringType()
-    machine = ModelType(MachineType, default={})
+    machine_type = StringType(serialize_when_none=False)
     in_used_by = ListType(StringType(), default=[])
     self_link = StringType(deserialize_from='selfLink')
     ip_forward = BooleanType(default=False)
