@@ -3,6 +3,17 @@
 [EVENT] CONTENT
 ```
 
+## Versionning
+- format
+```
+{major}.{minor}.{patch}.{current_date}
+```
+- scenario
+```
+1.2.3 -> 1.2.3.xxxx -> 1.2.3.yyyy -> 1.2.4 
+```
+
+
 ## Workflows
 > By default, [Push] includes a manual trigger (dispatch).
 
