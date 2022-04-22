@@ -49,5 +49,4 @@ class StorageConnector(GoogleCloudConnector):
                 # TOO MANY objects
                 return False
             request = self.client.objects().list_next(previous_request=request, previous_response=response)
-        _LOGGER.debug(f'[list_objects] {objects_list}')
         return objects_list

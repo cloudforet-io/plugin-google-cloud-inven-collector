@@ -23,18 +23,6 @@ snapshot_instance_meta = ItemDynamicLayout.set_fields('Snapshot Details', fields
     }),
 ])
 
-# Snapshot Schedules
-snapshot_schedule_meta = TableDynamicLayout.set_fields('Snapshot Schedules', root_path='data.snapshot_schedule', fields=[
-    TextDyField.data_source('ID', 'id'),
-    TextDyField.data_source('Name', 'name'),
-    TextDyField.data_source('Region', 'region'),
-    ListDyField.data_source('Schedule Frequency (UTC)', 'snapshot_schedule_policy.schedule_display',
-                            default_badge={'type': 'outline', 'delimiter': '<br>'}),
-    TextDyField.data_source('Auto-delete Snapshots After',
-                            'snapshot_schedule_policy.retention_policy.max_retention_days_display'),
-    DateTimeDyField.data_source('Creation Time', 'creation_timestamp')
-])
-
 
 snapshot_labels_meta = TableDynamicLayout.set_fields('Labels', root_path='data.labels', fields=[
     TextDyField.data_source('Key', 'key'),
@@ -43,7 +31,6 @@ snapshot_labels_meta = TableDynamicLayout.set_fields('Labels', root_path='data.l
 
 
 instance_template_meta = CloudServiceMeta.set_layouts([snapshot_instance_meta,
-                                                       snapshot_schedule_meta,
                                                        snapshot_labels_meta])
 
 

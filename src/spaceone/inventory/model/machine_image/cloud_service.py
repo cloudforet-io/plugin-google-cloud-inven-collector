@@ -60,7 +60,7 @@ it_meta_disk = TableDynamicLayout.set_fields('Disks',  root_path='data.disks', f
     EnumDyField.data_source('Mode', 'device_mode', default_badge={
         'indigo.500': ['READ_WRITE'], 'coral.600': ['READ_ONLY']
     }),
-    TextDyField.data_source('Boot Image', 'boot_image.name'),
+    TextDyField.data_source('Boot Image', 'boot_image'),
     EnumDyField.data_source('Encryption', 'encryption', default_badge={
         'primary': ['Google managed'], 'indigo.500': ['Customer managed'], 'coral.600': ['Customer supplied']
     }),

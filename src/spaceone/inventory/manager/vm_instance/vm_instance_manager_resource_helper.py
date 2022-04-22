@@ -158,8 +158,6 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
             "labels": instance.get('labels', {}),
             'is_managed_instance': True if instance.get('selfLink', '') in instance_in_managed_instance_groups else False,
         }
-        _LOGGER.debug(f'get_google_cloud_data instance => {instance}')
-        _LOGGER.debug(f'get_google_cloud_data google_cloud => {google_cloud}')
 
         return GoogleCloud(google_cloud, strict=False)
 

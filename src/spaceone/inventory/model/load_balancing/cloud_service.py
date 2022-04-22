@@ -7,260 +7,159 @@ from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLa
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
 
 '''
-INSTANCE
+LOAD BALANCING
 '''
-lb_frontend_in_detaail = SimpleTableDynamicLayout.set_fields('Frontend',
-                                                             root_path='data.frontends',
-                                                             fields=[
-                                                                 TextDyField.data_source('Name', 'name'),
-                                                                 EnumDyField.data_source('Protocol', 'protocols',
-                                                                                         default_badge={
-                                                                                             'primary': ['HTTP',
-                                                                                                         'HTTPS'],
-                                                                                             'indigo.500': ['TCP'],
-                                                                                             'coral.600': ['UDP']
-                                                                                         }),
-                                                                 ListDyField.data_source('Port', 'port'),
-                                                                 TextDyField.data_source('Scope', 'scope'),
-                                                                 ListDyField.data_source('Certificate', 'certificate'),
-                                                                 EnumDyField.data_source('Network Tier',
-                                                                                         'network_tier',
-                                                                                         default_badge={
-                                                                                             'indigo.500': ['Premium'],
-                                                                                             'coral.600': ['Standard']
-                                                                                         }),
-                                                             ])
 
-lb_host_path_in_detail = SimpleTableDynamicLayout.set_fields('Host & Path Rules',
-                                                             root_path='data.host_and_paths',
-                                                             fields=[
-                                                                 ListDyField.data_source('Hosts', 'host'),
-                                                                 ListDyField.data_source('Paths', 'path'),
-                                                                 TextDyField.data_source('Name', 'backend'),
-                                                             ])
-
-lb_backend_url_map_in_detail = SimpleTableDynamicLayout.set_fields('Backend(URL Map)',
-                                                                   root_path='data.backends.url_map_backend',
-                                                                   fields=[
-                                                                       TextDyField.data_source('Name', 'name'),
-                                                                       TextDyField.data_source('Type', 'type'),
-                                                                       TextDyField.data_source('Instance Name',
-                                                                                               'instance_name'),
-                                                                       EnumDyField.data_source('Cloud CDN', 'cloud_cdn',
-                                                                                               default_badge={
-                                                                                                   'indigo.500': [
-                                                                                                       'enabled'],
-                                                                                                   'coral.600': [
-                                                                                                       'disabled']
-                                                                                               }),
-                                                                       ListDyField.data_source('Health Check',
-                                                                                               'health_check'),
-                                                                       EnumDyField.data_source('Scheme', 'scheme',
-                                                                                               default_badge={
-                                                                                                   'indigo.500': [
-                                                                                                       'EXTERNAL'],
-                                                                                                   'coral.600': [
-                                                                                                       'INTERNAL']
-                                                                                               }),
-                                                                       TextDyField.data_source('Endpoint Protocol',
-                                                                                               'end_point_protocol'),
-                                                                       TextDyField.data_source('Named port',
-                                                                                               'named_port'),
-                                                                       TextDyField.data_source('Timeout', 'timeout'),
-                                                                       TextDyField.data_source('Autoscaling',
-                                                                                               'autoscaling_display'),
-                                                                       TextDyField.data_source('Balancing Mode',
-                                                                                               'balancing_mode_display'),
-                                                                       TextDyField.data_source('Capacity',
-                                                                                               'capacity_display'),
-
-                                                                       ListDyField.data_source('Selected Port',
-                                                                                               'selected_port',
-                                                                                               options={
-                                                                                                   'delimiter': '<br>'}),
-                                                                   ])
-
-lb_backend_target_pool_item_in_detail = ItemDynamicLayout.set_fields('Backend(Target Pool)',
-                                                                     root_path='data.backends.target_pool_backend',
-                                                                     fields=[
-                                                                         TextDyField.data_source('Name', 'name'),
-                                                                         TextDyField.data_source('Region', 'region'),
-                                                                         TextDyField.data_source('Session Affinity',
-                                                                                                 'session_affinity'),
-                                                                         ListDyField.data_source('Health Check',
-                                                                                                 'health_check'),
-                                                                         TextDyField.data_source('Backup Pool',
-                                                                                                 'backup_pool'),
-                                                                         TextDyField.data_source('Failover Ratio',
-                                                                                                 'fail_over_display'),
-                                                                     ])
-
-lb_backend_target_pool_table_in_detail = SimpleTableDynamicLayout.set_fields('Backend Instances (Target Pool) ',
-                                                                             root_path='data.backends.target_pool_backend.backend_instances',
-                                                                             fields=[
-                                                                                 TextDyField.data_source('Name',
-                                                                                                         'name'),
-                                                                                 TextDyField.data_source('Type',
-                                                                                                         'type'),
-                                                                                 TextDyField.data_source('Region',
-                                                                                                         'region'),
-                                                                                 TextDyField.data_source('Zone',
-                                                                                                         'zone'),
-                                                                                 ListDyField.data_source('Address',
-                                                                                                         'address'),
-                                                                             ])
-
-lb_details_tab_in_backend_proxy = SimpleTableDynamicLayout.set_fields('Backend (Proxy)',
-                                                                      root_path='data.backends.proxy_backend',
-                                                                      fields=[
-                                                                          TextDyField.data_source('Name', 'name'),
-                                                                          TextDyField.data_source('Type', 'type'),
-                                                                          TextDyField.data_source('Instance Name',
-                                                                                                  'instance_name'),
-                                                                          EnumDyField.data_source('Cloud CDN',
-                                                                                                  'cloud_cdn',
-                                                                                                  default_badge={
-                                                                                                      'indigo.500': [
-                                                                                                          'enabled'],
-                                                                                                      'coral.600': [
-                                                                                                          'disabled']
-                                                                                                  }),
-                                                                          ListDyField.data_source('Health Check',
-                                                                                                  'health_check'),
-                                                                          EnumDyField.data_source('Scheme', 'scheme',
-                                                                                                  default_badge={
-                                                                                                      'indigo.500': [
-                                                                                                          'EXTERNAL'],
-                                                                                                      'coral.600': [
-                                                                                                          'INTERNAL']
-                                                                                                  }),
-                                                                          TextDyField.data_source('Endpoint Protocol',
-                                                                                                  'end_point_protocol'),
-                                                                          TextDyField.data_source('Named port',
-                                                                                                  'named_port'),
-                                                                          TextDyField.data_source('Timeout', 'timeout'),
-                                                                          TextDyField.data_source('Autoscaling',
-                                                                                                  'autoscaling_display'),
-                                                                          TextDyField.data_source('Balancing Mode',
-                                                                                                  'balancing_mode_display'),
-                                                                          TextDyField.data_source('Capacity',
-                                                                                                  'capacity_display'),
-
-                                                                          ListDyField.data_source('Selected Port',
-                                                                                                  'selected_port',
-                                                                                                  options={
-                                                                                                      'delimiter': '<br>'}),
-                                                                      ])
-
-load_balancing_details = ListDynamicLayout.set_layouts('Details', layouts=[lb_frontend_in_detaail,
-                                                                           lb_host_path_in_detail,
-                                                                           lb_backend_url_map_in_detail,
-                                                                           lb_details_tab_in_backend_proxy,
-                                                                           lb_backend_target_pool_item_in_detail,
-                                                                           lb_backend_target_pool_table_in_detail,
-                                                                           ])
-
-lb_backend_meta = TableDynamicLayout.set_fields('Backends', root_path='data.backend_tabs', fields=[
+lb_forwarding_rule = TableDynamicLayout.set_fields('Forwarding Rule', root_path='data.forwarding_rules', fields=[
+    TextDyField.data_source('Id', 'id'),
     TextDyField.data_source('Name', 'name'),
-    TextDyField.data_source('Type', 'type'),
-    TextDyField.data_source('Scope', 'scope'),
-    EnumDyField.data_source('Protocol', 'protocol', default_badge={
-        'primary': ['HTTP', 'HTTPS'], 'indigo.500': ['TCP'], 'coral.600': ['UDP']
+    TextDyField.data_source('Description', 'description'),
+    EnumDyField.data_source('Source', 'type', default_badge={
+        'coral.600': ['Global'], 'peacock.500': ['Regional']
     }),
-])
-
-lb_frontend_meta = TableDynamicLayout.set_fields('Frontends', root_path='data.frontends', fields=[
-    TextDyField.data_source('Name', 'name'),
-    TextDyField.data_source('Scope', 'scope'),
-    TextDyField.data_source('Address', 'ip_address'),
-    ListDyField.data_source('Port', 'port'),
-    EnumDyField.data_source('Protocol', 'protocols', default_badge={
-        'primary': ['HTTP', 'HTTPS'], 'indigo.500': ['TCP'], 'coral.600': ['UDP']
-    }),
-    EnumDyField.data_source('Network Tier',
-                            'network_tier',
-                            default_badge={
-                                'indigo.500': ['Premium'],
-                                'coral.600': ['Standard']
-                            }),
-])
-
-lb_forwarding_rule_meta = TableDynamicLayout.set_fields('Forwarding Rules', root_path='data.forwarding_rules', fields=[
-    TextDyField.data_source('Name', 'name'),
-    EnumDyField.data_source('Type', 'type', default_badge={'indigo.500': ['Global'], 'indigo.600': ['Regional']}),
     TextDyField.data_source('Region', 'region'),
-    TextDyField.data_source('Address', 'ip_address'),
-    TextDyField.data_source('Port', 'port_range'),
-    EnumDyField.data_source('Protocol', 'ip_protocol', default_badge={
-        'primary': ['HTTP', 'HTTPS'], 'indigo.500': ['TCP'], 'coral.600': ['UDP']
+    TextDyField.data_source('IP Address', 'ip_address'),
+    EnumDyField.data_source('Protocol', 'ip_protocol', default_outline_badge=['TCP', 'UDP', 'ESP', 'AH', 'SCTP', 'ICMP',
+                                                                              'L3_DEFAULT']),
+    TextDyField.data_source('Port Range', 'port_range'),
+    TextDyField.data_source('Ports', 'ports'),
+    TextDyField.data_source('Target', 'target'),
+    EnumDyField.data_source('Load Balancing Scheme', 'load_balancing_scheme', default_outline_badge=['EXTERNAL', 'EXTERNAL_MANAGED', 'INTERNAL', 'INTERNAL_MANAGED',
+                                                                            'INTERNAL_SELF_MANAGED']),
+    TextDyField.data_source('Subnetwork', 'subnetwork'),
+    TextDyField.data_source('Network', 'network'),
+    TextDyField.data_source('Backend Service', 'backend_service'),
+    TextDyField.data_source('Service Label', 'service_label'),
+    TextDyField.data_source('Service Name', 'service_name'),
+    TextDyField.data_source('Network Tier', 'network_tier'),
+    TextDyField.data_source('IP Version', 'ip_version'),
+    EnumDyField.data_source('All Port', 'data.all_ports', default_badge={
+        'indigo.500': ['true'], 'coral.600': ['false']
     }),
-    TextDyField.data_source('Description', 'description'),
-    DateTimeDyField.data_source('Creation Time', 'creation_timestamp')
+    EnumDyField.data_source('All Global Access', 'data.all_global_access', default_badge={
+        'indigo.500': ['true'], 'coral.600': ['false']
+    }),
+    DateTimeDyField.data_source('Created At', 'data.creation_timestamp')
 ])
 
-lb_target_proxies_meta = TableDynamicLayout.set_fields('Target Proxies', root_path='data.target_proxies', fields=[
-    TextDyField.data_source('Name', 'target_proxy_display.name'),
-    EnumDyField.data_source('Type', 'target_proxy_display.type',
-                            default_badge={
-                                'primary': ['HTTP Proxy'],
-                                'indigo.500': ['HTTPS Proxy'],
-                                'coral.600': ['SSL Proxy'],
-                                'peacock.500': ['TCP Proxy'],
-                                'green.500': ['GRPC Proxy']
-                            }),
-    TextDyField.data_source('Target Resource', 'target_proxy_display.target_resource'),
-    TextDyField.data_source('Description', 'target_proxy_display.description'),
-    DateTimeDyField.data_source('Creation Time', 'target_proxy_display.creation_timestamp')
-])
-
-lb_health_checks_meta = TableDynamicLayout.set_fields('Health Checks', root_path='data.heath_check_vos.health_checks',
-                                                      fields=[
-                                                          TextDyField.data_source('Name', 'name'),
-                                                          TextDyField.data_source('Healthy Threshold',
-                                                                                  'healthy_threshold'),
-                                                          TextDyField.data_source('Unhealthy Threshold',
-                                                                                  'unhealthy_threshold'),
-                                                          TextDyField.data_source('Timeout in sec', 'timeout_sec'),
-                                                          TextDyField.data_source('Check Interval',
-                                                                                  'check_interval_sec'),
-                                                          DateTimeDyField.data_source('Creation Time',
-                                                                                      'creation_timestamp')
-                                                      ])
-
-lb_backend_service_meta = TableDynamicLayout.set_fields('Backend Services', root_path='data.backend_services', fields=[
+lb_target_proxy = ItemDynamicLayout.set_fields('Target Proxy', root_path='data.target_proxy', fields=[
     TextDyField.data_source('Name', 'name'),
-    EnumDyField.data_source('Type', 'type', default_badge={'indigo.500': ['Global'], 'indigo.600': ['Regional']}),
-    ListDyField.data_source('Region', 'region'),
-    TextDyField.data_source('Description', 'description'),
-    DateTimeDyField.data_source('Creation Time', 'creation_timestamp')
+    EnumDyField.data_source('Proxy Type', 'type', default_outline_badge=['GRPC', 'HTTP', 'HTTPS', 'SSL', 'TCP']),
+    TextDyField.data_source('Description', 'description')
 ])
 
-lb_certificates_meta = TableDynamicLayout.set_fields('Certificates', root_path='data.certificates', fields=[
+lb_urlmap = ItemDynamicLayout.set_fields('UrlMap', root_path='data.urlmap', fields=[
+    TextDyField.data_source('ID', 'id'),
+    TextDyField.data_source('Name', 'name'),
+    TextDyField.data_source('Description', 'description'),
+    TextDyField.data_source('Host Rule', 'host_rule'),
+    DateTimeDyField.data_source('Created At', 'creation_timestamp'),
+])
+
+lb_certificate = TableDynamicLayout.set_fields('Certificate', root_path='data.certificates', fields=[
+    TextDyField.data_source('ID', 'id'),
     TextDyField.data_source('Name', 'name'),
     ListDyField.data_source('Domain', 'domains'),
-    TextDyField.data_source('Expires', 'expire_time'),
-    TextDyField.data_source('Type', 'type'),
-    TextDyField.data_source('Status', 'managed.status'),
+    EnumDyField.data_source('Type', 'data.all_global_access', default_badge={
+        'indigo.500': ['SELF_MANAGED'], 'coral.600': ['MANAGED']
+    }),
     TextDyField.data_source('Description', 'description'),
-    DateTimeDyField.data_source('Creation Time', 'creation_timestamp')
+    TextDyField.data_source('Certificate', 'certificate'),
+    ListDyField.data_source('Subnect Alternative Name', 'subject_alternative_names'),
+    TextDyField.data_source('Expire Time', 'expire_time'),
+    TextDyField.data_source('Region', 'region'),
+    DateTimeDyField.data_source('Created At', 'creation_timestamp')
 ])
 
-lb_target_pools_meta = TableDynamicLayout.set_fields('Target Pools', root_path='data.target_pools', fields=[
+lb_backend_service = TableDynamicLayout.set_fields('Backend Service', root_path='data.backend_services', fields=[
+    TextDyField.data_source('ID', 'id'),
     TextDyField.data_source('Name', 'name'),
-    TextDyField.data_source('Region', '_region'),
-    TextDyField.data_source('Instances', 'num_of_instance'),
-    ListDyField.data_source('Health Check', '_health_checks'),
+    TextDyField.data_source('Description', 'description'),
+    EnumDyField.data_source('Protocol', 'data.protocol',
+                            default_outline_badge=['HTTP', 'HTTPS', 'HTTP2', 'TCP', 'SSL', 'UDP' 'GRPC']),
+    ListDyField.data_source('Backends', 'backends'),
+    ListDyField.data_source('Health Checks', 'health_checks'),
+    TextDyField.data_source('TimeOut Seconds', 'timeout_sec'),
+    TextDyField.data_source('Port', 'port'),
+    TextDyField.data_source('Port Name', 'port_name'),
+    EnumDyField.data_source('Type', 'data.enable_cdn', default_badge={
+        'indigo.500': ['true'], 'coral.600': ['false']
+    }),
+    EnumDyField.data_source('Session Affinity', 'data.session_affinity',
+                            default_outline_badge=['NONE', 'CLIENT_IP', 'CLIENT_IP_PROTO', 'CLIENT_IP_PORT_PROTO',
+                                                   'INTERNAL_MANAGED', 'INTERNAL_SELF_MANAGED', 'GENERATED_COOKIE',
+                                                   'HEADER_FIELD', 'HTTP_COOKIE']),
+    TextDyField.data_source('Affinity Cookie TTL Seconds', 'affinity_cookie_ttl_sec'),
+    TextDyField.data_source('FailOver Policy', 'failover_policy'),
+    EnumDyField.data_source('LoadBalancing Scheme', 'data.load_balancing_scheme',
+                            default_outline_badge=['EXTERNAL', 'INTERNAL', 'INTERNAL_MANAGED', 'INTERNAL_SELF_MANAGED']),
+    TextDyField.data_source('Log Config', 'log_config'),
+    TextDyField.data_source('Connection Draining', 'connection_draining'),
+    DateTimeDyField.data_source('Created At', 'creation_timestamp')
 ])
 
-load_balancing_meta = CloudServiceMeta.set_layouts([load_balancing_details,
-                                                    lb_backend_meta,
-                                                    lb_frontend_meta,
-                                                    lb_forwarding_rule_meta,
-                                                    lb_target_proxies_meta,
-                                                    lb_health_checks_meta,
-                                                    lb_backend_service_meta,
-                                                    lb_certificates_meta,
-                                                    lb_target_pools_meta])
+lb_backend_buckets = TableDynamicLayout.set_fields('Backend Bucket', root_path='data.backend_buckets', fields=[
+    TextDyField.data_source('Id', 'id'),
+    TextDyField.data_source('Name', 'name'),
+    TextDyField.data_source('Description', 'description'),
+    TextDyField.data_source('Bucket Name', 'bucket_name'),
+    EnumDyField.data_source('CDN', 'data.enable_cdn', default_badge={
+        'indigo.500': ['true'], 'coral.600': ['false']
+    }),
+    TextDyField.data_source('CDN Policy', 'cdn_policy'),
+    ListDyField.data_source('Custom Response Headers', 'custom_response_headers'),
+    DateTimeDyField.data_source('Created At', 'creation_timestamp')
+])
+
+lb_target_pools = TableDynamicLayout.set_fields('Target Pool', root_path='data.target_pools', fields=[
+    TextDyField.data_source('Id', 'id'),
+    TextDyField.data_source('Name', 'name'),
+    TextDyField.data_source('Description', 'description'),
+    ListDyField.data_source('Health Check', 'health_checks'),
+    TextDyField.data_source('Instance', 'instances'),
+    EnumDyField.data_source('LoadBalancing Scheme', 'data.session_affinity',
+                            default_outline_badge=['NONE', 'CLIENT_IP', 'CLIENT_IP_PROTO']),
+    TextDyField.data_source('FailOver Ratio', 'failover_ratio'),
+    TextDyField.data_source('Backup Pool', 'backup_pool'),
+])
+
+lb_health_checks = TableDynamicLayout.set_fields('Health Check', root_path='data.heath_checks', fields=[
+    TextDyField.data_source('Id', 'id'),
+    TextDyField.data_source('Name', 'name'),
+    TextDyField.data_source('Description', 'description'),
+    EnumDyField.data_source('Type', 'data.type',
+                            default_outline_badge=['TCP', 'SSL', 'HTTP', 'HTTPS', 'HTTP2']),
+    TextDyField.data_source('Check Interval Seconds', 'check_interval_sec'),
+    TextDyField.data_source('TimeOut Seconds', 'timeout_sec'),
+    TextDyField.data_source('UnHealthy Threshold', 'unhealthy_threshold'),
+    TextDyField.data_source('Healthy Threshold', 'healthy_threshold'),
+    TextDyField.data_source('Region', 'region'),
+    TextDyField.data_source('Log Config', 'log_config'),
+    DateTimeDyField.data_source('Created At', 'creation_timestamp')
+])
+
+lb_legacy_health_checks = TableDynamicLayout.set_fields('Legacy Health Check', root_path='data.legacy_health_checks', fields=[
+    TextDyField.data_source('Id', 'id'),
+    TextDyField.data_source('Name', 'name'),
+    TextDyField.data_source('Description', 'description'),
+    TextDyField.data_source('Host', 'host'),
+    TextDyField.data_source('Port', 'port'),
+    TextDyField.data_source('Request Path', 'request_path'),
+    TextDyField.data_source('Check Interval Seconds', 'check_interval_sec'),
+    TextDyField.data_source('Timeout Seconds', 'timeout_sec'),
+    TextDyField.data_source('UnHealthy Threshold', 'unhealthy_threshold'),
+    TextDyField.data_source('Healthy Threshold', 'healthy_threshold'),
+    DateTimeDyField.data_source('Created At', 'creation_timestamp')
+])
+
+load_balancing_meta = CloudServiceMeta.set_layouts([lb_forwarding_rule,
+                                                    lb_target_proxy,
+                                                    lb_urlmap,
+                                                    lb_backend_service,
+                                                    lb_backend_buckets,
+                                                    lb_target_pools,
+                                                    lb_health_checks,
+                                                    lb_legacy_health_checks])
 
 
 class LoadBalancingResource(CloudServiceResource):

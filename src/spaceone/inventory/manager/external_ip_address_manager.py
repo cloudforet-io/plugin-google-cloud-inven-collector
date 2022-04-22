@@ -38,37 +38,39 @@ class ExternalIPAddressManager(GoogleCloudManager):
 
         exp_conn: ExternalIPAddressConnector = self.locator.get_connector(self.connector_name, **params)
         regional_global_addresses = exp_conn.list_regional_addresses()
-        compute_engine_vm_address = exp_conn.list_instance_for_networks()
+        vm_address = exp_conn.list_instance_for_networks()
         forwarding_rule_address = exp_conn.list_forwarding_rule()
 
-        # Get lists that relate with snapshots through Google Cloud API
+        # External IP contains, regional global IP + vm NAT IP + forwarding rule IP
         all_external_ip_addresses = self.get_external_ip_addresses(regional_global_addresses,
-                                                                   compute_engine_vm_address,
+                                                                   vm_address,
                                                                    forwarding_rule_address)
 
-        for external_ip_juso in all_external_ip_addresses:
+        for external_ip_addr in all_external_ip_addresses:
             try:
-                region = external_ip_juso.get('region') if external_ip_juso.get('region') else 'global'
-                external_ip_juso.update({'project': secret_data['project_id'],
-                                         'status_display': external_ip_juso.get('status').replace('_', ' ').title()
-                                         })
-                if external_ip_juso.get('selfLink') is None:
-                    external_ip_juso.update({'self_link': self._get_external_self_link_when_its_empty(external_ip_juso)})
+                region = external_ip_addr.get('region') if external_ip_addr.get('region', '') else 'global'
+                external_ip_addr.update({
+                    'project': secret_data['project_id'],
+                    'status_display': external_ip_addr.get('status', '').replace('_', ' ').title()
+                })
+                if external_ip_addr.get('selfLink') is None:
+                    external_ip_addr.update({
+                        'self_link': self._get_external_self_link_when_its_empty(external_ip_addr)
+                    })
 
                 # No Labels (exists on console but No option on APIs)
-                _name = external_ip_juso.get('name', '')
-                external_ip_addr_id = external_ip_juso.get('id')
-                external_ip_juso_data = ExternalIpAddress(external_ip_juso, strict=False)
-                external_ip_juso_resource = ExternalIpAddressResource({
-                    'name': _name,
+                external_ip_addr_id = external_ip_addr.get('id', '')
+                external_ip_addr_data = ExternalIpAddress(external_ip_addr, strict=False)
+                external_ip_addr_resource = ExternalIpAddressResource({
+                    'name': external_ip_addr.get('name', ''),
                     'account': project_id,
                     'region_code': region,
-                    'data': external_ip_juso_data,
-                    'reference': ReferenceModel(external_ip_juso_data.reference())
+                    'data': external_ip_addr_data,
+                    'reference': ReferenceModel(external_ip_addr_data.reference())
                 })
 
                 self.set_region_code(region)
-                collected_cloud_services.append(ExternalIpAddressResponse({'resource': external_ip_juso_resource}))
+                collected_cloud_services.append(ExternalIpAddressResponse({'resource': external_ip_addr_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
                 error_response = self.generate_resource_error_response(e, 'VPC', 'ExternalIPAddress', external_ip_addr_id)
@@ -79,50 +81,51 @@ class ExternalIPAddressManager(GoogleCloudManager):
 
     def get_external_ip_addresses(self, regional_address, instances_over_region, forwarding_rules):
 
-        all_ip_juso_vos = []
-        all_ip_juso_only_check_dup = []
+        all_ip_addr_vos = []
+        all_ip_addr_only_check_dup = []
 
-        for ip_juso in regional_address:
-            if 'EXTERNAL' == ip_juso.get('addressType'):
-                simple_region = ip_juso.get('region')
-                users = ip_juso.get('users')
-                ip_juso.update({
-                    'region': simple_region[simple_region.rfind('/') + 1:] if simple_region else 'global',
-                    'used_by': self._get_parse_users(users) if users else [],
-                    'ip_version_display': self._valid_ip_address(ip_juso.get('address')),
-                    'network_tier_display': self._get_network_tier_display(ip_juso),
+        for ip_addr in regional_address:
+            if 'EXTERNAL' == ip_addr.get('addressType'):
+                url_region = ip_addr.get('region', '')
+                users = ip_addr.get('users', [])
+                ip_addr.update({
+                    'region': self.get_param_in_url(url_region, 'regions') if url_region == '' else 'global',
+                    'used_by': self.get_parse_users(users),
+                    'ip_version_display': self._get_ip_address_version(ip_addr.get('address')),
+                    'network_tier_display': ip_addr.get('networkTier', '').capitalize(),
                     'is_ephemeral': 'Static'
                 })
-                all_ip_juso_only_check_dup.append(ip_juso.get('address'))
-                all_ip_juso_vos.append(ip_juso)
+                all_ip_addr_only_check_dup.append(ip_addr.get('address'))
+                all_ip_addr_vos.append(ip_addr)
 
         for forwarding_rule in forwarding_rules:
-            forwarding_ip_juso = forwarding_rule.get('IPAddress')
+            forwarding_ip_addr = forwarding_rule.get('IPAddress')
             if forwarding_rule.get(
-                    'loadBalancingScheme') == 'EXTERNAL' and forwarding_ip_juso not in all_ip_juso_only_check_dup:
+                    'loadBalancingScheme') == 'EXTERNAL' and forwarding_ip_addr not in all_ip_addr_only_check_dup:
                 rule_name = forwarding_rule.get('name')
+                url_region = forwarding_rule.get('region', '')
                 forwarding_rule.update({
                     'is_ephemeral': 'Ephemeral',
-                    'ip_version_display': self._valid_ip_address(forwarding_ip_juso),
-                    'network_tier_display': self._get_network_tier_display(forwarding_rule),
+                    'ip_version_display': self._get_ip_address_version(forwarding_ip_addr),
+                    'network_tier_display': forwarding_rule.get('networkTier', '').capitalize(),
                     'address_type': forwarding_rule.get('loadBalancingScheme'),
-                    'address': forwarding_ip_juso,
-                    'region': self._get_region_from_forwarding_rule(forwarding_rule),
+                    'address': forwarding_ip_addr,
+                    'region': self.get_param_in_url(url_region, 'regions') if url_region != '' else 'global',
                     'status': 'IN_USE',
-                    'users': [forwarding_rule.get('selfLink')],
+                    'users': [forwarding_rule.get('selfLink', '')],
                     'used_by': [f'Forwarding rule {rule_name}'],
                 })
-                all_ip_juso_only_check_dup.append(forwarding_ip_juso)
-                all_ip_juso_vos.append(forwarding_rule)
+                all_ip_addr_only_check_dup.append(forwarding_ip_addr)
+                all_ip_addr_vos.append(forwarding_rule)
 
         for instance in instances_over_region:
             network_interfaces = instance.get('networkInterfaces', [])
-            zone = self._get_matched_last_target('zone', instance)
-            region = zone[:-2]
+            zone = self.get_param_in_url(instance.get('zone', ''), 'zones')
+            region = self.parse_region_from_zone(zone)
             for network_interface in network_interfaces:
                 external_ip_infos = network_interface.get('accessConfigs', [])
                 for external_ip_info in external_ip_infos:
-                    if 'natIP' in external_ip_info and external_ip_info.get('natIP') not in all_ip_juso_only_check_dup:
+                    if 'natIP' in external_ip_info and external_ip_info.get('natIP') not in all_ip_addr_only_check_dup:
                         instance_name = instance.get('name')
                         external_ip = {
                             'id': instance.get('id'),
@@ -132,56 +135,34 @@ class ExternalIPAddressManager(GoogleCloudManager):
                             'address_type': 'EXTERNAL',
                             'is_ephemeral': 'Ephemeral',
                             'network_tier': external_ip_info.get('networkTier'),
-                            'network_tier_display': self._get_network_tier_display(external_ip_info),
+                            'network_tier_display': external_ip_info.get('networkTier', '').capitalize(),
                             'status': 'IN_USE',
-                            'ip_version_display': self._valid_ip_address(external_ip_info.get('natIP')),
+                            'ip_version_display': self._get_ip_address_version(external_ip_info.get('natIP')),
                             'creation_timestamp': instance.get('creationTimestamp'),
-                            'users': [instance.get('selfLink')],
+                            'users': [instance.get('selfLink', '')],
                             'used_by': [f'Vm Instance {instance_name} ({zone})']
                         }
-                        all_ip_juso_only_check_dup.append(external_ip_info.get('natIP'))
-                        all_ip_juso_vos.append(external_ip)
+                        all_ip_addr_only_check_dup.append(external_ip_info.get('natIP', ''))
+                        all_ip_addr_vos.append(external_ip)
 
-        return all_ip_juso_vos
+        return all_ip_addr_vos
 
     @staticmethod
-    def _valid_ip_address(ip):
+    def _get_ip_address_version(ip):
         try:
             return "IPv4" if type(ip_address(ip)) is IPv4Address else "IPv6"
         except ValueError:
             return "Invalid"
 
-    @staticmethod
-    def _get_region_from_forwarding_rule(forwarding_rule):
-        self_link = forwarding_rule.get('selfLink')
-        parsed_link = self_link[self_link.find('projects/') + 9:]
-        _parsed_link = self_link[self_link.find('/forwardingRules/') + 9:]
-        return 'global' if parsed_link == '' else \
-            parsed_link[parsed_link.find('regions/') + 8:parsed_link.find('/forwardingRules')] \
-                if parsed_link.find('regions/') > -1 else parsed_link[parsed_link.find('/') + 1:parsed_link.find('/forwardingRules')]
+    def get_parse_users(self, users):
+        list_user = []
+        for url_user in users:
+            zone = self.get_param_in_url(url_user, 'zones')
+            instance = self.get_param_in_url(url_user, 'instances')
+            used_by = f'VM instance {instance} (Zone: {zone})'
+            list_user.append(used_by)
 
-    @staticmethod
-    def _get_network_tier_display(external_ip_info):
-        display_value = ''
-        if external_ip_info.get('networkTier') is not None:
-            display_value = external_ip_info.get('networkTier').capitalize()
-        return display_value
-
-    @staticmethod
-    def _get_parse_users(users):
-        parsed_used_by = []
-        for user in users:
-            zone = user[user.find('zones') + 6:user.find('/instances')]
-            instance = user[user.rfind('/') + 1:]
-            used = f'VM instance {instance} (Zone: {zone})'
-            parsed_used_by.append(used)
-
-        return parsed_used_by
-
-    @staticmethod
-    def _get_matched_last_target(key, source):
-        a = source.get(key, '')
-        return a[a.rfind('/') + 1:]
+        return list_user
 
     @staticmethod
     def _get_external_self_link_when_its_empty(external_ip):

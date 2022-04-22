@@ -13,21 +13,8 @@ class InstanceTemplateConnector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def list_machine_types(self, **query):
-        machine_type_list = []
-        query.update({'project': self.project_id})
-        request = self.client.machineTypes().aggregatedList(**query)
-        while request is not None:
-            response = request.execute()
-            for key, machine_type in response['items'].items():
-                if 'machineTypes' in machine_type:
-                    machine_type_list.extend(machine_type.get('machineTypes'))
-            request = self.client.machineTypes().aggregatedList_next(previous_request=request,
-                                                                     previous_response=response)
-
-        return machine_type_list
-
-
+    # TODO: Remove it
+    '''
     def list_disks(self, **query):
         disk_list = []
         query.update({'project': self.project_id})
@@ -41,6 +28,7 @@ class InstanceTemplateConnector(GoogleCloudConnector):
                                                                               previous_response=response)
 
         return disk_list
+    '''
 
     def list_instance_templates(self, **query):
         instance_template_list = []

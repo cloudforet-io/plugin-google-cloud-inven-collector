@@ -54,8 +54,7 @@ class VMInstanceManager(GoogleCloudManager):
                 vm_id = compute_vm.get('id')
                 zone, region = self._get_zone_and_region(compute_vm)
                 zone_info = {'zone': zone, 'region': region, 'project_id': project_id}
-                _LOGGER.debug(f'compute_vm => {compute_vm}')
-                resource = self.get_vm_instance_resource(project_id,zone_info, compute_vm, all_resources)
+                resource = self.get_vm_instance_resource(project_id, zone_info, compute_vm, all_resources)
 
                 resource_responses.append(VMInstanceResourceResponse({'resource': resource}))
                 self.set_region_code(resource.get('region_code', ''))
@@ -180,11 +179,10 @@ class VMInstanceManager(GoogleCloudManager):
         })
         return VMInstanceResource(server_data, strict=False)
 
-    @staticmethod
-    def _get_zone_and_region(instance) -> (str, str):
-        z = instance.get('zone', '')
-        zone = z[z.rfind('/') + 1:]
-        region = zone[:-2] if zone != '' else ''
+    def _get_zone_and_region(self, instance) -> (str, str):
+        url_zone = instance.get('zone', '')
+        zone = self.get_param_in_url(url_zone, 'zones')
+        region = self.parse_region_from_zone(zone)
         return zone, region
 
 

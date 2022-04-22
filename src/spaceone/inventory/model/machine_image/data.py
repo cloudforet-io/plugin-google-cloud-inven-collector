@@ -61,7 +61,7 @@ class Disk(Model):
     device_type = StringType(choices=('SCRATCH', 'PERSISTENT'))
     device_mode = StringType(choices=('READ_WRITE', 'READ_ONLY'))
     size = FloatType()
-    boot_image = ModelType(BootImage, default={}, serialize_when_none=False)
+    boot_image = StringType(serialize_when_none=False)
     is_boot_image = BooleanType(default=False)
     encryption = StringType(choices=('Google managed', 'Customer managed, Customer supplied'))
     tags = ModelType(DiskTags, default={})
@@ -69,11 +69,7 @@ class Disk(Model):
 
 class MachineType(Model):
     machine_type = StringType()
-    machine_display = StringType(serialize_when_none=False)
-    machine_detail = StringType(serialize_when_none=False)
     source_image_from = StringType(serialize_when_none=False)
-    core = IntType(default=0)
-    memory = FloatType(default=0.0)
 
 
 class Scheduling(Model):
@@ -107,7 +103,7 @@ class MachineImage(Model):
     status = StringType(choices=('INVALID', 'CREATING', 'READY', 'DELETING', 'UPLOADING'))
     fingerprint = StringType()
     self_link = StringType(deserialize_from='selfLink')
-    machine = ModelType(MachineType, default={})
+    machine = ModelType(MachineType, deserialize_from='machine_type', serialize_when_none=False)
     network_tags = ListType(StringType(), default=[])
     deletion_protection = BooleanType(default=False)
     total_storage_bytes = FloatType()
@@ -117,8 +113,8 @@ class MachineImage(Model):
     network_interfaces = ListType(ModelType(NetworkInterface), default=[])
     disks = ListType(ModelType(Disk), default=[])
     service_account = ModelType(ServiceAccount, serialize_when_none=False)
-    kind = StringType()
-    location = StringType()
+    kind = StringType(serialize_when_none=False)
+    location = ListType(StringType(), serialize_when_none=False)
     creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
 
     def reference(self):

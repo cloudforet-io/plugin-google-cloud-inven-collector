@@ -1,14 +1,6 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType, DictType
 
-'''
-기존 compute에 있던 다양한 Model 파일들을 모두 합침
-아래는 예외
-- resource.py > 
-- cloud_service_type.py > 
-- region.py > libs.schema.region.RegionResource 로 대체
-- stackdriver.py > 이것도 어딘가에서 대체 가능할 것 같음 동일 기능 코드 찾아볼것
-'''
 
 # common
 class Labels(Model):
