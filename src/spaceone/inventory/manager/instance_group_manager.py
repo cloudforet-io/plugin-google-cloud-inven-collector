@@ -37,7 +37,10 @@ class InstanceGroupManager(GoogleCloudManager):
         project_id = secret_data['project_id']
         instance_group_conn: InstanceGroupConnector = self.locator.get_connector(self.connector_name, **params)
 
-        # Get all Resources
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
         instance_groups = instance_group_conn.list_instance_groups()
         instance_group_managers = instance_group_conn.list_instance_group_managers()
         autoscalers = instance_group_conn.list_autoscalers()
@@ -45,6 +48,10 @@ class InstanceGroupManager(GoogleCloudManager):
 
         for instance_group in instance_groups:
             try:
+
+                ##################################
+                # 1. Set Basic Information
+                ##################################
                 instance_group_id = instance_group.get('id')
 
                 instance_group.update({
@@ -56,7 +63,7 @@ class InstanceGroupManager(GoogleCloudManager):
                 if match_instance_group_manager := \
                         self.match_instance_group_manager(instance_group_managers, instance_group.get('selfLink')):
 
-                    instance_group_type = self.get_instance_group_type(match_instance_group_manager)
+                    instance_group_type = self._get_instance_group_type(match_instance_group_manager)
                     scheduler.update({'instance_group_type': instance_group_type})
 
                     # Managed
@@ -65,6 +72,9 @@ class InstanceGroupManager(GoogleCloudManager):
                             'preservedState': {'disks': self._get_stateful_policy(match_instance_group_manager)}}
                     })
 
+                    ##################################
+                    # 2. Make Base Data
+                    ##################################
                     instance_group.update({
                         'instance_group_type': instance_group_type,
                         'instance_group_manager': InstanceGroupManagers(match_instance_group_manager, strict=False)
@@ -91,23 +101,26 @@ class InstanceGroupManager(GoogleCloudManager):
                     instance_group.update({'instance_group_type': 'UNMANAGED'})
                     scheduler.update({'instance_group_type': 'UNMANAGED'})
 
-                loc_type, location = self.get_instance_group_loc(instance_group)
+                loc_type, location = self._get_instance_group_loc(instance_group)
                 region = self.parse_region_from_zone(location) if loc_type == 'zone' else location
                 instances = instance_group_conn.list_instances(instance_group.get('name'), location, loc_type)
 
                 display_loc = {'region': location, 'zone': ''} if loc_type == 'region' \
-                    else {'region': location[:-2], 'zone': location}
-
-                instance_group.update({'display_location': display_loc})
+                    else {'region': self.parse_region_from_zone(location), 'zone': location}
 
                 instance_group.update({
                     'power_scheduler': scheduler,
                     'instances': self.get_instances(instances),
-                    'instance_counts': len(instances)
+                    'instance_counts': len(instances),
+                    'display_location': display_loc
                 })
                 # No labels
                 _name = instance_group.get('name', '')
                 instance_group_data = InstanceGroup(instance_group, strict=False)
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 instance_group_resource = InstanceGroupResource({
                     'name': _name,
                     'account': project_id,
@@ -116,7 +129,15 @@ class InstanceGroupManager(GoogleCloudManager):
                     'reference': ReferenceModel(instance_group_data.reference())
                 })
 
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code(region)
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of LoadBalancingResponse Object
+                ##################################
                 collected_cloud_services.append(InstanceGroupResponse({'resource': instance_group_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
@@ -126,7 +147,8 @@ class InstanceGroupManager(GoogleCloudManager):
         _LOGGER.debug(f'** Instance Group Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
-    def get_instance_group_loc(self, instance_group):
+    def _get_instance_group_loc(self, instance_group):
+        _LOGGER.debug(f'get_instance_group_loc => {instance_group}')
         inst_type = 'zone' if 'zone' in instance_group else 'region'
         loc = self._get_last_target(instance_group, inst_type)
         return inst_type, loc
@@ -134,7 +156,8 @@ class InstanceGroupManager(GoogleCloudManager):
     def get_instances(self, instances):
         _instances = []
         for instance in instances:
-            instance.update({'name': self._get_last_target(instance, 'instance')})
+            url_instance = instance.get('instance', '')
+            instance.update({'name': self.get_param_in_url(url_instance, 'instances')})
             _instances.append(instance)
 
         return _instances
@@ -179,7 +202,7 @@ class InstanceGroupManager(GoogleCloudManager):
         return disks_vos
 
     @staticmethod
-    def get_instance_group_type(instance_group_manager):
+    def _get_instance_group_type(instance_group_manager):
         if instance_group_manager.get('status', {}).get('stateful', {}).get('hasStatefulConfig'):
             return 'STATEFUL'
         else:

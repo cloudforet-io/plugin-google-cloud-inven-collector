@@ -36,19 +36,31 @@ class ExternalIPAddressManager(GoogleCloudManager):
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
 
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
         exp_conn: ExternalIPAddressConnector = self.locator.get_connector(self.connector_name, **params)
         regional_global_addresses = exp_conn.list_regional_addresses()
         vm_address = exp_conn.list_instance_for_networks()
         forwarding_rule_address = exp_conn.list_forwarding_rule()
 
         # External IP contains, regional global IP + vm NAT IP + forwarding rule IP
-        all_external_ip_addresses = self.get_external_ip_addresses(regional_global_addresses,
+        all_external_ip_addresses = self._get_external_ip_addresses(regional_global_addresses,
                                                                    vm_address,
                                                                    forwarding_rule_address)
 
         for external_ip_addr in all_external_ip_addresses:
             try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
                 region = external_ip_addr.get('region') if external_ip_addr.get('region', '') else 'global'
+                external_ip_addr_id = external_ip_addr.get('id', '')
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
                 external_ip_addr.update({
                     'project': secret_data['project_id'],
                     'status_display': external_ip_addr.get('status', '').replace('_', ' ').title()
@@ -57,10 +69,12 @@ class ExternalIPAddressManager(GoogleCloudManager):
                     external_ip_addr.update({
                         'self_link': self._get_external_self_link_when_its_empty(external_ip_addr)
                     })
-
                 # No Labels (exists on console but No option on APIs)
-                external_ip_addr_id = external_ip_addr.get('id', '')
                 external_ip_addr_data = ExternalIpAddress(external_ip_addr, strict=False)
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 external_ip_addr_resource = ExternalIpAddressResource({
                     'name': external_ip_addr.get('name', ''),
                     'account': project_id,
@@ -69,7 +83,15 @@ class ExternalIPAddressManager(GoogleCloudManager):
                     'reference': ReferenceModel(external_ip_addr_data.reference())
                 })
 
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code(region)
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of ExternalIpAddressResponse Object
+                ##################################
                 collected_cloud_services.append(ExternalIpAddressResponse({'resource': external_ip_addr_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
@@ -79,7 +101,7 @@ class ExternalIPAddressManager(GoogleCloudManager):
         _LOGGER.debug(f'** External IP Address Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
-    def get_external_ip_addresses(self, regional_address, instances_over_region, forwarding_rules):
+    def _get_external_ip_addresses(self, regional_address, instances_over_region, forwarding_rules):
 
         all_ip_addr_vos = []
         all_ip_addr_only_check_dup = []
@@ -90,7 +112,7 @@ class ExternalIPAddressManager(GoogleCloudManager):
                 users = ip_addr.get('users', [])
                 ip_addr.update({
                     'region': self.get_param_in_url(url_region, 'regions') if url_region == '' else 'global',
-                    'used_by': self.get_parse_users(users),
+                    'used_by': self._get_parse_users(users),
                     'ip_version_display': self._get_ip_address_version(ip_addr.get('address')),
                     'network_tier_display': ip_addr.get('networkTier', '').capitalize(),
                     'is_ephemeral': 'Static'
@@ -154,7 +176,7 @@ class ExternalIPAddressManager(GoogleCloudManager):
         except ValueError:
             return "Invalid"
 
-    def get_parse_users(self, users):
+    def _get_parse_users(self, users):
         list_user = []
         for url_user in users:
             zone = self.get_param_in_url(url_user, 'zones')

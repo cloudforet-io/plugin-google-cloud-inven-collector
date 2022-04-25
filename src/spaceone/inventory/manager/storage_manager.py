@@ -35,16 +35,24 @@ class StorageManager(GoogleCloudManager):
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
-        storage_conn: StorageConnector = self.locator.get_connector(self.connector_name, **params)
 
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
+        storage_conn: StorageConnector = self.locator.get_connector(self.connector_name, **params)
         # Get lists that relate with snapshots through Google Cloud API
         buckets = storage_conn.list_buckets()
 
         for bucket in buckets:
             try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
                 bucket_name = bucket.get('name')
                 bucket_id = bucket.get('id')
 
+                _name = bucket.get('name', '')
                 objects = storage_conn.list_objects(bucket_name)
                 _LOGGER.debug(f'[collect_cloud_service] objects => {objects}')
                 obj_count, size = self._get_number_of_obj_and_size(objects)
@@ -52,7 +60,11 @@ class StorageManager(GoogleCloudManager):
                 st_class = bucket.get('storageClass').lower()
                 region = self.get_matching_region(bucket)
                 labels = self.convert_labels_format(bucket.get('labels', {}))
-                stackdriver = self.get_stackdriver(bucket_name)
+                stackdriver = self._get_stackdriver(bucket_name)
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
                 bucket.update({
                     'project': secret_data['project_id'],
                     'encryption': self._get_encryption(bucket),
@@ -73,9 +85,12 @@ class StorageManager(GoogleCloudManager):
                     'public_access': self._get_public_access(bucket, iam_policy),
                     'labels': labels
                 })
-                _name = bucket.get('name', '')
+
                 bucket_data = Storage(bucket, strict=False)
-                # labels -> tags
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 bucket_resource = StorageResource({
                     'name': _name,
                     'account': project_id,
@@ -85,7 +100,15 @@ class StorageManager(GoogleCloudManager):
                     'reference': ReferenceModel(bucket_data.reference())
                 })
 
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code(region.get('region_code'))
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of LoadBalancingResponse Object
+                ##################################
                 collected_cloud_services.append(StorageResponse({'resource': bucket_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
@@ -309,7 +332,7 @@ class StorageManager(GoogleCloudManager):
         return iam_policy_binding
 
     @staticmethod
-    def get_stackdriver(name):
+    def _get_stackdriver(name):
         return {
             'type': 'storage.googleapis.com',
             'identifier': 'bucket_name',

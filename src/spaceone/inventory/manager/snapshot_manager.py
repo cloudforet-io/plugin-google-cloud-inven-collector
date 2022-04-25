@@ -37,6 +37,11 @@ class SnapshotManager(GoogleCloudManager):
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
+
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
         snapshot_conn: SnapshotConnector = self.locator.get_connector(self.connector_name, **params)
 
         # Get lists that relate with snapshots through Google Cloud API
@@ -44,6 +49,9 @@ class SnapshotManager(GoogleCloudManager):
 
         for snapshot in snapshots:
             try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
                 snapshot_id = snapshot.get('id')
                 region = self.get_matching_region(snapshot.get('storageLocations'))
 
@@ -55,8 +63,16 @@ class SnapshotManager(GoogleCloudManager):
                     'encryption': self._get_encryption_info(snapshot),
                     'labels': labels
                 })
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
                 snapshot_data = Snapshot(snapshot, strict=False)
                 _name = snapshot_data.get('name', '')
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 # labels -> tags
                 snapshots_resource = SnapshotResource({
                     'name': _name,
@@ -67,7 +83,15 @@ class SnapshotManager(GoogleCloudManager):
                     'reference': ReferenceModel(snapshot_data.reference())
                 })
 
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code(region.get('region_code'))
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of LoadBalancingResponse Object
+                ##################################
                 collected_cloud_services.append(SnapshotResponse({'resource': snapshots_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
@@ -103,7 +127,6 @@ class SnapshotManager(GoogleCloudManager):
             'disk_size': float(size),
             'storage_bytes': int(st_byte)
         }
-
 
     @staticmethod
     def _get_encryption_info(snapshot):

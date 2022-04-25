@@ -37,6 +37,11 @@ class RouteManager(GoogleCloudManager):
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
+
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
         route_conn: RouteConnector = self.locator.get_connector(self.connector_name, **params)
 
         # Get lists that relate with snapshots through Google Cloud API
@@ -46,9 +51,12 @@ class RouteManager(GoogleCloudManager):
 
         for route in routes:
             try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
                 display = {
                     'network_display': self.get_param_in_url(route.get('network', ''), 'networks'),
-                    'next_hop': self.get_next_hop(route),
+                    'next_hop': self._get_next_hop(route),
                     'instance_tags_on_list': self._get_tags_display(route, 'list'),
                     'instance_tags': self._get_tags_display(route, 'not list'),
 
@@ -57,16 +65,22 @@ class RouteManager(GoogleCloudManager):
                 route.update({
                     'display': display,
                     'project': secret_data['project_id'],
-                    'applicable_instance': self.get_matched_instance(route,
-                                                                    secret_data['project_id'],
-                                                                    compute_vms),
+                    'applicable_instance': self._get_matched_instance(route, secret_data['project_id'], compute_vms),
                 })
 
-                # No Labels
 
+                ##################################
+                # 2. Make Base Data
+                ##################################
+                # No Labels
                 route_data = Route(route, strict=False)
                 _name = route_data.get('name', '')
                 route_id = route.get('id')
+
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 route_resource = RouteResource({
                     'name': _name,
                     'account': project_id,
@@ -75,7 +89,15 @@ class RouteManager(GoogleCloudManager):
                     'reference': ReferenceModel(route_data.reference())
                 })
 
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code(region)
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of LoadBalancingResponse Object
+                ##################################
                 collected_cloud_services.append(RouteResponse({'resource': route_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
@@ -85,7 +107,7 @@ class RouteManager(GoogleCloudManager):
         _LOGGER.debug(f'** Route Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
-    def get_matched_instance(self, route, project_id, instances_over_region):
+    def _get_matched_instance(self, route, project_id, instances_over_region):
         all_compute_vms = []
         route_network = route.get('network')
 
@@ -116,7 +138,7 @@ class RouteManager(GoogleCloudManager):
                     all_compute_vms.append(ComputeVM(instance, strict=False))
         return all_compute_vms
 
-    def get_next_hop(self, route):
+    def _get_next_hop(self, route):
         next_hop = ''
         if 'nextHopInstance' in route:
             url_next_hop_instance = route.get('nextHopInstance', '')

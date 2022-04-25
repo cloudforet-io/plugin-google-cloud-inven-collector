@@ -45,19 +45,40 @@ class VMInstanceManager(GoogleCloudManager):
         secret_data = params.get('secret_data', {})
         project_id = secret_data.get('project_id', '')
 
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
         self.instance_conn: VMInstanceConnector = self.locator.get_connector(self.connector_name, **params)
         all_resources = self.get_all_resources(project_id)
         compute_vms = self.instance_conn.list_instances()
 
         for compute_vm in compute_vms:
             try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
                 vm_id = compute_vm.get('id')
                 zone, region = self._get_zone_and_region(compute_vm)
                 zone_info = {'zone': zone, 'region': region, 'project_id': project_id}
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
                 resource = self.get_vm_instance_resource(project_id, zone_info, compute_vm, all_resources)
 
-                resource_responses.append(VMInstanceResourceResponse({'resource': resource}))
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code(resource.get('region_code', ''))
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of LoadBalancingResponse Object
+                ##################################
+                resource_responses.append(VMInstanceResourceResponse({'resource': resource}))
+
+
             except Exception as e:
                 _LOGGER.error(f'[list_resources] vm_id => {vm_id}, error => {e}', exc_info=True)
                 error_response = self.generate_resource_error_response(e, 'ComputeEngine', 'Instance', vm_id)
@@ -164,7 +185,9 @@ class VMInstanceManager(GoogleCloudManager):
             'subnet': subnet_vo,
             'stackdriver': stackdriver_manager_helper.get_stackdriver_info(instance.get('id', ''))
         })
-
+        ##################################
+        # 3. Make Return Resource
+        ##################################
         server_data.update({
             'name': _name,
             'account': project_id,

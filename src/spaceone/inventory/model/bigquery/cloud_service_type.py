@@ -28,8 +28,8 @@ cst_sql_workspace._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source('Name', 'data.name'),
         TextDyField.data_source('Location', 'data.location'),
-        TextDyField.data_source('Default Partition Expires', 'data.default_partition_expiration_ms_display'),
-        TextDyField.data_source('Default Table Expires', 'data.default_table_expiration_ms_display'),
+        TextDyField.data_source('Default Partition Expires(Minutes)', 'data.default_partition_expiration_ms_display'),
+        TextDyField.data_source('Default Table Expires(Minutes)', 'data.default_table_expiration_ms_display'),
         EnumDyField.data_source('Visible on Console', 'data.visible_on_console', default_badge={
             'indigo.500': ['true'], 'coral.600': ['false']
         }),

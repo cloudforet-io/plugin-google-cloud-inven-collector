@@ -11,5 +11,4 @@ from spaceone.inventory.manager.firewall_manager import FirewallManager
 from spaceone.inventory.manager.route_manager import RouteManager
 from spaceone.inventory.manager.load_balancing_manager import LoadBalancingManager
 from spaceone.inventory.manager.big_query_manager import BigQueryManager
-from spaceone.inventory.manager.health_check_manager import HealthCheckManager
 from spaceone.inventory.manager.vm_instance_manager import VMInstanceManager
