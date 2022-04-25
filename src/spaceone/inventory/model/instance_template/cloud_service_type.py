@@ -17,7 +17,7 @@ cst_instance_template = CloudServiceTypeResource()
 cst_instance_template.name = 'InstanceTemplate'
 cst_instance_template.provider = 'google_cloud'
 cst_instance_template.group = 'ComputeEngine'
-cst_instance_template.service_code = 'ComputeEngine'
+cst_instance_template.service_code = 'Compute Engine'
 cst_instance_template.labels = ['Compute']
 cst_instance_template.tags = {
     'spaceone:icon': 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Compute_Engine.svg',

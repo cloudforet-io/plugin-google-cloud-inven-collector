@@ -17,7 +17,7 @@ cst_machine_image = CloudServiceTypeResource()
 cst_machine_image.name = 'MachineImage'
 cst_machine_image.provider = 'google_cloud'
 cst_machine_image.group = 'ComputeEngine'
-cst_machine_image.service_code = 'ComputeEngine'
+cst_machine_image.service_code = 'Compute Engine'
 cst_machine_image.labels = ['Compute']
 cst_machine_image.tags = {
     'spaceone:icon': 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Compute_Engine.svg',
