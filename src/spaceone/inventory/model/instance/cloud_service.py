@@ -121,16 +121,14 @@ vm_instance_meta = ServerMetadata.set_layouts([compute_engine, labels, disk, nic
 
 class ComputeEngineResource(VMInstanceResource):
     cloud_service_group = StringType(default='ComputeEngine')
+
+
+class VMInstanceResource(ComputeEngineResource):
     cloud_service_type = StringType(default='Instance')
     data = ModelType(VMInstance)
     _metadata = ModelType(ServerMetadata, default=vm_instance_meta, serialized_name='metadata')
 
-'''
-class VMInstanceResource(ComputeEngineResource):
-    cloud_service_type = StringType(default='Instance')
-'''
-
 
 class VMInstanceResponse(VMInstanceResourceResponse):
-    resource = PolyModelType(ComputeEngineResource)
+    resource = PolyModelType(VMInstanceResource)
 
