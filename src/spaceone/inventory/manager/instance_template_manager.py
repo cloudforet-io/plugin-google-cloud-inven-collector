@@ -35,21 +35,30 @@ class InstanceTemplateManager(GoogleCloudManager):
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
-        instance_template_conn: InstanceTemplateConnector = self.locator.get_connector(self.connector_name, **params)
 
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
+        instance_template_conn: InstanceTemplateConnector = self.locator.get_connector(self.connector_name, **params)
         # Get Instance Templates
         instance_templates = instance_template_conn.list_instance_templates()
         instance_groups = instance_template_conn.list_instance_group_managers()
 
         for inst_template in instance_templates:
             try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
                 inst_template_id = inst_template.get('id')
                 properties = inst_template.get('properties', {})
                 tags = properties.get('tags', {})
 
-                in_used_by, matched_instance_group = self.match_instance_group(inst_template, instance_groups)
-                disks = self.get_disks(properties)
+                in_used_by, matched_instance_group = self._match_instance_group(inst_template, instance_groups)
+                disks = self._get_disks(properties)
                 labels = self.convert_labels_format(properties.get('labels', {}))
+
+
 
                 inst_template.update({
                     'project': secret_data['project_id'],
@@ -61,7 +70,7 @@ class InstanceTemplateManager(GoogleCloudManager):
                     'disk_display': self._get_disk_type_display(disks, 'disk_type'),
                     'image': self._get_disk_type_display(disks, 'source_image_display'),
                     'instance_groups': matched_instance_group,
-                    'network_interfaces': self.get_network_interface(properties),
+                    'network_interfaces': self._get_network_interface(properties),
                     'fingerprint': self._get_properties_item(properties, 'metadata', 'fingerprint'),
                     'labels': labels,
                     'disks': disks
@@ -71,10 +80,18 @@ class InstanceTemplateManager(GoogleCloudManager):
                 if len(svc_account) > 0:
                     inst_template.update({'service_account': self._get_service_account(svc_account)})
                 _name = inst_template.get('name', '')
+
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
                 instance_template_data = InstanceTemplate(inst_template, strict=False)
                 # labels -> tags
                 default_region = 'global'
 
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 instance_template_resource = InstanceTemplateResource({
                     'name': _name,
                     'account': project_id,
@@ -84,7 +101,15 @@ class InstanceTemplateManager(GoogleCloudManager):
                     'region_code': default_region
                 })
 
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code(default_region)
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of LoadBalancingResponse Object
+                ##################################
                 collected_cloud_services.append(InstanceTemplateResponse({'resource': instance_template_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
@@ -95,7 +120,7 @@ class InstanceTemplateManager(GoogleCloudManager):
         return collected_cloud_services, error_responses
 
     # Returns matched instance group and user(instance) related to instance template.
-    def match_instance_group(self, instance_template, instance_group_managers: list):
+    def _match_instance_group(self, instance_template, instance_group_managers: list):
         in_used_by = []
         instance_group_infos = []
         for instance_group in instance_group_managers:
@@ -108,7 +133,7 @@ class InstanceTemplateManager(GoogleCloudManager):
 
         return in_used_by, instance_group_infos
 
-    def get_disks(self, instance):
+    def _get_disks(self, instance):
         disk_info = []
         for disk in instance.get('disks', []):
             init_param = disk.get('initializeParams', {})
@@ -124,14 +149,14 @@ class InstanceTemplateManager(GoogleCloudManager):
                 'device': disk.get('deviceName'),
                 'device_type': disk.get('type', ''),
                 'device_mode': disk.get('mode', ''),
-                'size': self.get_disk_size(init_param),
-                'tags': self.get_tags_info(disk)
+                'size': self._get_disk_size(init_param),
+                'tags': self._get_tags_info(disk)
             }, strict=False))
         return disk_info
 
-    def get_tags_info(self, disk):
+    def _get_tags_info(self, disk):
         init_param = disk.get('initializeParams', {})
-        disk_size = self.get_disk_size(init_param)
+        disk_size = self._get_disk_size(init_param)
         disk_type = init_param.get('diskType')
         sc_image = init_param.get('sourceImage', '')
         return {
@@ -139,13 +164,13 @@ class InstanceTemplateManager(GoogleCloudManager):
             'source_image': sc_image,
             'source_image_display': self.get_param_in_url(sc_image, 'images'),
             'auto_delete': disk.get('autoDelete'),
-            'read_iops': self.get_iops_rate(disk_type, disk_size, 'read'),
-            'write_iops': self.get_iops_rate(disk_type, disk_size, 'write'),
-            'read_throughput': self.get_throughput_rate(disk_type, disk_size),
-            'write_throughput': self.get_throughput_rate(disk_type, disk_size),
+            'read_iops': self._get_iops_rate(disk_type, disk_size, 'read'),
+            'write_iops': self._get_iops_rate(disk_type, disk_size, 'write'),
+            'read_throughput': self._get_throughput_rate(disk_type, disk_size),
+            'write_throughput': self._get_throughput_rate(disk_type, disk_size),
         }
 
-    def get_network_interface(self, instance):
+    def _get_network_interface(self, instance):
         network_interface_info = []
         for network_interface in instance.get('networkInterfaces', []):
             configs, tiers = self._get_access_configs_type_and_tier(network_interface.get('accessConfigs', []))
@@ -161,15 +186,15 @@ class InstanceTemplateManager(GoogleCloudManager):
 
         return network_interface_info
 
-    def get_iops_rate(self, disk_type, disk_size, flag):
+    def _get_iops_rate(self, disk_type, disk_size, flag):
         const = self._get_iops_constant(disk_type, flag)
         return disk_size * const
 
-    def get_throughput_rate(self, disk_type, disk_size):
+    def _get_throughput_rate(self, disk_type, disk_size):
         const = self._get_throughput_constant(disk_type)
         return disk_size * const
 
-    def get_disk_size(self, init_param) -> float:
+    def _get_disk_size(self, init_param) -> float:
         # initializeParams: {diskSizeGb: ""} can be Null
         if init_param.get('diskSizeGb') is not None:
             disk_size = self._get_bytes(int(init_param.get('diskSizeGb')))

@@ -166,12 +166,6 @@ class GoogleCloudManager(BaseManager):
                 }})
         return error_resource_response
 
-    # TODO: Remove it
-    '''
-    @staticmethod
-    def generate_region_from_zone(zone):
-        return zone[:-2]
-    '''
     @staticmethod
     def match_region_info(region_code):
         match_region_info = REGION_INFO.get(region_code)
@@ -204,16 +198,6 @@ class GoogleCloudManager(BaseManager):
         p = math.pow(1024, i)
         s = round(size_bytes / p, 2)
         return "%s %s" % (s, size_name[i])
-
-
-    @staticmethod
-    def convertMillis(millis):
-        s = millis / 1000
-        m, s = divmod(s, 60)
-        h, m = divmod(m, 60)
-        d, h = divmod(h, 24)
-
-        return d, h, m, s
 
     @staticmethod
     def parse_region_from_zone(zone):

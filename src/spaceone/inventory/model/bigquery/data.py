@@ -107,10 +107,11 @@ class BigQueryWorkSpace(Model):
     etags = StringType(serialize_when_none=False)
     location = StringType()
     visible_on_console = BooleanType()
-    default_partition_expiration_ms_display = StringType(serialize_when_none=False)
-    default_table_expiration_ms_display = StringType(serialize_when_none=False)
-    default_table_expiration_ms = StringType(deserialize_from='defaultTableExpirationMs',serialize_when_none=False)
-    default_partition_expiration_ms = StringType(deserialize_from='defaultPartitionExpirationMs', serialize_when_none=False)
+    default_partition_expiration_ms_display = IntType(serialize_when_none=False)
+    default_table_expiration_ms_display = IntType(serialize_when_none=False)
+    default_table_expiration_ms = StringType(deserialize_from='defaultTableExpirationMs', serialize_when_none=False)
+    default_partition_expiration_ms = StringType(deserialize_from='defaultPartitionExpirationMs',
+                                                 serialize_when_none=False)
 
     self_link = StringType(deserialize_from='selfLink')
     creation_time = DateTimeType(deserialize_from='creationTime')

@@ -35,19 +35,31 @@ class FirewallManager(GoogleCloudManager):
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
+
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
         firewall_conn: FirewallConnector = self.locator.get_connector(self.connector_name, **params)
 
         # Get lists that relate with snapshots through Google Cloud API
         firewalls = firewall_conn.list_firewall()
         compute_engine_vms = firewall_conn.list_instance_for_networks()
         region = 'global'
+
         for firewall in firewalls:
             try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
                 firewall_id = firewall.get('id')
                 target_tag = firewall.get('targetTags', [])
                 filter_range = ', '.join(firewall.get('sourceRanges', ''))
                 log_config = firewall.get('log_config', {})
 
+                ##################################
+                # 2. Make Base Data
+                ##################################
                 protocol_port = []
                 flag = 'allowed' if 'allowed' in firewall else 'denied'
                 for allowed in firewall.get(flag, []):
@@ -58,7 +70,7 @@ class FirewallManager(GoogleCloudManager):
 
                 display = {
                     'enforcement': 'Disabled' if firewall.get('disabled') else 'Enabled',
-                    'network_display': self._get_matched_last_target('network', firewall),
+                    'network_display': self.get_param_in_url(firewall.get('network', ''), 'networks'),
                     'direction_display': 'Ingress' if firewall.get('direction') == 'INGRESS' else 'Egress',
                     'target_display': ['Apply to all'] if not target_tag else target_tag,
                     'filter': f'IP ranges: {filter_range}',
@@ -69,7 +81,7 @@ class FirewallManager(GoogleCloudManager):
 
                 firewall.update({
                     'project': secret_data['project_id'],
-                    'applicable_instance': self.get_matched_instace(firewall,
+                    'applicable_instance': self._get_matched_instance(firewall,
                                                                     secret_data['project_id'],
                                                                     compute_engine_vms),
                     'display': display
@@ -78,6 +90,11 @@ class FirewallManager(GoogleCloudManager):
                 # No Labels on API
                 _name = firewall.get('data', '')
                 firewall_data = Firewall(firewall, strict=False)
+
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 firewall_resource = FirewallResource({
                     'name': _name,
                     'account': project_id,
@@ -86,7 +103,16 @@ class FirewallManager(GoogleCloudManager):
                     'reference': ReferenceModel(firewall_data.reference())
                 })
 
+
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code(region)
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of LoadBalancingResponse Object
+                ##################################
                 collected_cloud_services.append(FirewallResponse({'resource': firewall_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
@@ -96,20 +122,13 @@ class FirewallManager(GoogleCloudManager):
         _LOGGER.debug(f'** Firewall Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
-
-    @staticmethod
-    def _get_zone_from_target(key, source):
-        a = source.get(key, '')
-        return a[a.find('zones') + 6:a.find('/instances')]
-
-
-    def get_matched_instace(self, firewall, project_id, instances_over_region):
+    def _get_matched_instance(self, firewall, project_id, instances_over_region):
         all_ip_juso_vos = []
         firewall_network = firewall.get('network')
         for instance in instances_over_region:
             network_interfaces = instance.get('networkInterfaces', [])
-            zone = self._get_matched_last_target('zone', instance)
-            region = zone[:-2]
+            zone = self.get_param_in_url(instance.get('zone', ''), 'zones')
+            region = self.parse_region_from_zone(zone)
             for network_interface in network_interfaces:
                 if firewall_network == network_interface.get('network'):
                     instance_name = instance.get('name')
@@ -119,7 +138,7 @@ class FirewallManager(GoogleCloudManager):
                         'zone': zone,
                         'region': region,
                         'address': network_interface.get('networkIP'),
-                        'subnetwork': self._get_matched_last_target('subnetwork', network_interface),
+                        'subnetwork': self.get_param_in_url(network_interface.get('subnetwork', ''), 'subnetworks'),
                         'tags': instance.get('tags', {}).get('items', []),
                         'project': project_id,
                         'service_accounts': self._get_service_accounts(instance.get('serviceAccounts', [])),
@@ -130,7 +149,6 @@ class FirewallManager(GoogleCloudManager):
                     all_ip_juso_vos.append(ComputeVM(instance, strict=False))
         return all_ip_juso_vos
 
-
     @staticmethod
     def _get_label_display(labels):
         displays = []
@@ -138,11 +156,6 @@ class FirewallManager(GoogleCloudManager):
             value = labels.get(label, '')
             displays.append(f'{label}: {value}')
         return displays
-
-    @staticmethod
-    def _get_matched_last_target(key, source):
-        a = source.get(key, '')
-        return a[a.rfind('/') + 1:]
 
     @staticmethod
     def _valid_ip_address(ip):
@@ -160,14 +173,3 @@ class FirewallManager(GoogleCloudManager):
         if not service_accounts_list:
             service_accounts_list.append('None')
         return service_accounts_list
-
-    @staticmethod
-    def _get_parse_users(users):
-        parsed_used_by = []
-        for user in users:
-            zone = user[user.find('zones') + 6:user.find('/instances')]
-            instance = user[user.rfind('/') + 1:]
-            used = f'VM instance {instance} (Zone: {zone})'
-            parsed_used_by.append(used)
-
-        return parsed_used_by

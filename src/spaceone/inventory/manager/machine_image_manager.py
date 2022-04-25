@@ -36,6 +36,11 @@ class MachineImageManager(GoogleCloudManager):
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
+
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
         machine_image_conn: MachineImageConnector = self.locator.get_connector(self.connector_name, **params)
 
         # Get machine image
@@ -51,14 +56,20 @@ class MachineImageManager(GoogleCloudManager):
 
         for machine_image in machine_images:
             try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
+                _name = machine_image.get('name', '')
                 machine_image_id = machine_image.get('id')
                 properties = machine_image.get('instanceProperties', {})
                 tags = properties.get('tags', {})
                 boot_image = self.get_boot_image_data(properties)
                 disks = self.get_disks(properties, boot_image)
                 region = self.get_matching_region(machine_image.get('storageLocations'))
-                _LOGGER.debug(f'machine_image => {machine_image}')
 
+                ##################################
+                # 2. Make Base Data
+                ##################################
                 machine_image.update({
                     'project': secret_data['project_id'],
                     'deletion_protection': properties.get('deletionProtection', False),
@@ -79,10 +90,11 @@ class MachineImageManager(GoogleCloudManager):
                 if len(svc_account) > 0:
                     machine_image.update({'service_account': self._get_service_account(svc_account)})
 
-                _name = machine_image.get('name', '')
                 # No Labels
                 machine_image_data = MachineImage(machine_image, strict=False)
-
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 machine_image_resource = MachineImageResource({
                     'name': _name,
                     'account': project_id,
@@ -90,7 +102,16 @@ class MachineImageManager(GoogleCloudManager):
                     'reference': ReferenceModel(machine_image_data.reference()),
                     'region_code': region.get('region_code')
                 })
+
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code(region.get('region_code'))
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of LoadBalancingResponse Object
+                ##################################
                 collected_cloud_services.append(MachineImageResponse({'resource': machine_image_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)

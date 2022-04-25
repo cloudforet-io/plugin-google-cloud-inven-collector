@@ -36,6 +36,11 @@ class VPCNetworkManager(GoogleCloudManager):
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
+
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
         vpc_conn: VPCNetworkConnector = self.locator.get_connector(self.connector_name, **params)
 
         # Get lists that relate with snapshots through Google Cloud API
@@ -47,11 +52,14 @@ class VPCNetworkManager(GoogleCloudManager):
 
         for network in networks:
             try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
                 network_id = network.get('id')
                 network_identifier = network.get('selfLink')
                 matched_firewall = self._get_matched_firewalls(network_identifier, firewalls)
                 matched_route = self.get_matched_route(network_identifier, routes)
-                matched_subnets = self.get_matched_subnets(network_identifier, subnets)
+                matched_subnets = self._get_matched_subnets(network_identifier, subnets)
                 region = self.match_region_info('global')
                 peerings = self.get_peering(network)
 
@@ -79,7 +87,15 @@ class VPCNetworkManager(GoogleCloudManager):
 
                 # No labels
                 _name = network.get('name', '')
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
                 vpc_data = VPCNetwork(network, strict=False)
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 vpc_resource = VPCNetworkResource({
                     'name': _name,
                     'account': project_id,
@@ -88,7 +104,15 @@ class VPCNetworkManager(GoogleCloudManager):
                     'reference': ReferenceModel(vpc_data.reference())
                 })
 
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code('global')
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of LoadBalancingResponse Object
+                ##################################
                 collected_cloud_services.append(VPCNetworkResponse({'resource': vpc_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
@@ -196,8 +220,7 @@ class VPCNetworkManager(GoogleCloudManager):
                 route_vos.append(route)
         return route_vos
 
-    # TODO: "https://www.googleapis.com/compute/v1/projects/bluese-cloudone-20200113/regions/us-central1"
-    def get_matched_subnets(self, network, subnets):
+    def _get_matched_subnets(self, network, subnets):
         matched_subnet = []
         for subnet in subnets:
             if network == subnet.get('network', ''):

@@ -38,20 +38,30 @@ class DiskManager(GoogleCloudManager):
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
 
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
         disk_conn: DiskConnector = self.locator.get_connector(self.connector_name, **params)
         disks = disk_conn.list_disks()
         resource_policies = disk_conn.list_resource_policies()
 
         for disk in disks:
             try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
                 disk_id = disk.get('id')
-                disk_type = self._get_last_target(disk.get('type'))
+                disk_type = self.get_param_in_url(disk.get('type',''), 'diskTypes')
                 disk_size = float(disk.get('sizeGb'))
-                zone = self._get_last_target(disk.get('zone'))
-                region = zone[:-2]
+                zone = self.get_param_in_url(disk.get('zone', ''), 'zones')
+                region = self.parse_region_from_zone(zone)
                 name = disk.get('name')
-
                 labels = self.convert_labels_format(disk.get('labels', {}))
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
                 disk.update({
                     'project': secret_data['project_id'],
                     'id': disk_id,
@@ -60,18 +70,21 @@ class DiskManager(GoogleCloudManager):
                     'in_used_by': self._get_in_used_by(disk.get('users', [])),
                     'source_image_display': self._get_source_image_display(disk),
                     'disk_type': disk_type,
-                    'snapshot_schedule': self.get_matched_snapshot(region, disk, resource_policies),
+                    'snapshot_schedule': self._get_matched_snapshot(region, disk, resource_policies),
                     'snapshot_schedule_display': self._get_snapshot_schedule(disk),
                     'encryption': self._get_encryption(disk),
                     'size': float(self._get_bytes(int(disk.get('sizeGb')))),
-                    'read_iops': self.get_iops_rate(disk_type, disk_size, 'read'),
-                    'write_iops': self.get_iops_rate(disk_type, disk_size, 'write'),
-                    'read_throughput': self.get_throughput_rate(disk_type, disk_size),
-                    'write_throughput': self.get_throughput_rate(disk_type, disk_size),
+                    'read_iops': self._get_iops_rate(disk_type, disk_size, 'read'),
+                    'write_iops': self._get_iops_rate(disk_type, disk_size, 'write'),
+                    'read_throughput': self._get_throughput_rate(disk_type, disk_size),
+                    'write_throughput': self._get_throughput_rate(disk_type, disk_size),
                     'labels': labels
                 })
-
                 disk_data = Disk(disk, strict=False)
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 disk_resource = DiskResource({
                     'name': name,
                     'account': project_id,
@@ -80,7 +93,16 @@ class DiskManager(GoogleCloudManager):
                     'data': disk_data,
                     'reference': ReferenceModel(disk_data.reference())
                 })
+
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code(disk['region'])
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of LoadBalancingResponse Object
+                ##################################
                 collected_cloud_services.append(DiskResponse({'resource': disk_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
@@ -90,15 +112,15 @@ class DiskManager(GoogleCloudManager):
         _LOGGER.debug(f'** Disk Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
-    def get_iops_rate(self, disk_type, disk_size, flag):
+    def _get_iops_rate(self, disk_type, disk_size, flag):
         const = self._get_iops_constant(disk_type, flag)
         return disk_size * const
 
-    def get_throughput_rate(self, disk_type, disk_size):
+    def _get_throughput_rate(self, disk_type, disk_size):
         const = self._get_throughput_constant(disk_type)
         return disk_size * const
 
-    def get_matched_snapshot(self, region, disk, resource_policies):
+    def _get_matched_snapshot(self, region, disk, resource_policies):
         matched_policies = []
         policy_self_links = disk.get('resourcePolicies', [])
         policies = resource_policies.get(region)
@@ -118,7 +140,7 @@ class DiskManager(GoogleCloudManager):
                             'schedule': policy_schedule,
                             'retention_policy': retention
                         },
-                        'region': self._get_last_target(policy.get('region')),
+                        'region': self.get_param_in_url(policy.get('region', ''), 'regions'),
                         'labels': self.convert_labels_format(snapshot_prop.get('labels', {})),
                         'tags': self.convert_labels_format(snapshot_prop.get('labels', {})),
                         'storage_locations': snapshot_prop.get('storageLocations', [])
@@ -126,6 +148,13 @@ class DiskManager(GoogleCloudManager):
                     matched_policies.append(policy)
 
         return matched_policies
+
+    def _get_in_used_by(self, users):
+        in_used_by = []
+        for user in users:
+            used_single = self.get_param_in_url(user, 'instances')
+            in_used_by.append(used_single)
+        return in_used_by
 
     def _get_schedule_display(self, schedule):
         schedule_display = []
@@ -192,32 +221,21 @@ class DiskManager(GoogleCloudManager):
 
         return constant
 
-    @staticmethod
-    def _get_source_image_display(disk):
+    def _get_source_image_display(self, disk):
         source_image_display = ''
-        source_image = disk.get('sourceImage')
-        if source_image:
-            source_image_display = source_image[source_image.rfind('/') + 1:]
+        url_source_image = disk.get('sourceImage')
+        if url_source_image:
+            source_image_display = self.get_param_in_url(url_source_image, 'images')
         return source_image_display
 
-    @staticmethod
-    def _get_snapshot_schedule(disk):
+    def _get_snapshot_schedule(self, disk):
         snapshot_schedule = []
         policies = disk.get('resourcePolicies', [])
-        for policy in policies:
-            snapshot_schedule.append(policy[policy.rfind('/') + 1:])
-        return snapshot_schedule
+        for url_policy in policies:
+            str_policy = self.get_param_in_url(url_policy, 'resourcePolicies')
+            snapshot_schedule.append(str_policy)
 
-    '''
-    TODO: 
-    '''
-    @staticmethod
-    def _get_in_used_by(users):
-        in_used_by = []
-        for user in users:
-            used_single = user[user.rfind('/') + 1:]
-            in_used_by.append(used_single)
-        return in_used_by
+        return snapshot_schedule
 
     @staticmethod
     def _get_bytes(number):
@@ -233,14 +251,3 @@ class DiskManager(GoogleCloudManager):
             else:
                 encryption = 'Customer supplied'
         return encryption
-
-    '''
-    TODO: 
-    '''
-    @staticmethod
-    def _get_last_target(target):
-        # target can be Null
-        if target is None:
-            return ""
-        else:
-            return target[target.rfind('/') + 1:]

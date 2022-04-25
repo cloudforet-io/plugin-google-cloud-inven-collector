@@ -33,10 +33,14 @@ class LoadBalancingManager(GoogleCloudManager):
         lb_id = ""
 
         secret_data = params['secret_data']
-        project_id = secret_data['project_id']
         loadbalancing_conn: LoadBalancingConnector = self.locator.get_connector(self.connector_name, **params)
 
         project_id = secret_data.get('project_id')
+
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
 
         # Getting all components for loadbalancing
         forwarding_rules = loadbalancing_conn.list_forwarding_rules()
@@ -93,7 +97,7 @@ class LoadBalancingManager(GoogleCloudManager):
         for load_balancer in load_balancers:
             try:
                 ##################################
-                # 0. Set Basic Information
+                # 1. Set Basic Information
                 ##################################
                 lb_forwarding_rules = self._get_forwarding_rules(load_balancer, forwarding_rules)
                 lb_target_proxy = self._get_target_proxy(load_balancer)
@@ -106,7 +110,7 @@ class LoadBalancingManager(GoogleCloudManager):
                 lb_target_pools = self._get_target_pools(lb_forwarding_rules, target_pools)
 
                 ##################################
-                # 1. Make Base Data
+                # 2. Make Base Data
                 ##################################
 
                 loadbalancer_data = LoadBalancing({
@@ -133,7 +137,7 @@ class LoadBalancingManager(GoogleCloudManager):
                 }, strict=False)
 
                 ##################################
-                # 2. Make Return Resource
+                # 3. Make Return Resource
                 ##################################
                 loadbalancer_resource = LoadBalancingResource({
                     'name': loadbalancer_data.get('name', ''),
@@ -143,7 +147,15 @@ class LoadBalancingManager(GoogleCloudManager):
                     'reference': ReferenceModel(loadbalancer_data.reference(loadbalancer_data.get('self_link', '')))
                 })
 
+                ##################################
+                # 4. Make Collected Region Code
+                ##################################
                 self.set_region_code(loadbalancer_data.get('region', ''))
+
+                ##################################
+                # 5. Make Resource Response Object
+                # List of LoadBalancingResponse Object
+                ##################################
                 collected_cloud_services.append(LoadBalancingResponse({'resource': loadbalancer_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
@@ -152,7 +164,6 @@ class LoadBalancingManager(GoogleCloudManager):
 
         _LOGGER.debug(f'** Load Balancing Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
-
 
     def _get_loadbalancer_from_forwarding_rule(self, forwarding_rules) -> list:
         loadbalancers = []
@@ -212,6 +223,7 @@ class LoadBalancingManager(GoogleCloudManager):
 
     @staticmethod
     def _get_target_proxy_type(kind, target_proxy) -> dict:
+        # Proxy service is managed by type(protocol)
         if kind == 'compute#targetGRPCProxy':
             proxy_type = {
                 'type': 'GRPC',
@@ -240,7 +252,6 @@ class LoadBalancingManager(GoogleCloudManager):
         else:
             proxy_type = {}
         return proxy_type
-
 
     @staticmethod
     def _get_certificates(lb_target_proxy, ssl_certificates) -> list:
