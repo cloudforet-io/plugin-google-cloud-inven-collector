@@ -16,7 +16,7 @@ cst_snapshot = CloudServiceTypeResource()
 cst_snapshot.name = 'Snapshot'
 cst_snapshot.provider = 'google_cloud'
 cst_snapshot.group = 'ComputeEngine'
-cst_snapshot.service_code = 'ComputeEngine'
+cst_snapshot.service_code = 'Compute Engine'
 cst_snapshot.labels = ['Compute', 'Storage']
 cst_snapshot.tags = {
     'spaceone:icon': 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Compute_Engine.svg',

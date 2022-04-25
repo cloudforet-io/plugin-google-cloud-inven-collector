@@ -3,7 +3,6 @@ from spaceone.inventory.model.cloud_sql import *
 from spaceone.inventory.model.disk import *
 from spaceone.inventory.model.external_ip_address import *
 from spaceone.inventory.model.firewall import *
-from spaceone.inventory.model.health_check import *
 from spaceone.inventory.model.instance_group import *
 from spaceone.inventory.model.instance_template import *
 from spaceone.inventory.model.load_balancing import *
