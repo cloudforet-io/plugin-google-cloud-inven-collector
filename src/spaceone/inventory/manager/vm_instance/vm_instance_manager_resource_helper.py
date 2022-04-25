@@ -73,11 +73,11 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
         }
         '''
 
-        os_type, os_data = self.get_os_type_and_data(instance, public_images)
-        server_dic = self.get_server_dic(instance, os_type, zone_info)
-        google_cloud_data = self.get_google_cloud_data(instance, instance_in_managed_instance_groups)
-        hardware_data = self.get_hardware_data(instance, instance_types, zone_info)
-        compute_data = self.get_compute_data(instance, disks, zone_info)
+        os_type, os_data = self._get_os_type_and_data(instance, public_images)
+        server_dic = self._get_server_dic(instance, os_type, zone_info)
+        google_cloud_data = self._get_google_cloud_data(instance, instance_in_managed_instance_groups)
+        hardware_data = self._get_hardware_data(instance, instance_types, zone_info)
+        compute_data = self._get_compute_data(instance, disks, zone_info)
 
         server_dic.update({
             'data': {
@@ -90,7 +90,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
 
         return server_dic
 
-    def get_server_dic(self, instance, os_type, zone_info):
+    def _get_server_dic(self, instance, os_type, zone_info):
         server_data = {
             'name': instance.get('name', ''),
             'server_type': 'VM',
@@ -103,7 +103,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
 
         return server_data
 
-    def get_os_type_and_data(self, instance, public_images):
+    def _get_os_type_and_data(self, instance, public_images):
 
         disk_info = instance.get("disks", [])
         os_dists = disk_info[0].get('licenses', []) if len(disk_info) > 0 else []
@@ -148,20 +148,20 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
 
         return os_data
 
-    def get_google_cloud_data(self, instance, instance_in_managed_instance_groups):
+    def _get_google_cloud_data(self, instance, instance_in_managed_instance_groups):
         google_cloud = {
             "self_link": instance.get('selfLink', ''),
             "fingerprint": instance.get('fingerprint', ''),
-            "reservation_affinity": self.get_reservation_affinity(instance),
+            "reservation_affinity": self._get_reservation_affinity(instance),
             "deletion_protection": instance.get('deletionProtection', False),
-            "scheduling": self.get_scheduling(instance),
-            "labels": instance.get('labels', {}),
+            "scheduling": self._get_scheduling(instance),
+            "labels": self._get_labels(instance),
             'is_managed_instance': True if instance.get('selfLink', '') in instance_in_managed_instance_groups else False,
         }
 
         return GoogleCloud(google_cloud, strict=False)
 
-    def get_hardware_data(self, instance, instance_types, zone_info):
+    def _get_hardware_data(self, instance, instance_types, zone_info):
         '''
         core = IntType(default=0)
         memory = FloatType(default=0.0)
@@ -172,7 +172,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
         core, memory = self._get_core_and_memory(instance, instance_types)
 
         if core == 0 and memory == 0:
-            core, memory = self.get_custom_image_type(instance, zone_info, instance_types)
+            core, memory = self._get_custom_image_type(instance, zone_info, instance_types)
 
         hardware_data = {
             'core': core,
@@ -183,7 +183,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
 
         return Hardware(hardware_data, strict=False)
 
-    def get_compute_data(self, instance, disks, zone_info):
+    def _get_compute_data(self, instance, disks, zone_info):
         '''
             {
                 'keypair': StringType(default="")
@@ -199,7 +199,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 'tags' = DictType(StringType, default={})
             }
         '''
-
+        _LOGGER.debug(f'instance => {instance}')
         compute_data = {
             'keypair': '',
             'public_ip_address': self._get_public_ip_address(instance),
@@ -216,7 +216,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
 
         return Compute(compute_data)
 
-    def get_custom_image_type(self, instance, zone_info, instance_types):
+    def _get_custom_image_type(self, instance, zone_info, instance_types):
         machine = instance.get('machineType', '')
         _machine = machine[machine.rfind('/')+1:]
 
@@ -309,14 +309,13 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
 
         return ip_addresses
 
-
     @staticmethod
-    def get_reservation_affinity(instance):
+    def _get_reservation_affinity(instance):
         ra = instance.get('reservationAffinity', {})
         return ra.get('consumeReservationType', '')
 
     @staticmethod
-    def get_scheduling(instance):
+    def _get_scheduling(instance):
         schedule = instance.get('scheduling', {})
         scheduling = {
             'on_host_maintenance': schedule.get('onHostMaintenance', 'MIGRATE'),
@@ -326,14 +325,14 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
         return scheduling
 
     @staticmethod
-    def get_labels(instance):
+    def _get_labels(instance):
         labels = []
-        for k, v in instance.get('labels', {}).items():
-            labels.append({
-                'key': k,
-                'value': v
-            })
+        if 'items' in instance.get('tags', ''):
+            for item in instance.get('tags', '').get('items', []):
+                labels.append({
+                    'key': '',
+                    'value': item
+                })
+
         return labels
-
-
 

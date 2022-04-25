@@ -148,7 +148,6 @@ class InstanceGroupManager(GoogleCloudManager):
         return collected_cloud_services, error_responses
 
     def _get_instance_group_loc(self, instance_group):
-        _LOGGER.debug(f'get_instance_group_loc => {instance_group}')
         inst_type = 'zone' if 'zone' in instance_group else 'region'
         loc = self._get_last_target(instance_group, inst_type)
         return inst_type, loc

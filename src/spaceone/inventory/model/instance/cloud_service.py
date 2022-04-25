@@ -111,7 +111,7 @@ lb = TableDynamicLayout.set_fields('LB', root_path='data.load_balancers', fields
     }),
 ])
 
-labels = TableDynamicLayout.set_fields('Google Cloud Labels', root_path='data.google_cloud.labels', fields=[
+labels = TableDynamicLayout.set_fields('Labels', root_path='data.google_cloud.labels', fields=[
     TextDyField.data_source('Key', 'key'),
     TextDyField.data_source('Value', 'value'),
 ])
@@ -121,13 +121,16 @@ vm_instance_meta = ServerMetadata.set_layouts([compute_engine, labels, disk, nic
 
 class ComputeEngineResource(VMInstanceResource):
     cloud_service_group = StringType(default='ComputeEngine')
-
-
-class VMInstanceResource(ComputeEngineResource):
     cloud_service_type = StringType(default='Instance')
     data = ModelType(VMInstance)
     _metadata = ModelType(ServerMetadata, default=vm_instance_meta, serialized_name='metadata')
 
+'''
+class VMInstanceResource(ComputeEngineResource):
+    cloud_service_type = StringType(default='Instance')
+'''
+
 
 class VMInstanceResponse(VMInstanceResourceResponse):
-    resource = PolyModelType(VMInstanceResource)
+    resource = PolyModelType(ComputeEngineResource)
+
