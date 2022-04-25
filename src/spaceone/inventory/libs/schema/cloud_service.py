@@ -93,7 +93,8 @@ class VMInstanceResource(Model):
     launched_at = StringType(serialize_when_none=False)
     region_code = StringType()
     data = ModelType(VMInstance)
-    tags = DictType(StringType(), default={})
+    #tags = DictType(StringType(), default={})
+    tags = ListType(ModelType(Labels))
     reference = ModelType(ReferenceModel)
     _metadata = ModelType(ServerMetadata, serialized_name='metadata')
 

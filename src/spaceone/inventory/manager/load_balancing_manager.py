@@ -68,7 +68,6 @@ class LoadBalancingManager(GoogleCloudManager):
         tcp_proxies = loadbalancing_conn.list_tcp_proxies()
         load_balancers.extend(tcp_proxies)
         all_proxies.extend(tcp_proxies)
-        _LOGGER.debug(f'all_proxies => {load_balancers}')
 
         # SSL Cert for proxy
         ssl_certificates = loadbalancing_conn.list_ssl_certificates()
