@@ -60,7 +60,7 @@ class SnapshotManager(GoogleCloudManager):
                     'project': secret_data['project_id'],
                     'disk': self.get_disk_info(snapshot),
                     'creation_type': 'Scheduled' if snapshot.get('autoCreated') else 'Manual',
-                    'encryption': self._get_encryption_info(snapshot),
+                    'encryption': self.get_disk_encryption_type(snapshot.get('snapshotEncryptionKey')),
                     'labels': labels
                 })
 
@@ -102,7 +102,7 @@ class SnapshotManager(GoogleCloudManager):
         return collected_cloud_services, error_responses
 
     def get_matching_region(self, svc_location):
-        region_code = svc_location[0] if len(svc_location) > 0 else 'global'
+        region_code = svc_location[0] if svc_location else 'global'
         matched_info = self.match_region_info(region_code)
         return {'region_code': region_code, 'location': 'regional'} if matched_info \
             else {'region_code': 'global', 'location': 'multi'}
@@ -127,19 +127,6 @@ class SnapshotManager(GoogleCloudManager):
             'disk_size': float(size),
             'storage_bytes': int(st_byte)
         }
-
-    @staticmethod
-    def _get_encryption_info(snapshot):
-        encryption = 'Google managed'
-        encryption_key = snapshot.get('snapshotEncryptionKey')
-
-        if encryption_key:
-            if 'kmsKeyName' in encryption_key or 'kmsKeyServiceAccount' in encryption_key:
-                encryption = 'Customer managed'
-            elif 'rawKey' in encryption_key or 'sha256' in encryption_key:
-                encryption = 'Customer supplied'
-
-        return encryption
 
     @staticmethod
     def _get_bytes(number):

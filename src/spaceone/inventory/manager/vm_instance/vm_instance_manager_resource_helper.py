@@ -199,7 +199,6 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 'tags' = DictType(StringType, default={})
             }
         '''
-        _LOGGER.debug(f'instance => {instance}')
         compute_data = {
             'keypair': '',
             'public_ip_address': self._get_public_ip_address(instance),

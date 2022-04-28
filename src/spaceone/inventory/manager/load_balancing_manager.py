@@ -44,7 +44,6 @@ class LoadBalancingManager(GoogleCloudManager):
 
         # Getting all components for loadbalancing
         forwarding_rules = loadbalancing_conn.list_forwarding_rules()
-        _LOGGER.debug(f'forwarding_rules => {forwarding_rules}')
 
         # Extend all types of proxies
         load_balancers = []
@@ -185,7 +184,6 @@ class LoadBalancingManager(GoogleCloudManager):
         # Google cloud does not support one single loadbalancer
         if loadbalancer.get('kind') == 'compute#targetHttpProxy':
             return self.get_param_in_url(loadbalancer.get('urlMap', ''), 'urlMaps')
-
         elif loadbalancer.get('kind') == 'compute#targetHttpsProxy':
             return self.get_param_in_url(loadbalancer.get('urlMap', ''), 'urlMaps')
         elif loadbalancer.get('kind') == 'compute#targetSslProxy':
@@ -210,7 +208,7 @@ class LoadBalancingManager(GoogleCloudManager):
         Remove forwarding rule case  
         """
         if load_balancer.get('kind', '') == 'compute#forwardingRule':
-            return {}
+            target_proxy = {}
         else:
             target_proxy = {
                 'name': load_balancer.get('name', ''),

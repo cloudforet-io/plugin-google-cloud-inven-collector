@@ -58,8 +58,6 @@ class InstanceTemplateManager(GoogleCloudManager):
                 disks = self._get_disks(properties)
                 labels = self.convert_labels_format(properties.get('labels', {}))
 
-
-
                 inst_template.update({
                     'project': secret_data['project_id'],
                     'in_used_by': in_used_by,
@@ -118,20 +116,6 @@ class InstanceTemplateManager(GoogleCloudManager):
 
         _LOGGER.debug(f'** Instance Template Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
-
-    # Returns matched instance group and user(instance) related to instance template.
-    def _match_instance_group(self, instance_template, instance_group_managers: list):
-        in_used_by = []
-        instance_group_infos = []
-        for instance_group in instance_group_managers:
-            template_self_link_source = instance_template.get('selfLink', '')
-            template_self_link_target = instance_group.get('instanceTemplate', '')
-            if template_self_link_source != '' and template_self_link_target != '' and \
-                    template_self_link_source == template_self_link_target:
-                in_used_by.append(instance_group.get('name', ''))
-                instance_group_infos.append(InstanceGroup(instance_group, strict=False))
-
-        return in_used_by, instance_group_infos
 
     def _get_disks(self, instance):
         disk_info = []
@@ -213,6 +197,21 @@ class InstanceTemplateManager(GoogleCloudManager):
             tiers.append(access_config.get('networkTier', ''))
         return configs, tiers
 
+    # Returns matched instance group and user(instance) related to instance template.
+    @staticmethod
+    def _match_instance_group(instance_template, instance_group_managers: list):
+        in_used_by = []
+        instance_group_infos = []
+        for instance_group in instance_group_managers:
+            template_self_link_source = instance_template.get('selfLink', '')
+            template_self_link_target = instance_group.get('instanceTemplate', '')
+            if template_self_link_source != '' and template_self_link_target != '' and \
+                    template_self_link_source == template_self_link_target:
+                in_used_by.append(instance_group.get('name', ''))
+                instance_group_infos.append(InstanceGroup(instance_group, strict=False))
+
+        return in_used_by, instance_group_infos
+
     @staticmethod
     def _get_service_account(svc_account):
         service_account = svc_account[0]
@@ -264,8 +263,8 @@ class InstanceTemplateManager(GoogleCloudManager):
         scheduling = properties.get('scheduling', {})
         return {
             'on_host_maintenance': scheduling.get('onHostMaintenance', 'MIGRATE'),
-            'automatic_restart': 'On' if scheduling.get('automaticRestart', False) == True else 'Off',
-            'preemptibility': 'On' if scheduling.get('preemptible', False) == True else 'Off',
+            'automatic_restart': 'On' if scheduling.get('automaticRestart', False) else 'Off',
+            'preemptibility': 'On' if scheduling.get('preemptible', False) else 'Off',
         }
 
     @staticmethod

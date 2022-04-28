@@ -38,7 +38,6 @@ cst_instance_group._metadata = CloudServiceTypeMeta.set_meta(
             'indigo.500': ['ON'], 'coral.600': ['OFF']
         }),
         TextDyField.data_source('Autoscaling', 'data.autoscaling_display'),
-
         TextDyField.data_source('Project', 'data.project', options={'is_optional': True}),
         TextDyField.data_source('Region', 'data.display_location.region', options={'is_optional': True}),
         TextDyField.data_source('Zone', 'data.display_location.zone', options={'is_optional': True}),

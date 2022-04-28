@@ -108,8 +108,7 @@ class RouteManager(GoogleCloudManager):
         return collected_cloud_services, error_responses
 
     def _get_matched_instance(self, route, project_id, instances_over_region):
-        all_compute_vms = []
-        route_network = route.get('network')
+        matched_instances = []
 
         for instance in instances_over_region:
             network_interfaces = instance.get('networkInterfaces', [])
@@ -117,8 +116,7 @@ class RouteManager(GoogleCloudManager):
             region = self.parse_region_from_zone(zone)
 
             for network_interface in network_interfaces:
-
-                if route_network == network_interface.get('network'):
+                if self._check_instance_is_matched(route, instance):
                     instance_name = instance.get('name')
                     url_subnetwork = instance.get('subnetwork', '')
                     instance = {
@@ -135,8 +133,8 @@ class RouteManager(GoogleCloudManager):
                         'labels_display': self._get_label_display(instance.get('labels', {})),
                         'tags': instance.get('tags', {}).get('items', []),
                     }
-                    all_compute_vms.append(ComputeVM(instance, strict=False))
-        return all_compute_vms
+                    matched_instances.append(ComputeVM(instance, strict=False))
+        return matched_instances
 
     def _get_next_hop(self, route):
         next_hop = ''
@@ -198,3 +196,25 @@ class RouteManager(GoogleCloudManager):
             value = labels.get(label, '')
             displays.append(f'{label}: {value}')
         return displays
+
+    @staticmethod
+    def _check_instance_is_matched(route, instance):
+        """
+        - instance network is matched to route network(VPC network)
+        - instance tags is matched to route tags
+        """
+        matched = False
+        route_network = route.get('network')
+        network_interfaces = instance.get('networkInterfaces', [])
+
+        for network_interface in network_interfaces:
+            if route_network == network_interface.get('network'):
+                if 'tags' in route:
+                    if instance.get('tags', {}).get('items', []) in route.get('tags', []):
+                        matched = True
+                    else:
+                        matched = False
+                else:
+                    matched = True
+
+        return matched

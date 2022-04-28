@@ -13,23 +13,6 @@ class InstanceTemplateConnector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    # TODO: Remove it
-    '''
-    def list_disks(self, **query):
-        disk_list = []
-        query.update({'project': self.project_id})
-        request = self.client.instanceGroupManagers().aggregatedList(**query)
-        while request is not None:
-            response = request.execute()
-            for key, _disk in response['items'].items():
-                if 'disks' in _disk:
-                    disk_list.extend(_disk.get('disks'))
-            request = self.client.instanceGroupManagers().aggregatedList_next(previous_request=request,
-                                                                              previous_response=response)
-
-        return disk_list
-    '''
-
     def list_instance_templates(self, **query):
         instance_template_list = []
         query.update({'project': self.project_id})

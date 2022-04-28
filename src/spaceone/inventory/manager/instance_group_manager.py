@@ -81,12 +81,14 @@ class InstanceGroupManager(GoogleCloudManager):
                     })
 
                     if match_autoscaler := self.match_autoscaler(autoscalers, match_instance_group_manager):
-                        self._get_auto_policy_for_scheduler(scheduler, match_autoscaler)
+                        scheduler.update(
+                            self._get_auto_policy_for_scheduler(match_autoscaler)
+                        )
 
                         instance_group.update({
                             'autoscaler': AutoScaler(match_autoscaler, strict=False),
-                            'autoscaling_display':
-                                self._get_autoscaling_display(match_autoscaler.get('autoscalingPolicy', {}))
+                            'autoscaling_display': self._get_autoscaling_display(
+                                match_autoscaler.get('autoscalingPolicy', {}))
                         })
 
                     match_instance_template = \
@@ -101,11 +103,12 @@ class InstanceGroupManager(GoogleCloudManager):
                     instance_group.update({'instance_group_type': 'UNMANAGED'})
                     scheduler.update({'instance_group_type': 'UNMANAGED'})
 
-                loc_type, location = self._get_instance_group_loc(instance_group)
-                region = self.parse_region_from_zone(location) if loc_type == 'zone' else location
-                instances = instance_group_conn.list_instances(instance_group.get('name'), location, loc_type)
+                location_type = self._check_instance_group_is_zonal(instance_group)
+                location = self._get_location(instance_group)
+                region = self.parse_region_from_zone(location) if location_type == 'zone' else location
+                instances = instance_group_conn.list_instances(instance_group.get('name'), location, location_type)
 
-                display_loc = {'region': location, 'zone': ''} if loc_type == 'region' \
+                display_loc = {'region': location, 'zone': ''} if location_type == 'region' \
                     else {'region': self.parse_region_from_zone(location), 'zone': location}
 
                 instance_group.update({
@@ -147,10 +150,16 @@ class InstanceGroupManager(GoogleCloudManager):
         _LOGGER.debug(f'** Instance Group Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
-    def _get_instance_group_loc(self, instance_group):
-        inst_type = 'zone' if 'zone' in instance_group else 'region'
-        loc = self._get_last_target(instance_group, inst_type)
-        return inst_type, loc
+    def _get_location(self, instance_group):
+        if 'zone' in instance_group:
+            url_zone = instance_group.get('zone')
+            location = self.get_param_in_url(url_zone, 'zones')
+        else:
+            # zone or region key must be existed
+            url_region = instance_group.get('region')
+            location = self.get_param_in_url(url_region, 'regions')
+
+        return location
 
     def get_instances(self, instances):
         _instances = []
@@ -160,6 +169,11 @@ class InstanceGroupManager(GoogleCloudManager):
             _instances.append(instance)
 
         return _instances
+
+    @staticmethod
+    def _check_instance_group_is_zonal(instance_group):
+        instance_group_type = 'zone' if 'zone' in instance_group else 'region'
+        return instance_group_type
 
     @staticmethod
     def match_instance_template(instance_templates, instance_template_self_link):
@@ -222,20 +236,12 @@ class InstanceGroupManager(GoogleCloudManager):
 
         for custom_metric in autoscaling_policy.get('customMetricUtilizations', []):
             policy_display_list.append(
-                f'{self._get_custom_metric_target_name(custom_metric.get("metric", ""))} {custom_metric.get("utilizationTarget", "")}{self._get_custom_metric_target_type(custom_metric.get("utilizationTargetType"))}')
+                f'{custom_metric.get("metric", "")} {custom_metric.get("utilizationTarget", "")}{self._get_custom_metric_target_type(custom_metric.get("utilizationTargetType"))}')
 
         if policy_display_list:
             policy_join_str = ', '.join(policy_display_list)
             return f'{display_string}{policy_join_str}'
         else:
-            return ''
-
-    @staticmethod
-    def _get_custom_metric_target_name(util_target):
-        try:
-            target_name = util_target.split('/')[-1]
-            return target_name
-        except Exception as e:
             return ''
 
     @staticmethod
@@ -250,18 +256,15 @@ class InstanceGroupManager(GoogleCloudManager):
             return ''
 
     @staticmethod
-    def _get_last_target(target_vo, key):
-        a = target_vo.get(key, '')
-        return a[a.rfind('/') + 1:]
-
-    @staticmethod
-    def _get_auto_policy_for_scheduler(scheduler, matched_scheduler):
+    def _get_auto_policy_for_scheduler(matched_scheduler) -> dict:
         auto_policy = matched_scheduler.get('autoscalingPolicy', {})
 
         if auto_policy != {}:
-            scheduler.update({
+            return {
                 'recommend_size': matched_scheduler.get('recommendedSize', 1),
                 'origin_min_size': auto_policy.get('minNumReplicas'),
                 'origin_max_size': auto_policy.get('maxNumReplicas'),
                 'mode': auto_policy.get('mode')
-            })
+            }
+        else:
+            return {}

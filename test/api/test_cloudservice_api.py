@@ -47,7 +47,9 @@ class TestCollector(TestCase):
         Options can be selected
         options = {"cloud_service_types": ["SQLWorkspace"]}
         '''
-        options = {}
+        options = {
+            "cloud_service_types": ["Bucket"]
+        }
         filter = {}
         resource_stream = self.inventory.Collector.collect({'options': options, 'secret_data': secret_data,
                                                             'filter': filter})

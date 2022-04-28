@@ -13,3 +13,4 @@ from spaceone.inventory.connector.route import RouteConnector
 from spaceone.inventory.connector.load_balancing import LoadBalancingConnector
 from spaceone.inventory.connector.big_query import BigQueryConnector
 from spaceone.inventory.connector.vm_instance import VMInstanceConnector
+from spaceone.inventory.connector.monitoring import MonitoringConnector

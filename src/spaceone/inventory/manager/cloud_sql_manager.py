@@ -144,8 +144,7 @@ class CloudSQLManager(GoogleCloudManager):
         # Convert database list(dict) -> list(database object)
         list_databases = []
         for database in databases:
-            tmp_database = Database(database, strict=False)
-            list_databases.append(tmp_database)
+            list_databases.append(Database(database, strict=False))
 
         return list_databases
 
@@ -154,7 +153,8 @@ class CloudSQLManager(GoogleCloudManager):
         # Convert users list(dict) -> list(user object)
         list_users = []
         for user in users:
-            tmp_user = User(user, strict=False)
-            list_users.append(tmp_user)
+            user_obj = User(user, strict=False)
+            list_users.append(user_obj)
+        #list_users = [User(user, strict=False) for user in users]
 
         return list_users

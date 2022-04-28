@@ -53,10 +53,9 @@ class DiskManager(GoogleCloudManager):
                 ##################################
                 disk_id = disk.get('id')
                 disk_type = self.get_param_in_url(disk.get('type',''), 'diskTypes')
-                disk_size = float(disk.get('sizeGb'))
+                disk_size = float(disk.get('sizeGb', 0.0))
                 zone = self.get_param_in_url(disk.get('zone', ''), 'zones')
                 region = self.parse_region_from_zone(zone)
-                name = disk.get('name')
                 labels = self.convert_labels_format(disk.get('labels', {}))
 
                 ##################################
@@ -70,10 +69,10 @@ class DiskManager(GoogleCloudManager):
                     'in_used_by': self._get_in_used_by(disk.get('users', [])),
                     'source_image_display': self._get_source_image_display(disk),
                     'disk_type': disk_type,
-                    'snapshot_schedule': self._get_matched_snapshot(region, disk, resource_policies),
-                    'snapshot_schedule_display': self._get_snapshot_schedule(disk),
-                    'encryption': self._get_encryption(disk),
-                    'size': float(self._get_bytes(int(disk.get('sizeGb')))),
+                    'snapshot_schedule': self._get_matched_snapshot_schedule_detail(region, disk, resource_policies),
+                    'snapshot_schedule_display': self._get_snapshot_schedule_name(disk),
+                    'encryption': self.get_disk_encryption_type(disk.get('diskEncryptionKey')),
+                    'size': float(self._get_bytes(int(disk.get('sizeGb', 0)))),
                     'read_iops': self._get_iops_rate(disk_type, disk_size, 'read'),
                     'write_iops': self._get_iops_rate(disk_type, disk_size, 'write'),
                     'read_throughput': self._get_throughput_rate(disk_type, disk_size),
@@ -86,9 +85,9 @@ class DiskManager(GoogleCloudManager):
                 # 3. Make Return Resource
                 ##################################
                 disk_resource = DiskResource({
-                    'name': name,
+                    'name': disk.get('name', ''),
                     'account': project_id,
-                    'region_code': disk['region'],
+                    'region_code': disk.get('region'),
                     'tags': labels,
                     'data': disk_data,
                     'reference': ReferenceModel(disk_data.reference())
@@ -120,7 +119,8 @@ class DiskManager(GoogleCloudManager):
         const = self._get_throughput_constant(disk_type)
         return disk_size * const
 
-    def _get_matched_snapshot(self, region, disk, resource_policies):
+    # Get disk snapshot detailed configurations
+    def _get_matched_snapshot_schedule_detail(self, region, disk, resource_policies):
         matched_policies = []
         policy_self_links = disk.get('resourcePolicies', [])
         policies = resource_policies.get(region)
@@ -228,7 +228,8 @@ class DiskManager(GoogleCloudManager):
             source_image_display = self.get_param_in_url(url_source_image, 'images')
         return source_image_display
 
-    def _get_snapshot_schedule(self, disk):
+    # Get name of snapshot schedule
+    def _get_snapshot_schedule_name(self, disk):
         snapshot_schedule = []
         policies = disk.get('resourcePolicies', [])
         for url_policy in policies:
@@ -240,14 +241,3 @@ class DiskManager(GoogleCloudManager):
     @staticmethod
     def _get_bytes(number):
         return 1024 * 1024 * 1024 * number
-
-    @staticmethod
-    def _get_encryption(disk):
-        encryption = 'Google managed'
-        disk_encryption = disk.get('diskEncryptionKey')
-        if disk_encryption:
-            if 'kmsKeyName' in disk_encryption or 'kmsKeyServiceAccount' in disk_encryption:
-                encryption = 'Customer managed'
-            else:
-                encryption = 'Customer supplied'
-        return encryption

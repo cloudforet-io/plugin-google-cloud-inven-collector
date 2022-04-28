@@ -38,11 +38,12 @@ class ExternalIPAddressConnector(GoogleCloudConnector):
             for name, forwarding_rules_scoped_list in response['items'].items():
                 if 'forwardingRules' in forwarding_rules_scoped_list:
                     forwarding_rule_list.extend(forwarding_rules_scoped_list.get('forwardingRules'))
-            request = self.client.forwardingRules().aggregatedList_next(previous_request=request, previous_response=response)
+            request = self.client.forwardingRules().aggregatedList_next(previous_request=request,
+                                                                        previous_response=response)
 
         return forwarding_rule_list
 
-    def list_regional_addresses(self, **query):
+    def list_addresses(self, **query):
         address_list = []
         query = self.generate_query(**query)
         request = self.client.addresses().aggregatedList(**query)
@@ -51,8 +52,7 @@ class ExternalIPAddressConnector(GoogleCloudConnector):
             for name, _address_list in response['items'].items():
                 if 'addresses' in _address_list:
                     address_list.extend(_address_list.get('addresses'))
-            request = self.client.addresses().aggregatedList_next(previous_request=request,
-                                                                      previous_response=response)
+            request = self.client.addresses().aggregatedList_next(previous_request=request, previous_response=response)
 
         return address_list
 

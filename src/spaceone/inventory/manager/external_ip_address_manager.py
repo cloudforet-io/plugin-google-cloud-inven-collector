@@ -41,14 +41,14 @@ class ExternalIPAddressManager(GoogleCloudManager):
         # List all information through connector
         ##################################
         exp_conn: ExternalIPAddressConnector = self.locator.get_connector(self.connector_name, **params)
-        regional_global_addresses = exp_conn.list_regional_addresses()
-        vm_address = exp_conn.list_instance_for_networks()
+        all_addresses = exp_conn.list_addresses()
+        vm_instances = exp_conn.list_instance_for_networks()
         forwarding_rule_address = exp_conn.list_forwarding_rule()
 
-        # External IP contains, regional global IP + vm NAT IP + forwarding rule IP
-        all_external_ip_addresses = self._get_external_ip_addresses(regional_global_addresses,
-                                                                   vm_address,
-                                                                   forwarding_rule_address)
+        # External IP contains, reserved IP(static) + vm IP(ephemeral) + forwarding rule IP
+        all_external_ip_addresses = self._get_external_ip_addresses(all_addresses,
+                                                                    vm_instances,
+                                                                    forwarding_rule_address)
 
         for external_ip_addr in all_external_ip_addresses:
             try:
@@ -101,12 +101,17 @@ class ExternalIPAddressManager(GoogleCloudManager):
         _LOGGER.debug(f'** External IP Address Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
-    def _get_external_ip_addresses(self, regional_address, instances_over_region, forwarding_rules):
-
+    def _get_external_ip_addresses(self, all_addresses, all_instances, forwarding_rules):
+        """
+        Aggregates public ip address from different resource types
+        - Static IP : all_addresses
+        - Ephermeral IP : all_instances
+        - Forwarding Rule(LoadBalancer) IP : forwarding_rules
+        """
         all_ip_addr_vos = []
         all_ip_addr_only_check_dup = []
 
-        for ip_addr in regional_address:
+        for ip_addr in all_addresses:
             if 'EXTERNAL' == ip_addr.get('addressType'):
                 url_region = ip_addr.get('region', '')
                 users = ip_addr.get('users', [])
@@ -140,7 +145,7 @@ class ExternalIPAddressManager(GoogleCloudManager):
                 all_ip_addr_only_check_dup.append(forwarding_ip_addr)
                 all_ip_addr_vos.append(forwarding_rule)
 
-        for instance in instances_over_region:
+        for instance in all_instances:
             network_interfaces = instance.get('networkInterfaces', [])
             zone = self.get_param_in_url(instance.get('zone', ''), 'zones')
             region = self.parse_region_from_zone(zone)
