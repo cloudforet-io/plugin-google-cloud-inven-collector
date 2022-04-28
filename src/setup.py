@@ -39,7 +39,7 @@ setup(
         'MarkupSafe>=2.0.0rc2'
     ],
     package_data={
-        'spaceone': ['inventory/model/*/widget/*.yml']
+        'spaceone': ['inventory/model/*/*/widget/*.yml']
     },
     zip_safe=False,
 )
