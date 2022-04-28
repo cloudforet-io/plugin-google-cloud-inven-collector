@@ -4,7 +4,7 @@ SUPPORTED_FEATURES = ['garbage_collection']
 SUPPORTED_SCHEDULES = ['hours']
 FILTER_FORMAT = []
 CLOUD_SERVICE_GROUP_MAP = {
-    'SQLWorkspace': 'BigQueryManager',
+    'SQLWorkspace': 'SQLWorkspaceManager',
     'CloudSQL': 'CloudSQLManager',
     'Disk': 'DiskManager',
     'ExternalIPAddress': 'ExternalIPAddressManager',
