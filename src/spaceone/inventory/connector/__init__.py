@@ -1,16 +1,18 @@
-from spaceone.inventory.libs.connector import GoogleCloudConnector
-from spaceone.inventory.connector.cloud_sql import CloudSQLConnector
-from spaceone.inventory.connector.instance_template import InstanceTemplateConnector
-from spaceone.inventory.connector.instance_group import InstanceGroupConnector
-from spaceone.inventory.connector.machine_image import MachineImageConnector
-from spaceone.inventory.connector.disk import DiskConnector
-from spaceone.inventory.connector.snapshot import SnapshotConnector
-from spaceone.inventory.connector.storage import StorageConnector
-from spaceone.inventory.connector.vpc_network import VPCNetworkConnector
-from spaceone.inventory.connector.external_ip_address import ExternalIPAddressConnector
-from spaceone.inventory.connector.firewall import FirewallConnector
-from spaceone.inventory.connector.route import RouteConnector
-from spaceone.inventory.connector.load_balancing import LoadBalancingConnector
-from spaceone.inventory.connector.big_query import BigQueryConnector
-from spaceone.inventory.connector.vm_instance import VMInstanceConnector
-from spaceone.inventory.connector.monitoring import MonitoringConnector
+from spaceone.inventory.connector.bigquery.sql_workspace import SQLWorkspaceConnector
+from spaceone.inventory.connector.cloud_storage.monitoring import MonitoringConnector
+from spaceone.inventory.connector.cloud_storage.storage import StorageConnector
+from spaceone.inventory.connector.cloud_sql.instance import CloudSQLInstanceConnector
+from spaceone.inventory.connector.compute_engine.instance_template import InstanceTemplateConnector
+from spaceone.inventory.connector.compute_engine.instance_group import InstanceGroupConnector
+from spaceone.inventory.connector.compute_engine.machine_image import MachineImageConnector
+from spaceone.inventory.connector.compute_engine.disk import DiskConnector
+from spaceone.inventory.connector.compute_engine.snapshot import SnapshotConnector
+from spaceone.inventory.connector.compute_engine.vm_instance import VMInstanceConnector
+from spaceone.inventory.connector.networking.route import RouteConnector
+from spaceone.inventory.connector.networking.external_ip_address import ExternalIPAddressConnector
+from spaceone.inventory.connector.networking.firewall import FirewallConnector
+from spaceone.inventory.connector.networking.load_balancing import LoadBalancingConnector
+from spaceone.inventory.connector.networking.vpc_network import VPCNetworkConnector
+
+
+

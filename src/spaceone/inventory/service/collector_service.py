@@ -3,7 +3,6 @@ import logging
 import json
 import concurrent.futures
 
-from spaceone.inventory.libs.connector import GoogleCloudConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.core.service import *
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
@@ -143,22 +142,3 @@ class CollectorService(BaseService):
                 }})
 
         return error_resource_response
-
-# Not used function
-    def _set_regions_zones(self, secret_data, params):
-        result_regions = []
-        result_zones = []
-        query = {}
-        try:
-            connector: GoogleCloudConnector = self.locator.get_connector('GoogleCloudConnector', secret_data=secret_data)
-            zones = connector.list_zones(**query)
-
-            for zone in zones:
-                result_zones.append(zone.get('name'))
-
-                if region := zone.get('region'):
-                    result_regions.append(region.split('/')[-1])
-
-            params.update({'region': list(set(result_regions)), 'zone': result_zones})
-        except Exception as e:
-            _LOGGER.error(f'failed to _set_regions_zones {e}', exc_info=True)

@@ -2,7 +2,7 @@ from schematics import Model
 from schematics.types import ListType, StringType, PolyModelType, DictType, ModelType, FloatType
 
 from .base import BaseMetaData, BaseResponse, MetaDataView, MetaDataViewSubData, ReferenceModel
-from spaceone.inventory.model.instance.data import VMInstance, NIC, Disk
+from spaceone.inventory.model.compute_engine.instance.data import VMInstance, NIC, Disk
 from spaceone.inventory.libs.schema.region import RegionResource
 
 
