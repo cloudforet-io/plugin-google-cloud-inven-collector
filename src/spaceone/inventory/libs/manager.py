@@ -206,6 +206,18 @@ class GoogleCloudManager(BaseManager):
         '''
         parsed_zone = zone.split('-')
         if len(parsed_zone) >= 2:
-            return parsed_zone[0]+'-'+parsed_zone[1]
+            return f'{parsed_zone[0]}-{parsed_zone[1]}'
+
         else:
             return ''
+
+    @staticmethod
+    def get_disk_encryption_type(dict_encryption_info):
+        encryption_type = 'Google managed'
+        if dict_encryption_info:
+            if 'kmsKeyName' in dict_encryption_info or 'kmsKeyServiceAccount' in dict_encryption_info:
+                encryption_type = 'Customer managed'
+            else:
+                encryption_type = 'Customer supplied'
+
+        return encryption_type

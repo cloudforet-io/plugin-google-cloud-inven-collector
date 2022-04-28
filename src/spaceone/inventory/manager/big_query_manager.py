@@ -53,6 +53,7 @@ class BigQueryManager(GoogleCloudManager):
                 ##################################
                 # 1. Set Basic Information
                 ##################################
+
                 data_refer = data_set.get('datasetReference', {})
                 data_set_id = data_refer.get('datasetId')
                 dataset_project_id = data_refer.get('projectId')
@@ -168,12 +169,11 @@ class BigQueryManager(GoogleCloudManager):
 
     @staticmethod
     def _convert_milliseconds_to_minutes(milliseconds):
-        if milliseconds is None or milliseconds == "":
-            return None
+        if milliseconds:
+            minutes = (int(milliseconds)/1000)/60
+            return minutes
         else:
-            # Get timedelta between utc time
-            timedelta = datetime.fromtimestamp(int(milliseconds) / 1000) - datetime(1970, 1, 1, 0, 0)
-            return timedelta.total_seconds()/60
+            return None
 
     @staticmethod
     def _convert_unix_timestamp(unix_timestamp):

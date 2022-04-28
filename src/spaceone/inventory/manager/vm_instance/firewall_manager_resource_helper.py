@@ -57,7 +57,7 @@ class FirewallManagerResourceHelper(GoogleCloudManager):
         [{'IPProtocol': 'tcp', 'ports': ['100-200']}, {'IPProtocol': 'udp', 'ports': ['100-400']}]
         '''
         '''
-                    sg_translated = {
+            sg_translated = {
                 'priority': fw_origin.get('priority', ''),
                 'protocol': port_mappings.get('IPProtocol', ''),
                 'remote': '',

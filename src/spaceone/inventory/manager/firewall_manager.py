@@ -44,7 +44,7 @@ class FirewallManager(GoogleCloudManager):
 
         # Get lists that relate with snapshots through Google Cloud API
         firewalls = firewall_conn.list_firewall()
-        compute_engine_vms = firewall_conn.list_instance_for_networks()
+        all_instances = firewall_conn.list_instance_for_networks()
         region = 'global'
 
         for firewall in firewalls:
@@ -82,8 +82,8 @@ class FirewallManager(GoogleCloudManager):
                 firewall.update({
                     'project': secret_data['project_id'],
                     'applicable_instance': self._get_matched_instance(firewall,
-                                                                    secret_data['project_id'],
-                                                                    compute_engine_vms),
+                                                                      secret_data['project_id'],
+                                                                      all_instances),
                     'display': display
                 })
 
@@ -122,19 +122,18 @@ class FirewallManager(GoogleCloudManager):
         _LOGGER.debug(f'** Firewall Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
-    def _get_matched_instance(self, firewall, project_id, instances_over_region):
-        all_ip_juso_vos = []
+    def _get_matched_instance(self, firewall, project_id, all_instances):
+        matched_instances_vos = []
         firewall_network = firewall.get('network')
-        for instance in instances_over_region:
+        for instance in all_instances:
             network_interfaces = instance.get('networkInterfaces', [])
             zone = self.get_param_in_url(instance.get('zone', ''), 'zones')
             region = self.parse_region_from_zone(zone)
             for network_interface in network_interfaces:
-                if firewall_network == network_interface.get('network'):
-                    instance_name = instance.get('name')
+                if firewall_network == network_interface.get('network', ''):
                     instance = {
                         'id': instance.get('id'),
-                        'name': instance_name,
+                        'name': instance.get('name'),
                         'zone': zone,
                         'region': region,
                         'address': network_interface.get('networkIP'),
@@ -146,8 +145,8 @@ class FirewallManager(GoogleCloudManager):
                         'labels': self.convert_labels_format(instance.get('labels', {})),
                         'labels_display': self._get_label_display(instance.get('labels', {})),
                     }
-                    all_ip_juso_vos.append(ComputeVM(instance, strict=False))
-        return all_ip_juso_vos
+                    matched_instances_vos.append(ComputeVM(instance, strict=False))
+        return matched_instances_vos
 
     @staticmethod
     def _get_label_display(labels):

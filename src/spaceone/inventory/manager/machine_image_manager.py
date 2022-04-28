@@ -46,10 +46,8 @@ class MachineImageManager(GoogleCloudManager):
         # Get machine image
         machine_images = machine_image_conn.list_machine_images()
         disk_types = []
-        public_images = {}
 
         if machine_images:
-            public_images = machine_image_conn.list_public_images()
             for zone in params.get('zones', []):
                 list_disk_types = machine_image_conn.list_disks(zone)
                 disk_types.extend(list_disk_types)
@@ -126,7 +124,7 @@ class MachineImageManager(GoogleCloudManager):
         # if there's another option for disk encryption
         # encryption_list = instance.get('sourceDiskEncryptionKeys', [])
         for disk in instance.get('disks', []):
-            size = self._get_bytes(int(disk.get('diskSizeGb')))
+            size = self._get_bytes(int(disk.get('diskSizeGb', 0)))
             single_disk = {
                 'device_index': disk.get('index'),
                 'device': disk.get('deviceName'),
@@ -135,7 +133,7 @@ class MachineImageManager(GoogleCloudManager):
                 'size': float(size),
                 'tags': self.get_tags_info(disk)
             }
-            if disk.get('boot', False) == True:
+            if disk.get('boot', False):
                 single_disk.update({'boot_image': boot_image, 'is_boot_image': True})
 
             # Check image is encrypted
@@ -151,7 +149,7 @@ class MachineImageManager(GoogleCloudManager):
         return disk_info
 
     def get_tags_info(self, disk):
-        disk_size = float(disk.get('diskSizeGb'))
+        disk_size = float(disk.get('diskSizeGb', 0.0))
         disk_type = disk.get('diskType')
         return {
             'disk_type': disk_type,

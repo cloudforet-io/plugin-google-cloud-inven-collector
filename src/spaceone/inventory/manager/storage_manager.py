@@ -6,6 +6,7 @@ from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
 from spaceone.inventory.model.storage.cloud_service import *
 from spaceone.inventory.connector.storage import StorageConnector
+from spaceone.inventory.connector.monitoring import MonitoringConnector
 from spaceone.inventory.model.storage.cloud_service_type import CLOUD_SERVICE_TYPES
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,6 +42,7 @@ class StorageManager(GoogleCloudManager):
         # List all information through connector
         ##################################
         storage_conn: StorageConnector = self.locator.get_connector(self.connector_name, **params)
+        monitoring_conn: MonitoringConnector = self.locator.get_connector('MonitoringConnector', **params)
         # Get lists that relate with snapshots through Google Cloud API
         buckets = storage_conn.list_buckets()
 
@@ -53,9 +55,8 @@ class StorageManager(GoogleCloudManager):
                 bucket_id = bucket.get('id')
 
                 _name = bucket.get('name', '')
-                objects = storage_conn.list_objects(bucket_name)
-                _LOGGER.debug(f'[collect_cloud_service] objects => {objects}')
-                obj_count, size = self._get_number_of_obj_and_size(objects)
+                object_count = self._get_object_total_count(monitoring_conn, bucket_name)
+                object_size = self._get_bucket_total_size(monitoring_conn, bucket_name)
                 iam_policy = storage_conn.list_iam_policy(bucket_name)
                 st_class = bucket.get('storageClass').lower()
                 region = self.get_matching_region(bucket)
@@ -71,13 +72,13 @@ class StorageManager(GoogleCloudManager):
                     'requester_pays': self._get_requester_pays(bucket),
                     'retention_policy_display': self._get_retention_policy_display(bucket),
                     'links': self._get_config_link(bucket),
-                    'size': size,
+                    'size': object_size,
                     'stackdriver': stackdriver,
                     'default_event_based_hold': 'Enabled' if bucket.get('defaultEventBasedHold') else 'Disabled',
                     'iam_policy': iam_policy,
                     'iam_policy_binding': self._get_iam_policy_binding(iam_policy),
-                    'object_count': obj_count,
-                    'object_total_size': size,
+                    'object_count': object_count,
+                    'object_total_size': object_size,
                     'lifecycle_rule': self._get_lifecycle_rule(bucket),
                     'location': self.get_location(bucket),
                     'default_storage_class': st_class.capitalize(),
@@ -163,17 +164,6 @@ class StorageManager(GoogleCloudManager):
             'location_type': location_type.capitalize(),
             'location_display': location_display,
         }
-
-    @staticmethod
-    def _get_number_of_obj_and_size(objects):
-        # Overflow (n/a is -1)
-        if objects == False:
-            return -1, -1
-        object_count = len(objects)
-        size = 0.0
-        for obj in objects:
-            size = size + float(obj.get('size'))
-        return object_count, size
 
     @staticmethod
     def _get_encryption(bucket):
@@ -353,3 +343,31 @@ class StorageManager(GoogleCloudManager):
             period = rp_in_days if rp_in_days < 91 else rp_in_days / 31
             display = f'{str(int(period))} {day_month}'
         return display
+
+    @staticmethod
+    def _get_object_total_count(monitoring_conn, bucket_name):
+        metric = "storage.googleapis.com/storage/object_count"
+        start = datetime.now() - timedelta(days=1)
+        end = datetime.now()
+        response = monitoring_conn.get_metric_data(bucket_name, metric, start, end)
+
+        if response.get('points', []):
+            object_total_count = response.get('points', [])[0].get('value', {}).get('int64Value', '')
+        else:
+            object_total_count = None
+
+        return object_total_count
+
+    @staticmethod
+    def _get_bucket_total_size(monitoring_conn, bucket_name):
+        metric = "storage.googleapis.com/storage/total_bytes"
+        start = datetime.now() - timedelta(days=1)
+        end = datetime.now()
+        response = monitoring_conn.get_metric_data(bucket_name, metric, start, end)
+
+        if response.get('points', []):
+            object_total_size = response.get('points', [])[0].get('value', {}).get('doubleValue', '')
+        else:
+            object_total_size = None
+
+        return object_total_size
