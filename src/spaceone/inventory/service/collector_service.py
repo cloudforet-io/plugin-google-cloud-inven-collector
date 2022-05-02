@@ -19,7 +19,7 @@ class CollectorService(BaseService):
         self.execute_managers = []
         '''
         self.execute_managers = [
-            'BigQueryManager',
+            'SQLWorkspaceManager',
             'CloudSQLManager',
             'InstanceGroupManager',
             'InstanceTemplateManager',

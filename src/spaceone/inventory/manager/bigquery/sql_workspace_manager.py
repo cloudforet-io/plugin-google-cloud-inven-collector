@@ -178,10 +178,9 @@ class SQLWorkspaceManager(GoogleCloudManager):
 
     @staticmethod
     def _convert_unix_timestamp(unix_timestamp):
-        if unix_timestamp is None or unix_timestamp == '':
-            return datetime.date(9999, 12, 31)
-        else:
-            # Convert unix_timestamp(Epoch Time) to python timestamp object
-            timestamp = datetime.fromtimestamp(int(unix_timestamp) / 1000)
-            return timestamp
+        try:
+            return datetime.fromtimestamp(int(unix_timestamp) / 1000)
+        except Exception as e:
+            _LOGGER.error(f'[_convert_unix_timestamp] {e}')
+            return
 
