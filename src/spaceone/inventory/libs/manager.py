@@ -57,8 +57,19 @@ class GoogleCloudManager(BaseManager):
         connector: GoogleCloudConnector = GoogleCloudConnector(secret_data=secret_data)
         connector.verify()
 
-    def collect_cloud_service_type(self):
+    def collect_cloud_service_type(self, params):
+        options = params.get('options', {})
+
         for cloud_service_type in self.cloud_service_types:
+            _LOGGER.debug(f'cloud_service_type start => {cloud_service_type.resource.service_code}')
+            if 'service_code_mappers' in options:
+                svc_code_maps = options['service_code_mappers']
+                _LOGGER.debug(f'svc_code_maps => {svc_code_maps}')
+                _LOGGER.debug(f'service_code temp => {cloud_service_type.resource.service_code}')
+                if getattr(cloud_service_type.resource, 'service_code') and \
+                        cloud_service_type.resource.service_code in svc_code_maps:
+                    cloud_service_type.resource.service_code = svc_code_maps[cloud_service_type.resource.service_code]
+                _LOGGER.debug(f'service_code end => {cloud_service_type.resource.service_code}')
             yield cloud_service_type
 
     def collect_cloud_service(self, params) -> list:
@@ -69,7 +80,7 @@ class GoogleCloudManager(BaseManager):
 
         try:
             # Collect Cloud Service Type3wee
-            total_resources.extend(self.collect_cloud_service_type())
+            total_resources.extend(self.collect_cloud_service_type(params))
 
             # Collect Cloud Service
             resources, error_resources = self.collect_cloud_service(params)
