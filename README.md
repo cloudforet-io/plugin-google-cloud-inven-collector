@@ -49,6 +49,9 @@ Please, set authentication privilege for followings:
         * [Buckets](#Bucket)
     * [BigQuery](#bigquery)
         * [SQLWorkspace](#SQLWorkspace)
+    * [Options](#options)
+      * [CloudServiceType](#cloud-service-type--specify-what-to-collect)
+      * [ServiceCodeMapper](#service-code-mapper--update-service-code-in-cloud-service-type)
 
 #### [Compute Engine](https://cloud.google.com/compute/docs/apis)
 
@@ -356,19 +359,35 @@ Update plugin through spacectl command with the created yaml file.
 > spacectl exec update_plugin inventory.Collector -f update_collector.yaml
 </code></pre>
 
+
+### Service Code Mapper : Update service code in Cloud Service Type.
+
+If service_code_mapper is in options, You can replace the existed service code into new value one. 
+The default service code is listed below [service code list](#service-list) 
+<pre>
+<code>
+{
+    "service_code_mappers": {
+        "Compute Engine": "Your new service code",
+        "Cloud SQL": "Your new service code",
+    }
+}
+</code>
+</pre>>
+
 ---
 
 ### Service list
 
 The following is a list of services belling collected and service code information.
 
-| No. | Service name        | Service Code  |
-|:----|:--------------------|:--------------|
-| 1   | Compute Engine      | ComputeEngine |
-| 2   | BigQuery            | BigQuery      |
-| 3   | Cloud SQL           | CloudSQL      |
-| 4   | Networking Products | Networking    |
-| 5   | Cloud Storage       | CloudStorage  |
+| No. | Service name        | Service Code   |
+|:----|:--------------------|:---------------|
+| 1   | Compute Engine      | Compute Engine |
+| 2   | BigQuery            | BigQuery       |
+| 3   | Cloud SQL           | Cloud SQL      |
+| 4   | Networking Products | Networking     |
+| 5   | Cloud Storage       | Cloud Storage  |
 
 
 
