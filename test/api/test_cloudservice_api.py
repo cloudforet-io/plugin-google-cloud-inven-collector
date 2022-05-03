@@ -47,23 +47,8 @@ class TestCollector(TestCase):
         Options can be selected
         options = {"cloud_service_types": ["SQLWorkspace"]}
         '''
-        '''
-        options = {
-            "cloud_service_types": ["SQLWorkspace", "VMInstance"],
-            "service_code_mappers": {
-                "Compute Engine": "gikang test compute engine",
-                "Cloud SQL": "hahahoho test cloud sql",
-                "BigQuery": "hohohaha bigquery",
-                "Networking": "gikang cloud networking",
-                "Cloud Storage": "cccccloud storage",
-                "WrongValue": "Wrong Value"
-            }
-        }
-        '''
-
         options = {
         }
-
         filter = {}
         resource_stream = self.inventory.Collector.collect({'options': options, 'secret_data': secret_data,
                                                             'filter': filter})
