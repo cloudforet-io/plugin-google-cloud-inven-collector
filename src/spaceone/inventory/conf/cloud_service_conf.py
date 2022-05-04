@@ -4,18 +4,18 @@ SUPPORTED_FEATURES = ['garbage_collection']
 SUPPORTED_SCHEDULES = ['hours']
 FILTER_FORMAT = []
 CLOUD_SERVICE_GROUP_MAP = {
-    'SQLWorkspace': 'SQLWorkspaceManager',
-    'CloudSQL': 'CloudSQLManager',
-    'Disk': 'DiskManager',
-    'ExternalIPAddress': 'ExternalIPAddressManager',
-    'Firewall': 'FirewallManager',
-    'InstanceGroup': 'InstanceGroupManager',
-    'InstanceTemplate': 'InstanceTemplateManager',
-    'LoadBalancing': 'LoadBalancingManager',
-    'MachineImage': 'MachineImageManager',
-    'Route': 'RouteManager',
-    'Snapshot': 'SnapshotManager',
-    'Bucket': 'StorageManager',
-    'VPCNetwork': 'VPCNetworkManager',
-    'VMInstance': 'VMInstanceManager'
+    'ComputeEngine': ['VMInstanceManager',
+                      'SnapshotManager',
+                      'MachineImageManager',
+                      'InstanceTemplateManager',
+                      'InstanceGroupManager',
+                      'DiskManager'],
+    'CloudSQL': ['CloudSQLManager'],
+    'BigQuery': ['SQLWorkspaceManager'],
+    'CloudStorage': ['StorageManager'],
+    'Networking': ['ExternalIPAddressManager',
+                   'FirewallManager',
+                   'LoadBalancingManager',
+                   'RouteManager',
+                   'VPCNetworkManager']
 }

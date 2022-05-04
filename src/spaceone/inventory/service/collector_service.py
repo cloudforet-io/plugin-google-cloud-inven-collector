@@ -110,19 +110,20 @@ class CollectorService(BaseService):
 
     def _get_target_execute_manager(self, options):
         if 'cloud_service_types' in options:
-            execute_managers = self._match_execute_manager(options['cloud_service_types'])
+            execute_managers = self._cloud_service_groups_to_types(options['cloud_service_types'])
         else:
-            execute_managers = list(CLOUD_SERVICE_GROUP_MAP.values())
+            execute_managers = self._cloud_service_groups_to_types(CLOUD_SERVICE_GROUP_MAP.keys())
+
         return execute_managers
 
     @staticmethod
-    def _match_execute_manager(cloud_service_types):
-        target_cloud_service_types = []
-        for cloud_service_type in cloud_service_types:
-            if cloud_service_type in CLOUD_SERVICE_GROUP_MAP:
-                target_cloud_service_types.append(CLOUD_SERVICE_GROUP_MAP[cloud_service_type])
+    def _cloud_service_groups_to_types(cloud_service_groups) -> list:
+        cloud_service_types = []
+        for cloud_service_group in cloud_service_groups:
+            if cloud_service_group in CLOUD_SERVICE_GROUP_MAP:
+                cloud_service_types.extend(CLOUD_SERVICE_GROUP_MAP[cloud_service_group])
 
-        return target_cloud_service_types
+        return cloud_service_types
 
     @staticmethod
     def generate_error_response(e, cloud_service_group, cloud_service_type):
