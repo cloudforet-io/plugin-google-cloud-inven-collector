@@ -319,20 +319,11 @@ The cloud_service_types items that can be specified are as follows.
 <code>
 {
     "cloud_service_types": [
-    'VMInstance'
-    'SQLWorkspace',
+    'ComputeEngine'
     'CloudSQL',
-    'Disk',
-    'ExternalIPAddress',
-    'Firewall',
-    'InstanceGroup',
-    'InstanceTemplate',
-    'LoadBalancing',
-    'MachineImage',
-    'Route',
-    'Snapshot',
-    'Bucket',
-    'VPCNetwork''
+    'BigQuery',
+    'CloudStorage',
+    'Networking'
     ]
 }
 </code>
