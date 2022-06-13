@@ -16,5 +16,5 @@ options:
     key: value
     type: size
     options:
-      source_unit: GB
+      source_unit: BYTES
       default: 0

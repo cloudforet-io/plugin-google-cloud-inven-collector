@@ -88,7 +88,6 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 'primary_ip_address': self._get_primary_ip_address(instance)
             }
         })
-        _LOGGER.debug(f'server_dic => {server_dic}')
         return server_dic
 
     def _get_server_dic(self, instance, zone_info):
@@ -96,7 +95,6 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
             'name': instance.get('name', ''),
             'server_type': 'VM',
             'provider': 'google_cloud',
-#            'primary_ip_address': self._get_primary_ip_address(instance),
             'ip_addresses': self._get_ip_addresses(instance),
             'region_code': zone_info.get('region', '')
         }
@@ -297,7 +295,6 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
     def _get_ip_addresses(instance):
         ip_addresses = []
         networks = instance.get('networkInterfaces', [])
-        _LOGGER.debug(f'networks => {networks}')
         for network in networks:
             private_ip = network.get('networkIP', '')
             access_configs = network.get('accessConfigs', [])
@@ -308,7 +305,6 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 nat_ip = access_config.get('natIP', '')
                 if nat_ip != '':
                     ip_addresses.append(nat_ip)
-        _LOGGER.debug(f'_get_ip_addresses => {ip_addresses}')
         return ip_addresses
 
     @staticmethod
