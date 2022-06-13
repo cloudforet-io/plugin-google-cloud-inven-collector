@@ -169,7 +169,6 @@ class VMInstance(Model):
     os = ModelType(OS)
     google_cloud = ModelType(GoogleCloud)
     primary_ip_address = StringType()
-    #ip_addresses = ListType(StringType())
     hardware = ModelType(Hardware)
     compute = ModelType(Compute)
     load_balancers = ListType(ModelType(LoadBalancer))

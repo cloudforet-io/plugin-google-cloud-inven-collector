@@ -116,7 +116,6 @@ firewall = TableDynamicLayout.set_fields('Firewalls', root_path='data.security_g
 
 lb = TableDynamicLayout.set_fields('LB', root_path='data.load_balancers', fields=[
     TextDyField.data_source('Name', 'name'),
-    # TextDyField.data_source('DNS', 'dns'),
     EnumDyField.data_source('Type', 'type', default_badge={
         'primary': ['HTTP', 'HTTPS'], 'indigo.500': ['TCP'], 'coral.600': ['UDP']
     }),
@@ -132,13 +131,7 @@ labels = TableDynamicLayout.set_fields('Labels', root_path='data.google_cloud.la
     TextDyField.data_source('Value', 'value'),
 ])
 
-#vm_instance_meta = ServerMetadata.set_layouts([compute_engine, labels, disk, nic, firewall, lb])
 vm_instance_meta = CloudServiceMeta.set_layouts([compute_engine, labels, disk, nic, firewall, lb])
-
-'''
-class ComputeEngineResource(VMInstanceResource):
-    cloud_service_group = StringType(default='ComputeEngine')
-'''
 
 
 class ComputeEngineResource(CloudServiceResource):
@@ -148,14 +141,7 @@ class ComputeEngineResource(CloudServiceResource):
 class VMInstanceResource(ComputeEngineResource):
     cloud_service_type = StringType(default='Instance')
     data = ModelType(VMInstance)
-    #_metadata = ModelType(ServerMetadata, default=vm_instance_meta, serialized_name='metadata')
     _metadata = ModelType(CloudServiceMeta, default=vm_instance_meta, serialized_name='metadata')
-
-
-'''
-class VMInstanceResponse(VMInstanceResourceResponse):
-    resource = PolyModelType(VMInstanceResource)
-'''
 
 
 class VMInstanceResponse(CloudServiceResponse):
