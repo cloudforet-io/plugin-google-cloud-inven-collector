@@ -35,6 +35,7 @@ class ServerMetadata(Model):
 class CloudServiceResource(Model):
     provider = StringType(default="google_cloud")
     account = StringType()
+    ip_addresses = ListType(StringType())
     instance_type = StringType(serialize_when_none=False)
     instance_size = FloatType(serialize_when_none=False)
     launched_at = DateTimeType(serialize_when_none=False)
