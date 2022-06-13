@@ -13,7 +13,7 @@ query:
             operator: count
   filter:
     - key: account
-      value: 'true'
+      value: true
       operator: exists
 options:
   chart_type: DONUT

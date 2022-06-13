@@ -1,7 +1,8 @@
 from schematics import Model
-from schematics.types import StringType, ListType, BooleanType, ModelType, PolyModelType, DictType
+from schematics.types import StringType, ListType, BooleanType, ModelType, PolyModelType, BaseType
 from .dynamic_field import TextDyField, StateDyField, BadgeDyField, ListDyField, DictDyField, DateTimeDyField, \
     ImageDyField, EnumDyField, SizeField, ProgressField
+
 
 class BaseDynamicWidgetKeyFields(Model):
     key = StringType(serialize_when_none=False)
@@ -70,8 +71,7 @@ class BaseDynamicWidgetQueryAggregate(Model):
 
 class BaseDynamicWidgetQueryFilter(Model):
     key = StringType(serialize_when_none=False)
-    # value = PolyModelType([StringType], serialize_when_none=False)
-    value = StringType(serialize_when_none=False)
+    value = BaseType(serialize_when_none=False)
     operator = StringType(serialize_when_none=False)
 
 
