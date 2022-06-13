@@ -263,17 +263,7 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name='Launched', key='launched_at'),
         SearchField.set(name='Last Collected', key='updated_at', data_type='datetime'),
         SearchField.set(name='Created', key='created_at', data_type='datetime'),
-        SearchField.set(name='Deleted', key='deleted_at', data_type='datetime'),
-        SearchField.set(name='CPU Utilization (Average)', key='data.monitoring.cpu.utilization.avg', data_type='float'),
-        SearchField.set(name='CPU Utilization (Max)', key='data.monitoring.cpu.utilization.max', data_type='float'),
-        SearchField.set(name='Disk Write IOPS (Average)', key='data.monitoring.disk.write_iops.avg', data_type='float'),
-        SearchField.set(name='Disk Write IOPS (Max)', key='data.monitoring.disk.write_iops.max', data_type='float'),
-        SearchField.set(name='Disk Read IOPS (Average)', key='data.monitoring.disk.read_iops.avg', data_type='float'),
-        SearchField.set(name='Disk Read IOPS (Max)', key='data.monitoring.disk.read_iops.max', data_type='float'),
-        SearchField.set(name='Network In (Average)', key='data.monitoring.network.received_throughput.avg', data_type='float'),
-        SearchField.set(name='Network In (Max)', key='data.monitoring.network.received_throughput.max', data_type='float'),
-        SearchField.set(name='Network Out (Average)', key='data.monitoring.network.sent_throughput.max', data_type='float'),
-        SearchField.set(name='Tags"', key='tags', data_type='object')
+        SearchField.set(name='Deleted', key='deleted_at', data_type='datetime')
     ],
 
     widget=[

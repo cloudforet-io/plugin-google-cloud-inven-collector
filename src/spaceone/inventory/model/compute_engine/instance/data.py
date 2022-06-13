@@ -64,7 +64,7 @@ class Hardware(Model):
 
 class OS(Model):
     os_type = StringType(serialize_when_none=False)
-    details = StringType(serialize_when_none=False)
+    details = StringType(choices=('LINUX', 'WINDOWS'), serialize_when_none=False)
     os_distro = StringType(serialize_when_none=False)
     os_arch = StringType(serialize_when_none=False)
 
@@ -168,11 +168,15 @@ class Subnet(Model):
 class VMInstance(Model):
     os = ModelType(OS)
     google_cloud = ModelType(GoogleCloud)
+    primary_ip_address = StringType()
+    ip_addresses = ListType(StringType())
     hardware = ModelType(Hardware)
     compute = ModelType(Compute)
     load_balancers = ListType(ModelType(LoadBalancer))
     security_group = ListType(ModelType(SecurityGroup))
     vpc = ModelType(VPC)
     subnet = ModelType(Subnet)
+    nics = ListType(ModelType(NIC))
+    disks = ListType(ModelType(Disk))
     autoscaler = ModelType(AutoScaler, serialize_when_none=False)
     stackdriver = ModelType(StackDriver)

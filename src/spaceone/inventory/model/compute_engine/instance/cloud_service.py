@@ -76,7 +76,7 @@ hardware_manager = ItemDynamicLayout.set_fields('Hardware', root_path='data.hard
 
 compute_engine = ListDynamicLayout.set_layouts('Compute Engine', layouts=[vm_instance, google_cloud_vpc, instance_group_manager])
 
-disk = TableDynamicLayout.set_fields('Disk', root_path='disks', fields=[
+disk = TableDynamicLayout.set_fields('Disk', root_path='data.disks', fields=[
     TextDyField.data_source('Index', 'device_index'),
     TextDyField.data_source('Name', 'tags.disk_name'),
     SizeField.data_source('Size', 'size'),
@@ -91,7 +91,7 @@ disk = TableDynamicLayout.set_fields('Disk', root_path='disks', fields=[
     }),
 ])
 
-nic = TableDynamicLayout.set_fields('NIC', root_path='nics', fields=[
+nic = TableDynamicLayout.set_fields('NIC', root_path='data.nics', fields=[
     TextDyField.data_source('Index', 'device_index'),
     ListDyField.data_source('IP Addresses', 'ip_addresses', options={'delimiter': '<br>'}),
     TextDyField.data_source('CIDR', 'cidr'),
