@@ -1,9 +1,12 @@
 from schematics.types import ModelType, StringType, PolyModelType
 
 from spaceone.inventory.model.compute_engine.instance.data import VMInstance
-from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, EnumDyField, ListDyField, DateTimeDyField, SizeField
-from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, TableDynamicLayout, ListDynamicLayout
-from spaceone.inventory.libs.schema.cloud_service import VMInstanceResource, ServerMetadata, VMInstanceResourceResponse
+from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, EnumDyField, ListDyField, DateTimeDyField, \
+    SizeField
+from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, TableDynamicLayout, \
+    ListDynamicLayout
+from spaceone.inventory.libs.schema.cloud_service import CloudServiceMeta, CloudServiceResource, \
+    CloudServiceResponse
 
 
 '''
@@ -55,6 +58,20 @@ instance_group_manager = ItemDynamicLayout.set_fields('InstanceGroupManager', fi
     TextDyField.data_source('Auto Scaler ID', 'data.autoscaler.id'),
     TextDyField.data_source('Instance Group Name', 'data.autoscaler.instance_group.name'),
     TextDyField.data_source('Instance Template Name', 'data.autoscaler.instance_group.instance_template_name'),
+])
+
+operating_system_manager = ItemDynamicLayout.set_fields('Operating System', fields=[
+    TextDyField.data_source('OS Type', 'os_type'),
+    TextDyField.data_source('OS Distribution', 'data.os.os_distro'),
+    TextDyField.data_source('OS Architecture', 'data.os.os_arch'),
+    TextDyField.data_source('OS Version Details', 'data.os.details'),
+    TextDyField.data_source('OS License', 'data.os.os_license'),
+])
+
+hardware_manager = ItemDynamicLayout.set_fields('Hardware', root_path='data.hardware', fields=[
+    TextDyField.data_source('Core', 'core'),
+    TextDyField.data_source('Memory', 'memory'),
+    TextDyField.data_source('CPU Model', 'cpu_model'),
 ])
 
 compute_engine = ListDynamicLayout.set_layouts('Compute Engine', layouts=[vm_instance, google_cloud_vpc, instance_group_manager])
@@ -115,19 +132,31 @@ labels = TableDynamicLayout.set_fields('Labels', root_path='data.google_cloud.la
     TextDyField.data_source('Value', 'value'),
 ])
 
-vm_instance_meta = ServerMetadata.set_layouts([compute_engine, labels, disk, nic, firewall, lb])
+#vm_instance_meta = ServerMetadata.set_layouts([compute_engine, labels, disk, nic, firewall, lb])
+vm_instance_meta = CloudServiceMeta.set_layouts([compute_engine, labels, disk, nic, firewall, lb])
 
-
+'''
 class ComputeEngineResource(VMInstanceResource):
+    cloud_service_group = StringType(default='ComputeEngine')
+'''
+
+
+class ComputeEngineResource(CloudServiceResource):
     cloud_service_group = StringType(default='ComputeEngine')
 
 
 class VMInstanceResource(ComputeEngineResource):
     cloud_service_type = StringType(default='Instance')
     data = ModelType(VMInstance)
-    _metadata = ModelType(ServerMetadata, default=vm_instance_meta, serialized_name='metadata')
+    #_metadata = ModelType(ServerMetadata, default=vm_instance_meta, serialized_name='metadata')
+    _metadata = ModelType(CloudServiceMeta, default=vm_instance_meta, serialized_name='metadata')
 
 
+'''
 class VMInstanceResponse(VMInstanceResourceResponse):
     resource = PolyModelType(VMInstanceResource)
+'''
 
+
+class VMInstanceResponse(CloudServiceResponse):
+    resource = PolyModelType(VMInstanceResource)

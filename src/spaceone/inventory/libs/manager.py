@@ -61,7 +61,6 @@ class GoogleCloudManager(BaseManager):
         options = params.get('options', {})
 
         for cloud_service_type in self.cloud_service_types:
-            _LOGGER.debug(f'cloud_service_type start => {cloud_service_type.resource.service_code}')
             if 'service_code_mappers' in options:
                 svc_code_maps = options['service_code_mappers']
                 _LOGGER.debug(f'svc_code_maps => {svc_code_maps}')
@@ -79,7 +78,7 @@ class GoogleCloudManager(BaseManager):
         total_resources = []
 
         try:
-            # Collect Cloud Service Type3wee
+            # Collect Cloud Service Type
             total_resources.extend(self.collect_cloud_service_type(params))
 
             # Collect Cloud Service

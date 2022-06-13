@@ -1,5 +1,5 @@
 from schematics import Model
-from schematics.types import ListType, StringType, PolyModelType, DictType, ModelType, FloatType
+from schematics.types import ListType, StringType, PolyModelType, DictType, ModelType, FloatType, DateTimeType
 
 from .base import BaseMetaData, BaseResponse, MetaDataView, MetaDataViewSubData, ReferenceModel
 from spaceone.inventory.model.compute_engine.instance.data import VMInstance, NIC, Disk
@@ -23,12 +23,6 @@ class CloudServiceMeta(BaseMetaData):
         return cls({'view': MetaDataView({'sub_data': sub_data})})
 
 
-'''
-Check
-Compute 플러그인에서 서버의 Metadata는 별도로 리턴 하는것 같아서 여기로 통합함
-'''
-
-
 class ServerMetadata(Model):
     view = ModelType(MetaDataView)
 
@@ -43,7 +37,7 @@ class CloudServiceResource(Model):
     account = StringType()
     instance_type = StringType(serialize_when_none=False)
     instance_size = FloatType(serialize_when_none=False)
-    launched_at = StringType(serialize_when_none=False)
+    launched_at = DateTimeType(serialize_when_none=False)
     cloud_service_type = StringType()
     cloud_service_group = StringType()
     name = StringType(default="")
@@ -93,7 +87,6 @@ class VMInstanceResource(Model):
     launched_at = StringType(serialize_when_none=False)
     region_code = StringType()
     data = ModelType(VMInstance)
-    #tags = DictType(StringType(), default={})
     tags = ListType(ModelType(Labels))
     reference = ModelType(ReferenceModel)
     _metadata = ModelType(ServerMetadata, serialized_name='metadata')
