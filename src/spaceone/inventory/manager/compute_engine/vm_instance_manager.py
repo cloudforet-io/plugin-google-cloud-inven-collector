@@ -12,10 +12,10 @@ from spaceone.inventory.manager.compute_engine.vm_instance.load_balancer_manager
 from spaceone.inventory.manager.compute_engine.vm_instance.nic_manager_resource_helper import NICManagerResourceHelper
 from spaceone.inventory.manager.compute_engine.vm_instance.stackdriver_manager_resource_helper import StackDriverManagerResourceHelper
 from spaceone.inventory.manager.compute_engine.vm_instance.vpc_manager_resource_helper import VPCManagerResourceHelper
-from spaceone.inventory.model.compute_engine.instance.cloud_service import VMInstanceResource
+from spaceone.inventory.model.compute_engine.instance.cloud_service import VMInstanceResource, VMInstanceResponse
 from spaceone.inventory.model.compute_engine.instance.cloud_service_type import CLOUD_SERVICE_TYPES
 from spaceone.inventory.libs.schema.base import ReferenceModel
-from spaceone.inventory.libs.schema.cloud_service import VMInstanceResourceResponse
+#from spaceone.inventory.libs.schema.cloud_service import VMInstanceResourceResponse
 
 _LOGGER = logging.getLogger(__name__)
 NUMBER_OF_CONCURRENT = 20
@@ -26,7 +26,7 @@ class VMInstanceManager(GoogleCloudManager):
     cloud_service_types = CLOUD_SERVICE_TYPES
     instance_conn = None
 
-    def collect_cloud_service(self, params) -> ([VMInstanceResourceResponse], []):
+    def collect_cloud_service(self, params) -> ([VMInstanceResponse], []):
         '''
         params = {
             'zone_info': {
@@ -76,8 +76,7 @@ class VMInstanceManager(GoogleCloudManager):
                 # 5. Make Resource Response Object
                 # List of LoadBalancingResponse Object
                 ##################################
-                resource_responses.append(VMInstanceResourceResponse({'resource': resource}))
-
+                resource_responses.append(VMInstanceResponse({'resource': resource}))
 
             except Exception as e:
                 _LOGGER.error(f'[list_resources] vm_id => {vm_id}, error => {e}', exc_info=True)
@@ -191,9 +190,9 @@ class VMInstanceManager(GoogleCloudManager):
         server_data.update({
             'name': _name,
             'account': project_id,
-            'instance_type': server_data.get('compute', {}).get('instance_type', ''),
-            'instance_size': server_data.get('hardware', {}).get('core', ''),
-            'launched_at': server_data.get('compute', {}).get('launched_at', ''),
+            'instance_type': server_data.get('data', {}).get('compute', {}).get('instance_type', ''),
+            'instance_size': server_data.get('data', {}).get('hardware', {}).get('core', 0),
+            'launched_at': server_data.get('data', {}).get('compute', {}).get('launched_at', ''),
             'tags': labels,
             'reference': ReferenceModel({
                 'resource_id': server_data['data']['google_cloud']['self_link'],

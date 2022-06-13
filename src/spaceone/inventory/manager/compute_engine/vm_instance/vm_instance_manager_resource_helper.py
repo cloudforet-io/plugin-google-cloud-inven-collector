@@ -17,7 +17,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
     def get_server_info(self, instance, instance_types, disks, zone_info, public_images, instance_in_managed_instance_groups):
         '''
         server_data = {
-            "name": '',
+            "name": '',x
             "server_type": 'VM',
             "os_type": "LINUX" | "WINDOWS",
             "provider": "google_cloud",
@@ -73,8 +73,8 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
         }
         '''
 
-        os_type, os_data = self._get_os_type_and_data(instance, public_images)
-        server_dic = self._get_server_dic(instance, os_type, zone_info)
+        os_data = self._get_os_data(instance, public_images)
+        server_dic = self._get_server_dic(instance, zone_info)
         google_cloud_data = self._get_google_cloud_data(instance, instance_in_managed_instance_groups)
         hardware_data = self._get_hardware_data(instance, instance_types, zone_info)
         compute_data = self._get_compute_data(instance, disks, zone_info)
@@ -90,11 +90,10 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
 
         return server_dic
 
-    def _get_server_dic(self, instance, os_type, zone_info):
+    def _get_server_dic(self, instance, zone_info):
         server_data = {
             'name': instance.get('name', ''),
             'server_type': 'VM',
-            'os_type': os_type,
             'provider': 'google_cloud',
             'primary_ip_address': self._get_primary_ip_address(instance),
             'ip_addresses': self._get_ip_addresses(instance),
@@ -103,7 +102,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
 
         return server_data
 
-    def _get_os_type_and_data(self, instance, public_images):
+    def _get_os_data(self, instance, public_images):
 
         disk_info = instance.get("disks", [])
         os_dists = disk_info[0].get('licenses', []) if len(disk_info) > 0 else []
@@ -120,7 +119,9 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 break
 
         os_data = self._get_appropriate_image_info(os_identity, licenses, public_images)
-        return os_type, OS(os_data, strict=False)
+        os_data['os_type'] = os_type
+
+        return OS(os_data, strict=False)
 
     @staticmethod
     def _get_appropriate_image_info(os_identity, licenses, public_images):

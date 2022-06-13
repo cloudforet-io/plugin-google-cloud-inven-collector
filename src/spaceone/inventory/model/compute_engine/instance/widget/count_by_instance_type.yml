@@ -1,0 +1,15 @@
+---
+cloud_service_group: ComputeEngine
+cloud_service_type: Instance
+name: Count By Instance Type
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.compute.instance_type
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: TREEMAP

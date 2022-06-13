@@ -1,0 +1,20 @@
+---
+cloud_service_group: ComputeEngine
+cloud_service_type: Instance
+name: Total Disk Size
+query:
+  aggregate:
+    - unwind:
+        path: disks
+    - group:
+        fields:
+          - name: value
+            key: disks.size
+            operator: count
+options:
+  value_options:
+    key: value
+    type: size
+    options:
+      source_unit: GB
+      default: 0

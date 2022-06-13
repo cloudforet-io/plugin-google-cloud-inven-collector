@@ -63,9 +63,10 @@ class Hardware(Model):
 
 
 class OS(Model):
-    details = StringType()
-    os_distro = StringType()
-    os_arch = StringType()
+    os_type = StringType(serialize_when_none=False)
+    details = StringType(serialize_when_none=False)
+    os_distro = StringType(serialize_when_none=False)
+    os_arch = StringType(serialize_when_none=False)
 
 
 # disk
