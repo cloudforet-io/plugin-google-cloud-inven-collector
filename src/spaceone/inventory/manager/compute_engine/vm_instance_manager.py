@@ -27,6 +27,7 @@ class VMInstanceManager(GoogleCloudManager):
     instance_conn = None
 
     def collect_cloud_service(self, params) -> ([VMInstanceResponse], []):
+        _LOGGER.debug(f'** VM Instance START **')
         '''
         params = {
             'zone_info': {
@@ -171,7 +172,13 @@ class VMInstanceManager(GoogleCloudManager):
         _name = instance.get('name', '')
 
         '''Gather all resources informations'''
+        '''
         server_data.update({
+            'nics': nic_vos,
+            'disks': disk_vos,
+        })
+        '''
+        server_data['data'].update({
             'nics': nic_vos,
             'disks': disk_vos,
         })

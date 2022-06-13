@@ -84,7 +84,8 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 'os': os_data,
                 'google_cloud': google_cloud_data,
                 'hardware': hardware_data,
-                'compute': compute_data
+                'compute': compute_data,
+                'primary_ip_address': self._get_primary_ip_address(instance)
             }
         })
 
@@ -95,7 +96,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
             'name': instance.get('name', ''),
             'server_type': 'VM',
             'provider': 'google_cloud',
-            'primary_ip_address': self._get_primary_ip_address(instance),
+#            'primary_ip_address': self._get_primary_ip_address(instance),
             'ip_addresses': self._get_ip_addresses(instance),
             'region_code': zone_info.get('region', '')
         }
