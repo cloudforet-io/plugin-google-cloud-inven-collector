@@ -46,10 +46,17 @@ class TestCollector(TestCase):
         '''
         Options can be selected
         options = {"cloud_service_types": ["SQLWorkspace"]}
+                        "service_code_mappers": {
+                    "Compute Engine": "Test Gikang",
+                    "Networking": "HaHa HoHo",
+                    "Cloud SQL": "SQLSQL"
+            }
         '''
         options = {
+            "cloud_service_types": ["ComputeEngine"]
         }
         filter = {}
+        print(f'secret data => {secret_data}')
         resource_stream = self.inventory.Collector.collect({'options': options, 'secret_data': secret_data,
                                                             'filter': filter})
         for res in resource_stream:
