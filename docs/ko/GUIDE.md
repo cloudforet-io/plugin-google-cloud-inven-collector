@@ -19,6 +19,8 @@
 Google Cloud에서 다른 프로젝트와 구분하기 위해 사용되는 고유한 문자열입니다.  
 **Project ID** 에 대한 상세한 설명은 [Google Cloud Documentation](https://cloud.google.com/resource-manager/docs/creating-managing-projects#before_you_begin)을 참고하십시오.
 
+<br>
+
 ### **google_oauth2_credentials**
 
 **[google_oauth2_credentials]** 방식은 OAuth2.0 기반의 **자격증명**을 제공합니다. 
@@ -62,13 +64,15 @@ Google API의 인증 방식의 상세한 설명은 [Google Cloud Documentation](
 
 **클라우드포레의 서비스계정** 과 **Google Cloud의 서비스 계정** 은 다른 개념입니다.
 
-또한 Google Cloud는 서비스계정과 사용자 계정은 차이가 존재합니다. 
+또한 Google Cloud는 서비스계정과 사용자 계정은 차이가 존재합니다.
 
 자세한 설명은 [Google Cloud Documentation](https://cloud.google.com/iam/docs/service-accounts?hl=ko#differences_between_a_service_account_and_a_user_account)을 참고 하십시오.
 
+<br>
+
 (1) [Google Cloud 로그인](https://accounts.google.com/ServiceLogin/signinchooser?continue=https%3A%2F%2Fcloud.google.com%2F_d%2Freturn%3Fcontinue%3Dhttps%253A%252F%252Fcloud.google.com%252Fgcp%252F&flowName=GlifWebSignIn&flowEntry=ServiceLogin) > [IAM 콘솔](https://console.cloud.google.com/projectselector2/iam-admin/iam?supportedpurview=organizationId,folder,project&orgonly=true) 이동
 
-(1-1)[IAM 및 관리자 > 서비스 계정] 메뉴에서 [서비스 계정 만들기]를 클릭합니다.
+(1-1) [IAM 및 관리자 > 서비스 계정] 메뉴에서 [서비스 계정 만들기]를 클릭합니다.
 
 <img src="./GUIDE-img/create-gcp-service-account(h2)-1.png" width="80%" height="80%">
 
@@ -121,13 +125,16 @@ Google Cloud 리소스를 수집하기 위해 필요한 권한목록은 아래�
 > 💡 위 과정은 플러그인 실행에 필요한 일부 권한만 가지고 있습니다.  
 추가적으로 [[4. 추가 역할(Role) 생성](#4-추가-역할Role-생성)] 과정을 진행하여 권한을 부여해야 합니다.
 
+<br>
+<br>
 
 ## 3. 접근 가능한 사용자 지정(선택)
 
 Google Cloud에서 서비스 계정에 접근할 수 있는 계정을 추가 할 수 있습니다.
 
-이 과정은 생략할 수 있습니다. 자세한 설명은 [Google Cloud Documentation](https://cloud.google.com/iam/docs/impersonating-service-accounts?_ga=2.105995587.-1313572510.1657024428&_gac=1.250300276.1657701814.CjwKCAjw2rmWBhB4EiwAiJ0mtYsa93F_vckP4cRoTJMHvwj00MwAj6_vLe5zPC-rnTr5BHU_1YebSRoCY6MQAvD_BwE)을 참고 하십시오.  
+이 과정은 생략할 수 있습니다. 자세한 설명은 [Google Cloud Documentation](https://cloud.google.com/iam/docs/impersonating-service-accounts?_ga=2.105995587.-1313572510.1657024428&_gac=1.250300276.1657701814.CjwKCAjw2rmWBhB4EiwAiJ0mtYsa93F_vckP4cRoTJMHvwj00MwAj6_vLe5zPC-rnTr5BHU_1YebSRoCY6MQAvD_BwE)을 참고 하십시오.
 
+<br>
 
 [서비스 계정 사용자 역할]은 입력한 계정에게 서비스 계정에 대한 작업 및 VM을 배포할 권한을 부여합니다.  
 [서비스 계정 관리자 역할]은 입력한 계정에게 서비스 계정을 관리할 권한을 부여합니다.
@@ -160,7 +167,7 @@ Google Cloud에서 서비스 계정에 접근할 수 있는 계정을 추가 할
 
 <br>
 
-(1) [IAM > 역할] 메뉴로 이동 후 [역할 만들기] 버튼을 클릭합니다.
+(1) [IAM 및 관리자 > 역할] 메뉴로 이동 후 [역할 만들기] 버튼을 클릭합니다.
 
 <img src="./GUIDE-img/add-role(h2)-1.png" width="80%" height="80%">
 
@@ -190,9 +197,14 @@ Google Cloud에서 서비스 계정에 접근할 수 있는 계정을 추가 할
 
 <img src="./GUIDE-img/add-role(h2)-6.png" width="80%" height="80%">
 
+<br>
+<br>
+
 ## 5. 인증 키 생성
 
 인증키는 Google Cloud 리소스를 접근하기 위한 **자격 증명** 정보를 가지고 있습니다.
+
+<br>
 
 (1) [IAM 및 관리자 > 서비스 계정] 메뉴에서 서비스 계정 이메일을 클릭합니다.
 
@@ -210,6 +222,9 @@ Google Cloud에서 서비스 계정에 접근할 수 있는 계정을 추가 할
 
 해당 JSON파일에 클라우드포레에서 Google Cloud 서비스계정 등록 시 필요한 설정 정보가 존재합니다.
 
+<br>
+<br>
+
 ## 6. 서비스 계정 등록
 
 이제 서비스 계정 추가를 위한 준비가 끝났습니다.
@@ -217,6 +232,8 @@ Google Cloud에서 서비스 계정에 접근할 수 있는 계정을 추가 할
 지금까지 설정 가이드를 진행하면서 얻은 설정 정보를 활용해 서비스 계정을 등록 할 수 있습니다.
 
 서비스 계정 등록의 자세한 방법은 [[클라우드포레 사용자 가이드]](https://spaceone.org/ko/docs/guides/asset-inventory/service-account/#%EC%84%9C%EB%B9%84%EC%8A%A4-%EA%B3%84%EC%A0%95-%EC%B6%94%EA%B0%80%ED%95%98%EA%B8%B0)를 참고 하십시오.
+
+<br>
 
 (1) **[Project ID]** 설정 정보 확인
 
@@ -256,4 +273,4 @@ Google Cloud에서 서비스 계정에 접근할 수 있는 계정을 추가 할
 
 <img src="./GUIDE-img/create-service-account(h2)-4.png" width="80%" height="80%">
 
-(3) 이후 클라우드포레의 **컬렉터 플러그인** 생성 방법은 [[클라우드포레의 사용자 가이드]](https://spaceone.org/ko/docs/guides/asset-inventory/collector/)를 참고하십시오.
+(4) 이후 클라우드포레의 **컬렉터 플러그인** 생성 방법은 [[클라우드포레의 사용자 가이드]](https://spaceone.org/ko/docs/guides/asset-inventory/collector/)를 참고하십시오.
