@@ -82,6 +82,7 @@ class DiskManager(GoogleCloudManager):
                     'labels': labels,
                     'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
                                                                                 "compute.googleapis.com/instance/disk",
+                                                                                disk.get('name'),
                                                                                 google_cloud_monitoring_filters)
                 })
                 disk_data = Disk(disk, strict=False)

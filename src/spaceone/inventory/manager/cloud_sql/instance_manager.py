@@ -62,12 +62,14 @@ class CloudSQLManager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                monitoring_resource_id = f'{project_id}:{instance_name}'
                 google_cloud_monitoring_filters = [{'key': 'resource.labels.database_id',
-                                                    'value': f'{project_id}:{instance_name}'}]
+                                                    'value': monitoring_resource_id}]
 
                 instance.update({
                     'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
                                                                                 "cloudsql.googleapis.com/database",
+                                                                                monitoring_resource_id,
                                                                                 google_cloud_monitoring_filters),
                     'display_state': self._get_display_state(instance),
                     'databases': self._get_databases(databases),
