@@ -1,5 +1,6 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType, DictType, UnionType, MultiType
+from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Labels(Model):
@@ -43,10 +44,7 @@ class FirewallDisplay(Model):
     logs = StringType(choices=('On', 'Off'))
 
 
-class Firewall(Model):
-    id = StringType()
-    name = StringType()
-    project = StringType()
+class Firewall(BaseResource):
     description = StringType()
     network = StringType()
     priority = IntType()
@@ -62,7 +60,6 @@ class Firewall(Model):
     denied = ListType(ModelType(Allowed), serialize_when_none=False)
     disabled = BooleanType(serialize_when_none=False)
     log_config = ModelType(LogConfig, deserialize_from='logConfig', serialize_when_none=False)
-    self_link = StringType(deserialize_from='selfLink')
     creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
     display = ModelType(FirewallDisplay, serialize_when_none=False)
 

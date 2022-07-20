@@ -49,8 +49,7 @@ class CloudSQLManager(GoogleCloudManager):
                 # 1. Set Basic Information
                 ##################################
                 instance_name = instance['name']
-                project = instance.get('project', '')
-                stackdriver = self._get_stackdriver(project, instance_name)
+                # stackdriver = self._get_stackdriver(project, instance_name)
                 # Get Databases & Users, If SQL instance is not available skip, Database/User check.
                 # Otherwise, It occurs error while list databases, list users.
                 if self._check_sql_instance_is_available(instance):
@@ -63,9 +62,13 @@ class CloudSQLManager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                google_cloud_monitoring_filters = [{'key': 'resource.labels.database_id',
+                                                    'value': f'{project_id}:{instance_name}'}]
 
                 instance.update({
-                    'stackdriver': stackdriver,
+                    'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
+                                                                                "cloudsql.googleapis.com/database",
+                                                                                google_cloud_monitoring_filters),
                     'display_state': self._get_display_state(instance),
                     'databases': self._get_databases(databases),
                     'users': self._get_users(users),
@@ -115,30 +118,22 @@ class CloudSQLManager(GoogleCloudManager):
             _LOGGER.debug(f'[_check_sql_instance_is_available] instance {instance_name} is not available')
             return False
 
-    @staticmethod
-    def _get_stackdriver(project, name):
-        return {
-            'type': 'cloudsql.googleapis.com',
-            'identifier': 'database_id',
-            'filters': [{
-                'key': 'resource.label.database_id',
-                'value': f'{project}:{name}' if project != '' else f'{name}'
-            }]
-        }
-
     # SQL Instance power status
     @staticmethod
     def _get_display_state(instance):
         activation_policy = instance.get('settings', {}).get('activationPolicy', 'UNKNOWN')
 
         if activation_policy in ['ALWAYS']:
-            return 'RUNNING'
+            if instance.get('state') == 'PENDING_CREATE':
+                return 'CREATING'
+            elif instance.get('state') == 'RUNNABLE':
+                return 'RUNNING'
         elif activation_policy in ['NEVER']:
             return 'STOPPED'
         elif activation_policy in ['ON_DEMAND']:
             return 'ON-DEMAND'
-        else:
-            return 'UNKNOWN'
+
+        return 'UNKNOWN'
 
     @staticmethod
     def _get_databases(databases):
@@ -156,6 +151,6 @@ class CloudSQLManager(GoogleCloudManager):
         for user in users:
             user_obj = User(user, strict=False)
             list_users.append(user_obj)
-        #list_users = [User(user, strict=False) for user in users]
+        # list_users = [User(user, strict=False) for user in users]
 
         return list_users

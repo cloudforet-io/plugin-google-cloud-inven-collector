@@ -71,6 +71,7 @@ class SQLWorkspaceManager(GoogleCloudManager):
                     update_bq_dt_tables, table_schemas = self._get_table_list_with_schema(big_query_conn, bq_dt_tables)
 
                 labels = self.convert_labels_format(bq_dataset.get('labels', {}))
+                google_cloud_monitoring_filters = [{'key': 'resource.labels.dataset_id', 'value': data_set_id}]
 
                 ##################################
                 # 2. Make Base Data
@@ -88,7 +89,10 @@ class SQLWorkspaceManager(GoogleCloudManager):
                     'lastModifiedTime': self._convert_unix_timestamp(last_modified_time),
                     'default_partition_expiration_ms_display': self._convert_milliseconds_to_minutes(exp_partition_ms),
                     'default_table_expiration_ms_display': self._convert_milliseconds_to_minutes(exp_table_ms),
-                    'labels': labels
+                    'labels': labels,
+                    'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
+                                                                                "bigquery.googleapis.com",
+                                                                                google_cloud_monitoring_filters)
                 })
                 big_query_data = BigQueryWorkSpace(bq_dataset, strict=False)
 

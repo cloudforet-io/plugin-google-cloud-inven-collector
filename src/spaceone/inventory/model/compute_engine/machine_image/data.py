@@ -1,5 +1,6 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Labels(Model):
@@ -83,7 +84,7 @@ class ServiceAccount(Model):
     scopes = ListType(StringType(), default=[], serialize_when_none=False)
 
 
-class MachineImage(Model):
+class MachineImage(BaseResource):
     '''
         ('ID', 'data.id'),
         ('Name', 'data.name'),
@@ -96,13 +97,9 @@ class MachineImage(Model):
         ('Self Link', 'data.self_link'),
         ('Creation Time', 'data.creation_timestamp')
     '''
-    project = StringType()
-    id = StringType()
-    name = StringType()
     description = StringType()
     status = StringType(choices=('INVALID', 'CREATING', 'READY', 'DELETING', 'UPLOADING'))
     fingerprint = StringType()
-    self_link = StringType(deserialize_from='selfLink')
     machine = ModelType(MachineType, deserialize_from='machine_type', serialize_when_none=False)
     network_tags = ListType(StringType(), default=[])
     deletion_protection = BooleanType(default=False)

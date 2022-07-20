@@ -1,5 +1,6 @@
 import time
 import logging
+from typing import Tuple, List
 
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.connector.compute_engine.vm_instance import VMInstanceConnector
@@ -10,15 +11,13 @@ from spaceone.inventory.manager.compute_engine.vm_instance.firewall_manager_reso
 from spaceone.inventory.manager.compute_engine.vm_instance.load_balancer_manager_resource_helper import \
     LoadBalancerManagerResourceHelper
 from spaceone.inventory.manager.compute_engine.vm_instance.nic_manager_resource_helper import NICManagerResourceHelper
-from spaceone.inventory.manager.compute_engine.vm_instance.stackdriver_manager_resource_helper import StackDriverManagerResourceHelper
 from spaceone.inventory.manager.compute_engine.vm_instance.vpc_manager_resource_helper import VPCManagerResourceHelper
 from spaceone.inventory.model.compute_engine.instance.cloud_service import VMInstanceResource, VMInstanceResponse
 from spaceone.inventory.model.compute_engine.instance.cloud_service_type import CLOUD_SERVICE_TYPES
+from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 from spaceone.inventory.libs.schema.base import ReferenceModel
-#from spaceone.inventory.libs.schema.cloud_service import VMInstanceResourceResponse
 
 _LOGGER = logging.getLogger(__name__)
-NUMBER_OF_CONCURRENT = 20
 
 
 class VMInstanceManager(GoogleCloudManager):
@@ -26,7 +25,7 @@ class VMInstanceManager(GoogleCloudManager):
     cloud_service_types = CLOUD_SERVICE_TYPES
     instance_conn = None
 
-    def collect_cloud_service(self, params) -> ([VMInstanceResponse], []):
+    def collect_cloud_service(self, params) -> Tuple[List[VMInstanceResponse], List[ErrorResourceResponse]]:
         _LOGGER.debug(f'** VM Instance START **')
         '''
         params = {
@@ -89,7 +88,6 @@ class VMInstanceManager(GoogleCloudManager):
 
     # To get all related resources from all regions
     def get_all_resources(self, project_id) -> dict:
-
         instancegroup_manager_helper: InstanceGroupManagerResourceHelper = InstanceGroupManagerResourceHelper(
             self.instance_conn)
 
@@ -110,7 +108,7 @@ class VMInstanceManager(GoogleCloudManager):
         }
 
     def get_vm_instance_resource(self, project_id, zone_info, instance, all_resources) -> VMInstanceResource:
-        ''' Prepare input params for call maanger '''
+        """ Prepare input params for call manager """
         # VPC
         vpcs = all_resources.get('vpcs', [])
         subnets = all_resources.get('subnets', [])
@@ -143,17 +141,15 @@ class VMInstanceManager(GoogleCloudManager):
         disks = all_resources.get('disk', [])
 
         '''Get related resources from managers'''
-        vm_instance_manager_helper: VMInstanceManagerResourceHelper = VMInstanceManagerResourceHelper(
-            self.instance_conn)
-        auto_scaler_manager_helper: InstanceGroupManagerResourceHelper = InstanceGroupManagerResourceHelper(
-            self.instance_conn)
+        vm_instance_manager_helper: VMInstanceManagerResourceHelper = \
+            VMInstanceManagerResourceHelper(self.instance_conn)
+        auto_scaler_manager_helper: InstanceGroupManagerResourceHelper = \
+            InstanceGroupManagerResourceHelper(self.instance_conn)
         loadbalancer_manager_helper: LoadBalancerManagerResourceHelper = LoadBalancerManagerResourceHelper()
         disk_manager_helper: DiskManagerResourceHelper = DiskManagerResourceHelper()
         nic_manager_helper: NICManagerResourceHelper = NICManagerResourceHelper()
         vpc_manager_helper: VPCManagerResourceHelper = VPCManagerResourceHelper()
         firewall_manager_helper: FirewallManagerResourceHelper = FirewallManagerResourceHelper()
-        stackdriver_manager_helper: StackDriverManagerResourceHelper = StackDriverManagerResourceHelper()
-
         autoscaler_vo = auto_scaler_manager_helper.get_autoscaler_info(instance, instance_group, autoscaler)
         load_balancer_vos = loadbalancer_manager_helper.get_loadbalancer_info(instance, instance_group, backend_svcs,
                                                                               url_maps,
@@ -166,12 +162,13 @@ class VMInstanceManager(GoogleCloudManager):
         firewall_names = [d.get('name') for d in firewall_vos if d.get('name', '') != '']
         server_data = vm_instance_manager_helper.get_server_info(instance, instance_types, disks, zone_info,
                                                                  public_images, instance_in_managed_instance_groups)
+        google_cloud_monitoring_filters = [{'key': 'resource.labels.instance_id', 'value': instance.get('id')}]
         google_cloud = server_data['data'].get('google_cloud', {})
         _google_cloud = google_cloud.to_primitive()
         labels = _google_cloud.get('labels', [])
         _name = instance.get('name', '')
 
-        '''Gather all resources informations'''
+        ''' Gather all resources information '''
         '''
         server_data.update({
             'nics': nic_vos,
@@ -189,7 +186,9 @@ class VMInstanceManager(GoogleCloudManager):
             'autoscaler': autoscaler_vo,
             'vpc': vpc_vo,
             'subnet': subnet_vo,
-            'stackdriver': stackdriver_manager_helper.get_stackdriver_info(instance.get('id', ''))
+            'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
+                                                                        "compute.googleapis.com/instance",
+                                                                        google_cloud_monitoring_filters)
         })
         ##################################
         # 3. Make Return Resource
@@ -213,5 +212,3 @@ class VMInstanceManager(GoogleCloudManager):
         zone = self.get_param_in_url(url_zone, 'zones')
         region = self.parse_region_from_zone(zone)
         return zone, region
-
-

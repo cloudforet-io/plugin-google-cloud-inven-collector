@@ -1,24 +1,11 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, BooleanType, IntType, DateTimeType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class SQLServerUserDetail(Model):
     disabled = BooleanType()
     server_roles = ListType(StringType, deserialize_from='serverRoles')
-
-
-class StackDriverFilters(Model):
-    key = StringType()
-    value = StringType()
-
-
-class StackDriver(Model):
-    class Option:
-        serialize_when_none = False
-
-    type = StringType()
-    identifier = StringType()
-    filters = ListType(ModelType(StackDriverFilters), default=[])
 
 
 class User(Model):
@@ -128,14 +115,11 @@ class IPAddress(Model):
     ip_address = StringType(deserialize_from="ipAddress")
 
 
-class Instance(Model):
-    name = StringType()
+class Instance(BaseResource):
     kind = StringType()
     display_state = StringType(choices=('RUNNING', 'STOPPED', 'UNKNOWN', 'ON-DEMAND'))
     state = StringType(choices=('SQL_INSTANCE_STATE_UNSPECIFIED', 'RUNNABLE', 'SUSPENDED', 'PENDING_DELETE',
                                 'PENDING_CREATE', 'MAINTENANCE', 'FAILED'))
-    stackdriver = ModelType(StackDriver, serialize_when_none=False)
-    region = StringType()
     gce_zone = StringType(deserialize_from="gceZone")
     database_version = StringType(deserialize_from="databaseVersion")
     settings = ModelType(InstanceSetting)
@@ -143,10 +127,8 @@ class Instance(Model):
     ip_addresses = ListType(ModelType(IPAddress), deserialize_from="ipAddresses")
     server_ca_cert = ModelType(ServerCACert, deserialize_from="serverCaCert")
     instance_type = StringType(deserialize_from="instanceType")
-    project = StringType()
     service_account_email_address = StringType(deserialize_from="serviceAccountEmailAddress")
     backend_type = StringType(deserialize_from="backendType")
-    self_link = StringType(deserialize_from="selfLink")
     databases = ListType(ModelType(Database))
     users = ListType(ModelType(User))
     connection_name = StringType(deserialize_from="connectionName", serialize_when_none=False)

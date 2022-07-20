@@ -1,5 +1,6 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, FloatType, DateTimeType, IntType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Labels(Model):
@@ -61,10 +62,7 @@ class SnapShotSchedule(Model):
     creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
 
 
-class Disk(Model):
-    project = StringType()
-    id = StringType()
-    name = StringType()
+class Disk(BaseResource):
     zone = StringType()
     disk_type = StringType(choices=('local-ssd', 'pd-balanced', 'pd-ssd', 'pd-standard'), serialize_when_none=False)
     read_iops = FloatType(serialize_when_none=False)
@@ -78,11 +76,9 @@ class Disk(Model):
     status = StringType(choices=('INVALID', 'CREATING', 'machine_image_conn', 'DELETING', 'UPLOADING'))
     encryption = StringType(choices=('Google managed', 'Customer managed, Customer supplied'))
     size = FloatType()
-    region = StringType()
     fingerprint = StringType(deserialize_from='labelFingerprint')
     snapshot_schedule_display = ListType(StringType(), default=[])
     snapshot_schedule = ListType(ModelType(SnapShotSchedule), default=[])
-    self_link = StringType(deserialize_from='selfLink')
     labels = ListType(ModelType(Labels), default=[])
     creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
     last_attach_timestamp = DateTimeType(deserialize_from='lastAttachTimestamp', serialize_when_none=False)

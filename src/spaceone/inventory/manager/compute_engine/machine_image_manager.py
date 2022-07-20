@@ -211,7 +211,7 @@ class MachineImageManager(GoogleCloudManager):
     @staticmethod
     def get_boot_disk(list_disk_info) -> dict:
         for disk_info in list_disk_info:
-            if disk_info.get('boot', False) == True:
+            if disk_info.get('boot', False):
                 return disk_info
         return {}
 
@@ -285,8 +285,8 @@ class MachineImageManager(GoogleCloudManager):
         scheduling = properties.get('scheduling', {})
         return {
             'on_host_maintenance': scheduling.get('onHostMaintenance', 'MIGRATE'),
-            'automatic_restart': 'On' if scheduling.get('automaticRestart', False) == True else 'Off',
-            'preemptibility': 'On' if scheduling.get('preemptible', False) == True else 'Off',
+            'automatic_restart': 'On' if scheduling.get('automaticRestart', False) else 'Off',
+            'preemptibility': 'On' if scheduling.get('preemptible', False) else 'Off',
         }
 
     @staticmethod

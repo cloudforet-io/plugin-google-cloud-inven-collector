@@ -11,7 +11,8 @@ class InstanceGroupManagerResourceHelper(GoogleCloudManager):
     connector_name = 'VMInstanceConnector'
     instance_conn = None
 
-    def __init__(self, gcp_connector=None):
+    def __init__(self, gcp_connector=None, **kwargs):
+        super().__init__(**kwargs)
         self.instance_conn: VMInstanceConnector = gcp_connector
 
     def get_autoscaler_info(self, instance, instance_group_managers, autoscalers) -> AutoScaler:

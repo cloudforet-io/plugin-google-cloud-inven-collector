@@ -7,7 +7,7 @@ class NICManagerResourceHelper(GoogleCloudManager):
     connector_name = 'VMInstanceConnector'
 
     def get_nic_info(self, instance, subnet_vo):
-        '''
+        """
         nic_data = {
             "device_index": 0,
             "device": "",
@@ -19,7 +19,7 @@ class NICManagerResourceHelper(GoogleCloudManager):
                 "public_dns": "",
             }
         }
-        '''
+        """
         nics = []
         network_interfaces = instance.get('networkInterfaces', [])
         for idx, network in enumerate(network_interfaces):
@@ -50,7 +50,7 @@ class NICManagerResourceHelper(GoogleCloudManager):
         for idx, access_config in enumerate(access_configs):
             nat_ip = access_config.get('natIP', '')
             if nat_ip != '':
-                #ip_addresses.append(nat_ip)
+                # ip_addresses.append(nat_ip)
                 if idx == 0:
                     public_ip_address = nat_ip
 

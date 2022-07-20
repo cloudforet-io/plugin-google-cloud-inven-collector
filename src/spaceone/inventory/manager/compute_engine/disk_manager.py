@@ -62,6 +62,7 @@ class DiskManager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                google_cloud_monitoring_filters = [{'key': 'metric.device_name', 'value': disk.get('name')}]
                 disk.update({
                     'project': secret_data['project_id'],
                     'id': disk_id,
@@ -78,7 +79,10 @@ class DiskManager(GoogleCloudManager):
                     'write_iops': self._get_iops_rate(disk_type, disk_size, 'write'),
                     'read_throughput': self._get_throughput_rate(disk_type, disk_size),
                     'write_throughput': self._get_throughput_rate(disk_type, disk_size),
-                    'labels': labels
+                    'labels': labels,
+                    'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
+                                                                                "compute.googleapis.com/instance/disk",
+                                                                                google_cloud_monitoring_filters)
                 })
                 disk_data = Disk(disk, strict=False)
 

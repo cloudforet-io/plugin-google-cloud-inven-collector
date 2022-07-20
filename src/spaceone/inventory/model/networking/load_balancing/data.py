@@ -1,6 +1,6 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType, \
-    DictType, PolyModelType
+from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Labels(Model):
@@ -301,12 +301,8 @@ class HealthCheck(Model):
     creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
 
 
-class LoadBalancing(Model):
-    id = StringType()
-    name = StringType()
+class LoadBalancing(BaseResource):
     description = StringType(default='')
-    project = StringType()
-    region = StringType()
     internal_or_external = StringType(choices=['Internal', 'External', 'UnKnown'], serialize_when_none=False)
     type = StringType(choices=['HTTP(S) LoadBalancer', 'HTTP(S) LoadBalancer(classic)', 'SSL Proxy LoadBalancer',
                                'TCP Proxy LoadBalancer', 'TCP/UDP Network LoadBalancer', 'UnKnown'],

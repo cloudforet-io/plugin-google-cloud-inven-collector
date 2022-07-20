@@ -1,5 +1,6 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Labels(Model):
@@ -28,10 +29,8 @@ class RouteDisplay(Model):
     instance_tags = ListType(StringType(), default=[])
     instance_tags_on_list = ListType(StringType(), default=[])
 
-class Route(Model):
-    project = StringType()
-    id = StringType()
-    name = StringType()
+
+class Route(BaseResource):
     description = StringType()
     network = StringType()
     dest_range = StringType(deserialize_from='destRange')
@@ -45,7 +44,6 @@ class Route(Model):
     nextHopPeering = StringType(deserialize_from='nextHopPeering', serialize_when_none=False)
     nextHopIlb = StringType(deserialize_from='nextHopIlb', serialize_when_none=False)
     display = ModelType(RouteDisplay)
-    self_link = StringType(deserialize_from='selfLink')
     creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
 
     def reference(self):

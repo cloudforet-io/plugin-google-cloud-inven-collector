@@ -1,5 +1,6 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType, DictType, UnionType, MultiType
+from schematics.types import ListType, StringType, DateTimeType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Labels(Model):
@@ -7,13 +8,9 @@ class Labels(Model):
     value = StringType()
 
 
-class ExternalIpAddress(Model):
-    id = StringType(default='')
-    name = StringType(default='')
-    region = StringType(default='global')
+class ExternalIpAddress(BaseResource):
     status = StringType(choices=('RESERVED', 'RESERVING', 'IN_USE'))
     status_display = StringType(choices=('Reserved', 'Reserving', 'In Use'))
-    project = StringType()
     description = StringType(default='')
     address = StringType()
     subnet_name = StringType(serialize_when_none=False)
@@ -24,7 +21,6 @@ class ExternalIpAddress(Model):
     network_tier = StringType(choices=('PREMIUM', 'STANDARD'),  deserialize_from='networkTier', serialize_when_none=False)
     network_tier_display = StringType()
     used_by = ListType(StringType(), default=[])
-    self_link = StringType(deserialize_from='selfLink')
     ip_version = StringType(choices=('IPV4', 'IPV6'), deserialize_from='ipVersion', serialize_when_none=False)
     ip_version_display = StringType()
     users = ListType(StringType(), default=[])
