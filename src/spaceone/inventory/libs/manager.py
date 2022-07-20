@@ -82,11 +82,11 @@ class GoogleCloudManager(BaseManager):
 
     @staticmethod
     def set_google_cloud_monitoring(project_id, metric_type, filters):
-        metric_filter = f'metric.type = starts_with("{metric_type}")'
+        metric_filter = f"metric.type = starts_with('{metric_type}')"
 
         filter_list = []
         for _filter in filters:
-            filter_list.append(f'{_filter["key"]} = {_filter["value"]}')
+            filter_list.append(f"{_filter['key']} = {_filter['value']}")
 
         or_merge_filter = ' OR '.join(filter_list)
         merge_filter = ' AND '.join([metric_filter, or_merge_filter])
