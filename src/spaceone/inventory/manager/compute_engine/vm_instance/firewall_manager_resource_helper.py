@@ -10,10 +10,6 @@ class FirewallManagerResourceHelper(GoogleCloudManager):
     connector_name = 'VMInstanceConnector'
 
     def list_firewall_rules_info(self, instance, firewall_rules) -> list:
-        '''
-
-        '''
-
         firewall_rules_results = []
         inst_network_info = self._get_instance_network_info(instance)
 
@@ -101,10 +97,10 @@ class FirewallManagerResourceHelper(GoogleCloudManager):
 
     @staticmethod
     def _get_port_min_max(port) -> tuple:
-        '''
+        """
         :param port: ['80'] or ['70 - 200']
         :return: ('80', '80') or ('70', '200')
-        '''
+        """
         if len(port.split('-')) == 1:
             port_min = port.split('-')[0]
             port_max = port.split('-')[0]

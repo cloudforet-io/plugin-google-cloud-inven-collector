@@ -107,7 +107,7 @@ class SnapshotManager(GoogleCloudManager):
             else {'region_code': 'global', 'location': 'multi'}
 
     def get_disk_info(self, snapshot):
-        '''
+        """
             source_disk = StringType()
             source_disk_display = StringType()
             source_disk_id = StringType()
@@ -115,7 +115,7 @@ class SnapshotManager(GoogleCloudManager):
             disk_size_display = StringType()
             storage_bytes = IntType()
             storage_bytes_display = StringType()
-        '''
+        """
         disk_gb = snapshot.get('diskSizeGb', 0.0)
         st_byte = snapshot.get('storageBytes', 0)
         size = self._get_bytes(int(disk_gb))

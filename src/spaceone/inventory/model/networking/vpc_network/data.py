@@ -1,5 +1,6 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType, DictType, UnionType, MultiType
+from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Labels(Model):
@@ -168,14 +169,10 @@ class IPAddress(Model):
     creation_timestamp = DateTimeType(deserialize_from='creationTimestamp')
 
 
-class VPCNetwork(Model):
-    id = StringType()
-    name = StringType()
-    project = StringType()
+class VPCNetwork(BaseResource):
     description = StringType()
     ipv4_range = StringType(deserialize_from='IPv4Range', serialize_when_none=False)
     gateway_ipv4 = StringType(deserialize_from='gatewayIPv4', serialize_when_none=False)
-    self_link = StringType(deserialize_from='selfLink')
     subnet_creation_mode = StringType(choices=('Auto', 'Custom'))
     auto_create_subnetworks = BooleanType(deserialize_from='autoCreateSubnetworks')
     peerings = ListType(ModelType(Peering), default=[])

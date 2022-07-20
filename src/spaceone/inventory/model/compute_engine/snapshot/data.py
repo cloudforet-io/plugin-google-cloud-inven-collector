@@ -1,5 +1,6 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType
+from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, FloatType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Labels(Model):
@@ -56,12 +57,8 @@ class Encryption(Model):
     kms_key_name = StringType(deserialize_from='kmsKeyName')
 
 
-class Snapshot(Model):
-    id = StringType()
-    name = StringType()
-    project = StringType()
+class Snapshot(BaseResource):
     status = StringType(choices=('CREATING', 'DELETING', 'FAILED', 'READY', 'UPLOADING'))
-    self_link = StringType(deserialize_from='selfLink')
     disk = ModelType(Disk, default={})
     fingerprint = StringType(deserialize_from='labelFingerprint')
     snapshot_encryption_key = ModelType(Encryption, serialize_when_none=False, deserialize_from='snapshotEncryptionKey')

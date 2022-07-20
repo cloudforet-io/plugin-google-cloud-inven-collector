@@ -11,11 +11,12 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
     connector_name = 'VMInstanceConnector'
     instance_conn = None
 
-    def __init__(self, gcp_connector=None):
+    def __init__(self, gcp_connector=None, **kwargs):
+        super().__init__(**kwargs)
         self.instance_conn: VMInstanceConnector = gcp_connector
 
     def get_server_info(self, instance, instance_types, disks, zone_info, public_images, instance_in_managed_instance_groups):
-        '''
+        """
         server_data = {
             "name": '',x
             "server_type": 'VM',
@@ -31,7 +32,6 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                     "details": "",
                     "os_distro": "",
                 },
-
                 "google_cloud": {
                     "self_link": "",
                     "fingerprint": "",
@@ -71,7 +71,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 },
             }
         }
-        '''
+        """
 
         os_data = self._get_os_data(instance, public_images)
         server_dic = self._get_server_dic(instance, zone_info)
@@ -162,12 +162,12 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
         return GoogleCloud(google_cloud, strict=False)
 
     def _get_hardware_data(self, instance, instance_types, zone_info):
-        '''
+        """
         core = IntType(default=0)
         memory = FloatType(default=0.0)
         is_vm = StringType(default=True)
         cpu_model = ListType(StringType(default=""))
-        '''
+        """
 
         core, memory = self._get_core_and_memory(instance, instance_types)
 
@@ -184,7 +184,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
         return Hardware(hardware_data, strict=False)
 
     def _get_compute_data(self, instance, disks, zone_info):
-        '''
+        """
             {
                 'keypair': StringType(default="")
                 'az':StringType()                       # zone_name
@@ -198,7 +198,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 'security_groups': []
                 'tags' = DictType(StringType, default={})
             }
-        '''
+        """
         compute_data = {
             'keypair': '',
             'public_ip_address': self._get_public_ip_address(instance),
@@ -231,7 +231,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
         tags = {}
         for k, v in instance.get('tags', {}).items():
             if isinstance(v, str):
-                tags.update({k:v})
+                tags.update({k: v})
         return tags
 
     @staticmethod

@@ -1,5 +1,6 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType, DictType
+from spaceone.inventory.libs.schema.google_cloud_monitoring import GoogleCloudMonitoringModel
 
 
 # common
@@ -116,7 +117,6 @@ class NIC(Model):
 
 
 # Firewall
-
 class SecurityGroup(Model):
     priority = IntType(serialize_when_none=False)
     protocol = StringType()
@@ -131,20 +131,6 @@ class SecurityGroup(Model):
     direction = StringType(choices=("inbound", "outbound"))
     port = StringType(serialize_when_none=False)
     action = StringType(choices=('allow', 'deny'))
-
-
-# stackdriver
-class StackDriverFilters(Model):
-    key = StringType()
-    value = StringType()
-
-
-class StackDriver(Model):
-    class Option:
-        serialize_when_none = False
-
-    type = StringType()
-    filters = ListType(ModelType(StackDriverFilters), default=[])
 
 
 # vpc
@@ -178,4 +164,4 @@ class VMInstance(Model):
     nics = ListType(ModelType(NIC))
     disks = ListType(ModelType(Disk))
     autoscaler = ModelType(AutoScaler, serialize_when_none=False)
-    stackdriver = ModelType(StackDriver)
+    google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)

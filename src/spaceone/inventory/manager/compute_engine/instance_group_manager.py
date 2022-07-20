@@ -113,11 +113,17 @@ class InstanceGroupManager(GoogleCloudManager):
                 display_loc = {'region': location, 'zone': ''} if location_type == 'region' \
                     else {'region': self.parse_region_from_zone(location), 'zone': location}
 
+                google_cloud_monitoring_filters = [{'key': 'resource.instance_group_name',
+                                                    'value': instance_group.get('name')}]
+
                 instance_group.update({
                     'power_scheduler': scheduler,
                     'instances': self.get_instances(instances),
                     'instance_counts': len(instances),
-                    'display_location': display_loc
+                    'display_location': display_loc,
+                    'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
+                                                                                "compute.googleapis.com/instance_group",
+                                                                                google_cloud_monitoring_filters)
                 })
                 # No labels
                 _name = instance_group.get('name', '')

@@ -1,19 +1,6 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType, DictType, UnionType, MultiType
-
-
-class StackDriverFilters(Model):
-    key = StringType()
-    value = StringType()
-
-
-class StackDriver(Model):
-    class Option:
-        serialize_when_none = False
-
-    type = StringType()
-    identifier = StringType()
-    filters = ListType(ModelType(StackDriverFilters), default=[])
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Labels(Model):
@@ -128,16 +115,11 @@ class IAMConfiguration(Model):
     uniform_bucket_level_access = ModelType(BucketAccess, deserialize_from='uniformBucketLevelAccess', serialize_when_none=False)
 
 
-class Storage(Model):
-    id = StringType()
-    name = StringType()
-    project = StringType()
-    stackdriver = ModelType(StackDriver, serialize_when_none=False)
+class Storage(BaseResource):
     links = ModelType(Link)
     acl = ListType(ModelType(BucketAccessControls), default=[], deserialize_from='acl')
     default_event_based_hold = StringType(choices=('Enabled', 'Disabled'))
     default_object_acl = ListType(ModelType(ObjectACL), default=[], serialize_when_none=False, deserialize_from='defaultObjectAcl')
-    self_link = StringType(deserialize_from='selfLink')
     public_access = StringType(choices=('Subject to object ACLs', 'Not Public', 'Public to Internet'))
     access_control = StringType(choices=('Fine-grained', 'Uniform'))
     lifecycle_rule = ModelType(Lifecycle, serialize_when_none=False)

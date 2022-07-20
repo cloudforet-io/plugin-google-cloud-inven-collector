@@ -6,7 +6,7 @@ class DiskManagerResourceHelper(GoogleCloudManager):
     connector_name = 'VMInstanceConnector'
 
     def get_disk_info(self, instance, disk_list):
-        '''
+        """
         disk_data = {
             "device_index": 0,
             "device": "",
@@ -26,7 +26,7 @@ class DiskManagerResourceHelper(GoogleCloudManager):
                 labels = DictType(StringType, default={}, serialize_when_none=False)
             }
         }
-        '''
+        """
         disks = []
         int_disks = instance.get('disks', [])
         for int_disk in int_disks:

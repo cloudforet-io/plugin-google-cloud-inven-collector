@@ -6,7 +6,7 @@ class LoadBalancerManagerResourceHelper(GoogleCloudManager):
     connector_name = 'VMInstanceConnector'
 
     def get_loadbalancer_info(self, instance, instance_groups, backend_svc, url_maps, target_pools, forwarding_rules):
-        '''
+        """
         load_balancer_data_list = [{
                 "type": 'HTTP'| 'TCP'| 'UDP'
                 "name": "",
@@ -22,7 +22,7 @@ class LoadBalancerManagerResourceHelper(GoogleCloudManager):
             },
             ...
         ]
-        '''
+        """
         load_balancer_data_list = []
         matched_groups = self.get_matched_instance_group(instance, instance_groups)
         for matched_group in matched_groups:
@@ -82,7 +82,8 @@ class LoadBalancerManagerResourceHelper(GoogleCloudManager):
 
         return matched_backend_svc
 
-    def get_matched_instance_group(self, instance, instance_groups):
+    @staticmethod
+    def get_matched_instance_group(instance, instance_groups):
         matched_instance_group = []
         for instance_group in instance_groups:
             instance_list = instance_group.get('instance_list', [])

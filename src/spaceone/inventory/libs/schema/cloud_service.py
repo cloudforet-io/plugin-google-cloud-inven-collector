@@ -4,6 +4,7 @@ from schematics.types import ListType, StringType, PolyModelType, DictType, Mode
 from .base import BaseMetaData, BaseResponse, MetaDataView, MetaDataViewSubData, ReferenceModel
 from spaceone.inventory.model.compute_engine.instance.data import VMInstance, NIC, Disk
 from spaceone.inventory.libs.schema.region import RegionResource
+from spaceone.inventory.libs.schema.google_cloud_monitoring import GoogleCloudMonitoringModel
 
 
 class Labels(Model):
@@ -30,6 +31,15 @@ class ServerMetadata(Model):
     def set_layouts(cls, layouts=[]):
         sub_data = MetaDataViewSubData({'layouts': layouts})
         return cls({'view': MetaDataView({'sub_data': sub_data})})
+
+
+class BaseResource(Model):
+    id = StringType(serialize_when_none=False)
+    name = StringType(serialize_when_none=False)
+    project = StringType(serialize_when_none=False)
+    region = StringType(serialize_when_none=False)
+    self_link = StringType(deserialize_from='selfLink', serialize_when_none=False)
+    google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
 
 
 class CloudServiceResource(Model):
@@ -91,13 +101,6 @@ class VMInstanceResource(Model):
     tags = ListType(ModelType(Labels))
     reference = ModelType(ReferenceModel)
     _metadata = ModelType(ServerMetadata, serialized_name='metadata')
-
-
-class VMInstanceResourceResponse(BaseResponse):
-    state = StringType(default='SUCCESS')
-    resource_type = StringType(default='inventory.Server')
-    match_rules = DictType(ListType(StringType), default={'1': ['reference.resource_id']})
-    resource = PolyModelType(VMInstanceResource)
 
 
 class RegionResourceResponse(BaseResponse):

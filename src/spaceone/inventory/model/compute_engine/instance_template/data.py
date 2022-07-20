@@ -1,5 +1,6 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Labels(Model):
@@ -76,7 +77,7 @@ class Scheduling(Model):
     preemptibility = StringType(choices=('On', 'Off'))
 
 
-class InstanceTemplate(Model):
+class InstanceTemplate(BaseResource):
     '''
         ('ID', 'data.id'),
         ('Name', 'data.name'),
@@ -89,16 +90,12 @@ class InstanceTemplate(Model):
         ('Self Link', 'data.self_link'),
         ('Creation Time', 'data.creation_timestamp')
     '''
-    project = StringType()
-    id = StringType()
-    name = StringType()
     description = StringType()
     fingerprint = StringType()
     disk_display = StringType()
     image = StringType()
     machine_type = StringType(serialize_when_none=False)
     in_used_by = ListType(StringType(), default=[])
-    self_link = StringType(deserialize_from='selfLink')
     ip_forward = BooleanType(default=False)
     scheduling = ModelType(Scheduling, default={})
     network_tags = ListType(StringType(), default=[])

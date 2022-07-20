@@ -68,11 +68,9 @@ workspace_labels_meta = TableDynamicLayout.set_fields('Labels', root_path='data.
     TextDyField.data_source('Value', 'value'),
 ])
 
-big_query_workspace_meta = CloudServiceMeta.set_layouts([workspace_dataset_meta,
-                                                       workspace_table_meta,
-                                                       workspace_table_schema_meta,
-                                                       workspace_matching_project_meta,
-                                                       workspace_labels_meta])
+big_query_workspace_meta = CloudServiceMeta.set_layouts([workspace_dataset_meta, workspace_table_meta,
+                                                         workspace_table_schema_meta, workspace_matching_project_meta,
+                                                         workspace_labels_meta])
 
 
 class BigQueryGroupResource(CloudServiceResource):

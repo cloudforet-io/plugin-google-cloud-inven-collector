@@ -1,5 +1,6 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType, DictType, UnionType, MultiType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Labels(Model):
@@ -92,11 +93,7 @@ class Access(Model):
     user_by_email = StringType(deserialize_from='userByEmail', serialize_when_none=False)
 
 
-class BigQueryWorkSpace(Model):
-    id = StringType()
-    name = StringType()
-    project = StringType()
-    region = StringType()
+class BigQueryWorkSpace(BaseResource):
     matching_projects = ListType(ModelType(ProjectModel), default=[])
     dataset_reference = ModelType(DatasetReference, deserialize_from='datasetReference', serialize_when_none=False)
     friendly_name = StringType(deserialize_from='friendlyName', serialize_when_none=False)
@@ -113,7 +110,6 @@ class BigQueryWorkSpace(Model):
     default_partition_expiration_ms = StringType(deserialize_from='defaultPartitionExpirationMs',
                                                  serialize_when_none=False)
 
-    self_link = StringType(deserialize_from='selfLink')
     creation_time = DateTimeType(deserialize_from='creationTime')
     last_modified_time = DateTimeType(deserialize_from='lastModifiedTime')
 

@@ -2,6 +2,7 @@ from spaceone.inventory.model.networking.load_balancing.data import *
 from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, EnumDyField, ListDyField, DateTimeDyField
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, TableDynamicLayout
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
+from schematics.types import ModelType, StringType, PolyModelType
 
 '''
 LOAD BALANCING

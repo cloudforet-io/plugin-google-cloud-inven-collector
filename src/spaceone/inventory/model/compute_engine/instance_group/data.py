@@ -1,5 +1,6 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, DictType, FloatType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class InstanceGroupManagerVersionTargetSize(Model):
@@ -224,22 +225,17 @@ class DisplayLocation(Model):
     zone = StringType(default="")
 
 
-class InstanceGroup(Model):
-    id = StringType()
+class InstanceGroup(BaseResource):
     kind = StringType()
     instance_group_type = StringType(choices=('STATELESS', 'STATEFUL', 'UNMANAGED'))
-    name = StringType()
     description = StringType(default="")
     network = StringType()
     fingerprint = StringType()
     display_location = ModelType(DisplayLocation, serialize_when_none=False)
     zone = StringType(serialize_when_none=False)
-    self_link = StringType(deserialize_from='selfLink')
     size = IntType()
-    region = StringType(serialize_when_none=False)
     power_scheduler = ModelType(Scheduler)
     subnetwork = StringType()
-    project = StringType()
     instance_counts = IntType(default=0)
     template = ModelType(InstanceTemplate, serialize_when_none=False)
     instance_group_manager = ModelType(InstanceGroupManagers, serialize_when_none=False)
