@@ -123,6 +123,7 @@ class InstanceGroupManager(GoogleCloudManager):
                     'display_location': display_loc,
                     'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
                                                                                 "compute.googleapis.com/instance_group",
+                                                                                instance_group.get('name'),
                                                                                 google_cloud_monitoring_filters)
                 })
                 # No labels

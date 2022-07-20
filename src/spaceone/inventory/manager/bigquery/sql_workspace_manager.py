@@ -92,6 +92,7 @@ class SQLWorkspaceManager(GoogleCloudManager):
                     'labels': labels,
                     'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
                                                                                 "bigquery.googleapis.com",
+                                                                                data_set_id,
                                                                                 google_cloud_monitoring_filters)
                 })
                 big_query_data = BigQueryWorkSpace(bq_dataset, strict=False)

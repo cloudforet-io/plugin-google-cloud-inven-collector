@@ -188,6 +188,7 @@ class VMInstanceManager(GoogleCloudManager):
             'subnet': subnet_vo,
             'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
                                                                         "compute.googleapis.com/instance",
+                                                                        instance.get('id'),
                                                                         google_cloud_monitoring_filters)
         })
         ##################################

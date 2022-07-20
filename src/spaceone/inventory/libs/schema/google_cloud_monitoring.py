@@ -9,6 +9,7 @@ class GoogleCloudMonitoringFilterLabel(Model):
 
 class GoogleCloudMonitoringFilter(Model):
     metric_type = StringType(serialize_when_none=False)
+    resource_id = StringType(serialize_when_none=False)
     labels = ListType(ModelType(GoogleCloudMonitoringFilterLabel, serialize_when_none=False), default=[])
 
 
