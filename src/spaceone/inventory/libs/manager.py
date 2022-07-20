@@ -84,9 +84,9 @@ class GoogleCloudManager(BaseManager):
     def set_google_cloud_monitoring(project_id, metric_type, resource_id, filters):
         return {
             'name': f'projects/{project_id}',
+            'resource_id': resource_id,
             'filters': [{
                 'metric_type': metric_type,
-                'resource_id': resource_id,
                 'labels': filters
             }]
         }
