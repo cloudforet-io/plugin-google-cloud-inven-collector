@@ -82,19 +82,27 @@ class GoogleCloudManager(BaseManager):
 
     @staticmethod
     def set_google_cloud_monitoring(project_id, metric_type, filters):
-        metric_filter = f"metric.type = starts_with('{metric_type}')"
-
-        filter_list = []
-        for _filter in filters:
-            filter_list.append(f"{_filter['key']} = {_filter['value']}")
-
-        or_merge_filter = ' OR '.join(filter_list)
-        merge_filter = ' AND '.join([metric_filter, or_merge_filter])
-
         return {
             'name': f'projects/{project_id}',
-            'filters': [merge_filter]
+            'filters': [{
+                'metric_type': metric_type,
+                'labels': filters
+            }]
         }
+
+        # metric_filter = f"metric.type = starts_with('{metric_type}')"
+        #
+        # filter_list = []
+        # for _filter in filters:
+        #     filter_list.append(f"{_filter['key']} = {_filter['value']}")
+        #
+        # or_merge_filter = ' OR '.join(filter_list)
+        # merge_filter = ' AND '.join([metric_filter, or_merge_filter])
+        #
+        # return {
+        #     'name': f'projects/{project_id}',
+        #     'filters': [merge_filter]
+        # }
 
     @staticmethod
     def get_param_in_url(url, key):
