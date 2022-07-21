@@ -33,21 +33,6 @@ cst_vm_instance.tags = {
 
 cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Server ID', 'server_id', options={'is_optional': True}),
-        TextDyField.data_source('Name', 'name'),
-        TextDyField.data_source('Resource ID', 'reference.resource_id', options={'is_optional': True}),
-        EnumDyField.data_source('Management State', 'state', default_badge={
-            'green.500': ['Active'], 'gray.500': ['Deleted']
-        }),
-        TextDyField.data_source('Instance Type', 'data.compute.instance_type'),
-        TextDyField.data_source('Core', 'data.hardware.core'),
-        TextDyField.data_source('Memory', 'data.hardware.memory'),
-        TextDyField.data_source('Provider', 'provider'),
-        TextDyField.data_source('Cloud Service Group', 'cloud_service_group', options={'is_optional': True}),
-        TextDyField.data_source('Cloud Service Type', 'cloud_service_type', options={'is_optional': True}),
-        TextDyField.data_source('Instance ID', 'data.compute.instance_id', options={'is_optional': True}),
-        TextDyField.data_source('Key Pair', 'data.compute.keypair', options={'is_optional': True}),
-        TextDyField.data_source('Image', 'data.compute.image', options={'is_optional': True}),
         EnumDyField.data_source('Instance State', 'data.compute.instance_state', default_badge={
             'yellow.500': ['Pending', 'Rebooting', 'Shutting-Down', 'Stopping', 'Starting', 'Staging', 'Provisioning',
                            'Suspending', 'Deallocating', 'Repairing'],
@@ -55,6 +40,14 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
             'red.500': ['Stopped', 'Deallocated', 'Suspended'],
             'gray.500': ['Terminated']
         }),
+        TextDyField.data_source('Server ID', 'server_id', options={'is_optional': True}),
+        TextDyField.data_source('Instance Type', 'data.compute.instance_type'),
+        TextDyField.data_source('Core', 'data.hardware.core'),
+        TextDyField.data_source('Memory', 'data.hardware.memory'),
+        TextDyField.data_source('Instance ID', 'data.compute.instance_id', options={'is_optional': True}),
+        TextDyField.data_source('Key Pair', 'data.compute.keypair', options={'is_optional': True}),
+        TextDyField.data_source('Image', 'data.compute.image', options={'is_optional': True}),
+
         TextDyField.data_source('Availability Zone', 'data.compute.az'),
         TextDyField.data_source('OS Type', 'data.os.os_type', options={'is_optional': True}),
         TextDyField.data_source('OS', 'data.os.os_distro'),
@@ -175,43 +168,11 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
             'field_description': '(Daily Max)'
         }),
         TextDyField.data_source('Account ID', 'account', options={'is_optional': True}),
-        TextDyField.data_source('Region', 'region_code', options={'is_optional': True}, reference={
-            "resource_type": "inventory.Region",
-            "reference_key": "region_code"
-        }),
-        TextDyField.data_source('Project', 'project_id', options={"sortable": False}, reference={
-            "resource_type": "identity.Project",
-            "reference_key": "project_id"
-        }),
-        TextDyField.data_source('Service Accounts', 'collection_info.service_accounts', options={'is_optional': True},
-                                reference={
-                                    "resource_type": "identity.ServiceAccount",
-                                    "reference_key": "service_account_id"
-                                }),
-        TextDyField.data_source('Secrets', 'collection_info.secrets', options={'is_optional': True}, reference={
-            "resource_type": "secret.Secret",
-            "reference_key": "secret_id"
-        }),
-        TextDyField.data_source('Collectors', 'collection_info.collectors', options={'is_optional': True}, reference={
-            "resource_type": "inventory.Collector",
-            "reference_key": "collector_id"
-        }),
         TextDyField.data_source('Launched', 'launched_at', options={'is_optional': True}),
-        DateTimeDyField.data_source('Last Collected', 'updated_at', options={"source_type": "iso8601"}),
-        DateTimeDyField.data_source('Created', 'created_at', options={
-            "source_type": "iso8601",
-            "is_optional": True
-        }),
-        DateTimeDyField.data_source('Deleted', 'deleted_at', options={
-            "source_type": "iso8601",
-            "is_optional": True
-        }),
     ],
 
     search=[
         SearchField.set(name='Server ID', key='server_id'),
-        SearchField.set(name='Name', key='name'),
-        SearchField.set(name='Resource ID', key='reference.resource_id'),
         SearchField.set(name='IP Address', key='data.ip_addresses'),
         SearchField.set(name='Instance ID', key='data.compute.instance_id'),
         SearchField.set(name='Instance State', key='data.compute.instance_state',
@@ -245,24 +206,9 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name='Auto Scaling Group', key='data.auto_scaling_group.name'),
         SearchField.set(name='Core', key='data.hardware.core', data_type='integer'),
         SearchField.set(name='Memory', key='data.hardware.memory', data_type='float'),
-        SearchField.set(name='Management State', key='state',
-                        enums={
-                            'ACTIVE': {'label': 'Active'},
-                            'DELETED': {'label': 'Deleted'}
-                        }),
-        SearchField.set(name='Provider', key='provider', reference='identity.Provider'),
         SearchField.set(name='Account ID', key='account'),
-        SearchField.set(name='Cloud Service Group', key='cloud_service_group'),
-        SearchField.set(name='Cloud Service Type', key='cloud_service_type'),
-        SearchField.set(name='Region', key='region_code', reference='inventory.Region'),
-        SearchField.set(name='Project', key='project_id', reference='identity.Project'),
         SearchField.set(name='Project Group', key='project_group_id', reference='identity.ProjectGroup'),
-        SearchField.set(name='Service Account', key='collection_info.service_accounts', reference='identity.ServiceAccount'),
-        SearchField.set(name='Secret', key='collection_info.secrets', reference='secret.Secret'),
         SearchField.set(name='Launched', key='launched_at'),
-        SearchField.set(name='Last Collected', key='updated_at', data_type='datetime'),
-        SearchField.set(name='Created', key='created_at', data_type='datetime'),
-        SearchField.set(name='Deleted', key='deleted_at', data_type='datetime')
     ],
 
     widget=[
