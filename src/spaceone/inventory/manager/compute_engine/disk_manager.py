@@ -62,7 +62,7 @@ class DiskManager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                google_cloud_monitoring_filters = [{'key': 'metric.device_name', 'value': disk.get('name')}]
+                google_cloud_monitoring_filters = [{'key': 'resource.labels.device_name', 'value': disk.get('name')}]
                 disk.update({
                     'project': secret_data['project_id'],
                     'id': disk_id,
