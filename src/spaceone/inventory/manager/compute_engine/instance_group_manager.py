@@ -113,7 +113,7 @@ class InstanceGroupManager(GoogleCloudManager):
                 display_loc = {'region': location, 'zone': ''} if location_type == 'region' \
                     else {'region': self.parse_region_from_zone(location), 'zone': location}
 
-                google_cloud_monitoring_filters = [{'key': 'resource.instance_group_name',
+                google_cloud_monitoring_filters = [{'key': 'resource.labels.instance_group_name',
                                                     'value': instance_group.get('name')}]
 
                 instance_group.update({
