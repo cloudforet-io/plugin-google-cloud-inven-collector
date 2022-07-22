@@ -53,7 +53,7 @@ class TestCollector(TestCase):
             }
         '''
         options = {
-            "cloud_service_types": ["ComputeEngine"]
+            "cloud_service_types": ["BigQuery"]
         }
         filter = {}
         print(f'secret data => {secret_data}')
