@@ -23,19 +23,20 @@ Google Cloud에서 다른 프로젝트와 구분하기 위해 사용되는 고�
 
 ### **google_oauth2_credentials**
 
-**[google_oauth2_credentials]** 방식은 OAuth2.0 기반의 **자격증명**을 제공합니다. 
-이를 통해 사용자(리소스 소유자)를 대신하여 리소스에 접근할 수 있습니다. 
+**[google_oauth2_credentials]** 방식은 OAuth2.0 기반의 **자격증명**을 제공합니다.   
+이를 통해 사용자(리소스 소유자)를 대신하여 리소스에 접근할 수 있습니다.   
 Google API의 인증 방식의 상세한 설명은 [Google Cloud Documentation](https://developers.google.com/identity/protocols/oauth2?hl=en)을 참고하십시오.
 
 <br>
 2가지 개념에 대해 간략히 알아 보았습니다.  
-이제, 실제로 **설정 정보를 획득하는 방법**에 대해 아래 과정에서 자세히 알아보도록 하겠습니다. 
+
+이제, 실제로 **설정 정보를 획득하는 방법** 에 대해 아래 과정에서 자세히 알아보도록 하겠습니다.
 
 <br>
 
 ## 전체 Flow
 
-클라우드포레에서는 Google Cloud 연동에 대해 OAuth2.0에 기반한 **[google_oauth2_credentials]** 방식을 지원합니다.
+클라우드포레에서는 Google Cloud 연동에 대해 OAuth2.0에 기반한 **[google_oauth2_credentials]** 방식을 지원합니다.    
 **[google_oauth2_credentials]** 을 이용한 방식은 아래와 같은 설정 정보가 필요합니다. 
 
 - **Client Email**
@@ -67,7 +68,7 @@ Google API의 인증 방식의 상세한 설명은 [Google Cloud Documentation](
 
 <br>
 
-(1) [Google Cloud 로그인](https://cloud.google.com/gcp/?hl=en) > [IAM 콘솔](https://console.cloud.google.com/projectselector2/iam-admin/iam?supportedpurview=organizationId,folder,project&orgonly=true) 이동 후 [IAM] 버튼을  클릭합니다.  
+(1) [Google Cloud 로그인](https://cloud.google.com/gcp/?hl=en) > [IAM 콘솔](https://console.cloud.google.com/projectselector2/iam-admin/iam?supportedpurview=organizationId,folder,project&orgonly=true) 이동 후 프로젝트를 클릭합니다.  
 (1-1) [IAM 및 관리자 > 서비스 계정] 메뉴에서 [서비스 계정 만들기]를 클릭합니다.
 
 <img src="./GUIDE-img/create-gcp-service-account(h2)-1.png" width="80%" height="80%">
@@ -89,6 +90,7 @@ Google Cloud 플러그인이 리소스 정보를 수집하기 위해 서비스 �
 컬렉터 플러그인은 읽기 권한 이외의 어떠한 권한도 필요하지 않습니다.
 
 컬렉터 플러그인이 수집할 수 있는 Google Cloud 서비스와 리소스를 수집하기 위해 필요한 권한 목록은 아래와 같습니다.
+
 <br>
 
 | Service | URL |
@@ -182,9 +184,11 @@ Google Cloud 플러그인이 리소스 정보를 수집하기 위해 서비스 �
 (2) [키] 탭 메뉴를 클릭합니다.  
 (2-1) [키 추가 > 새 키 만들기] 버튼을 클릭합니다.
 
-<img src="./GUIDE-img/create-key(h2)-1.png" width="80%" height="80%">
+<img src="./GUIDE-img/create-key(h2)-2.png" width="80%" height="80%">
 
-(3) 키 유형 중 JSON 방식을 클릭한 후 [만들기] 버튼을 클릭합니다.  
+(3) 키 유형 중 JSON 방식을 클릭한 후 [만들기] 버튼을 클릭합니다.
+<img src="./GUIDE-img/create-key(h2)-3.png" width="80%" height="80%">
+
 (3-1) 로컬 컴퓨터에 비공개 키가 JSON 파일로 저장됩니다.  
 다운로드 받은 JSON 파일에는 클라우드포레에서 서비스 계정 등록 시 필요한 설정 정보가 존재합니다.
 
@@ -220,9 +224,11 @@ Google Cloud 플러그인이 리소스 정보를 수집하기 위해 서비스 �
 - **[Private Key ID]**
 - **[Project ID]**
 - **[client_x509_cert_url]**
-
 <br>
+
 위 정보를 클라우드포레에 입력하는 방식은 크게 두가지 방법을 제공합니다.
+1. 직접 입력
+2. JSON으로 입력
 
 (2-1) 설정 정보를 직접 입력하는 방식입니다.  
 다운로드받은 JSON 파일의 내용 중 각각의 설정 정보에 해당하는 값을 복사 후 붙여넣기 합니다.
