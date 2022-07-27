@@ -97,6 +97,8 @@ class StorageManager(GoogleCloudManager):
                     'account': project_id,
                     'tags': labels,
                     'region_code': region.get('region_code'),
+                    'instance_type': '',
+                    'instance_size': bucket_data.size,
                     'data': bucket_data,
                     'reference': ReferenceModel(bucket_data.reference())
                 })
