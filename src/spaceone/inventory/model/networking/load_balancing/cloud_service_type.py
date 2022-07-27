@@ -23,6 +23,7 @@ cst_load_balancing.is_major = True
 cst_load_balancing.labels = ['Networking']
 cst_load_balancing.tags = {
     'spaceone:icon': 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Load_Balancing.svg',
+    'spaceone:display_name': 'LoadBalancing'
 }
 
 cst_load_balancing._metadata = CloudServiceTypeMeta.set_meta(
