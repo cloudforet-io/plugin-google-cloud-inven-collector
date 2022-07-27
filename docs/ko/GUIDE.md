@@ -109,7 +109,7 @@ Google Cloud 플러그인이 리소스 정보를 수집하기 위해 서비스 �
 
 <img src="./GUIDE-img/create-role(h2)-1.png" width="80%" height="80%">
 
-(1-3) [다른 역할 추가] 버튼을 클릭하여 검색창에 `BigQuery 리소스 뷰어` 와 `BigQuery 데이터 뷰어` 를 입력 후 역할을 추가합니다.
+(1-3) [다른 역할 추가] 버튼을 클릭하여 검색창에 `BigQuery 리소스 뷰어` 를 입력 후 역할을 추가합니다.
 
 <img src="./GUIDE-img/create-role(h2)-2.png" width="80%" height="80%">
 
