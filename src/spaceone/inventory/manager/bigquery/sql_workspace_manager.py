@@ -33,7 +33,6 @@ class SQLWorkspaceManager(GoogleCloudManager):
 
         collected_cloud_services = []
         error_responses = []
-        data_set_id = ""
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
@@ -46,17 +45,17 @@ class SQLWorkspaceManager(GoogleCloudManager):
         data_sets = big_query_conn.list_dataset()
         projects = big_query_conn.list_projects()
 
-        update_bq_dt_tables = []
-        table_schemas = []
-
         for data_set in data_sets:
             try:
                 ##################################
                 # 1. Set Basic Information
                 ##################################
 
+                update_bq_dt_tables = []
+                table_schemas = []
+
                 data_refer = data_set.get('datasetReference', {})
-                data_set_id = data_refer.get('datasetId')
+                data_set_id = data_refer.get('datasetId', '')
                 dataset_project_id = data_refer.get('projectId')
                 bq_dataset = big_query_conn.get_dataset(data_set_id)
                 creation_time = bq_dataset.get('creationTime', '')
@@ -183,9 +182,10 @@ class SQLWorkspaceManager(GoogleCloudManager):
 
     @staticmethod
     def _convert_unix_timestamp(unix_timestamp):
-        try:
-            return datetime.fromtimestamp(int(unix_timestamp) / 1000)
-        except Exception as e:
-            _LOGGER.error(f'[_convert_unix_timestamp] {e}')
-            return
+        if unix_timestamp:
+            try:
+                return datetime.fromtimestamp(int(unix_timestamp) / 1000)
+            except Exception as e:
+                _LOGGER.error(f'[_convert_unix_timestamp] {e}')
 
+        return None
