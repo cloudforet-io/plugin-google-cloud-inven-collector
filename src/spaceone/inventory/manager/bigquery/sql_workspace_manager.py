@@ -65,9 +65,9 @@ class SQLWorkspaceManager(GoogleCloudManager):
                 exp_table_ms = bq_dataset.get('defaultTableExpirationMs')
 
                 # skip if dataset id is invisible
-                if self._get_visible_on_console(data_set_id):
-                    bq_dt_tables = big_query_conn.list_tables(data_set_id)
-                    update_bq_dt_tables, table_schemas = self._get_table_list_with_schema(big_query_conn, bq_dt_tables)
+                # if self._get_visible_on_console(data_set_id):
+                #     bq_dt_tables = big_query_conn.list_tables(data_set_id)
+                #     update_bq_dt_tables, table_schemas = self._get_table_list_with_schema(big_query_conn, bq_dt_tables)
 
                 labels = self.convert_labels_format(bq_dataset.get('labels', {}))
                 google_cloud_monitoring_filters = [{'key': 'resource.labels.dataset_id', 'value': data_set_id}]
