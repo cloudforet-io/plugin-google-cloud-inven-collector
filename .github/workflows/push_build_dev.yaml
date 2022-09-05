@@ -32,7 +32,7 @@ jobs:
           author_name: Github Action Slack
 
   docker:
-      if: github.repository_owner == 'spaceone-dev'
+      if: github.repository_owner == 'cloudforet-io'
       needs: versioning
       runs-on: ubuntu-latest
       env:

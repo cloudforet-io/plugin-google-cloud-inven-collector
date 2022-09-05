@@ -14,12 +14,12 @@ env:
 
 jobs:
   owner_check:
-    if: github.repository_owner == 'spaceone-dev'
+    if: github.repository_owner == 'cloudforet-io'
     runs-on: ubuntu-latest
     steps:
       - run: echo ${{ github.repository_owner }}
   condition_check:
-    if: github.repository_owner == 'spaceone-dev'
+    if: github.repository_owner == 'cloudforet-io'
     runs-on: ubuntu-latest
     needs: owner_check
     steps:
