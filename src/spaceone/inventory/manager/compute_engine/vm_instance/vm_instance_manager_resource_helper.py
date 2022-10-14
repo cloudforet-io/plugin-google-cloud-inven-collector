@@ -137,7 +137,6 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 for image in images:
                     if licenses == image.get('licenses', []):
                         os_arch_index = [i for i, e in enumerate(arch_list) if e in image.get('description', '')]
-
                         os_data.update({'os_distro': 'windows-server' if key == 'windows' else key,
                                         'details': image.get('description', ''),
                                         'os_arch': arch_list[os_arch_index[0]] if len(os_arch_index) > 0 else ''})
@@ -146,6 +145,8 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
             if find:
                 break
 
+        if os_identity == 'cos':
+            os_data.update({'os_distro': 'container-optimized os'})
         return os_data
 
     def _get_google_cloud_data(self, instance, instance_in_managed_instance_groups):

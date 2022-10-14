@@ -26,7 +26,6 @@ cst_disk.tags = {
 
 cst_disk._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Name', 'data.name'),
         TextDyField.data_source('ID', 'data.id'),
         TextDyField.data_source('Zone', 'data.zone'),
         TextDyField.data_source('Source Image', 'data.source_image_display'),
