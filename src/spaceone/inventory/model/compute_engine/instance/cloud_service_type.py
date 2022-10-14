@@ -2,7 +2,8 @@ import os
 
 from spaceone.inventory.libs.common_parser import *
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import CardWidget, ChartWidget
-from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, SearchField, DateTimeDyField, ListDyField, \
+from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, SearchField, DateTimeDyField, \
+    ListDyField, \
     EnumDyField, SizeField
 from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, \
     CloudServiceTypeMeta
@@ -17,7 +18,6 @@ count_by_account_conf = os.path.join(current_dir, 'widget/count_by_account.yml')
 count_by_instance_type_conf = os.path.join(current_dir, 'widget/count_by_instance_type.yml')
 count_by_region_conf = os.path.join(current_dir, 'widget/count_by_region.yml')
 
-
 cst_vm_instance = CloudServiceTypeResource()
 cst_vm_instance.name = 'Instance'
 cst_vm_instance.provider = 'google_cloud'
@@ -30,15 +30,14 @@ cst_vm_instance.tags = {
     'spaceone:icon': 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Compute_Engine.svg',
 }
 
-
 cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        EnumDyField.data_source('Instance State', 'data.compute.instance_state', default_badge={
-            'yellow.500': ['Pending', 'Rebooting', 'Shutting-Down', 'Stopping', 'Starting', 'Staging', 'Provisioning',
-                           'Suspending', 'Deallocating', 'Repairing'],
-            'green.500': ['Running'],
-            'red.500': ['Stopped', 'Deallocated', 'Suspended'],
-            'gray.500': ['Terminated']
+        EnumDyField.data_source('Instance State', 'data.compute.instance_state', default_state={
+            'safe': ['RUNNING'],
+            'warning': ['PENDING', 'REBOOTING', 'SHUTTING-DOWN', 'STOPPING', 'STARTING',
+                        'PROVISIONING', 'STAGING', 'DEALLOCATING', 'REPAIRING'],
+            'alert': ['STOPPED', 'DEALLOCATED', 'SUSPENDED'],
+            'disable': ['TERMINATED']
         }),
         TextDyField.data_source('Server ID', 'server_id', options={'is_optional': True}),
         TextDyField.data_source('Instance Type', 'data.compute.instance_type'),
@@ -64,7 +63,8 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source('Subnet Name', 'data.subnet.subnet_name', options={'is_optional': True}),
         TextDyField.data_source('LB Name', 'data.load_balancers.name', options={'is_optional': True}),
         TextDyField.data_source('LB DNS', 'data.load_balancers.dns', options={'is_optional': True}),
-        TextDyField.data_source('Managed Instance', 'data.google_cloud.is_managed_instance', options={'is_optional': True}),
+        TextDyField.data_source('Managed Instance', 'data.google_cloud.is_managed_instance',
+                                options={'is_optional': True}),
         TextDyField.data_source('LB DNS', 'data.load_balancers.dns', options={'is_optional': True}),
         TextDyField.data_source('Auto Scaling Group', 'data.auto_scaling_group.name', options={'is_optional': True}),
         TextDyField.data_source('CPU Utilization', 'data.monitoring.cpu.utilization.avg', options={
@@ -107,11 +107,12 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
             'is_optional': True,
             'field_description': '(Daily Average)'
         }),
-        SizeField.data_source('Network Received Throughput', 'data.monitoring.network.received_throughput.avg', options={
-            'default': 0,
-            'is_optional': True,
-            'field_description': '(Daily Average)'
-        }),
+        SizeField.data_source('Network Received Throughput', 'data.monitoring.network.received_throughput.avg',
+                              options={
+                                  'default': 0,
+                                  'is_optional': True,
+                                  'field_description': '(Daily Average)'
+                              }),
         SizeField.data_source('Network Sent Throughput', 'data.monitoring.network.sent_throughput.avg', options={
             'default': 0,
             'is_optional': True,
@@ -157,11 +158,12 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
             'is_optional': True,
             'field_description': '(Daily Max)'
         }),
-        SizeField.data_source('Network Received Throughput', 'data.monitoring.network.received_throughput.max', options={
-            'default': 0,
-            'is_optional': True,
-            'field_description': '(Daily Max)'
-        }),
+        SizeField.data_source('Network Received Throughput', 'data.monitoring.network.received_throughput.max',
+                              options={
+                                  'default': 0,
+                                  'is_optional': True,
+                                  'field_description': '(Daily Max)'
+                              }),
         SizeField.data_source('Network Sent Throughput', 'data.monitoring.network.sent_throughput.max', options={
             'default': 0,
             'is_optional': True,
@@ -225,4 +227,3 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
 CLOUD_SERVICE_TYPES = [
     CloudServiceTypeResponse({'resource': cst_vm_instance}),
 ]
-
