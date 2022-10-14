@@ -130,3 +130,5 @@ dmypy.json
 
 # Test case
 test_cloudservice_api.py
+
+.idea
