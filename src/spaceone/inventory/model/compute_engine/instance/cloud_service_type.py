@@ -33,10 +33,10 @@ cst_vm_instance.tags = {
 cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         EnumDyField.data_source('Instance State', 'data.compute.instance_state', default_state={
-            'safe': ['running'],
-            'warning': ['staging', 'provisioning', 'repairing', 'stopping', 'suspending'],
+            'safe': ['RUNNING'],
+            'warning': ['STAGING', 'PROVISIONING', 'REPAIRING', 'STOPPING', 'SUSPENDING'],
             'disable': [],
-            'alert': ['suspended', 'terminated']
+            'alert': ['SUSPENDED', 'TERMINATED']
         }),
         TextDyField.data_source('Server ID', 'server_id', options={'is_optional': True}),
         TextDyField.data_source('Instance Type', 'data.compute.instance_type'),
