@@ -146,7 +146,8 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 break
 
         if os_identity == 'cos':
-            os_data.update({'os_distro': 'container-optimized os'})
+            os_data.update({'os_distro': 'cos',
+                            'details': 'Google, Container-Optimized OS'})
         return os_data
 
     def _get_google_cloud_data(self, instance, instance_in_managed_instance_groups):

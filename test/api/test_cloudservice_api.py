@@ -56,7 +56,7 @@ class TestCollector(TestCase):
             "cloud_service_types": ["BigQuery"]
         }
         filter = {}
-        print(f'secret data => {secret_data}')
+
         resource_stream = self.inventory.Collector.collect({'options': options, 'secret_data': secret_data,
                                                             'filter': filter})
         for res in resource_stream:
