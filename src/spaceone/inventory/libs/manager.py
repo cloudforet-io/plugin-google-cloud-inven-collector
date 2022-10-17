@@ -19,6 +19,9 @@ class GoogleCloudManager(BaseManager):
     response_schema = None
     collected_region_codes = []
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def verify(self, options, secret_data, **kwargs):
         """ Check collector's status.
         """
@@ -113,7 +116,7 @@ class GoogleCloudManager(BaseManager):
         # Google cloud resource representation rules is /{key}/{value}/{key}/{value}
         if key in list_path:
             index_key = list_path.index(key)
-            index_value = index_key+1
+            index_value = index_key + 1
             param = list_path[index_value]
         return param
 

@@ -24,7 +24,7 @@ class TopicManager(GoogleCloudManager):
         Response:
             CloudServiceResponse/ErrorResourceResponse
         """
-        _LOGGER.debug(f'** Pub/Sub topic START **')
+        _LOGGER.debug(f'[Pub/Sub] Topic START')
 
         start_time = time.time()
         collected_cloud_services = []
@@ -32,13 +32,17 @@ class TopicManager(GoogleCloudManager):
         topic_id = ""
 
         secret_data = params['secret_data']
-        project_id = secret_data['project_id']
 
         ##################################
         # 0. Gather All Related Resources
         # List all information through connector
         ##################################
         topic_conn: TopicConnector = self.locator.get_connector(self.connector_name, **params)
+        project_topic_names = topic_conn.get_project_topic_names()
+        print(project_topic_names)
+        # for name in project_topic_names:
+        #     a = topic_conn.get_topic_by_name(name)
+        #     print(a)
 
         _LOGGER.debug(f'** Firewall Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses

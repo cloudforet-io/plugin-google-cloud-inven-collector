@@ -8,7 +8,7 @@ topic_meta = CloudServiceMeta.set_layouts([])
 
 
 class PubSubResource(CloudServiceResource):
-    cloud_service_group = StringType(default='PubSub')
+    cloud_service_group = StringType(default='Pub/Sub')
 
 
 class TopicResource(PubSubResource):

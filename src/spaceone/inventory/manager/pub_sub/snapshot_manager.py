@@ -9,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class SnapshotManager(GoogleCloudManager):
-    connector_name = 'SnapshotManager'
+    connector_name = 'SnapshotConnector'
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params):

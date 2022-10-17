@@ -53,7 +53,7 @@ class TestCollector(TestCase):
             }
         '''
         options = {
-            "cloud_service_types": ["BigQuery"]
+            "cloud_service_types": ["PubSub"]
         }
         filter = {}
 
