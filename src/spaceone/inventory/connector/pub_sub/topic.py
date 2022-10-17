@@ -13,27 +13,55 @@ class TopicConnector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get_project_topic_names(self, **query):
+    def list_project_topic_names(self, **query):
         topic_names = []
         query.update({'project': self._make_project_fmt()})
         request = self.client.projects().topics().list(**query)
 
         while request is not None:
             response = request.execute()
-            print(response)
             topics = response.get('topics', [])
             topic_names = [topic['name'] for topic in topics]
             request = self.client.projects().topics().list_next(previous_request=request, previous_response=response)
         return topic_names
 
-    def get_topic_by_name(self, name):
-        query = {'topic': name}
-        request = self.client.projects().topics().get(**query)
+    def list_snapshot_names(self, topic_name):
+        snapshots = []
+        query = {'topic': topic_name}
+        snapshot_service = self.client.projects().topics().snapshots()
+        request = snapshot_service.list(**query)
 
-        # while request is not None:
-        #     response = request.execute()
-        #     print(response)
+        while request is not None:
+            response = request.execute()
+            snapshots = response.get('snapshots', [])
+            request = snapshot_service.list_next(previous_request=request, previous_response=response)
+        return snapshots
+
+    def list_subscription_names(self, topic_name):
+        subscriptions = []
+        query = {'topic': topic_name}
+        subscription_service = self.client.projects().topics().subscriptions()
+        request = subscription_service.list(**query)
+
+        while request is not None:
+            response = request.execute()
+            subscriptions = response.get('subscriptions', [])
+            request = subscription_service.list_next(previous_request=request, previous_response=response)
+        return subscriptions
+
+    def get_subscription(self, subscription_name):
+        query = {'subscription': subscription_name}
+        subscription_service = self.client.projects().subscriptions()
+        request = subscription_service.get(**query)
+        response = request.execute()
+        return response
+
+    def get_snapshot(self, snapshot_name):
+        query = {'snapshot': snapshot_name}
+        snapshot_service = self.client.projects().snapshots()
+        request = snapshot_service.get(**query)
+        response = request.execute()
+        return response
 
     def _make_project_fmt(self):
-        print(self.project_id)
         return f'projects/{self.project_id}'
