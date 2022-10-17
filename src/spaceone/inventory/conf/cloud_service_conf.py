@@ -17,7 +17,11 @@ CLOUD_SERVICE_GROUP_MAP = {
                    'FirewallManager',
                    'LoadBalancingManager',
                    'RouteManager',
-                   'VPCNetworkManager']
+                   'VPCNetworkManager'],
+    'PubSub': ['SchemaManager',
+               'SnapshotManager',
+               'SubscriptionManager',
+               'TopicManager']
 }
 
 REGION_INFO = {

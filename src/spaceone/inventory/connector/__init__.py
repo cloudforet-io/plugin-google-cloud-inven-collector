@@ -13,6 +13,10 @@ from spaceone.inventory.connector.networking.external_ip_address import External
 from spaceone.inventory.connector.networking.firewall import FirewallConnector
 from spaceone.inventory.connector.networking.load_balancing import LoadBalancingConnector
 from spaceone.inventory.connector.networking.vpc_network import VPCNetworkConnector
+from spaceone.inventory.connector.pub_sub.schema import SchemaConnector
+from spaceone.inventory.connector.pub_sub.subscription import SubscriptionConnector
+from spaceone.inventory.connector.pub_sub.snapshot import SnapshotConnector
+from spaceone.inventory.connector.pub_sub.topic import TopicConnector
 
 
 
