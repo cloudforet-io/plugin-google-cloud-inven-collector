@@ -13,17 +13,16 @@ class TopicConnector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def list_project_topic_names(self, **query):
-        topic_names = []
+    def list_topics(self, **query):
+        topics = []
         query.update({'project': self._make_project_fmt()})
         request = self.client.projects().topics().list(**query)
 
         while request is not None:
             response = request.execute()
             topics = response.get('topics', [])
-            topic_names = [topic['name'] for topic in topics]
             request = self.client.projects().topics().list_next(previous_request=request, previous_response=response)
-        return topic_names
+        return topics
 
     def list_snapshot_names(self, topic_name):
         snapshots = []

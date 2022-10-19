@@ -1,4 +1,4 @@
-from schematics.types import ModelType, StringType, PolyModelType
+from schematics.types import ModelType, StringType, PolyModelType, DictType
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
 from spaceone.inventory.model.pub_sub.topic.data import Topic
@@ -8,6 +8,7 @@ topic_meta = CloudServiceMeta.set_layouts([])
 
 
 class PubSubResource(CloudServiceResource):
+    tags = DictType(StringType, serialize_when_none=False)
     cloud_service_group = StringType(default='Pub/Sub')
 
 

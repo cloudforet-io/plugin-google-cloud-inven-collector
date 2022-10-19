@@ -3,24 +3,88 @@ from schematics.types import ModelType, ListType, StringType, IntType, DateTimeT
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
+class RetryPolicy(Model):
+    minimum_backoff = StringType(serialize_when_none=False, deserialize_from='minimumBackoff')
+    maximum_backoff = StringType(serialize_when_none=False, deserialize_from='maximumBackoff')
+
+
+class DeadLetterPolicy(Model):
+    dead_letter_topic = StringType(serialize_when_none=False, deserialize_from='deadLetterTopic')
+    max_delivery_attempts = IntType(serialize_when_none=False, deserialize_from='maxDeliveryAttempts')
+
+
+class BigQueryConfig(Model):
+    table = StringType(serialize_when_none=False)
+    use_topic_schema = BooleanType(serialize_when_none=False, deserialize_from='useTopicSchema')
+    write_metadata = BooleanType(serialize_when_none=False, deserialize_from='writeMetadata')
+    drop_unknown_fields = BooleanType(serialize_when_none=False, deserialize_from='dropUnknownFields')
+    state = StringType(choices=('STATE_UNSPECIFIED', 'ACTIVE', 'PERMISSION_DENIED', 'NOT_FOUND', 'SCHEMA_MISMATCH'),
+                       serialize_when_none=False)
+
+
+class OidcToken(Model):
+    service_account_email = StringType(serialize_when_none=False, deserialize_from='serviceAccountEmail')
+    audience = StringType(serialize_when_none=False)
+
+
+class PushConfig(Model):
+    push_endpoint = StringType(serialize_when_none=False, deserialize_from='pushEndpoint')
+    attributes = DictType(StringType, serialize_when_none=False)
+    oidc_token = ModelType(OidcToken, serialize_when_none=False, deserialize_from='oidcToken')
+
+
 class Subscription(Model):
-    subscription_id = StringType()
-    subscription_name = StringType()
-    project = StringType()
+    name = StringType()
+    topic = StringType(serialize_when_none=False)
+    push_config = ModelType(PushConfig, deserialize_from='pushConfig')
+    bigquery_config = ModelType(BigQueryConfig, serialize_when_none=False, deserialize_from='bigqueryConfig')
+    ack_deadline_seconds = IntType(serialize_when_none=False, deserialize_from='ackDeadlineSeconds')
+    retain_acked_messages = BooleanType(serialize_when_none=False, deserialize_from='retainAckedMessages')
+    message_retention_duration = StringType(serialize_when_none=False, deserialize_from='messageRetentionDuration')
+    labels = DictType(StringType, serialize_when_none=False)
+    enable_message_ordering = BooleanType(serialize_when_none=False, deserialize_from='enableMessageOrdering')
+    expiration_policy = DictType(StringType, serialize_when_none=False, deserialize_from='expirationPolicy')
+    filter = StringType(serialize_when_none=False)
+    dead_letter_policy = ModelType(DeadLetterPolicy, serialize_when_none=False, deserialize_from='deadLetterPolicy')
+    retry_policy = ModelType(RetryPolicy, serialize_when_none=False, deserialize_from='retryPolicy')
+    detached = BooleanType(serialize_when_none=False)
+    enable_exactly_once_delivery = BooleanType(serialize_when_none=False, deserialize_from='enableExactlyOnceDelivery')
+    topic_message_retention_duration = StringType(serialize_when_none=False,
+                                                  deserialize_from='topicMassageRetentionDuration')
+    state = StringType(choices=('STATE_UNSPECIFIED', 'ACTIVE', 'RESOURCE_ERROR'))
 
 
 class Snapshot(Model):
-    snapshot_id = StringType()
-    snapshot_name = StringType()
-    project = StringType()
+    name = StringType()
+    topic = StringType(serialize_when_none=False)
+    expire_time = StringType(serialize_when_none=False, deserialize_from='expireTime')
+    labels = DictType(StringType, serialize_when_none=False)
+
+
+class MessageStoragePolicy(Model):
+    allowed_persistence_regions = ListType(StringType, serialize_when_none=False,
+                                           deserialize_from='allowedPersistenceRegions')
+
+
+class SchemaSettings(Model):
+    schema = StringType(serialize_when_none=False)
+    encoding = StringType(choices=('ENCODING_UNSPECIFIED', 'JSON', 'BINARY'), serialize_when_none=False)
+    first_revision_id = StringType(serialize_when_none=False, deserialize_from='firstRevisionId')
+    last_revision_id = StringType(serialize_when_none=False, deserialize_from='lastRevisionId')
 
 
 class Topic(BaseResource):
-    encryption_key = StringType(choices=('Google-managed', 'Customer-managed'))
-    schema_name = StringType(default='')
-    message_encoding = StringType(default='')
-    labels = DictType(StringType, default={})
-    retention_duration = StringType(default='')
-    subscriptions = ListType(ModelType(Subscription))
-    snapshots = ListType(ModelType(Snapshot))
+    labels = DictType(StringType, serialize_when_none=False)
+    message_storage_policy = ModelType(MessageStoragePolicy, serialize_when_none=False)
+    kms_key_name = StringType(serialize_when_none=False)
+    schema_settings = ModelType(SchemaSettings, serialize_when_none=False, default={})
+    satisfies_pzs = BooleanType(serialize_when_none=False)
+    message_retention_duration = StringType(serialize_when_none=False)
+    subscriptions = ListType(ModelType(Subscription), default=[])
+    snapshots = ListType(ModelType(Snapshot), default=[])
 
+    def reference(self):
+        return {
+            "resource_id": self.self_link,
+            "external_link": f"https://console.cloud.google.com/cloudpubsub/topic/detail/{self.name}?project={self.project}"
+        }

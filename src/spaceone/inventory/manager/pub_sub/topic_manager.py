@@ -3,7 +3,10 @@ import logging
 
 from spaceone.inventory.connector.pub_sub.topic import TopicConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
+from spaceone.inventory.libs.schema.base import ReferenceModel
+from spaceone.inventory.model.pub_sub.topic.cloud_service import TopicResource, TopicResponse
 from spaceone.inventory.model.pub_sub.topic.cloud_service_type import CLOUD_SERVICE_TYPES
+from spaceone.inventory.model.pub_sub.topic.data import Topic, Subscription, Snapshot
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,49 +42,75 @@ class TopicManager(GoogleCloudManager):
         # List all information through connector
         ##################################
         topic_conn: TopicConnector = self.locator.get_connector(self.connector_name, **params)
-        topic_names = topic_conn.list_project_topic_names()
+        topics = topic_conn.list_topics()
 
-        for topic_name in topic_names:
+        for topic in topics:
             try:
                 ##################################
                 # 1. Set Basic Information
                 ##################################
+                topic_name = topic.get('name')
                 topic_id = self._make_topic_id(topic_name, project_id)
+                labels = topic.get('label', {})
+                message_storage_policy = topic.get('messageStoragePolicy', {})
+                kms_key_name = topic.get('kmsKeyName', '')
+                schema_settings = topic.get('schemaSettings', {})
+                satisfies_pzs = topic.get('stisfiesPzs', False)
+                message_retention_duration = topic.get('messageRetentionDuration', '')
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
-
+                subscriptions = []
                 subscription_names = topic_conn.list_subscription_names(topic_name)
                 for subscription_name in subscription_names:
                     subscription = topic_conn.get_subscription(subscription_name)
-                    print(subscription)
-                # TODO : create Subscription model
+                    subscriptions.append(Subscription(subscription, strict=False))
 
+                snapshots = []
                 snapshot_names = topic_conn.list_snapshot_names(topic_name)
                 for snapshot_name in snapshot_names:
                     snapshot = topic_conn.get_snapshot(snapshot_name)
-                    # print(snapshot)
+                    snapshots.append(Snapshot(snapshot, strict=False))
 
                 ##################################
-                # 3. Make Return Resource
+                # 3. Make topic data
                 ##################################
-
+                topic.update({
+                    'project': project_id,
+                    'labels': labels,
+                    'message_storage_policy': message_storage_policy,
+                    'kms_key_name': kms_key_name,
+                    'schema_settings': schema_settings,
+                    'satisfies_pzs': satisfies_pzs,
+                    'message_retention_duration': message_retention_duration,
+                    'subscriptions': subscriptions,
+                    'snapshots': snapshots
+                })
+                topic_data = Topic(topic, strict=False)
                 ##################################
-                # 4. Make Collected Region Code
+                # 4. Make TopicResource Code
                 ##################################
-
+                topic_resource = TopicResource({
+                    'name': topic_id,
+                    'account': project_id,
+                    'tags': labels,
+                    'region_code': 'Global',
+                    'instance_type': '',
+                    'instance_size': 0,
+                    'data': topic_data,
+                    'reference': ReferenceModel(topic_data.reference())
+                })
                 ##################################
                 # 5. Make Resource Response Object
-                # List of LoadBalancingResponse Object
                 ##################################
-
+                collected_cloud_services.append(TopicResponse({'resource': topic_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
-                error_response = self.generate_resource_error_response(e, 'Pub/Sub', 'Topic', topic_name)
+                error_response = self.generate_resource_error_response(e, 'Pub/Sub', 'Topic', topic_id)
                 error_responses.append(error_response)
 
-        _LOGGER.debug(f'** Firewall Finished {time.time() - start_time} Seconds **')
+        _LOGGER.debug(f'** Pub/Sub Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
     @staticmethod
