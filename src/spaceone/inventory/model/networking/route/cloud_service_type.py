@@ -25,7 +25,6 @@ cst_route.tags = {
 
 cst_route._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Name', 'data.name'),
         TextDyField.data_source('Description', 'data.description'),
         TextDyField.data_source('Destination IP Range', 'data.dest_range'),
         TextDyField.data_source('Priority', 'data.priority'),

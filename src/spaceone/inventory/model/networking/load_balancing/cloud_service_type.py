@@ -28,7 +28,6 @@ cst_load_balancing.tags = {
 
 cst_load_balancing._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Name', 'data.name'),
         TextDyField.data_source('Type', 'data.type'),
         EnumDyField.data_source('Source', 'data.internal_or_external', default_badge={
 

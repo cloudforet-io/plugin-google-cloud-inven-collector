@@ -26,7 +26,6 @@ cst_network.tags = {
 
 cst_network._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Name', 'data.name'),
         TextDyField.data_source('Number of Subnet', 'data.subnetwork_data.total_number'),
         TextDyField.data_source('Maximum transmission unit', 'data.mtu'),
         TextDyField.data_source('Mode', 'data.subnet_creation_mode'),
