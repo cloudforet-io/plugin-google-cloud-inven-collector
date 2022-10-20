@@ -73,6 +73,10 @@ class SchemaSettings(Model):
     last_revision_id = StringType(serialize_when_none=False, deserialize_from='lastRevisionId')
 
 
+class TopicDisplay(Model):
+    subscription_count = IntType(default=0)
+
+
 class Topic(BaseResource):
     labels = DictType(StringType, serialize_when_none=False)
     message_storage_policy = ModelType(MessageStoragePolicy, serialize_when_none=False)
@@ -80,8 +84,9 @@ class Topic(BaseResource):
     schema_settings = ModelType(SchemaSettings, serialize_when_none=False, default={})
     satisfies_pzs = BooleanType(serialize_when_none=False)
     message_retention_duration = StringType(serialize_when_none=False)
-    subscriptions = ListType(ModelType(Subscription), default=[])
-    snapshots = ListType(ModelType(Snapshot), default=[])
+    subscriptions = ListType(ModelType(Subscription), serialize_when_none=False)
+    snapshots = ListType(ModelType(Snapshot), serialize_when_none=False)
+    display = ModelType(TopicDisplay, serialize_when_none=False)
 
     def reference(self):
         return {

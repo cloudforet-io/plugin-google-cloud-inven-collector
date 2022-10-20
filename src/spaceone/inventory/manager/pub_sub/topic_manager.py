@@ -73,6 +73,10 @@ class TopicManager(GoogleCloudManager):
                     snapshot = topic_conn.get_snapshot(snapshot_name)
                     snapshots.append(Snapshot(snapshot, strict=False))
 
+                display = {
+                    'subscription_count': len(subscription_names)
+                }
+
                 ##################################
                 # 3. Make topic data
                 ##################################
@@ -85,7 +89,8 @@ class TopicManager(GoogleCloudManager):
                     'satisfies_pzs': satisfies_pzs,
                     'message_retention_duration': message_retention_duration,
                     'subscriptions': subscriptions,
-                    'snapshots': snapshots
+                    'snapshots': snapshots,
+                    'display': display
                 })
                 topic_data = Topic(topic, strict=False)
                 ##################################
