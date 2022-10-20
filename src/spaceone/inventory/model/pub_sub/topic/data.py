@@ -75,9 +75,11 @@ class SchemaSettings(Model):
 
 class TopicDisplay(Model):
     subscription_count = IntType(default=0)
+    retention = StringType(serialize_when_none=False)
 
 
 class Topic(BaseResource):
+    encryption_key = StringType(serialize_when_none=False)
     labels = DictType(StringType, serialize_when_none=False)
     message_storage_policy = ModelType(MessageStoragePolicy, serialize_when_none=False)
     kms_key_name = StringType(serialize_when_none=False)

@@ -1,5 +1,6 @@
 import time
 import logging
+from datetime import datetime, timedelta
 
 from spaceone.inventory.connector.pub_sub.topic import TopicConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
@@ -51,12 +52,12 @@ class TopicManager(GoogleCloudManager):
                 ##################################
                 topic_name = topic.get('name')
                 topic_id = self._make_topic_id(topic_name, project_id)
-                labels = topic.get('label', {})
-                message_storage_policy = topic.get('messageStoragePolicy', {})
-                kms_key_name = topic.get('kmsKeyName', '')
-                schema_settings = topic.get('schemaSettings', {})
-                satisfies_pzs = topic.get('stisfiesPzs', False)
-                message_retention_duration = topic.get('messageRetentionDuration', '')
+                labels = topic.get('label')
+                message_storage_policy = topic.get('messageStoragePolicy')
+                kms_key_name = topic.get('kmsKeyName')
+                schema_settings = topic.get('schemaSettings')
+                satisfies_pzs = topic.get('stisfiesPzs')
+                message_retention_duration = topic.get('messageRetentionDuration')
 
                 ##################################
                 # 2. Make Base Data
@@ -74,8 +75,11 @@ class TopicManager(GoogleCloudManager):
                     snapshots.append(Snapshot(snapshot, strict=False))
 
                 display = {
-                    'subscription_count': len(subscription_names)
+                    'subscription_count': len(subscription_names),
+                    'encryption_key': self._get_encryption_key(kms_key_name),
                 }
+                if message_retention_duration:
+                    display.update({'retention': self._change_duration_to_dhm(message_retention_duration)})
 
                 ##################################
                 # 3. Make topic data
@@ -122,3 +126,33 @@ class TopicManager(GoogleCloudManager):
     def _make_topic_id(topic_name, project_id):
         path, topic_id = topic_name.split(f'projects/{project_id}/topics/')
         return topic_id
+
+    @staticmethod
+    def _get_encryption_key(kms_key_name):
+        if kms_key_name:
+            encryption_key = 'Customer managed'
+        else:
+            encryption_key = 'Google managed'
+        return encryption_key
+
+    def _change_duration_to_dhm(self, duration):
+        seconds, _ = duration.split('s')
+        return self._display_time(int(seconds))
+
+    @staticmethod
+    def _display_time(seconds, granularity=2):
+        result = []
+        intervals = (
+            ('days', 86400),
+            ('hr', 3600),
+            ('min', 60),
+            ('seconds', 1),
+        )
+        for name, count in intervals:
+            value = seconds // count
+            if value:
+                seconds -= value * count
+                if value == 1:
+                    name = name.rstrip('s')
+                result.append(f"{value} {name}")
+        return ' '.join(result[:granularity])

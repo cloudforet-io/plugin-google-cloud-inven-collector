@@ -1,7 +1,15 @@
 import os
+
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import *
+from spaceone.inventory.libs.schema.metadata.dynamic_widget import CardWidget, ChartWidget
+from spaceone.inventory.libs.schema.metadata.dynamic_field import EnumDyField, TextDyField, SizeField, SearchField
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
+
+total_count_conf = os.path.join(current_dir, 'widget/total_count.yml')
+count_by_region_conf = os.path.join(current_dir, 'widget/count_by_region.yml')
+count_by_project_conf = os.path.join(current_dir, 'widget/count_by_project.yml')
 
 cst_topic = CloudServiceTypeResource()
 cst_topic.name = 'Topic'
@@ -16,9 +24,27 @@ cst_topic.tags = {
 }
 
 cst_topic._metadata = CloudServiceTypeMeta.set_meta(
-    fields=[],
-    search=[],
-    widget=[]
+    fields=[
+        EnumDyField.data_source('Encryption key', 'data.encryption_key', default_badge={
+            'primary': ['Google managed'], 'indigo.500': ['Customer managed']
+        }),
+        TextDyField.data_source('Topic name', 'data.name'),
+        TextDyField.data_source('Retention', 'data.display.retention'),
+        TextDyField.data_source('Project', 'data.project'),
+        SizeField.data_source('Subscription count', 'data.display.subscription_count')
+    ],
+    search=[
+        SearchField.set(name='Topic ID', key='data.id'),
+        SearchField.set(name='Encryption key', key='data.id'),
+        SearchField.set(name='Topic name', key='data.id'),
+        SearchField.set(name='Retention', key='data.id'),
+        SearchField.set(name='Project', key='data.id')
+    ],
+    widget=[
+        CardWidget.set(**get_data_from_yaml(total_count_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_region_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_project_conf))
+    ]
 )
 
 CLOUD_SERVICE_TYPES = [
