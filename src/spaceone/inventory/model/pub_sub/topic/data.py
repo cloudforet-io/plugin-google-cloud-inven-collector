@@ -81,13 +81,15 @@ class TopicDisplay(Model):
 
 
 class Topic(BaseResource):
+    topic_id = StringType(serialize_when_none=False)
     encryption_key = StringType(serialize_when_none=False)
     labels = DictType(StringType, serialize_when_none=False)
-    message_storage_policy = ModelType(MessageStoragePolicy, serialize_when_none=False)
+    message_storage_policy = ModelType(MessageStoragePolicy, serialize_when_none=False,
+                                       deserialize_from='messageStoragePolicy')
     kms_key_name = StringType(serialize_when_none=False)
-    schema_settings = ModelType(SchemaSettings, serialize_when_none=False, default={})
-    satisfies_pzs = BooleanType(serialize_when_none=False)
-    message_retention_duration = StringType(serialize_when_none=False)
+    schema_settings = ModelType(SchemaSettings, serialize_when_none=False, deserialize_from='schemaSettings')
+    satisfies_pzs = BooleanType(serialize_when_none=False, deserialize_from='satisfiesPzs')
+    message_retention_duration = StringType(serialize_when_none=False, deserialize_from='messageRetentionDuration')
     subscriptions = ListType(ModelType(Subscription), serialize_when_none=False)
     snapshots = ListType(ModelType(Snapshot), serialize_when_none=False)
     display = ModelType(TopicDisplay, serialize_when_none=False)

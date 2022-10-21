@@ -5,7 +5,15 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, E
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
 from spaceone.inventory.model.pub_sub.topic.data import Topic
 
-topic = ItemDynamicLayout.set_fields('Topic', fields=[])
+topic_detail = ItemDynamicLayout.set_fields('Topic Details', fields=[
+    TextDyField.data_source('Topic ID', 'data.topic_id'),
+    TextDyField.data_source('Project', 'data.project'),
+    TextDyField.data_source('Encryption key', 'data.encryption_key'),
+    TextDyField.data_source('Schema name', 'data.schema_settings.schema'),
+    TextDyField.data_source('Message encoding', 'data.schema_settings.encoding'),
+    TextDyField.data_source('Subscription count', 'data.display.subscription_count'),
+    TextDyField.data_source('Reduction duration', 'data.display.retention')
+])
 
 topic_subscription_meta = TableDynamicLayout.set_fields('Subscriptions', root_path='data.subscription', fields=[
     TextDyField.data_source('Subscription ID', 'id'),
@@ -23,19 +31,9 @@ topic_snapshot_meta = TableDynamicLayout.set_fields('Snapshots', root_path='data
     DateTimeDyField.data_source('Expire time', 'expire_time'),
     TextDyField.data_source('Topic', 'topic')
 ])
-topic_detail = ItemDynamicLayout.set_fields('Topic Details', fields=[
-    TextDyField.data_source('Name', 'name'),
-    TextDyField.data_source('Project', 'data.project'),
-    TextDyField.data_source('Encryption key', 'data.encryption_key'),
-    TextDyField.data_source('Schema name', 'data.schema_settings.schema'),
-    TextDyField.data_source('Message encoding', 'data.schema_settings.encoding'),
-    TextDyField.data_source('Subscription count', 'data.display.subscription_count'),
-    TextDyField.data_source('Reduction duration', 'data.display.retention')
-
-])
 
 topic_detail_meta = ListDynamicLayout.set_layouts('Details', layouts=[topic_detail])
-topic_meta = CloudServiceMeta.set_layouts([topic_subscription_meta, topic_snapshot_meta, topic_detail_meta])
+topic_meta = CloudServiceMeta.set_layouts([topic_detail_meta, topic_subscription_meta, topic_snapshot_meta])
 
 
 class PubSubResource(CloudServiceResource):

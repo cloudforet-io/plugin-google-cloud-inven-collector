@@ -51,11 +51,7 @@ class TopicManager(GoogleCloudManager):
                 ##################################
                 topic_name = topic.get('name')
                 topic_id = self._make_topic_id(topic_name, project_id)
-                labels = topic.get('label')
-                message_storage_policy = topic.get('messageStoragePolicy')
-                kms_key_name = topic.get('kmsKeyName')
-                schema_settings = topic.get('schemaSettings')
-                satisfies_pzs = topic.get('stisfiesPzs')
+                labels = topic.get('labels')
                 message_retention_duration = topic.get('messageRetentionDuration')
 
                 ##################################
@@ -69,6 +65,7 @@ class TopicManager(GoogleCloudManager):
                     bigquery_config = subscription.get('bigqueryConfig')
                     subscription.update({'delivery_type': self._make_delivery_type(push_config, bigquery_config)})
                     subscriptions.append(Subscription(subscription, strict=False))
+                    time.sleep(0.2)
 
                 snapshots = []
                 snapshot_names = topic_conn.list_snapshot_names(topic_name)
@@ -76,10 +73,11 @@ class TopicManager(GoogleCloudManager):
                     snapshot = topic_conn.get_snapshot(snapshot_name)
                     snapshot.update({'id': self._make_snapshot_id(snapshot_name)})
                     snapshots.append(Snapshot(snapshot, strict=False))
+                    time.sleep(0.2)
 
                 display = {
                     'subscription_count': len(subscription_names),
-                    'encryption_key': self._get_encryption_key(kms_key_name),
+                    'encryption_key': self._get_encryption_key(topic.get('kmsKeyName')),
                 }
                 if message_retention_duration:
                     display.update({'retention': self._change_duration_to_dhm(message_retention_duration)})
@@ -88,12 +86,8 @@ class TopicManager(GoogleCloudManager):
                 # 3. Make topic data
                 ##################################
                 topic.update({
+                    'topic_id': topic_id,
                     'project': project_id,
-                    'labels': labels,
-                    'message_storage_policy': message_storage_policy,
-                    'kms_key_name': kms_key_name,
-                    'schema_settings': schema_settings,
-                    'satisfies_pzs': satisfies_pzs,
                     'message_retention_duration': message_retention_duration,
                     'subscriptions': subscriptions,
                     'snapshots': snapshots,
@@ -104,7 +98,7 @@ class TopicManager(GoogleCloudManager):
                 # 4. Make TopicResource Code
                 ##################################
                 topic_resource = TopicResource({
-                    'name': topic_id,
+                    'name': topic_name,
                     'account': project_id,
                     'tags': labels,
                     'region_code': 'Global',

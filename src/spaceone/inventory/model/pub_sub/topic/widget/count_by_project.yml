@@ -1,5 +1,5 @@
 ---
-cloud_service_group: Pub/Sub
+cloud_service_group: "Pub/Sub"
 cloud_service_type: Topic
 name: Count by Project
 query:
