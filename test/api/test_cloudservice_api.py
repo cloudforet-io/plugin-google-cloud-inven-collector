@@ -1,6 +1,6 @@
+import json
 import os
 import unittest
-import json
 
 from spaceone.core.unittest.runner import RichTestRunner
 from spaceone.tester import TestCase, print_json
@@ -53,7 +53,7 @@ class TestCollector(TestCase):
             }
         '''
         options = {
-            "cloud_service_types": ["PubSub"]
+            "cloud_service_types": ["Pub/Sub"]
         }
         filter = {}
 

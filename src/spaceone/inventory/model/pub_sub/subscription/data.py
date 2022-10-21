@@ -5,6 +5,7 @@ from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class RetryPolicy(Model):
+    description = StringType(serialize_when_none=False)
     minimum_backoff = StringType(serialize_when_none=False, deserialize_from='minimumBackoff')
     maximum_backoff = StringType(serialize_when_none=False, deserialize_from='maximumBackoff')
 
@@ -38,10 +39,13 @@ class Display(Model):
     delivery_type = StringType(serialize_when_none=False)
     retention_duration = StringType(serialize_when_none=False)
     ttl = StringType(serialize_when_none=False)
+    subscription_expiration = StringType(serialize_when_none=False)
     ack_deadline_seconds = StringType(serialize_when_none=False)
     message_ordering = StringType(serialize_when_none=False)
     exactly_once_delivery = StringType(serialize_when_none=False)
     attachment = StringType(serialize_when_none=False)
+    retain_acked_messages = StringType(serialize_when_none=False)
+    retry_policy = ModelType(RetryPolicy, serialize_when_none=False)
 
 
 class Subscription(BaseResource):

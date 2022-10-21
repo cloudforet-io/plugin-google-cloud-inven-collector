@@ -42,9 +42,9 @@ cst_subscription._metadata = CloudServiceTypeMeta.set_meta(
             'indigo.500': ['Enabled'], 'coral.600': ['Disabled']}),
         TextDyField.data_source('Expiration', 'data.display.ttl'),
         EnumDyField.data_source('Attachment', 'data.display.attachment', default_badge={
-            'indigo.500': ['Attached'], 'coral.600': ['Unattached']}, options={'is_optional': True}),
+            'indigo.500': ['Attached'], 'coral.600': ['Unattached']}),
         TextDyField.data_source('Subscription name', 'name', options={'is_optional': True}),
-        TextDyField.data_source('Project', 'data.project', options={'is_optional': True}),
+        TextDyField.data_source('Project', 'data.project', options={'is_optional': True})
     ],
     search=[
         SearchField.set(name='Status', key='data.id'),

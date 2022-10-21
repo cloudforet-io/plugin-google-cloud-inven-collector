@@ -63,21 +63,35 @@ class SubscriptionManager(GoogleCloudManager):
                         subscription.get('enableMessageOrdering')),
                     'exactly_once_delivery': self._change_boolean_to_enabled_or_disabled(
                         subscription.get('enableExactlyOnceDelivery')),
-                    'attachment': self._make_enable_attachment(subscription.get('topic'))
+                    'attachment': self._make_enable_attachment(subscription.get('topic')),
+                    'retain_acked_messages': self._make_retain_yes_or_no(subscription.get('retainAckedMessages'))
                 }
 
                 if message_reduction_duration := subscription.get('messageRetentionDuration'):
                     subscription_display.update(
-                        {'retention_duration': self._make_time_to_dhms_string(message_reduction_duration)}
+                        {'retention_duration': self._make_time_to_dhms_format(message_reduction_duration)}
                     )
 
                 if expiration_policy := subscription.get('expirationPolicy'):
-                    subscription_display.update({'ttl': self._make_time_to_dhms_string(expiration_policy.get('ttl'))})
+                    ttl = self._make_time_to_dhms_format(expiration_policy.get('ttl'))
+                    subscription_display.update({'ttl': ttl,
+                                                 'subscription_expiration': self._make_expiration_description(ttl)})
 
                 if ack_deadline_seconds := subscription.get('ackDeadlineSeconds'):
                     subscription_display.update(
-                        {'ack_deadline_seconds': self._make_time_to_dhms_string(ack_deadline_seconds)}
+                        {'ack_deadline_seconds': self._make_time_to_dhms_format(ack_deadline_seconds)}
                     )
+
+                if retry_policy := subscription.get('retryPolicy'):
+                    subscription_display.update(
+                        {'retry_policy': {'description': 'Retry after exponential backoff delay',
+                                          'minimum_backoff': self._make_time_to_dhms_format(
+                                              retry_policy.get('minimumBackoff')),
+                                          'maximum_backoff': self._make_time_to_dhms_format(
+                                              retry_policy.get('maximumBackoff'))}})
+                else:
+                    subscription_display.update(
+                        {'retry_policy': {'description': 'Retry immediately'}})
 
                 ##################################
                 # 3. Make subscription data
@@ -116,7 +130,7 @@ class SubscriptionManager(GoogleCloudManager):
         _LOGGER.debug(f'** Pub/Sub Subscription Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
-    def _make_time_to_dhms_string(self, duration):
+    def _make_time_to_dhms_format(self, duration):
         if isinstance(duration, int):
             return self._display_time(duration)
         if isinstance(duration, str):
@@ -169,3 +183,14 @@ class SubscriptionManager(GoogleCloudManager):
             return 'Unattached'
         else:
             return 'Attached'
+
+    @staticmethod
+    def _make_retain_yes_or_no(retain_acked_messages):
+        if retain_acked_messages:
+            return 'Yes'
+        else:
+            return 'No'
+
+    @staticmethod
+    def _make_expiration_description(ttl):
+        return f'Subscription expires in {ttl} if there is no activity'
