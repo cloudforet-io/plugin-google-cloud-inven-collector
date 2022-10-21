@@ -22,8 +22,8 @@ CLOUD_SERVICE_GROUP_MAP = {
     'PubSub': [
         # 'SchemaManager',
         # 'SnapshotManager',
-        # 'SubscriptionManager',
-        'TopicManager'
+        'SubscriptionManager'
+        # 'TopicManager'
     ]
 }
 

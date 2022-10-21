@@ -62,7 +62,8 @@ class SubscriptionManager(GoogleCloudManager):
                     'message_ordering': self._change_boolean_to_enabled_or_disabled(
                         subscription.get('enableMessageOrdering')),
                     'exactly_once_delivery': self._change_boolean_to_enabled_or_disabled(
-                        subscription.get('enableExactlyOnceDelivery'))
+                        subscription.get('enableExactlyOnceDelivery')),
+                    'attachment': self._make_enable_attachment(subscription.get('topic'))
                 }
 
                 if message_reduction_duration := subscription.get('messageRetentionDuration'):
@@ -161,3 +162,10 @@ class SubscriptionManager(GoogleCloudManager):
             return 'Enabled'
         else:
             return 'Disabled'
+
+    @staticmethod
+    def _make_enable_attachment(topic):
+        if topic == '_deleted-topic_':
+            return 'Unattached'
+        else:
+            return 'Attached'

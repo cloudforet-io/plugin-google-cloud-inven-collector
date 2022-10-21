@@ -1,8 +1,15 @@
 import os
 
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import *
+from spaceone.inventory.libs.schema.metadata.dynamic_field import EnumDyField, TextDyField, SearchField
+from spaceone.inventory.libs.schema.metadata.dynamic_widget import CardWidget, ChartWidget
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
+
+total_count_conf = os.path.join(current_dir, 'widget/total_count.yml')
+count_by_region_conf = os.path.join(current_dir, 'widget/count_by_region.yml')
+count_by_project_conf = os.path.join(current_dir, 'widget/count_by_project.yml')
 
 cst_subscription = CloudServiceTypeResource()
 cst_subscription.name = 'Subscription'
@@ -17,9 +24,45 @@ cst_subscription.tags = {
 }
 
 cst_subscription._metadata = CloudServiceTypeMeta.set_meta(
-    fields=[],
-    search=[],
-    widget=[]
+    fields=[
+        EnumDyField.data_source('Status', 'data.state', default_state={
+            'safe': ['ACTIVE'],
+            'warning': [],
+            'alert': ['RESOURCE_ERROR', 'STATE_UNSPECIFIED']
+        }),
+        TextDyField.data_source('Subscription ID', 'data.id'),
+        EnumDyField.data_source('Delivery type', 'data.display.delivery_type',
+                                default_outline_badge=['Pull', 'Push', 'BigQuery']),
+        TextDyField.data_source('Topic name', 'data.topic'),
+        TextDyField.data_source('Ack deadline', 'data.display.ack_deadline_seconds'),
+        TextDyField.data_source('Retention', 'data.display.retention_duration'),
+        EnumDyField.data_source('Message ordering', 'data.display.message_ordering', default_badge={
+            'indigo.500': ['Enabled'], 'coral.600': ['Disabled']}),
+        EnumDyField.data_source('Exactly once delivery', 'data.display.exactly_once_delivery', default_badge={
+            'indigo.500': ['Enabled'], 'coral.600': ['Disabled']}),
+        TextDyField.data_source('Expiration', 'data.display.ttl'),
+        EnumDyField.data_source('Attachment', 'data.display.attachment', default_badge={
+            'indigo.500': ['Attached'], 'coral.600': ['Unattached']}, options={'is_optional': True}),
+        TextDyField.data_source('Subscription name', 'name', options={'is_optional': True}),
+        TextDyField.data_source('Project', 'data.project', options={'is_optional': True}),
+    ],
+    search=[
+        SearchField.set(name='Status', key='data.id'),
+        SearchField.set(name='Delivery type', key='data.display.delivery_type'),
+        SearchField.set(name='Ack deadline', key='data.display.ack_deadline_seconds'),
+        SearchField.set(name='Retention', key='data.display.retention_duration'),
+        SearchField.set(name='Message ordering', key='data.display.message_ordering'),
+        SearchField.set(name='Exactly once delivery', key='data.display.exactly_once_delivery'),
+        SearchField.set(name='Expiration', key='data.display.ttl'),
+        SearchField.set(name='Attachment', key='data.display.attachment'),
+        SearchField.set(name='Subscription name', key='name'),
+        SearchField.set(name='Project', key='data.project')
+    ],
+    widget=[
+        CardWidget.set(**get_data_from_yaml(total_count_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_region_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_project_conf))
+    ]
 )
 
 CLOUD_SERVICE_TYPES = [

@@ -41,7 +41,7 @@ class Display(Model):
     ack_deadline_seconds = StringType(serialize_when_none=False)
     message_ordering = StringType(serialize_when_none=False)
     exactly_once_delivery = StringType(serialize_when_none=False)
-
+    attachment = StringType(serialize_when_none=False)
 
 
 class Subscription(BaseResource):
