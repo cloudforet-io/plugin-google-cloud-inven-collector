@@ -26,7 +26,6 @@ cst_instance_group.tags = {
 cst_instance_group._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source('Instance Group ID', 'data.id', options={'is_optional': True}),
-        TextDyField.data_source('Name', 'data.name'),
         TextDyField.data_source('Instances', 'data.instance_counts'),
         EnumDyField.data_source('Type', 'data.instance_group_type',
                                 default_outline_badge=['STATELESS', 'STATEFUL', 'UNMANAGED']),

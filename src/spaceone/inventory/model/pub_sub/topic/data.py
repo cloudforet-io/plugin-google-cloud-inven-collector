@@ -36,6 +36,7 @@ class PushConfig(Model):
 class Subscription(Model):
     name = StringType()
     topic = StringType(serialize_when_none=False)
+    delivery_type = StringType(serialize_when_none=False)
     push_config = ModelType(PushConfig, deserialize_from='pushConfig')
     bigquery_config = ModelType(BigQueryConfig, serialize_when_none=False, deserialize_from='bigqueryConfig')
     ack_deadline_seconds = IntType(serialize_when_none=False, deserialize_from='ackDeadlineSeconds')
@@ -55,7 +56,8 @@ class Subscription(Model):
 
 
 class Snapshot(Model):
-    name = StringType()
+    id = StringType(serialize_when_none=False)
+    name = StringType(serialize_when_none=False)
     topic = StringType(serialize_when_none=False)
     expire_time = StringType(serialize_when_none=False, deserialize_from='expireTime')
     labels = DictType(StringType, serialize_when_none=False)

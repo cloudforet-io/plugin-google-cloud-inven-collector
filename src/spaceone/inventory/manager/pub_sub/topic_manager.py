@@ -1,6 +1,5 @@
 import time
 import logging
-from datetime import datetime, timedelta
 
 from spaceone.inventory.connector.pub_sub.topic import TopicConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
@@ -66,12 +65,16 @@ class TopicManager(GoogleCloudManager):
                 subscription_names = topic_conn.list_subscription_names(topic_name)
                 for subscription_name in subscription_names:
                     subscription = topic_conn.get_subscription(subscription_name)
+                    push_config = subscription.get('pushConfig')
+                    bigquery_config = subscription.get('bigqueryConfig')
+                    subscription.update({'delivery_type': self._make_delivery_type(push_config, bigquery_config)})
                     subscriptions.append(Subscription(subscription, strict=False))
 
                 snapshots = []
                 snapshot_names = topic_conn.list_snapshot_names(topic_name)
                 for snapshot_name in snapshot_names:
                     snapshot = topic_conn.get_snapshot(snapshot_name)
+                    snapshot.update({'id': self._make_snapshot_id(snapshot_name)})
                     snapshots.append(Snapshot(snapshot, strict=False))
 
                 display = {
@@ -122,6 +125,10 @@ class TopicManager(GoogleCloudManager):
         _LOGGER.debug(f'** Pub/Sub Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
+    def _change_duration_to_dhm(self, duration):
+        seconds, _ = duration.split('s')
+        return self._display_time(int(seconds))
+
     @staticmethod
     def _make_topic_id(topic_name, project_id):
         path, topic_id = topic_name.split(f'projects/{project_id}/topics/')
@@ -134,10 +141,6 @@ class TopicManager(GoogleCloudManager):
         else:
             encryption_key = 'Google managed'
         return encryption_key
-
-    def _change_duration_to_dhm(self, duration):
-        seconds, _ = duration.split('s')
-        return self._display_time(int(seconds))
 
     @staticmethod
     def _display_time(seconds, granularity=2):
@@ -156,3 +159,18 @@ class TopicManager(GoogleCloudManager):
                     name = name.rstrip('s')
                 result.append(f"{value} {name}")
         return ' '.join(result[:granularity])
+
+    @staticmethod
+    def _make_delivery_type(push_config, bigquery_config):
+        if push_config:
+            delivery_type = 'Push'
+        elif bigquery_config:
+            delivery_type = 'BigQuery'
+        else:
+            delivery_type = 'Pull'
+        return delivery_type
+
+    @staticmethod
+    def _make_snapshot_id(snapshot_name):
+        *path, snapshot_id = snapshot_name.split('/')
+        return snapshot_id

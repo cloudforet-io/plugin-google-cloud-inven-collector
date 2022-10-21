@@ -25,7 +25,6 @@ cst_machine_image.tags = {
 # Basic table for
 cst_machine_image._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Name', 'data.name'),
         TextDyField.data_source('Source Instance', 'data.machine.source_image_from'),
         TextDyField.data_source('Machine Type', 'data.machine.machine_type'),
         ListDyField.data_source('Storage location', 'data.storage_locations',

@@ -28,17 +28,17 @@ cst_topic._metadata = CloudServiceTypeMeta.set_meta(
         EnumDyField.data_source('Encryption key', 'data.encryption_key', default_badge={
             'primary': ['Google managed'], 'indigo.500': ['Customer managed']
         }),
+        SizeField.data_source('Subscription count', 'data.display.subscription_count'),
         TextDyField.data_source('Topic name', 'data.name'),
         TextDyField.data_source('Retention', 'data.display.retention'),
-        TextDyField.data_source('Project', 'data.project'),
-        SizeField.data_source('Subscription count', 'data.display.subscription_count')
+        TextDyField.data_source('Project', 'data.project')
     ],
     search=[
         SearchField.set(name='Topic ID', key='data.id'),
-        SearchField.set(name='Encryption key', key='data.id'),
-        SearchField.set(name='Topic name', key='data.id'),
-        SearchField.set(name='Retention', key='data.id'),
-        SearchField.set(name='Project', key='data.id')
+        SearchField.set(name='Encryption key', key='data.encryption_key'),
+        SearchField.set(name='Topic name', key='data.name'),
+        SearchField.set(name='Retention', key='data.display.retention'),
+        SearchField.set(name='Project', key='data.project')
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

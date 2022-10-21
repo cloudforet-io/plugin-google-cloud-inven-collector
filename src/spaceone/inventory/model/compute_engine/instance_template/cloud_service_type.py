@@ -25,7 +25,6 @@ cst_instance_template.tags = {
 # Basic table for
 cst_instance_template._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Name', 'data.name'),
         TextDyField.data_source('Machine Type', 'data.machine_type'),
         TextDyField.data_source('Image', 'data.image'),
         TextDyField.data_source('Disk Type', 'data.disk_display'),

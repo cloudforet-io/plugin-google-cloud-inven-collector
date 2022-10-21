@@ -24,7 +24,6 @@ cst_snapshot.tags = {
 
 cst_snapshot._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Name', 'data.name'),
         EnumDyField.data_source('Status', 'data.status', default_state={
             'safe': ['READY'],
             'warning': ['CREATING', 'UPLOADING', 'DELETING'],
