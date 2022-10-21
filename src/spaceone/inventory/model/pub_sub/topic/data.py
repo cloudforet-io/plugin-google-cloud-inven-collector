@@ -1,5 +1,6 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType, DictType
+from schematics.types import ModelType, ListType, StringType, IntType, BooleanType, DictType
+
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
@@ -97,5 +98,5 @@ class Topic(BaseResource):
     def reference(self):
         return {
             "resource_id": self.self_link,
-            "external_link": f"https://console.cloud.google.com/cloudpubsub/topic/detail/{self.name}?project={self.project}"
+            "external_link": f"https://console.cloud.google.com/cloudpubsub/topic/detail/{self.topic_id}?project={self.project}"
         }

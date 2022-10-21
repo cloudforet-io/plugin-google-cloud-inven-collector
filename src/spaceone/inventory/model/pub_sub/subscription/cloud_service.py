@@ -1,10 +1,12 @@
 from schematics.types import ModelType, StringType, PolyModelType
-from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout
+
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
+from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, ListDynamicLayout
 from spaceone.inventory.model.pub_sub.subscription.data import Subscription
 
-subscription = ItemDynamicLayout.set_fields('Subscription', fields=[])
-subscription_meta = CloudServiceMeta.set_layouts([])
+subscription_detail = ItemDynamicLayout.set_fields('Subscription Details', fields=[])
+subscription_detail_meta = ListDynamicLayout.set_layouts('Details', layouts=[subscription_detail])
+subscription_meta = CloudServiceMeta.set_layouts([subscription_detail_meta])
 
 
 class PubSubResource(CloudServiceResource):

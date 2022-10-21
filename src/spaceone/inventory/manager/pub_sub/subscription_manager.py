@@ -1,9 +1,12 @@
-import time
 import logging
+import time
 
 from spaceone.inventory.connector.pub_sub.subscription import SubscriptionConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
+from spaceone.inventory.libs.schema.base import ReferenceModel
+from spaceone.inventory.model.pub_sub.subscription.cloud_service import SubscriptionResource, SubscriptionResponse
 from spaceone.inventory.model.pub_sub.subscription.cloud_service_type import CLOUD_SERVICE_TYPES
+from spaceone.inventory.model.pub_sub.subscription.data import Subscription
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +27,7 @@ class SubscriptionManager(GoogleCloudManager):
         Response:
             CloudServiceResponse/ErrorResourceResponse
         """
-        _LOGGER.debug(f'** Pub/Sub subscription START **')
+        _LOGGER.debug(f'** Pub/Sub Subscription START **')
 
         start_time = time.time()
         collected_cloud_services = []
@@ -39,6 +42,122 @@ class SubscriptionManager(GoogleCloudManager):
         # List all information through connector
         ##################################
         subscription_conn: SubscriptionConnector = self.locator.get_connector(self.connector_name, **params)
+        subscriptions = subscription_conn.list_subscriptions()
 
-        _LOGGER.debug(f'** Firewall Finished {time.time() - start_time} Seconds **')
+        for subscription in subscriptions:
+            try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
+                subscription_name = subscription.get('name')
+                subscription_id = self._make_subscription_id(subscription_name, project_id)
+                push_config = subscription.get('pushConfig')
+                bigquery_config = subscription.get('bigqueryConfig')
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
+                subscription_display = {
+                    'delivery_type': self._make_delivery_type(push_config, bigquery_config),
+                    'message_ordering': self._change_boolean_to_enabled_or_disabled(
+                        subscription.get('enableMessageOrdering')),
+                    'exactly_once_delivery': self._change_boolean_to_enabled_or_disabled(
+                        subscription.get('enableExactlyOnceDelivery'))
+                }
+
+                if message_reduction_duration := subscription.get('messageRetentionDuration'):
+                    subscription_display.update(
+                        {'retention_duration': self._make_time_to_dhms_string(message_reduction_duration)}
+                    )
+
+                if expiration_policy := subscription.get('expirationPolicy'):
+                    subscription_display.update({'ttl': self._make_time_to_dhms_string(expiration_policy.get('ttl'))})
+
+                if ack_deadline_seconds := subscription.get('ackDeadlineSeconds'):
+                    subscription_display.update(
+                        {'ack_deadline_seconds': self._make_time_to_dhms_string(ack_deadline_seconds)}
+                    )
+
+                ##################################
+                # 3. Make subscription data
+                ##################################
+                subscription.update({
+                    'id': subscription_id,
+                    'project': project_id,
+                    'display': subscription_display
+                })
+                subscription_data = Subscription(subscription, strict=False)
+
+                ##################################
+                # 4. Make SubscriptionResource Code
+                ##################################
+                subscription_resource = SubscriptionResource({
+                    'name': subscription_name,
+                    'account': project_id,
+                    'tags': subscription_data.labels,
+                    'region_code': 'Global',
+                    'instance_type': '',
+                    'instance_size': 0,
+                    'data': subscription_data,
+                    'reference': ReferenceModel(subscription_data.reference())
+                })
+
+                ##################################
+                # 5. Make Resource Response Object
+                ##################################
+                collected_cloud_services.append(SubscriptionResponse({'resource': subscription_resource}))
+
+            except Exception as e:
+                _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
+                error_response = self.generate_resource_error_response(e, 'Pub/Sub', 'Subscription', subscription_id)
+                error_responses.append(error_response)
+
+        _LOGGER.debug(f'** Pub/Sub Subscription Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
+
+    def _make_time_to_dhms_string(self, duration):
+        if isinstance(duration, int):
+            return self._display_time(duration)
+        if isinstance(duration, str):
+            seconds, _ = duration.split('s')
+            return self._display_time(int(seconds))
+
+    @staticmethod
+    def _display_time(seconds, granularity=2):
+        result = []
+        intervals = (
+            ('days', 86400),
+            ('hr', 3600),
+            ('min', 60),
+            ('seconds', 1),
+        )
+        for name, count in intervals:
+            value = seconds // count
+            if value:
+                seconds -= value * count
+                if value == 1:
+                    name = name.rstrip('s')
+                result.append(f"{value} {name}")
+        return ' '.join(result[:granularity])
+
+    @staticmethod
+    def _make_delivery_type(push_config, bigquery_config):
+        if push_config:
+            delivery_type = 'Push'
+        elif bigquery_config:
+            delivery_type = 'BigQuery'
+        else:
+            delivery_type = 'Pull'
+        return delivery_type
+
+    @staticmethod
+    def _make_subscription_id(subscription_name, project_id):
+        path, topic_id = subscription_name.split(f'projects/{project_id}/subscriptions/')
+        return topic_id
+
+    @staticmethod
+    def _change_boolean_to_enabled_or_disabled(boolean_field):
+        if boolean_field:
+            return 'Enabled'
+        else:
+            return 'Disabled'

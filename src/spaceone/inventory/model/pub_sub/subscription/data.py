@@ -1,6 +1,8 @@
 from schematics import Model
 from schematics.types import ModelType, StringType, IntType, BooleanType, DictType
 
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
+
 
 class RetryPolicy(Model):
     minimum_backoff = StringType(serialize_when_none=False, deserialize_from='minimumBackoff')
@@ -32,11 +34,20 @@ class PushConfig(Model):
     oidc_token = ModelType(OidcToken, serialize_when_none=False, deserialize_from='oidcToken')
 
 
-class Subscription(Model):
-    name = StringType()
-    topic = StringType(serialize_when_none=False)
+class Display(Model):
     delivery_type = StringType(serialize_when_none=False)
-    push_config = ModelType(PushConfig, deserialize_from='pushConfig')
+    retention_duration = StringType(serialize_when_none=False)
+    ttl = StringType(serialize_when_none=False)
+    ack_deadline_seconds = StringType(serialize_when_none=False)
+    message_ordering = StringType(serialize_when_none=False)
+    exactly_once_delivery = StringType(serialize_when_none=False)
+
+
+
+class Subscription(BaseResource):
+    topic = StringType(serialize_when_none=False)
+    display = ModelType(Display, serialize_when_none=False)
+    push_config = ModelType(PushConfig, serialize_when_none=False, deserialize_from='pushConfig')
     bigquery_config = ModelType(BigQueryConfig, serialize_when_none=False, deserialize_from='bigqueryConfig')
     ack_deadline_seconds = IntType(serialize_when_none=False, deserialize_from='ackDeadlineSeconds')
     retain_acked_messages = BooleanType(serialize_when_none=False, deserialize_from='retainAckedMessages')
@@ -49,6 +60,10 @@ class Subscription(Model):
     retry_policy = ModelType(RetryPolicy, serialize_when_none=False, deserialize_from='retryPolicy')
     detached = BooleanType(serialize_when_none=False)
     enable_exactly_once_delivery = BooleanType(serialize_when_none=False, deserialize_from='enableExactlyOnceDelivery')
-    topic_message_retention_duration = StringType(serialize_when_none=False,
-                                                  deserialize_from='topicMassageRetentionDuration')
     state = StringType(choices=('STATE_UNSPECIFIED', 'ACTIVE', 'RESOURCE_ERROR'))
+
+    def reference(self):
+        return {
+            "resource_id": self.self_link,
+            "external_link": f"https://console.cloud.google.com/cloudpubsub/subscription/detail/{self.id}?project={self.project}"
+        }

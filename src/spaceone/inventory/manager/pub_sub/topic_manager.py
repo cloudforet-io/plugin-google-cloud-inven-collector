@@ -1,5 +1,5 @@
-import time
 import logging
+import time
 
 from spaceone.inventory.connector.pub_sub.topic import TopicConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
@@ -116,7 +116,7 @@ class TopicManager(GoogleCloudManager):
                 error_response = self.generate_resource_error_response(e, 'Pub/Sub', 'Topic', topic_id)
                 error_responses.append(error_response)
 
-        _LOGGER.debug(f'** Pub/Sub Finished {time.time() - start_time} Seconds **')
+        _LOGGER.debug(f'** Pub/Sub Topic Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
     def _change_duration_to_dhm(self, duration):
