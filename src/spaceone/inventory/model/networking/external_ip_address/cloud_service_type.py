@@ -25,7 +25,6 @@ cst_external_ip.tags = {
 
 cst_external_ip._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Name', 'data.name'),
         TextDyField.data_source('External Address', 'data.address'),
         TextDyField.data_source('Region', 'data.region'),
         EnumDyField.data_source('Type', 'data.is_ephemeral', default_badge={

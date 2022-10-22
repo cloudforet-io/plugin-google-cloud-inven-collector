@@ -12,3 +12,8 @@ from spaceone.inventory.manager.networking.route_manager import RouteManager
 from spaceone.inventory.manager.networking.load_balancing_manager import LoadBalancingManager
 from spaceone.inventory.manager.bigquery.sql_workspace_manager import SQLWorkspaceManager
 from spaceone.inventory.manager.compute_engine.vm_instance_manager import VMInstanceManager
+from spaceone.inventory.manager.pub_sub.schema_manager import SchemaManager
+from spaceone.inventory.manager.pub_sub.snapshot_manager import SnapshotManager
+from spaceone.inventory.manager.pub_sub.subscription_manager import SubscriptionManager
+from spaceone.inventory.manager.pub_sub.topic_manager import TopicManager
+

@@ -25,7 +25,6 @@ cst_firewall.tags = {
 
 cst_firewall._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Name', 'data.name'),
         EnumDyField.data_source('Logs', 'data.display.logs', default_badge={
             'indigo.500': ['On'], 'coral.600': ['Off']
         }),

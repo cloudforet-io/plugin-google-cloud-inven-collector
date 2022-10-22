@@ -1,20 +1,26 @@
 import math
 from schematics import Model
-from schematics.types import ModelType, StringType, PolyModelType, DictType, BooleanType
-from spaceone.inventory.libs.schema.metadata.dynamic_search import BaseDynamicSearch
+from schematics.types import ModelType, StringType, PolyModelType, DictType, BooleanType, BaseType
 
+from spaceone.inventory.libs.schema.metadata.dynamic_search import BaseDynamicSearch
 
 BACKGROUND_COLORS = [
     'black', 'white',
     'gray', 'gray.100', 'gray.200', 'gray.300', 'gray.400', 'gray.500', 'gray.600', 'gray.700', 'gray.800', 'gray.900',
     'red', 'red.100', 'red.200', 'red.300', 'red.400', 'red.500', 'red.600', 'red.700', 'red.800', 'red.900',
-    'coral', 'coral.100', 'coral.200', 'coral.300', 'coral.400', 'coral.500', 'coral.600', 'coral.700', 'coral.800', 'coral.900',
-    'yellow', 'yellow.100', 'yellow.200', 'yellow.300', 'yellow.400', 'yellow.500', 'yellow.600', 'yellow.700', 'yellow.800', 'yellow.900',
-    'green', 'green.100', 'green.200', 'green.300', 'green.400', 'green.500', 'green.600', 'green.700', 'green.800', 'green.900',
+    'coral', 'coral.100', 'coral.200', 'coral.300', 'coral.400', 'coral.500', 'coral.600', 'coral.700', 'coral.800',
+    'coral.900',
+    'yellow', 'yellow.100', 'yellow.200', 'yellow.300', 'yellow.400', 'yellow.500', 'yellow.600', 'yellow.700',
+    'yellow.800', 'yellow.900',
+    'green', 'green.100', 'green.200', 'green.300', 'green.400', 'green.500', 'green.600', 'green.700', 'green.800',
+    'green.900',
     'blue', 'blue.100', 'blue.200', 'blue.300', 'blue.400', 'blue.500', 'blue.600', 'blue.700', 'blue.800', 'blue.900',
-    'violet', 'violet.100', 'violet.200', 'violet.300', 'violet.400', 'violet.500', 'violet.600', 'violet.700', 'violet.800', 'violet.900',
-    'peacock', 'peacock.100', 'peacock.200', 'peacock.300', 'peacock.400', 'peacock.500', 'peacock.600', 'peacock.700', 'peacock.800', 'peacock.900',
-    'indigo', 'indigo.100', 'indigo.200', 'indigo.300', 'indigo.400', 'indigo.500', 'indigo.600', 'indigo.700', 'indigo.800', 'indigo.900',
+    'violet', 'violet.100', 'violet.200', 'violet.300', 'violet.400', 'violet.500', 'violet.600', 'violet.700',
+    'violet.800', 'violet.900',
+    'peacock', 'peacock.100', 'peacock.200', 'peacock.300', 'peacock.400', 'peacock.500', 'peacock.600', 'peacock.700',
+    'peacock.800', 'peacock.900',
+    'indigo', 'indigo.100', 'indigo.200', 'indigo.300', 'indigo.400', 'indigo.500', 'indigo.600', 'indigo.700',
+    'indigo.800', 'indigo.900',
 ]
 
 TYPE_BADGE = ['primary', 'indigo.500', 'coral.600', 'peacock.500', 'green.500']
@@ -279,10 +285,10 @@ class EnumDyField(BaseDynamicField):
         for _key in _default_outline_badge:
             _round_index = len(TYPE_BADGE)
             _index = _default_outline_badge.index(_key)
-            _num = math.floor(_index/len(TYPE_BADGE))
+            _num = math.floor(_index / len(TYPE_BADGE))
 
             if _num > 0:
-                _round_index = len(TYPE_BADGE)*_num
+                _round_index = len(TYPE_BADGE) * _num
 
             if _round_index - 1 < _index:
                 _index = _index - _round_index
@@ -394,3 +400,28 @@ class SearchField(BaseDynamicSearch):
             })
 
         return cls(return_dic)
+
+
+class MoreLayoutField(Model):
+    name = StringType(default='')
+    type = StringType(default="popup")
+    options = DictType(BaseType, serialize_when_none=False)
+
+
+class MoreFieldOptions(FieldViewOption):
+    sub_key = StringType(serialize_when_none=False)
+    layout = PolyModelType(MoreLayoutField, serialize_when_none=False)
+
+
+class MoreField(BaseDynamicField):
+    type = StringType(default="more")
+    options = PolyModelType(MoreFieldOptions, serialize_when_none=False)
+
+    @classmethod
+    def data_source(cls, name, key, **kwargs):
+        _data_source = {'key': key, 'name': name}
+
+        if 'options' in kwargs:
+            _data_source.update({'options': kwargs.get('options')})
+
+        return cls(_data_source)
