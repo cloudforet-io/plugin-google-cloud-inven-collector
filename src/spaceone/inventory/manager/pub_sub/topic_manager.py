@@ -27,7 +27,7 @@ class TopicManager(GoogleCloudManager):
         Response:
             CloudServiceResponse/ErrorResourceResponse
         """
-        _LOGGER.debug(f'[Pub/Sub] Topic START')
+        _LOGGER.debug(f'** Pub/Sub Topic START **')
 
         start_time = time.time()
         collected_cloud_services = []
