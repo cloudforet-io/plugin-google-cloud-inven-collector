@@ -44,7 +44,16 @@ cst_subscription._metadata = CloudServiceTypeMeta.set_meta(
         EnumDyField.data_source('Attachment', 'data.display.attachment', default_badge={
             'indigo.500': ['Attached'], 'coral.600': ['Unattached']}),
         TextDyField.data_source('Subscription name', 'name', options={'is_optional': True}),
-        TextDyField.data_source('Project', 'data.project', options={'is_optional': True})
+        TextDyField.data_source('Project', 'data.project', options={'is_optional': True}),
+        TextDyField.data_source('Dead letter topic', 'data.dead_letter_policy.dead_letter_topic',
+                                options={'is_optional': True}),
+        TextDyField.data_source('Maximum delivery attempts', 'data.dead_letter_policy.max_delivery_attempts',
+                                options={'is_optional': True}),
+        TextDyField.data_source('Retry policy', 'data.display.retry_policy.description', options={'is_optional': True}),
+        TextDyField.data_source('Minimum backoff duration', 'data.display.retry_policy.minimum_backoff',
+                                options={'is_optional': True}),
+        TextDyField.data_source('Maximum backoff duration', 'data.display.retry_policy.maximum_backoff',
+                                options={'is_optional': True}),
     ],
     search=[
         SearchField.set(name='Status', key='data.id'),
