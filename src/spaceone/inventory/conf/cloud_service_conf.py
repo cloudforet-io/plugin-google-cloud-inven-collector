@@ -19,11 +19,11 @@ CLOUD_SERVICE_GROUP_MAP = {
                    'LoadBalancingManager',
                    'RouteManager',
                    'VPCNetworkManager'],
-    'PubSub': [
-        # 'SchemaManager',
-        # 'SnapshotManager',
-        'SubscriptionManager'
-        # 'TopicManager'
+    'Pub/Sub': [
+        'SchemaManager',
+        'SnapshotManager',
+        'SubscriptionManager',
+        'TopicManager'
     ]
 }
 

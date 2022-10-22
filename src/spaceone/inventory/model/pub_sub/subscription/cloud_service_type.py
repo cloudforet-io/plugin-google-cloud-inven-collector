@@ -56,7 +56,8 @@ cst_subscription._metadata = CloudServiceTypeMeta.set_meta(
                                 options={'is_optional': True}),
     ],
     search=[
-        SearchField.set(name='Status', key='data.id'),
+        SearchField.set(name='Subscription ID', key='data.id'),
+        SearchField.set(name='Status', key='data.status'),
         SearchField.set(name='Delivery type', key='data.display.delivery_type'),
         SearchField.set(name='Ack deadline', key='data.display.ack_deadline_seconds'),
         SearchField.set(name='Retention', key='data.display.retention_duration'),
