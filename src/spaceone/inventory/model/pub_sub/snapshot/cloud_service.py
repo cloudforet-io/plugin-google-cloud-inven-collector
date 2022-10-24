@@ -7,7 +7,6 @@ from spaceone.inventory.model.pub_sub.snapshot.data import Snapshot
 
 snapshot = ItemDynamicLayout.set_fields('Snapshot', fields=[
     TextDyField.data_source('Snapshot ID', 'data.id'),
-    TextDyField.data_source('Snapshot name', 'name'),
     TextDyField.data_source('Topic name', 'data.topic'),
     DateTimeDyField.data_source('Expiration', 'data.expire_time'),
     TextDyField.data_source('Project', 'data.project', options={'is_optional': True})

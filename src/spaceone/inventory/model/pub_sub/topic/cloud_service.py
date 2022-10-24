@@ -15,7 +15,7 @@ topic_detail = ItemDynamicLayout.set_fields('Topic Details', fields=[
     TextDyField.data_source('Reduction duration', 'data.display.retention')
 ])
 
-topic_subscription_meta = TableDynamicLayout.set_fields('Subscriptions', root_path='data.subscription', fields=[
+topic_subscription_meta = TableDynamicLayout.set_fields('Subscriptions', root_path='data.subscriptions', fields=[
     TextDyField.data_source('Subscription ID', 'id'),
     EnumDyField.data_source('State', 'state', default_state={
         'safe': ['ACTIVE'],

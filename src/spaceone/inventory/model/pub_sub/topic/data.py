@@ -79,6 +79,7 @@ class SchemaSettings(Model):
 class TopicDisplay(Model):
     subscription_count = IntType(default=0)
     retention = StringType(serialize_when_none=False)
+    encryption_key = StringType(serialize_when_none=False)
 
 
 class Topic(BaseResource):

@@ -36,13 +36,12 @@ cst_subscription._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source('Topic name', 'data.topic'),
         TextDyField.data_source('Ack deadline', 'data.display.ack_deadline_seconds'),
         TextDyField.data_source('Retention', 'data.display.retention_duration'),
-        EnumDyField.data_source('Message ordering', 'data.display.message_ordering', default_badge={
-            'indigo.500': ['Enabled'], 'coral.600': ['Disabled']}),
-        EnumDyField.data_source('Exactly once delivery', 'data.display.exactly_once_delivery', default_badge={
-            'indigo.500': ['Enabled'], 'coral.600': ['Disabled']}),
+        TextDyField.data_source('Message ordering', 'data.display.message_ordering'),
+        TextDyField.data_source('Exactly once delivery', 'data.display.exactly_once_delivery'),
         TextDyField.data_source('Expiration', 'data.display.ttl'),
         EnumDyField.data_source('Attachment', 'data.display.attachment', default_badge={
             'indigo.500': ['Attached'], 'coral.600': ['Unattached']}),
+        TextDyField.data_source('Push endpoint', 'data.push_config.push_endpoint'),
         TextDyField.data_source('Subscription name', 'name', options={'is_optional': True}),
         TextDyField.data_source('Project', 'data.project', options={'is_optional': True}),
         TextDyField.data_source('Dead letter topic', 'data.dead_letter_policy.dead_letter_topic',
@@ -59,14 +58,15 @@ cst_subscription._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name='Subscription ID', key='data.id'),
         SearchField.set(name='Status', key='data.status'),
         SearchField.set(name='Delivery type', key='data.display.delivery_type'),
-        SearchField.set(name='Ack deadline', key='data.display.ack_deadline_seconds'),
+        SearchField.set(name='Ack deadline', key='data.ack_deadline_seconds', data_type='integer'),
         SearchField.set(name='Retention', key='data.display.retention_duration'),
         SearchField.set(name='Message ordering', key='data.display.message_ordering'),
         SearchField.set(name='Exactly once delivery', key='data.display.exactly_once_delivery'),
         SearchField.set(name='Expiration', key='data.display.ttl'),
         SearchField.set(name='Attachment', key='data.display.attachment'),
         SearchField.set(name='Subscription name', key='name'),
-        SearchField.set(name='Project', key='data.project')
+        SearchField.set(name='Project', key='data.project'),
+        SearchField.set(name='Max delivery attempts (dead_letter)', key='data.dead_letter_policy.max_delivery_attempts')
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
