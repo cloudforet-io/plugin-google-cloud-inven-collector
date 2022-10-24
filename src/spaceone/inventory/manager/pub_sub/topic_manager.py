@@ -63,7 +63,8 @@ class TopicManager(GoogleCloudManager):
                     subscription = topic_conn.get_subscription(subscription_name)
                     push_config = subscription.get('pushConfig')
                     bigquery_config = subscription.get('bigqueryConfig')
-                    subscription.update({'delivery_type': self._make_delivery_type(push_config, bigquery_config)})
+                    subscription.update({'id': self._make_subscription_id(subscription_name),
+                                         'delivery_type': self._make_delivery_type(push_config, bigquery_config)})
                     subscriptions.append(Subscription(subscription, strict=False))
                     time.sleep(0.2)
 
@@ -168,3 +169,8 @@ class TopicManager(GoogleCloudManager):
     def _make_snapshot_id(snapshot_name):
         *path, snapshot_id = snapshot_name.split('/')
         return snapshot_id
+
+    @staticmethod
+    def _make_subscription_id(subscription_name):
+        *path, subscription_id = subscription_name.split('/')
+        return subscription_id
