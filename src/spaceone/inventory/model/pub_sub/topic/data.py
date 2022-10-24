@@ -35,6 +35,7 @@ class PushConfig(Model):
 
 
 class Subscription(Model):
+    id = StringType(serialize_when_none=False)
     name = StringType()
     topic = StringType(serialize_when_none=False)
     delivery_type = StringType(serialize_when_none=False)

@@ -8,11 +8,11 @@ from spaceone.inventory.model.pub_sub.topic.data import Topic
 topic_detail = ItemDynamicLayout.set_fields('Topic Details', fields=[
     TextDyField.data_source('Topic ID', 'data.topic_id'),
     TextDyField.data_source('Project', 'data.project'),
-    TextDyField.data_source('Encryption key', 'data.encryption_key'),
+    TextDyField.data_source('Encryption key', 'data.display.encryption_key'),
     TextDyField.data_source('Schema name', 'data.schema_settings.schema'),
     TextDyField.data_source('Message encoding', 'data.schema_settings.encoding'),
     TextDyField.data_source('Subscription count', 'data.display.subscription_count'),
-    TextDyField.data_source('Reduction duration', 'data.display.retention')
+    TextDyField.data_source('Retention duration', 'data.display.retention')
 ])
 
 topic_subscription_meta = TableDynamicLayout.set_fields('Subscriptions', root_path='data.subscriptions', fields=[
