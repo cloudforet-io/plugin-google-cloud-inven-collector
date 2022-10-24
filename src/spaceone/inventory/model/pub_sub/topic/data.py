@@ -97,6 +97,6 @@ class Topic(BaseResource):
 
     def reference(self):
         return {
-            "resource_id": self.self_link,
+            "resource_id": self.topic_id,
             "external_link": f"https://console.cloud.google.com/cloudpubsub/topic/detail/{self.topic_id}?project={self.project}"
         }

@@ -12,7 +12,7 @@ class Schema(BaseResource):
 
     def reference(self):
         return {
-            "resource_id": self.self_link,
+            "resource_id": self.id,
             "external_link": f"https://console.cloud.google.com/cloudpubsub/schema/detail/{self.id}?project={self.project}"
         }
 
