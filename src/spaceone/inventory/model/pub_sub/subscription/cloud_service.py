@@ -20,6 +20,7 @@ subscription_detail = ItemDynamicLayout.set_fields('Subscription Details', field
     TextDyField.data_source('Retry policy', 'data.display.retry_policy.description'),
     TextDyField.data_source('Minimum backoff duration', 'data.display.retry_policy.minimum_backoff'),
     TextDyField.data_source('Maximum backoff duration', 'data.display.retry_policy.maximum_backoff'),
+    TextDyField.data_source('Push endpoint', 'data.push_config.push_endpoint'),
 ])
 subscription_detail_meta = ListDynamicLayout.set_layouts('Details', layouts=[subscription_detail])
 subscription_meta = CloudServiceMeta.set_layouts([subscription_detail_meta])

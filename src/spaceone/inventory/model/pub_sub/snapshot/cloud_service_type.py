@@ -33,7 +33,7 @@ cst_pub_sub_snapshot._metadata = CloudServiceTypeMeta.set_meta(
     search=[
         SearchField.set(name='Snapshot ID', key='data.id'),
         SearchField.set(name='Topic name', key='data.topic'),
-        SearchField.set(name='Expiration', key='data.expire_time'),
+        SearchField.set(name='Expiration', key='data.expire_time', data_type='datetime'),
         SearchField.set(name='Project', key='data.project')
     ],
     widget=[

@@ -9,7 +9,7 @@ schema_details = ItemDynamicLayout.set_fields('Schema', fields=[
     TextDyField.data_source('Schema ID', 'data.id'),
     EnumDyField.data_source('Schema type', 'data.schema_type',
                             default_outline_badge=['AVRO', 'PROTOCOL_BUFFER', 'TYPE_UNSPECIFIED']),
-    TextDyField.data_source('Project', 'project'),
+    TextDyField.data_source('Project', 'data.project'),
 ])
 
 definition = ItemDynamicLayout.set_fields('Definition', fields=[
