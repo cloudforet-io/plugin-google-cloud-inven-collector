@@ -49,6 +49,11 @@ Please, set authentication privilege for followings:
         * [Buckets](#Bucket)
     * [BigQuery](#bigquery)
         * [SQLWorkspace](#SQLWorkspace)
+    * [Cloud Pub/Sub](#cloud-pub/sub)
+        * [Topic](#topic)
+        * [Subscription](#subscription)
+        * [Snapshot](#snapshot)
+        * [Schema](#schema)
     * [Options](#options)
       * [CloudServiceType](#cloud-service-type--specify-what-to-collect)
       * [ServiceCodeMapper](#service-code-mapper--update-service-code-in-cloud-service-type)
@@ -304,6 +309,38 @@ Please, set authentication privilege for followings:
     - Service Endpoint
         - https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/{resource}
 
+
+#### [Pub/Sub](https://cloud.google.com/pubsub/docs/reference)
+- #### Topic
+    - IAM
+        - pubsub.topics.list
+        - pubsub.subscriptions.get
+        - pubsub.snapshots.get
+
+    - Service Endpoint
+        - https://pubsub.googleapis.com/v1/{project}/topics
+        - https://pubsub.googleapis.com/v1/{subscription}
+        - https://pubsub.googleapis.com/v1/{snapshot}
+- #### Subscription
+    - IAM
+        - pubsub.subscriptions.list
+
+    - Service Endpoint
+        - https://pubsub.googleapis.com/v1/{project}/subscriptions
+- #### Snapshot
+    - IAM
+        - pubsub.snapshots.list
+
+    - Service Endpoint
+        - https://pubsub.googleapis.com/v1/{project}/snapshots
+- #### Schema
+    - IAM
+        - https://pubsub.googleapis.com/v1/{parent}/schemas
+        - https://pubsub.googleapis.com/v1/{name}
+
+    - Service Endpoint
+        - https://pubsub.googleapis.com/pubsub/v1/projects/{projectId}/{resource}
+
 ---
 
 ## Options
@@ -379,6 +416,7 @@ The following is a list of services belling collected and service code informati
 | 3   | Cloud SQL           | Cloud SQL      |
 | 4   | Networking Products | Networking     |
 | 5   | Cloud Storage       | Cloud Storage  |
+| 6   | Cloud Pub/Sub       | Cloud Pub/Sub  |
 
 
 
