@@ -13,7 +13,7 @@ schema_details = ItemDynamicLayout.set_fields('Schema', fields=[
 ])
 
 definition = ItemDynamicLayout.set_fields('Definition', fields=[
-    MoreField.data_source('Definition', 'data.definition', options={
+    MoreField.data_source('Definition', 'data.display.output_display', options={
         'sub_key': 'data.definition',
         'layout': {
             'name': 'Definition',

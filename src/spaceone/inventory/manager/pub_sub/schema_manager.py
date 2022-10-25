@@ -60,10 +60,15 @@ class SchemaManager(GoogleCloudManager):
                 ##################################
                 # 3. Make schema data
                 ##################################
+                display = {
+                    'output_display': 'show'
+                }
+
                 schema.update({
                     'id': schema_id,
                     'project': project_id,
-                    'schema_type': schema.get('type')
+                    'schema_type': schema.get('type'),
+                    'display': display
                 })
                 schema_data = Schema(schema, strict=False)
 
