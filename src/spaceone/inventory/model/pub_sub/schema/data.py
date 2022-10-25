@@ -1,6 +1,10 @@
-from schematics.types import StringType
-
+from schematics.types import StringType, ModelType
+from schematics import Model
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
+
+
+class Display(Model):
+    output_display = StringType(serialize_when_none=False, default='show')
 
 
 class Schema(BaseResource):
@@ -9,6 +13,7 @@ class Schema(BaseResource):
     definition = StringType(serialize_when_none=False)
     revision_id = StringType(serialize_when_none=False, deserialize_from='revisionId')
     revision_create_time = StringType(serialize_when_none=False, deserialize_from='revisionCreateTime')
+    display = ModelType(Display, serialize_when_none=False)
 
     def reference(self):
         return {
