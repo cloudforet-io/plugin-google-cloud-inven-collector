@@ -1,5 +1,5 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, IntType, BooleanType, DictType
+from schematics.types import ModelType, ListType, StringType
 
 __all__ = ['EventTrigger']
 
