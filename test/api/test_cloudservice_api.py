@@ -53,12 +53,13 @@ class TestCollector(TestCase):
             }
         '''
         options = {
-            "cloud_service_types": ["Pub/Sub"]
+            "cloud_service_types": ["CloudFunctions"]
         }
         filter = {}
 
         resource_stream = self.inventory.Collector.collect({'options': options, 'secret_data': secret_data,
                                                             'filter': filter})
+        print(resource_stream)
         for res in resource_stream:
             print_json(res)
 

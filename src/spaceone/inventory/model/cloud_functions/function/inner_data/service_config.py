@@ -36,7 +36,7 @@ class ServiceConfig(Model):
         serialize_when_none=False,
         deserialize_from='vpcConnectorEgressSettings')
     ingress_settings = StringType(
-        choies=('INGRESS_SETTINGS_UNSPECIFIED', 'ALLOW_ALL', 'ALLOW_INTERNAL_ONLY', 'ALLOW_INTERNAL_AND_GCLB'),
+        choices=('INGRESS_SETTINGS_UNSPECIFIED', 'ALLOW_ALL', 'ALLOW_INTERNAL_ONLY', 'ALLOW_INTERNAL_AND_GCLB'),
         serialize_when_none=False, deserialize_from='ingressSettings')
     uri = StringType(serialize_when_none=False)
     service_account_email = StringType(serialize_when_none=False, deserialize_from='serviceAccountEmail')

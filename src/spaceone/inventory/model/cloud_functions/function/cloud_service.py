@@ -5,6 +5,8 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, E
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
 from spaceone.inventory.model.cloud_functions.function.data import Function
 
+__all__ = ['FunctionResource', 'FunctionResponse']
+
 function_detail = ItemDynamicLayout.set_fields('', fields=[])
 
 # TODO: write proper words
