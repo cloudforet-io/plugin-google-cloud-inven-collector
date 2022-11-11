@@ -55,7 +55,9 @@ class FunctionManager(GoogleCloudManager):
         functions = self.function_conn.list_functions()
 
         for function in functions:
+            print("api")
             print(function)
+            print('-' * 100)
             try:
                 ##################################
                 # 1. Set Basic Information
@@ -71,9 +73,19 @@ class FunctionManager(GoogleCloudManager):
                     'environment': self._make_readable_environment(function['environment']),
                     'function_id': function_id,
                     'last_deployed': self._make_last_deployed(function['updateTime']),
-                    'region': location
+                    'region': location,
+                    'trigger': self._make_trigger(function.get('eventTrigger')),
+                    'Runtime': self._make_runtime_for_readable(function['buildConfig']['runtime']),
+                    'memory_allocated': function['serviceConfig']['availableMemory'],
+                    'timeout': self._make_timeout(function['serviceConfig']['timeoutSeconds']),
+                    'executed_function': function['buildConfig']['entryPoint'],
+                    'labels': labels,
+                    'authentication': ''
                 }
+                # TODO: have to make authentication and trigger
+                print("derived variables")
                 print(display)
+                print('-' * 100)
                 ##################################
                 # 3. Make function data
                 ##################################
@@ -133,3 +145,39 @@ class FunctionManager(GoogleCloudManager):
         updated_time = datetime.strptime(update_time, '%Y-%m-%dT%H:%M:%S')
         korea_time = updated_time + timedelta(hours=9)
         return korea_time.strftime("%m/%d, %Y,%I:%M:%S %p")
+
+    @staticmethod
+    def _make_trigger(event_trigger):
+        if event_trigger:
+            return event_trigger.get('eventType', 'Not Found')
+        else:
+            return 'HTTP'
+
+    @staticmethod
+    def _make_runtime_for_readable(runtime):
+        runtime_map = {
+            'dotnet6': '.NET 6.0',
+            'dotnet3': '.NET Core 3.1',
+            'go119': 'Go 1.19',
+            'go118': 'Go 1.18',
+            'go116': 'Go 1.16',
+            'go113': 'Go 1.13',
+            'java17': 'Java 17',
+            'java11': 'Java 11',
+            'nodejs12': 'Node.js 12',
+            'nodejs14': 'Node.js 14',
+            'nodejs16': 'Node.js 16',
+            'php81': 'PHP 8.1',
+            'php74': 'PHP 7.4',
+            'python38': 'Python 3.8',
+            'python39': 'Python 3.9',
+            'python310': 'Python 3.10',
+            'ruby30': 'Ruby 3.0',
+            'ruby27': 'Ruby 2.7',
+            'ruby26': 'Ruby 2.6'
+        }
+        return runtime_map.get(runtime, 'Not Found')
+
+    @staticmethod
+    def _make_timeout(timeout):
+        return f'{timeout} seconds'
