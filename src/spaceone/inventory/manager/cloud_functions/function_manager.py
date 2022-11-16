@@ -55,9 +55,6 @@ class FunctionManager(GoogleCloudManager):
         functions = self.function_conn.list_functions()
 
         for function in functions:
-            print("api")
-            print(function)
-            print('-' * 100)
             try:
                 ##################################
                 # 1. Set Basic Information
@@ -66,26 +63,31 @@ class FunctionManager(GoogleCloudManager):
                 location, function_id = self._make_location_and_id(function_name, project_id)
                 labels = function.get('labels')
 
+                print(f"########## [{function_id}] api")
+                print(function)
+                print('##' * 100)
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                display = {
+                display = {}
+
+                # main table
+                display.update({
                     'environment': self._make_readable_environment(function['environment']),
                     'function_id': function_id,
                     'last_deployed': self._make_last_deployed(function['updateTime']),
-                    'region': location,
                     'trigger': self._make_trigger(function.get('eventTrigger')),
-                    'Runtime': self._make_runtime_for_readable(function['buildConfig']['runtime']),
-                    'memory_allocated': function['serviceConfig']['availableMemory'],
+                    'runtime': self._make_runtime_for_readable(function['buildConfig']['runtime']),
                     'timeout': self._make_timeout(function['serviceConfig']['timeoutSeconds']),
-                    'executed_function': function['buildConfig']['entryPoint'],
-                    'labels': labels,
-                    'authentication': ''
-                }
-                # TODO: have to make authentication and trigger
-                print("derived variables")
+                    'memory_allocated': self._make_memory_allocated(function['serviceConfig']['availableMemory'])
+                    # 'authentication': '' # if TODO: cloud IAM be developed, i will add this field
+                })
+
+                #
+
+                print(f"########## [{function_id}] derived variables")
                 print(display)
-                print('-' * 100)
+                print('##' * 100)
                 ##################################
                 # 3. Make function data
                 ##################################
@@ -121,7 +123,7 @@ class FunctionManager(GoogleCloudManager):
                                                                        self.cloud_service_type, function_id)
                 error_responses.append(error_response)
 
-        _LOGGER.debug(f'** Function Gen1 Finished {time.time() - start_time} Seconds **')
+        _LOGGER.debug(f'** Function Gen2 Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
     @staticmethod
@@ -144,7 +146,7 @@ class FunctionManager(GoogleCloudManager):
         update_time, microseconds = update_time.split('.')
         updated_time = datetime.strptime(update_time, '%Y-%m-%dT%H:%M:%S')
         korea_time = updated_time + timedelta(hours=9)
-        return korea_time.strftime("%m/%d, %Y,%I:%M:%S %p")
+        return f'{korea_time.strftime("%m/%d, %Y,%I:%M:%S %p")} GMT+9'
 
     @staticmethod
     def _make_trigger(event_trigger):
@@ -181,3 +183,12 @@ class FunctionManager(GoogleCloudManager):
     @staticmethod
     def _make_timeout(timeout):
         return f'{timeout} seconds'
+
+    @staticmethod
+    def _make_memory_allocated(memory):
+        try:
+            number, unit = memory.split('Mi')
+            return f'{number} MiB'
+        except:
+            number, unit = memory.split('Gi')
+            return f'{number} GiB'

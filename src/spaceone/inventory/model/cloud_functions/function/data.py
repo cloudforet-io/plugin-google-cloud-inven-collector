@@ -11,6 +11,11 @@ class FunctionDisplay(Model):
     environment_lowercase = StringType(
         serialize_when_none=False)
     environment = StringType(serialize_when_none=False)
+    function_id = StringType(serialize_when_none=False)
+    last_deployed = StringType(serialize_when_none=False)
+    trigger = StringType(serialize_when_none=False)
+    runtime = StringType(serialize_when_none=False)
+    timeout = StringType(serialize_when_none=False)
 
 
 class Function(BaseResource):
