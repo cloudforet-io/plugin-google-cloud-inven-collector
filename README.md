@@ -27,7 +27,36 @@ Please contact us if you need any further information. (<support@spaceone.dev>)
 Registered service account on SpaceONE must have certain permissions to collect cloud service data
 Please, set authentication privilege for followings:
 
-### Contents
+<br>
+<br>
+
+### Google Service Endpoint (in use)
+There is an endpoints used to collect resources information of GCP. Endpoint of served GCP is a URL consisting of a service code.
+```text
+https://[service-code].googleapis.com
+```
+
+We use dozens of endpoints because we collect information from many services.
+
+### Service list
+
+The following is a list of services being collected and service code information.
+
+|No.|Service name|Service Code|
+|---|------|---|
+|1|Compute Engine|compute|
+|2|Networking|compute|
+|3|Cloud SQL|sqladmin|
+|4|Storage|storage|
+|5|BigQuery|bigquery|
+|6|Cloud Pub/Sub|pubsub|
+
+If you want to know the detailed service endpoint, please check the [content details](###content-details) below.
+
+<br>
+<br>
+
+### Content details
 
 * Table of Contents
     * [Compute Engine](#compute-engine)
@@ -401,23 +430,6 @@ The default service code is listed below [service code list](#service-list)
     }
 }
 </code>
-</pre>>
+</pre>
 
 ---
-
-### Service list
-
-The following is a list of services belling collected and service code information.
-
-| No. | Service name        | Service Code   |
-|:----|:--------------------|:---------------|
-| 1   | Compute Engine      | Compute Engine |
-| 2   | BigQuery            | BigQuery       |
-| 3   | Cloud SQL           | Cloud SQL      |
-| 4   | Networking Products | Networking     |
-| 5   | Cloud Storage       | Cloud Storage  |
-| 6   | Cloud Pub/Sub       | Cloud Pub/Sub  |
-
-
-
-
