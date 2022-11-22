@@ -29,8 +29,8 @@ function_detail_meta = ListDynamicLayout.set_layouts('Details', layouts=[general
 # source
 source_information = ItemDynamicLayout.set_fields('', fields=[
     TextDyField.data_source('Runtime', 'data.display.runtime'),
-    TextDyField.data_source('Entry point', ''),
-    TextDyField.data_source('Source location', ''),
+    TextDyField.data_source('Entry point', 'data.build_config.entry_point'),
+    TextDyField.data_source('Source location', 'data.display.source_location'),
 ])
 
 # TODO: Need some research on how to get the code

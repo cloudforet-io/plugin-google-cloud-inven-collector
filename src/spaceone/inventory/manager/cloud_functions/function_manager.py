@@ -1,6 +1,7 @@
 import time
 import logging
 from datetime import datetime, timedelta
+import requests
 import pytz
 
 from spaceone.inventory.libs.manager import GoogleCloudManager
@@ -80,14 +81,18 @@ class FunctionManager(GoogleCloudManager):
                     'runtime': self._make_runtime_for_readable(function['buildConfig']['runtime']),
                     'timeout': self._make_timeout(function['serviceConfig']['timeoutSeconds']),
                     'memory_allocated': self._make_memory_allocated(function['serviceConfig']['availableMemory']),
-                    # 'authentication': '' # if TODO: cloud IAM be developed, i will add this field
                     'ingress_settings': self._make_ingress_setting_readable(
                         function['serviceConfig'].get('ingressSettings')),
                     'vpc_connector_egress_settings': self._make_vpc_egress_readable(
-                        function['serviceConfig'].get('vpcConnectorEgressSettings'))
+                        function['serviceConfig'].get('vpcConnectorEgressSettings')),
                 })
 
-                #
+                if storage_source := function['buildConfig']['source'].get('storageSource'):
+                    source_location = self._make_source_location(storage_source)
+                    display.update({
+                        'source_location': source_location,
+                        'source_code': self._make_source_code(source_location, function_id)
+                    })
 
                 print(f"########## [{function_id}] derived variables")
                 print(display)
@@ -217,3 +222,12 @@ class FunctionManager(GoogleCloudManager):
     def _make_ingress_setting_readable(ingress_settings):
         ingress_settings = ingress_settings.replace('_', ' ').lower()
         return ingress_settings[0].upper() + ingress_settings[1:]
+
+    @staticmethod
+    def _make_source_location(storage_source):
+        bucket = storage_source['bucket']
+        storage_object = storage_source['object']
+        return f'{bucket}/{storage_object}'
+    def _make_source_code(self, source_location, function_id):
+        pass
+

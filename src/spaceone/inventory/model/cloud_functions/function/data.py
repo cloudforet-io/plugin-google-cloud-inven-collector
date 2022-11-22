@@ -18,6 +18,7 @@ class FunctionDisplay(Model):
     timeout = StringType(serialize_when_none=False)
     vpc_connector_egress_settings = StringType(serialize_when_none=False)
     ingress_settings = StringType(serialize_when_none=False)
+    source_location = StringType(serialize_when_none=False)
 
 
 class Function(BaseResource):
