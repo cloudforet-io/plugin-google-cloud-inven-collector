@@ -11,27 +11,24 @@ __all__ = ['FunctionResource', 'FunctionResponse']
 general_information = ItemDynamicLayout.set_fields('General Information', fields=[
     TextDyField.data_source('Last deployed', 'data.display.last_deployed'),
     TextDyField.data_source('Region', 'region_code'),
-    TextDyField.data_source('Memory allocated', ''),
-    TextDyField.data_source('Timeout', ''),
-    TextDyField.data_source('Minimum instances', ''),
-    TextDyField.data_source('Maximum instances', ''),
-    TextDyField.data_source('Service account', ''),
-    # TODO: By default, your function is built in the worker pools managed by Cloud Build.
-    #  To build it using a different one, select its name in the field below.
-    TextDyField.data_source('Build Worker Pools', ''),
-    TextDyField.data_source('Container build log', ''),
+    TextDyField.data_source('Memory allocated', 'data.display.memory_allocated'),
+    TextDyField.data_source('Timeout', 'data.display.timeout'),
+    TextDyField.data_source('Minimum instances', 'data.service_config.min_instance_count'),
+    TextDyField.data_source('Maximum instances', 'data.service_config.max_instance_count'),
+    TextDyField.data_source('Service account', 'data.service_config.service_account_email'),
+    TextDyField.data_source('Build Worker Pools', 'data.build_config.worker_pool'),
+    TextDyField.data_source('Container build log', 'data.build_config.build'),
 ])
 networking_settings = ItemDynamicLayout.set_fields('Networking Settings', fields=[
-    TextDyField.data_source('Ingress settings', ''),
-    TextDyField.data_source('VPC connector', ''),
-    TextDyField.data_source('VPC connector egress', ''),
-    TextDyField.data_source('routing', ''),
+    TextDyField.data_source('Ingress settings', 'data.service_config.ingress_settings'),
+    TextDyField.data_source('VPC connector', 'data.service_config.vpc_connector'),
+    TextDyField.data_source('VPC connector egress', 'data.display.vpc_connector_egress'),
 ])
 function_detail_meta = ListDynamicLayout.set_layouts('Details', layouts=[general_information, networking_settings])
 
 # source
 source_information = ItemDynamicLayout.set_fields('', fields=[
-    TextDyField.data_source('Runtime', ''),
+    TextDyField.data_source('Runtime', 'data.display.runtime'),
     TextDyField.data_source('Entry point', ''),
     TextDyField.data_source('Source location', ''),
 ])

@@ -16,6 +16,8 @@ class FunctionDisplay(Model):
     trigger = StringType(serialize_when_none=False)
     runtime = StringType(serialize_when_none=False)
     timeout = StringType(serialize_when_none=False)
+    vpc_connector_egress_settings = StringType(serialize_when_none=False)
+    ingress_settings = StringType(serialize_when_none=False)
 
 
 class Function(BaseResource):

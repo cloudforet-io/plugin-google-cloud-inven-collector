@@ -79,8 +79,12 @@ class FunctionManager(GoogleCloudManager):
                     'trigger': self._make_trigger(function.get('eventTrigger')),
                     'runtime': self._make_runtime_for_readable(function['buildConfig']['runtime']),
                     'timeout': self._make_timeout(function['serviceConfig']['timeoutSeconds']),
-                    'memory_allocated': self._make_memory_allocated(function['serviceConfig']['availableMemory'])
+                    'memory_allocated': self._make_memory_allocated(function['serviceConfig']['availableMemory']),
                     # 'authentication': '' # if TODO: cloud IAM be developed, i will add this field
+                    'ingress_settings': self._make_ingress_setting_readable(
+                        function['serviceConfig'].get('ingressSettings')),
+                    'vpc_connector_egress_settings': self._make_vpc_egress_readable(
+                        function['serviceConfig'].get('vpcConnectorEgressSettings'))
                 })
 
                 #
@@ -192,3 +196,24 @@ class FunctionManager(GoogleCloudManager):
         except:
             number, unit = memory.split('Gi')
             return f'{number} GiB'
+
+    @staticmethod
+    def _make_vpc_egress_readable(egress_settings):
+        if egress_settings:
+            egress_settings = egress_settings.replace('_', ' ').lower()
+            first_character, other_character = egress_settings[0:3], egress_settings[1:]
+
+            if first_character == 'vpc':
+                first_character = 'VPC'
+            elif first_character == 'all':
+                first_character = 'All'
+            else:
+                first_character = 'Pri'
+            return first_character + other_character
+        else:
+            return ''
+
+    @staticmethod
+    def _make_ingress_setting_readable(ingress_settings):
+        ingress_settings = ingress_settings.replace('_', ' ').lower()
+        return ingress_settings[0].upper() + ingress_settings[1:]
