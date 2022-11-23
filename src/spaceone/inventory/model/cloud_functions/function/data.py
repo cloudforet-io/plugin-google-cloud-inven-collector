@@ -7,6 +7,11 @@ from spaceone.inventory.model.cloud_functions.function.inner_data import *
 __all__ = ['Function']
 
 
+class Code(Model):
+    name = StringType()
+    content = StringType()
+
+
 class FunctionDisplay(Model):
     environment_lowercase = StringType(
         serialize_when_none=False)
@@ -19,6 +24,10 @@ class FunctionDisplay(Model):
     vpc_connector_egress_settings = StringType(serialize_when_none=False)
     ingress_settings = StringType(serialize_when_none=False)
     source_location = StringType(serialize_when_none=False)
+    source_code = ListType(ModelType(Code), serialize_when_none=False)
+    output_display = StringType(serialize_when_none=False)
+    trigger_name = StringType(serialize_when_none=False)
+    retry_policy = StringType(serialize_when_none=False)
 
 
 class Function(BaseResource):

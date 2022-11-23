@@ -1,8 +1,11 @@
 import time
 import logging
 from datetime import datetime, timedelta
-import requests
-import pytz
+import google.oauth2.service_account
+from google.cloud import storage
+from zipfile import ZipFile
+from zipfile import is_zipfile
+import io
 
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
@@ -88,10 +91,20 @@ class FunctionManager(GoogleCloudManager):
                 })
 
                 if storage_source := function['buildConfig']['source'].get('storageSource'):
-                    source_location = self._make_source_location(storage_source)
+                    bucket = storage_source['bucket']
+                    storage_object = storage_source['object']
+                    source_location = self._make_source_location(bucket, storage_object)
                     display.update({
                         'source_location': source_location,
-                        'source_code': self._make_source_code(source_location, function_id)
+                        'source_code': self._make_source_code(bucket, storage_object, secret_data),
+                        'output_display': 'show'
+                    })
+
+                if trigger_data := function.get('eventTrigger'):
+                    display.update({
+                        'trigger_name': self._make_trigger_name(trigger_data.get('trigger')),
+                        'retry_policy': self._make_retry_policy(
+                            trigger_data.get('retryPolicy', 'RETRY_POLICY_UNSPECIFIED'))
                     })
 
                 print(f"########## [{function_id}] derived variables")
@@ -110,6 +123,7 @@ class FunctionManager(GoogleCloudManager):
                 ##################################
                 # 4. Make Function Resource Code
                 ##################################
+                print(labels)
                 function_resource = FunctionResource({
                     'name': function_name,
                     'account': project_id,
@@ -224,10 +238,36 @@ class FunctionManager(GoogleCloudManager):
         return ingress_settings[0].upper() + ingress_settings[1:]
 
     @staticmethod
-    def _make_source_location(storage_source):
-        bucket = storage_source['bucket']
-        storage_object = storage_source['object']
+    def _make_source_location(bucket, storage_object):
         return f'{bucket}/{storage_object}'
-    def _make_source_code(self, source_location, function_id):
-        pass
 
+    @staticmethod
+    def _make_source_code(bucket, storage_object, secret_data):
+        credentials = google.oauth2.service_account.Credentials.from_service_account_info(secret_data)
+        storage_client = storage.Client(project=secret_data['project_id'], credentials=credentials)
+
+        bucket = storage_client.get_bucket(bucket)
+        blob = bucket.blob(storage_object)
+        zip_file_from_storage = io.BytesIO(blob.download_as_string())
+        code_data = []
+        if is_zipfile(zip_file_from_storage):
+            with ZipFile(zip_file_from_storage, 'r') as file:
+                for content_file_name in file.namelist():
+                    content = file.read(content_file_name)
+                    code_data.append({'name': content_file_name,
+                                      'content': content.decode()})
+        return code_data
+
+    @staticmethod
+    def _make_trigger_name(trigger_id):
+        path, trigger_name = trigger_id.split('triggers/')
+        return trigger_name
+
+    @staticmethod
+    def _make_retry_policy(retry_policy):
+        if retry_policy == 'RETRY_POLICY_RETRY':
+            return 'Enabled'
+        elif retry_policy == 'RETRY_POLICY_DO_NOT_RETRY':
+            return 'Disabled'
+        else:
+            return 'Unspecified'
