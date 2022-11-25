@@ -74,6 +74,7 @@ class FunctionManager(GoogleCloudManager):
 
                 # main table
                 display.update({
+                    'region': location,
                     'environment': self._make_readable_environment(function['environment']),
                     'function_id': function_id,
                     'last_deployed': self._make_last_deployed(function['updateTime']),

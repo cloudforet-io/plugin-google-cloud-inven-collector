@@ -8,8 +8,8 @@ __all__ = ['Function']
 
 
 class FunctionDisplay(Model):
-    environment_lowercase = StringType(
-        serialize_when_none=False)
+    region = StringType(serialize_when_none=False)
+    environment_lowercase = StringType(serialize_when_none=False)
     environment = StringType(serialize_when_none=False)
     function_id = StringType(serialize_when_none=False)
     last_deployed = StringType(serialize_when_none=False)
@@ -43,5 +43,5 @@ class Function(BaseResource):
     def reference(self):
         return {
             "resource_id": self.name,
-            "external_link": f"https://console.cloud.google.com/functions/details/{self.region}/{self.id}?env={self.display.environment_lowercase}&project={self.project}"
+            "external_link": f"https://console.cloud.google.com/functions/details/{self.display.region}/{self.display.function_id}?env={self.display.environment_lowercase}&project={self.project}"
         }
