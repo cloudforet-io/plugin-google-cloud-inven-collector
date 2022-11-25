@@ -28,9 +28,4 @@ class FunctionConnector(GoogleCloudConnector):
     def _make_parent(self):
         return f'projects/{self.project_id}/locations/-'
 
-    def get_artifact(self):
-        self.client(googleapiclient='artifact', )
-        self.google_client_service = 'artifact'
-        self.version = 'v1'
-
 

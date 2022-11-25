@@ -39,7 +39,7 @@ cst_function._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source('Region', 'region_code'),
         TextDyField.data_source('Trigger', 'data.display.trigger'),
         TextDyField.data_source('Runtime', 'data.display.runtime'),
-        TextDyField.data_source('Memory allocated', 'data.service_config.available_memory'),
+        TextDyField.data_source('Memory allocated', 'data.display.memory_allocated'),
         TextDyField.data_source('Timeout', 'data.display.timeout'),
         TextDyField.data_source('Executed function', 'data.build_config.entry_point'),
     ],
