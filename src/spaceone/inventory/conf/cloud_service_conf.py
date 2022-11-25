@@ -24,7 +24,8 @@ CLOUD_SERVICE_GROUP_MAP = {
         'SnapshotManager',
         'SubscriptionManager',
         'TopicManager'
-    ]
+    ],
+    'CloudFunctions': ['FunctionManager']
 }
 
 REGION_INFO = {

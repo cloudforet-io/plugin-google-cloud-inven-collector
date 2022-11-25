@@ -17,6 +17,7 @@ from spaceone.inventory.connector.pub_sub.schema import SchemaConnector
 from spaceone.inventory.connector.pub_sub.subscription import SubscriptionConnector
 from spaceone.inventory.connector.pub_sub.snapshot import SnapshotConnector
 from spaceone.inventory.connector.pub_sub.topic import TopicConnector
+from spaceone.inventory.connector.cloud_functions.function import FunctionConnector
 
 
 

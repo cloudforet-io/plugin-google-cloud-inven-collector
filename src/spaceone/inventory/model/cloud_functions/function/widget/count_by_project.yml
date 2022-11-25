@@ -1,0 +1,15 @@
+---
+cloud_service_group: CloudFunctions
+cloud_service_type: Function
+name: Count by Project
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: account
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: DONUT

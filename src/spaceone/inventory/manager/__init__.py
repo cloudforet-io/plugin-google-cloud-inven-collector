@@ -16,4 +16,5 @@ from spaceone.inventory.manager.pub_sub.schema_manager import SchemaManager
 from spaceone.inventory.manager.pub_sub.snapshot_manager import SnapshotManager
 from spaceone.inventory.manager.pub_sub.subscription_manager import SubscriptionManager
 from spaceone.inventory.manager.pub_sub.topic_manager import TopicManager
+from spaceone.inventory.manager.cloud_functions.function_manager import FunctionManager
 
