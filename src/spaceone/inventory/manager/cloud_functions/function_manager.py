@@ -67,9 +67,6 @@ class FunctionManager(GoogleCloudManager):
                 location, function_id = self._make_location_and_id(function_name, project_id)
                 labels = function.get('labels')
 
-                print(f"########## [{function_id}] api")
-                print(function)
-                print('##' * 100)
                 ##################################
                 # 2. Make Base Data
                 ##################################
@@ -107,9 +104,6 @@ class FunctionManager(GoogleCloudManager):
                             trigger_data.get('retryPolicy', 'RETRY_POLICY_UNSPECIFIED'))
                     })
 
-                print(f"########## [{function_id}] derived variables")
-                print(display)
-                print('##' * 100)
                 ##################################
                 # 3. Make function data
                 ##################################
@@ -123,7 +117,6 @@ class FunctionManager(GoogleCloudManager):
                 ##################################
                 # 4. Make Function Resource Code
                 ##################################
-                print(labels)
                 function_resource = FunctionResource({
                     'name': function_name,
                     'account': project_id,
@@ -139,7 +132,7 @@ class FunctionManager(GoogleCloudManager):
                 # 5. Make Resource Response Object
                 ##################################
                 collected_cloud_services.append(FunctionResponse({'resource': function_resource}))
-                print()
+
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
                 error_response = self.generate_resource_error_response(e, self.cloud_service_group,
@@ -249,13 +242,12 @@ class FunctionManager(GoogleCloudManager):
         bucket = storage_client.get_bucket(bucket)
         blob = bucket.blob(storage_object)
         zip_file_from_storage = io.BytesIO(blob.download_as_string())
-        code_data = []
+        code_data = {}
         if is_zipfile(zip_file_from_storage):
             with ZipFile(zip_file_from_storage, 'r') as file:
                 for content_file_name in file.namelist():
                     content = file.read(content_file_name)
-                    code_data.append({'name': content_file_name,
-                                      'content': content.decode()})
+                    code_data[content_file_name] = content.decode()
         return code_data
 
     @staticmethod

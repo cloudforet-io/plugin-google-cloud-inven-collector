@@ -53,8 +53,7 @@ cst_function._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name='Runtime', key='data.display.runtime'),
         SearchField.set(name='Memory allocated', key='data.service_config.available_memory'),
         SearchField.set(name='Timeout', key='data.display.timeout'),
-        SearchField.set(name='Executed function', key='data.build_config.entry_point'),
-        # TODO: add more fields for searching
+        SearchField.set(name='Executed function', key='data.build_config.entry_point')
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

@@ -1,6 +1,6 @@
 from schematics.types import ModelType, StringType, PolyModelType, DictType
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, ListDynamicLayout, \
-    TableDynamicLayout
+    TableDynamicLayout, SimpleTableDynamicLayout
 from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, MoreField, EnumDyField, DateTimeDyField
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
 from spaceone.inventory.model.cloud_functions.function.data import Function
@@ -33,53 +33,25 @@ source_information = ItemDynamicLayout.set_fields('Information', fields=[
     TextDyField.data_source('Source location', 'data.display.source_location'),
 ])
 
-# TODO: apply proper metadata
-source_code = ItemDynamicLayout.set_fields('Source code', fields=[
-    MoreField.data_source('Definition', 'data.display.output_display', options={
-        'sub_key': 'data.definition',
-        'layout': {
-            'name': 'Definition',
-            'type': 'popup',
-            'options': {
-                'layout': {
-                    'type': 'raw'
-                }
-            }
-        }
-    }),
-    MoreField.data_source('Definition2', 'data.display.output_display', options={
-        'sub_key': 'data.definition',
-        'layout': {
-            'name': 'Definition',
-            'type': 'popup',
-            'options': {
-                'layout': {
-                    'type': 'raw'
-                }
-            }
-        }
-    })
-])
+source_code = SimpleTableDynamicLayout.set_source_code_field('Source code', root_path='data.display.source_code')
 
 function_source_meta = ListDynamicLayout.set_layouts('Source', layouts=[source_information, source_code])
 
-# TODO: change proper value in variabels
 # variables
-runtime_environment_variables = TableDynamicLayout.set_fields('Labels', root_path='data.labels', fields=[
-    TextDyField.data_source('Key', 'key'),
-    TextDyField.data_source('Value', 'value'),
-])
-build_environment_variables = TableDynamicLayout.set_fields('Labels', root_path='data.labels', fields=[
-    TextDyField.data_source('Key', 'key'),
-    TextDyField.data_source('Value', 'value'),
-])
-secrets = TableDynamicLayout.set_fields('Labels', root_path='data.labels', fields=[
-    TextDyField.data_source('Key', 'key'),
-    TextDyField.data_source('Value', 'value'),
-])
+runtime_environment_variables = SimpleTableDynamicLayout.set_tags('Runtime environment variables',
+                                                                  root_path='data.service_config.environment_variables')
+build_environment_variables = SimpleTableDynamicLayout.set_tags('Build environment variables',
+                                                                root_path='data.build_config.environment_variables')
+secrets = SimpleTableDynamicLayout.set_tags('Secrets', root_path='data.service_config.secret_environment_variables',
+                                            fields=[
+                                                TextDyField.data_source('key', 'role'),
+                                                TextDyField.data_source('project id', 'special_group'),
+                                                TextDyField.data_source('secret', 'user_by_email'),
+                                                TextDyField.data_source('version', 'user_by_email')
+                                            ])
+
 function_variables_meta = ListDynamicLayout.set_layouts('Variables', layouts=[runtime_environment_variables,
                                                                               build_environment_variables, secrets])
-
 # trigger
 https = ItemDynamicLayout.set_fields('HTTPS', fields=[
     TextDyField.data_source('URL', 'data.service_config.uri')
