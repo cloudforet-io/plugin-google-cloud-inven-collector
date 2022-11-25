@@ -4,3 +4,4 @@ spaceone-tester
 google-api-python-client
 schematics
 MarkupSafe>=2.0.0rc2
+google-cloud-storage
