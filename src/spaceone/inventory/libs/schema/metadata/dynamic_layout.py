@@ -119,27 +119,6 @@ class SimpleTableDynamicLayout(BaseLayoutField):
             ]
         return cls.set_fields(name, root_path, fields)
 
-    @classmethod
-    def set_source_code_field(cls, name='', root_path='', fields=None):
-        if fields is None:
-            fields = [
-                TextDyField.data_source('File name', 'file_name'),
-                MoreField.data_source('Source', 'output_display',
-                                      options={
-                                          'sub_key': 'content',
-                                          'layout': {
-                                              'name': 'Code',
-                                              'type': 'popup',
-                                              'options': {
-                                                  'layout': {
-                                                      'type': 'raw'
-                                                  }
-                                              }
-                                          }
-                                      })
-            ]
-        return cls.set_fields(name, root_path, fields)
-
 
 class ListDynamicLayout(BaseLayoutField):
     type = StringType(default='list')
