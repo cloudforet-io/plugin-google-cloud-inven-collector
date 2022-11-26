@@ -33,6 +33,7 @@ class FunctionDisplay(Model):
     source_location = StringType(serialize_when_none=False)
     source_code = ListType(ModelType(Source), serialize_when_none=False)
     trigger_name = StringType(serialize_when_none=False)
+    event_provider = StringType(serialize_when_none=False)
     retry_policy = StringType(serialize_when_none=False)
     runtime_environment_variables = ListType(ModelType(Variable), serialize_when_none=False)
     build_environment_variables = ListType(ModelType(Variable), serialize_when_none=False)

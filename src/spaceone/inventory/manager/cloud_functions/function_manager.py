@@ -10,6 +10,7 @@ import io
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
 from spaceone.inventory.connector.cloud_functions.function import FunctionConnector
+from spaceone.inventory.connector.cloud_functions.eventarc import EventarcConnector
 from spaceone.inventory.model.cloud_functions.function.cloud_service_type import CLOUD_SERVICE_TYPES, cst_function
 from spaceone.inventory.model.cloud_functions.function.cloud_service import FunctionResource, FunctionResponse
 from spaceone.inventory.model.cloud_functions.function.data import Function
@@ -49,8 +50,9 @@ class FunctionManager(GoogleCloudManager):
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
-
         self.function_conn: FunctionConnector = self.locator.get_connector(self.connector_name, **params)
+
+        trigger_provider_map = self._create_trigger_provider_map(params)
 
         ##################################
         # 0. Gather All Related Resources
@@ -101,7 +103,9 @@ class FunctionManager(GoogleCloudManager):
                     display.update({
                         'trigger_name': self._make_trigger_name(trigger_data.get('trigger')),
                         'retry_policy': self._make_retry_policy(
-                            trigger_data.get('retryPolicy', 'RETRY_POLICY_UNSPECIFIED'))
+                            trigger_data.get('retryPolicy', 'RETRY_POLICY_UNSPECIFIED')),
+                        'event_provider': self._get_event_provider_from_trigger_map(trigger_data.get('eventType'),
+                                                                                    trigger_provider_map)
                     })
 
                 if runtime_environment_variables := function['serviceConfig'].get('environmentVariables', {}):
@@ -112,6 +116,7 @@ class FunctionManager(GoogleCloudManager):
                     display.update({
                         'build_environment_variables': self._dict_to_list_of_dict(build_environment_variables)
                     })
+
                 ##################################
                 # 3. Make function data
                 ##################################
@@ -282,3 +287,32 @@ class FunctionManager(GoogleCloudManager):
         for key, value in dict_variables.items():
             variables.append({'key': key, 'value': value})
         return variables
+
+    def _list_providers_from_eventarc(self, params):
+        eventarc_conn: EventarcConnector = self.locator.get_connector('EventarcConnector', **params)
+        providers = eventarc_conn.list_providers()
+        return providers
+
+    def _create_trigger_provider_map(self, params):
+        providers = self._list_providers_from_eventarc(params)
+
+        trigger_provider_map = {}
+        for provider in providers:
+            display_name = provider['displayName']
+
+            event_types = []
+            for event_type in provider['eventTypes']:
+                if display_name in trigger_provider_map:
+                    if event_type not in trigger_provider_map[display_name]:
+                        event_types.append(event_type['type'])
+                else:
+                    event_types.append(event_type['type'])
+            trigger_provider_map[display_name] = event_types
+        return trigger_provider_map
+
+    @staticmethod
+    def _get_event_provider_from_trigger_map(event_type, trigger_provider_map):
+        for display_name, event_types in trigger_provider_map.items():
+            if event_type in event_types:
+                return display_name
+        return 'Not Found'
