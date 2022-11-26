@@ -123,12 +123,12 @@ class SimpleTableDynamicLayout(BaseLayoutField):
     def set_source_code_field(cls, name='', root_path='', fields=None):
         if fields is None:
             fields = [
-                TextDyField.data_source('File name', 'key'),
-                MoreField.data_source('Source', 'data.display.output_display',
+                TextDyField.data_source('File name', 'file_name'),
+                MoreField.data_source('Source', 'output_display',
                                       options={
-                                          'sub_key': 'value',
+                                          'sub_key': 'content',
                                           'layout': {
-                                              'name': 'Source',
+                                              'name': 'Code',
                                               'type': 'popup',
                                               'options': {
                                                   'layout': {

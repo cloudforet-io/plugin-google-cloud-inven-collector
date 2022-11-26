@@ -1,6 +1,6 @@
 from schematics.types import ModelType, StringType, PolyModelType, DictType
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, ListDynamicLayout, \
-    TableDynamicLayout, SimpleTableDynamicLayout
+    SimpleTableDynamicLayout
 from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, MoreField, EnumDyField, DateTimeDyField
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
 from spaceone.inventory.model.cloud_functions.function.data import Function
@@ -33,7 +33,22 @@ source_information = ItemDynamicLayout.set_fields('Information', fields=[
     TextDyField.data_source('Source location', 'data.display.source_location'),
 ])
 
-source_code = SimpleTableDynamicLayout.set_source_code_field('Source code', root_path='data.display.source_code')
+source_code = SimpleTableDynamicLayout.set_source_code_field('Source code', fields=[
+    TextDyField.data_source('File name', 'data.display.source_code.file_name'),
+    MoreField.data_source('Source', 'data.display.source_code.output_display',
+                          options={
+                              'sub_key': 'data.display.source_code.content',
+                              'layout': {
+                                  'name': 'Code',
+                                  'type': 'popup',
+                                  'options': {
+                                      'layout': {
+                                          'type': 'raw'
+                                      }
+                                  }
+                              }
+                          })
+])
 
 function_source_meta = ListDynamicLayout.set_layouts('Source', layouts=[source_information, source_code])
 
