@@ -18,6 +18,7 @@ from spaceone.inventory.connector.pub_sub.subscription import SubscriptionConnec
 from spaceone.inventory.connector.pub_sub.snapshot import SnapshotConnector
 from spaceone.inventory.connector.pub_sub.topic import TopicConnector
 from spaceone.inventory.connector.cloud_functions.function import FunctionConnector
+from spaceone.inventory.connector.cloud_functions.eventarc import EventarcConnector
 
 
 

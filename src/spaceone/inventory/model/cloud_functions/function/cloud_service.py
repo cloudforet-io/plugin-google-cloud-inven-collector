@@ -73,7 +73,7 @@ https = ItemDynamicLayout.set_fields('HTTPS', fields=[
 ])
 eventarc_trigger = ItemDynamicLayout.set_fields('Eventarc trigger', fields=[
     TextDyField.data_source('Name', 'data.display.trigger_name'),
-    TextDyField.data_source('Event provider', 'region_code'),
+    TextDyField.data_source('Event provider', 'data.display.event_provider'),
     TextDyField.data_source('Event type', 'data.event_trigger.event_type'),
     TextDyField.data_source('Receive events from', 'data.event_trigger.pubsub_topic'),
     TextDyField.data_source('Trigger region', 'data.event_trigger.trigger_region'),
