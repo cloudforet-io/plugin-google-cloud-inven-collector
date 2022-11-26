@@ -105,6 +105,14 @@ class FunctionManager(GoogleCloudManager):
                             trigger_data.get('retryPolicy', 'RETRY_POLICY_UNSPECIFIED'))
                     })
 
+                if runtime_environment_variables := function['serviceConfig'].get('environmentVariables', {}):
+                    display.update({
+                        'runtime_environment_variables': self._dict_to_list_of_dict(runtime_environment_variables)
+                    })
+                if build_environment_variables := function['buildConfig'].get('environmentVariables', {}):
+                    display.update({
+                        'build_environment_variables': self._dict_to_list_of_dict(build_environment_variables)
+                    })
                 ##################################
                 # 3. Make function data
                 ##################################
@@ -264,3 +272,10 @@ class FunctionManager(GoogleCloudManager):
             return 'Disabled'
         else:
             return 'Unspecified'
+
+    @staticmethod
+    def _dict_to_list_of_dict(dict_variables: dict) -> list:
+        variables = []
+        for key, value in dict_variables.items():
+            variables.append({'key': key, 'value': value})
+        return variables
