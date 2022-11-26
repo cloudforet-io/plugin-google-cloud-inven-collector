@@ -7,6 +7,11 @@ from spaceone.inventory.model.cloud_functions.function.inner_data import *
 __all__ = ['Function']
 
 
+class Variable(Model):
+    key = StringType(serialize_when_none=False)
+    value = StringType(serialize_when_none=False)
+
+
 class FunctionDisplay(Model):
     region = StringType(serialize_when_none=False)
     environment_lowercase = StringType(serialize_when_none=False)
@@ -24,6 +29,8 @@ class FunctionDisplay(Model):
     output_display = StringType(serialize_when_none=False)
     trigger_name = StringType(serialize_when_none=False)
     retry_policy = StringType(serialize_when_none=False)
+    runtime_environment_variables = ListType(ModelType(Variable), serialize_when_none=False)
+    build_environment_variables = ListType(ModelType(Variable), serialize_when_none=False)
 
 
 class Function(BaseResource):

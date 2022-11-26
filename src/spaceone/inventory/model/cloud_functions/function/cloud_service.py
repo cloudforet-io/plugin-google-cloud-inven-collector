@@ -39,15 +39,15 @@ function_source_meta = ListDynamicLayout.set_layouts('Source', layouts=[source_i
 
 # variables
 runtime_environment_variables = SimpleTableDynamicLayout.set_tags('Runtime environment variables',
-                                                                  root_path='data.service_config.environment_variables')
+                                                                  root_path='data.display.runtime_environment_variables')
 build_environment_variables = SimpleTableDynamicLayout.set_tags('Build environment variables',
-                                                                root_path='data.build_config.environment_variables')
+                                                                root_path='data.display.build_environment_variables')
 secrets = SimpleTableDynamicLayout.set_tags('Secrets', root_path='data.service_config.secret_environment_variables',
                                             fields=[
-                                                TextDyField.data_source('key', 'role'),
-                                                TextDyField.data_source('project id', 'special_group'),
-                                                TextDyField.data_source('secret', 'user_by_email'),
-                                                TextDyField.data_source('version', 'user_by_email')
+                                                TextDyField.data_source('key', 'key'),
+                                                TextDyField.data_source('project id', 'project_id'),
+                                                TextDyField.data_source('secret', 'secret'),
+                                                TextDyField.data_source('version', 'version')
                                             ])
 
 function_variables_meta = ListDynamicLayout.set_layouts('Variables', layouts=[runtime_environment_variables,
