@@ -12,6 +12,12 @@ class Variable(Model):
     value = StringType(serialize_when_none=False)
 
 
+class Source(Model):
+    file_name = StringType(serialize_when_none=False)
+    content = StringType(serialize_when_none=False)
+    output_display = StringType(serialize_when_none=False, default='show')
+
+
 class FunctionDisplay(Model):
     region = StringType(serialize_when_none=False)
     environment_lowercase = StringType(serialize_when_none=False)
@@ -25,8 +31,7 @@ class FunctionDisplay(Model):
     vpc_connector_egress_settings = StringType(serialize_when_none=False)
     ingress_settings = StringType(serialize_when_none=False)
     source_location = StringType(serialize_when_none=False)
-    source_code = DictType(StringType, serialize_when_none=False)
-    output_display = StringType(serialize_when_none=False)
+    source_code = ListType(ModelType(Source), serialize_when_none=False)
     trigger_name = StringType(serialize_when_none=False)
     retry_policy = StringType(serialize_when_none=False)
     runtime_environment_variables = ListType(ModelType(Variable), serialize_when_none=False)

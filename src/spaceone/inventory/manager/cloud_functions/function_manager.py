@@ -95,7 +95,6 @@ class FunctionManager(GoogleCloudManager):
                     display.update({
                         'source_location': source_location,
                         'source_code': self._make_source_code(bucket, storage_object, secret_data),
-                        'output_display': 'show'
                     })
 
                 if trigger_data := function.get('eventTrigger'):
@@ -251,12 +250,16 @@ class FunctionManager(GoogleCloudManager):
         bucket = storage_client.get_bucket(bucket)
         blob = bucket.blob(storage_object)
         zip_file_from_storage = io.BytesIO(blob.download_as_string())
-        code_data = {}
+        code_data = []
         if is_zipfile(zip_file_from_storage):
             with ZipFile(zip_file_from_storage, 'r') as file:
                 for content_file_name in file.namelist():
                     content = file.read(content_file_name)
-                    code_data[content_file_name] = content.decode()
+                    code_data.append({
+                        'file_name': content_file_name,
+                        'content': content,
+                        'output_display': 'show'
+                    })
         return code_data
 
     @staticmethod
