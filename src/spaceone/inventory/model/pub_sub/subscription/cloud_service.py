@@ -1,4 +1,4 @@
-from schematics.types import ModelType, StringType, PolyModelType
+from schematics.types import ModelType, StringType, PolyModelType, DictType
 
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
 from spaceone.inventory.libs.schema.metadata.dynamic_field import EnumDyField, TextDyField
@@ -27,6 +27,7 @@ subscription_meta = CloudServiceMeta.set_layouts([subscription_detail_meta])
 
 
 class PubSubResource(CloudServiceResource):
+    tags = DictType(StringType, serialize_when_none=False)
     cloud_service_group = StringType(default='Pub/Sub')
 
 
