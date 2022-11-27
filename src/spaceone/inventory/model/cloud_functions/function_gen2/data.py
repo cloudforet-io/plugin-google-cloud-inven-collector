@@ -2,9 +2,9 @@ from schematics import Model
 from schematics.types import ModelType, ListType, StringType, DictType
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
-from spaceone.inventory.model.cloud_functions.function.inner_data import *
+from spaceone.inventory.model.cloud_functions.function_gen2.inner_data import *
 
-__all__ = ['Function']
+__all__ = ['FunctionGen2']
 
 
 class Variable(Model):
@@ -39,7 +39,7 @@ class FunctionDisplay(Model):
     build_environment_variables = ListType(ModelType(Variable), serialize_when_none=False)
 
 
-class Function(BaseResource):
+class FunctionGen2(BaseResource):
     name = StringType()
     environment = StringType(choices=('ENVIRONMENT_UNSPECIFIED', 'GEN_1', 'GEN_2'), serialize_when_none=False)
     description = StringType(serialize_when_none=False)

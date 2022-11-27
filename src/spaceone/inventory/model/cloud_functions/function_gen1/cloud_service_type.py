@@ -2,8 +2,7 @@ import os
 
 from spaceone.inventory.libs.common_parser import *
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import CardWidget, ChartWidget
-from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, SearchField, DateTimeDyField, \
-    EnumDyField, SizeField
+from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, SearchField, EnumDyField
 from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, \
     CloudServiceTypeMeta
 
@@ -30,19 +29,19 @@ cst_function._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         EnumDyField.data_source('Status', 'data.state', default_state={
             'safe': ['ACTIVE'],
-            'warning': ['DEPLOYING', 'DELETING'],
-            'alert': ['STATE_UNSPECIFIED', 'FAILED', 'UNKNOWN']
+            'warning': ['DEPLOYING', 'DELETING', 'DEPLOY_IN_PROGRESS', 'DELETE_IN_PROGRESS'],
+            'alert': ['STATE_UNSPECIFIED', 'FAILED', 'UNKNOWN', 'CLOUD_FUNCTION_STATUS_UNSPECIFIED', 'OFFLINE']
         }),
         TextDyField.data_source('Environment', 'data.display.environment'),
         TextDyField.data_source('ID', 'data.display.function_id'),
         TextDyField.data_source('Last deployed', 'data.display.last_deployed'),
         TextDyField.data_source('Region', 'region_code'),
         TextDyField.data_source('Trigger', 'data.display.trigger'),
-        TextDyField.data_source('Event provider', 'data.display.event_provider'),
+        TextDyField.data_source('Event provider', 'data.event_trigger.event_type'),
         TextDyField.data_source('Runtime', 'data.display.runtime'),
         TextDyField.data_source('Memory allocated', 'data.display.memory_allocated'),
         TextDyField.data_source('Timeout', 'data.display.timeout'),
-        TextDyField.data_source('Executed function', 'data.build_config.entry_point'),
+        TextDyField.data_source('Entry Point', 'data.entry_point'),
     ],
     search=[
         SearchField.set(name='Status', key='data.state'),
@@ -53,9 +52,9 @@ cst_function._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name='Trigger', key='data.display.trigger'),
         SearchField.set(name='Event provider', key='data.display.event_provider'),
         SearchField.set(name='Runtime', key='data.display.runtime'),
-        SearchField.set(name='Memory allocated', key='data.service_config.available_memory'),
+        SearchField.set(name='Memory allocated', key='data.display.memory_allocated'),
         SearchField.set(name='Timeout', key='data.display.timeout'),
-        SearchField.set(name='Executed function', key='data.build_config.entry_point')
+        SearchField.set(name='Entry Point', key='data.entry_point')
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

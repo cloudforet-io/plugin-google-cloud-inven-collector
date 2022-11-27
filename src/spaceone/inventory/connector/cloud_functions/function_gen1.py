@@ -2,13 +2,13 @@ import logging
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
-__all__ = ['FunctionConnector']
+__all__ = ['FunctionGen1Connector']
 _LOGGER = logging.getLogger(__name__)
 
 
-class FunctionConnector(GoogleCloudConnector):
+class FunctionGen1Connector(GoogleCloudConnector):
     google_client_service = 'cloudfunctions'
-    version = 'v2'
+    version = 'v1'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -27,5 +27,3 @@ class FunctionConnector(GoogleCloudConnector):
 
     def _make_parent(self):
         return f'projects/{self.project_id}/locations/-'
-
-

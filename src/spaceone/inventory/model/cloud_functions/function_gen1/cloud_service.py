@@ -1,9 +1,9 @@
 from schematics.types import ModelType, StringType, PolyModelType, DictType
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, ListDynamicLayout, \
     SimpleTableDynamicLayout
-from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, MoreField, EnumDyField, DateTimeDyField
+from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, MoreField
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
-from spaceone.inventory.model.cloud_functions.function.data import Function
+from spaceone.inventory.model.cloud_functions.function_gen1.data import FunctionGen1
 
 __all__ = ['FunctionResource', 'FunctionResponse']
 
@@ -13,23 +13,23 @@ general_information = ItemDynamicLayout.set_fields('General Information', fields
     TextDyField.data_source('Region', 'region_code'),
     TextDyField.data_source('Memory allocated', 'data.display.memory_allocated'),
     TextDyField.data_source('Timeout', 'data.display.timeout'),
-    TextDyField.data_source('Minimum instances', 'data.service_config.min_instance_count'),
-    TextDyField.data_source('Maximum instances', 'data.service_config.max_instance_count'),
-    TextDyField.data_source('Service account', 'data.service_config.service_account_email'),
-    TextDyField.data_source('Build Worker Pools', 'data.build_config.worker_pool'),
-    TextDyField.data_source('Container build log', 'data.build_config.build'),
+    TextDyField.data_source('Minimum instances', 'data.min_instances'),
+    TextDyField.data_source('Maximum instances', 'data.max_instances'),
+    TextDyField.data_source('Service account', 'data.service_account_email'),
+    TextDyField.data_source('Build Worker Pools', 'data.build_worker_pool'),
+    TextDyField.data_source('Container build log', 'data.build_id'),
 ])
 networking_settings = ItemDynamicLayout.set_fields('Networking Settings', fields=[
-    TextDyField.data_source('Ingress settings', 'data.service_config.ingress_settings'),
-    TextDyField.data_source('VPC connector', 'data.service_config.vpc_connector'),
-    TextDyField.data_source('VPC connector egress', 'data.display.vpc_connector_egress'),
+    TextDyField.data_source('Ingress settings', 'data.display.ingress_settings'),
+    TextDyField.data_source('VPC connector', 'data.vpc_connector'),
+    TextDyField.data_source('VPC connector egress', 'data.display.vpc_connector_egress_settings'),
 ])
 function_detail_meta = ListDynamicLayout.set_layouts('Details', layouts=[general_information, networking_settings])
 
 # source
 source_information = ItemDynamicLayout.set_fields('Information', fields=[
     TextDyField.data_source('Runtime', 'data.display.runtime'),
-    TextDyField.data_source('Entry point', 'data.build_config.entry_point'),
+    TextDyField.data_source('Entry point', 'data.entry_point'),
     TextDyField.data_source('Source location', 'data.display.source_location'),
 ])
 
@@ -69,18 +69,17 @@ function_variables_meta = ListDynamicLayout.set_layouts('Variables', layouts=[ru
                                                                               build_environment_variables, secrets])
 # trigger
 https = ItemDynamicLayout.set_fields('HTTPS', fields=[
-    TextDyField.data_source('URL', 'data.service_config.uri')
+    TextDyField.data_source('Trigger URL', 'data.https_trigger.url')
 ])
-eventarc_trigger = ItemDynamicLayout.set_fields('Eventarc trigger', fields=[
-    TextDyField.data_source('Name', 'data.display.trigger_name'),
+
+event = ItemDynamicLayout.set_fields('Event Trigger', fields=[
     TextDyField.data_source('Event provider', 'data.display.event_provider'),
     TextDyField.data_source('Event type', 'data.event_trigger.event_type'),
-    TextDyField.data_source('Receive events from', 'data.event_trigger.pubsub_topic'),
-    TextDyField.data_source('Trigger region', 'data.event_trigger.trigger_region'),
-    TextDyField.data_source('Service account', 'data.event_trigger.service_account_email'),
-    TextDyField.data_source('Retry on failure', 'data.display.retry_policy')
+    TextDyField.data_source('Resource', 'data.event_trigger.resource'),
+    TextDyField.data_source('Service', 'data.event_trigger.service')
 ])
-function_trigger_meta = ListDynamicLayout.set_layouts('Trigger', layouts=[https, eventarc_trigger])
+
+function_trigger_meta = ListDynamicLayout.set_layouts('Trigger', layouts=[https, event])
 
 function_meta = CloudServiceMeta.set_layouts(
     [function_detail_meta, function_source_meta, function_variables_meta, function_trigger_meta])
@@ -93,7 +92,7 @@ class CloudFunctionsResource(CloudServiceResource):
 
 class FunctionResource(CloudFunctionsResource):
     cloud_service_type = StringType(default='Function')
-    data = ModelType(Function)
+    data = ModelType(FunctionGen1)
     _metadata = ModelType(CloudServiceMeta, default=function_meta, serialized_name='metadata')
 
 
