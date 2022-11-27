@@ -3,7 +3,7 @@ from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLa
     SimpleTableDynamicLayout
 from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, MoreField, EnumDyField, DateTimeDyField
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
-from spaceone.inventory.model.cloud_functions.function.data import Function
+from spaceone.inventory.model.cloud_functions.function_gen2.data import FunctionGen2
 
 __all__ = ['FunctionResource', 'FunctionResponse']
 
@@ -93,7 +93,7 @@ class CloudFunctionsResource(CloudServiceResource):
 
 class FunctionResource(CloudFunctionsResource):
     cloud_service_type = StringType(default='Function')
-    data = ModelType(Function)
+    data = ModelType(FunctionGen2)
     _metadata = ModelType(CloudServiceMeta, default=function_meta, serialized_name='metadata')
 
 

@@ -9,17 +9,17 @@ import io
 
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
-from spaceone.inventory.connector.cloud_functions.function import FunctionConnector
+from spaceone.inventory.connector.cloud_functions.function_gen2 import FunctionGen2Connector
 from spaceone.inventory.connector.cloud_functions.eventarc import EventarcConnector
-from spaceone.inventory.model.cloud_functions.function.cloud_service_type import CLOUD_SERVICE_TYPES, cst_function
-from spaceone.inventory.model.cloud_functions.function.cloud_service import FunctionResource, FunctionResponse
-from spaceone.inventory.model.cloud_functions.function.data import Function
+from spaceone.inventory.model.cloud_functions.function_gen2.cloud_service_type import CLOUD_SERVICE_TYPES, cst_function
+from spaceone.inventory.model.cloud_functions.function_gen2.cloud_service import FunctionResource, FunctionResponse
+from spaceone.inventory.model.cloud_functions.function_gen2.data import FunctionGen2
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class FunctionManager(GoogleCloudManager):
-    connector_name = 'FunctionConnector'
+class FunctionGen2Manager(GoogleCloudManager):
+    connector_name = 'FunctionGen2Connector'
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def __init__(self, *args, **kwargs):
@@ -50,7 +50,7 @@ class FunctionManager(GoogleCloudManager):
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
-        self.function_conn: FunctionConnector = self.locator.get_connector(self.connector_name, **params)
+        self.function_conn: FunctionGen2Connector = self.locator.get_connector(self.connector_name, **params)
 
         trigger_provider_map = self._create_trigger_provider_map(params)
 
@@ -118,14 +118,14 @@ class FunctionManager(GoogleCloudManager):
                     })
 
                 ##################################
-                # 3. Make function data
+                # 3. Make function_gen2 data
                 ##################################
                 function.update({
                     # 'function_id': function_id,
                     'project': project_id,
                     'display': display
                 })
-                function_data = Function(function, strict=False)
+                function_data = FunctionGen2(function, strict=False)
 
                 ##################################
                 # 4. Make Function Resource Code

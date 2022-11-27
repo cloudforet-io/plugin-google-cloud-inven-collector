@@ -17,7 +17,8 @@ from spaceone.inventory.connector.pub_sub.schema import SchemaConnector
 from spaceone.inventory.connector.pub_sub.subscription import SubscriptionConnector
 from spaceone.inventory.connector.pub_sub.snapshot import SnapshotConnector
 from spaceone.inventory.connector.pub_sub.topic import TopicConnector
-from spaceone.inventory.connector.cloud_functions.function import FunctionConnector
+from spaceone.inventory.connector.cloud_functions.function_gen2 import FunctionGen2Connector
+from spaceone.inventory.connector.cloud_functions.function_gen1 import FunctionGen1Connector
 from spaceone.inventory.connector.cloud_functions.eventarc import EventarcConnector
 
 

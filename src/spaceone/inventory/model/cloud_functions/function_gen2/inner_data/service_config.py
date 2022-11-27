@@ -29,7 +29,7 @@ class ServiceConfig(Model):
     available_memory = StringType(serialize_when_none=False, deserialize_from='availableMemory')
     environment_variables = DictType(StringType, serialize_when_none=False, deserialize_from='environmentVariables')
     max_instance_count = IntType(serialize_when_none=False, deserialize_from='maxInstanceCount')
-    min_instance_count = IntType(serialize_when_none=False, deserialize_from='minInstanceCount')
+    min_instance_count = IntType(serialize_when_none=False, deserialize_from='minInstanceCount', default=0)
     vpc_connector = StringType(serialize_when_none=False, deserialize_from='vpcConnector')
     vpc_connector_egress_settings = StringType(
         choices=('VPC_CONNECTOR_EGRESS_SETTINGS_UNSPECIFIED', 'PRIVATE_RANGES_ONLY', 'ALL_TRAFFIC'),
