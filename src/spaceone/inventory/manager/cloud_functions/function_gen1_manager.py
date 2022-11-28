@@ -47,7 +47,6 @@ class FunctionGen1Manager(GoogleCloudManager):
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
-        trigger_provider_map = self._create_trigger_provider_map(params)
 
         self.function_conn: FunctionGen1Connector = self.locator.get_connector(self.connector_name, **params)
 
@@ -80,10 +79,9 @@ class FunctionGen1Manager(GoogleCloudManager):
                         'trigger': 'HTTP',
                         'http_url': http_trigger['url']
                     })
-                # TODO: need to solve 'Not Fount' about event_provider
+
                 if event_trigger := function.get('eventTrigger'):
-                    trigger = self._get_event_provider_from_trigger_map(event_trigger['eventType'],
-                                                                        trigger_provider_map)
+                    trigger = self._get_display_name(event_trigger.get('service'))
                     display.update({
                         'trigger': trigger,
                         'event_provider': trigger
@@ -108,7 +106,6 @@ class FunctionGen1Manager(GoogleCloudManager):
                     })
 
                 function.update({
-                    # 'function_id': function_id,
                     'project': project_id,
                     'display': display
                 })
@@ -253,31 +250,19 @@ class FunctionGen1Manager(GoogleCloudManager):
             variables.append({'key': key, 'value': value})
         return variables
 
-    def _create_trigger_provider_map(self, params):
-        providers = self._list_providers_from_eventarc(params)
-
-        trigger_provider_map = {}
-        for provider in providers:
-            display_name = provider['displayName']
-
-            event_types = []
-            for event_type in provider['eventTypes']:
-                if display_name in trigger_provider_map:
-                    if event_type not in trigger_provider_map[display_name]:
-                        event_types.append(event_type['type'])
-                else:
-                    event_types.append(event_type['type'])
-            trigger_provider_map[display_name] = event_types
-        return trigger_provider_map
-
-    def _list_providers_from_eventarc(self, params):
-        eventarc_conn: EventarcConnector = self.locator.get_connector('EventarcConnector', **params)
-        providers = eventarc_conn.list_providers()
-        return providers
-
     @staticmethod
-    def _get_event_provider_from_trigger_map(event_type, trigger_provider_map):
-        for display_name, event_types in trigger_provider_map.items():
-            if event_type in event_types:
-                return display_name
-        return 'Not Found'
+    def _get_display_name(trigger_service):
+        try:
+            service, path = trigger_service.split('.googleapis.com')
+        except ValueError:
+            service = 'analytics'
+        service_map = {
+            'storage': 'Cloud Storage',
+            'pubsub': 'Cloud Pub/Sub',
+            'firestore': 'Cloud Firestore',
+            'firebaseauth': 'Firebase Authentication',
+            'firebasestorage': 'Cloud Storage for Firebase',
+            'firebaseremoteconfig': 'Firebase Remote Config',
+            'analytics': 'Google Analytics for Firebase'
+        }
+        return service_map[service]
