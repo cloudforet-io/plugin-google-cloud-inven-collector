@@ -33,22 +33,7 @@ source_information = ItemDynamicLayout.set_fields('Information', fields=[
     TextDyField.data_source('Source location', 'data.display.source_location'),
 ])
 
-source_code = SimpleTableDynamicLayout.set_fields('Source code', fields=[
-    TextDyField.data_source('File name', 'data.display.source_code.file_name'),
-    MoreField.data_source('Source', 'data.display.source_code.output_display',
-                          options={
-                              'sub_key': 'data.display.source_code.content',
-                              'layout': {
-                                  'name': 'Code',
-                                  'type': 'popup',
-                                  'options': {
-                                      'layout': {
-                                          'type': 'raw'
-                                      }
-                                  }
-                              }
-                          })
-])
+source_code = SimpleTableDynamicLayout.set_code_field('Source code')
 
 function_source_meta = ListDynamicLayout.set_layouts('Source', layouts=[source_information, source_code])
 
