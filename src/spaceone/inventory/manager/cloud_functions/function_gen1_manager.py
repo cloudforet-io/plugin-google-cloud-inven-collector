@@ -67,7 +67,7 @@ class FunctionGen1Manager(GoogleCloudManager):
                     'last_deployed': self._make_last_deployed(function['updateTime']),
                     'runtime': self._make_runtime_for_readable(function['runtime']),
                     'timeout': self._make_timeout(function['timeout']),
-                    'executed_function': function.get('entry_point'),
+                    'executed_function': function.get('entryPoint'),
                     'memory_allocated': self._make_memory_allocated(function['availableMemoryMb']),
                     'ingress_settings': self._make_ingress_setting_readable(function['ingressSettings']),
                     'vpc_connector_egress_settings': self._make_vpc_egress_readable(
