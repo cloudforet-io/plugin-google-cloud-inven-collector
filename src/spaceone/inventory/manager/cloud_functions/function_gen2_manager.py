@@ -76,12 +76,14 @@ class FunctionGen2Manager(GoogleCloudManager):
 
                 # main table
                 display.update({
+                    'state': function.get('state'),
                     'region': location,
                     'environment': self._make_readable_environment(function['environment']),
                     'function_id': function_id,
                     'last_deployed': self._make_last_deployed(function['updateTime']),
                     'runtime': self._make_runtime_for_readable(function['buildConfig']['runtime']),
                     'timeout': self._make_timeout(function['serviceConfig']['timeoutSeconds']),
+                    'executed_function': function['buildConfig'].get('entryPoint'),
                     'memory_allocated': self._make_memory_allocated(function['serviceConfig']['availableMemory']),
                     'ingress_settings': self._make_ingress_setting_readable(
                         function['serviceConfig'].get('ingressSettings')),
