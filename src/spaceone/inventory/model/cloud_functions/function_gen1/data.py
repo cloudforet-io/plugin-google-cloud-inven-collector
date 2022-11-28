@@ -41,7 +41,7 @@ class FunctionDisplay(Model):
 class FunctionGen1(BaseResource):
     name = StringType()
     description = StringType(serialize_when_none=False)
-    state = StringType(choices=(
+    status = StringType(choices=(
         'CLOUD_FUNCTION_STATUS_UNSPECIFIED', 'ACTIVE', 'OFFLINE', 'DEPLOY_IN_PROGRESS', 'DELETE_IN_PROGRESS',
         'UNKNOWN'),
         serialize_when_none=False)
@@ -49,6 +49,7 @@ class FunctionGen1(BaseResource):
     runtime = StringType(serialize_when_none=False)
     timeout = StringType(serialize_when_none=False)
     available_memory_mb = IntType(serialize_when_none=False, deserialize_from='availableMemoryMb')
+    service_account_email = StringType(serialize_when_none=False, deserialize_from='serviceAccountEmail')
     update_time = StringType(serialize_when_none=False, deserialize_from='updateTime')
     version_id = StringType(serialize_when_none=False, deserialize_from='versionId')
     labels = DictType(StringType, serialize_when_none=False)

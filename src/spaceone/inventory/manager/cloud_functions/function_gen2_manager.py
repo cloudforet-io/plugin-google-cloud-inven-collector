@@ -80,7 +80,6 @@ class FunctionGen2Manager(GoogleCloudManager):
                     'environment': self._make_readable_environment(function['environment']),
                     'function_id': function_id,
                     'last_deployed': self._make_last_deployed(function['updateTime']),
-                    'trigger': self._make_trigger(function.get('eventTrigger')),
                     'runtime': self._make_runtime_for_readable(function['buildConfig']['runtime']),
                     'timeout': self._make_timeout(function['serviceConfig']['timeoutSeconds']),
                     'memory_allocated': self._make_memory_allocated(function['serviceConfig']['availableMemory']),
@@ -100,12 +99,18 @@ class FunctionGen2Manager(GoogleCloudManager):
                     })
 
                 if trigger_data := function.get('eventTrigger'):
+                    trigger = self._get_event_provider_from_trigger_map(trigger_data.get('eventType'),
+                                                                        trigger_provider_map)
                     display.update({
+                        'trigger': trigger,
+                        'event_provider': trigger,
                         'trigger_name': self._make_trigger_name(trigger_data.get('trigger')),
                         'retry_policy': self._make_retry_policy(
                             trigger_data.get('retryPolicy', 'RETRY_POLICY_UNSPECIFIED')),
-                        'event_provider': self._get_event_provider_from_trigger_map(trigger_data.get('eventType'),
-                                                                                    trigger_provider_map)
+                    })
+                else:
+                    display.update({
+                        'trigger': 'HTTP'
                     })
 
                 if runtime_environment_variables := function['serviceConfig'].get('environmentVariables', {}):
