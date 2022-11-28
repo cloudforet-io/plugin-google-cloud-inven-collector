@@ -19,6 +19,7 @@ class Source(Model):
 
 
 class FunctionDisplay(Model):
+    state = StringType(serialize_when_none=False)
     region = StringType(serialize_when_none=False)
     environment_lowercase = StringType(serialize_when_none=False)
     environment = StringType(serialize_when_none=False)
@@ -26,6 +27,7 @@ class FunctionDisplay(Model):
     last_deployed = StringType(serialize_when_none=False)
     runtime = StringType(serialize_when_none=False)
     timeout = StringType(serialize_when_none=False)
+    executed_function = StringType(serialize_when_none=False)
     memory_allocated = StringType(serialize_when_none=False)
     ingress_settings = StringType(serialize_when_none=False)
     vpc_connector_egress_settings = StringType(serialize_when_none=False)
