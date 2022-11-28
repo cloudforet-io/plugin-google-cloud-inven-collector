@@ -20,7 +20,7 @@ general_information = ItemDynamicLayout.set_fields('General Information', fields
     TextDyField.data_source('Container build log', 'data.build_config.build'),
 ])
 networking_settings = ItemDynamicLayout.set_fields('Networking Settings', fields=[
-    TextDyField.data_source('Ingress settings', 'data.service_config.ingress_settings'),
+    TextDyField.data_source('Ingress settings', 'data.display.ingress_settings'),
     TextDyField.data_source('VPC connector', 'data.service_config.vpc_connector'),
     TextDyField.data_source('VPC connector egress', 'data.display.vpc_connector_egress'),
 ])

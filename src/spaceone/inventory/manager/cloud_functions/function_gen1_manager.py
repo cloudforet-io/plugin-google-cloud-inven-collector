@@ -80,10 +80,11 @@ class FunctionGen1Manager(GoogleCloudManager):
                     })
                 # TODO: need to solve 'Not Fount' about event_provider
                 if event_trigger := function.get('eventTrigger'):
+                    trigger = self._get_event_provider_from_trigger_map(event_trigger['eventType'],
+                                                                        trigger_provider_map)
                     display.update({
-                        'trigger': self._get_event_provider_from_trigger_map(event_trigger['eventType'],
-                                                                             trigger_provider_map),
-                        'event_provider': ''
+                        'trigger': trigger,
+                        'event_provider': trigger
                     })
 
                 if function.get('sourceUploadUrl'):
