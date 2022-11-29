@@ -23,9 +23,6 @@ Please contact us if you need any further information. (<support@spaceone.dev>)
 
 ---
 
-## Authentication Overview
-Registered service account on SpaceONE must have certain permissions to collect cloud service data
-Please, set authentication privilege for followings:
 
 <br>
 <br>
@@ -37,6 +34,9 @@ https://[service-code].googleapis.com
 ```
 
 We use dozens of endpoints because we collect information from many services.
+
+<br>
+<br>
 
 ### Service list
 
@@ -50,6 +50,7 @@ The following is a list of services being collected and service code information
 |4|Storage|storage|
 |5|BigQuery|bigquery|
 |6|Cloud Pub/Sub|pubsub|
+|7|Cloud Functions|cloudfunctions|
 
 If you want to know the detailed service endpoint, please check the [content details](###content-details) below.
 
@@ -83,9 +84,18 @@ If you want to know the detailed service endpoint, please check the [content det
         * [Subscription](#subscription)
         * [Snapshot](#snapshot)
         * [Schema](#schema)
+    * [Cloud Fuctions](#cloud-functions)
+        * [Function](#function)
     * [Options](#options)
       * [CloudServiceType](#cloud-service-type--specify-what-to-collect)
       * [ServiceCodeMapper](#service-code-mapper--update-service-code-in-cloud-service-type)
+
+<br>
+<br>
+
+## Authentication Overview
+Registered service account on SpaceONE must have certain permissions to collect cloud service data
+Please, set authentication privilege for followings:
 
 #### [Compute Engine](https://cloud.google.com/compute/docs/apis)
 
@@ -364,12 +374,30 @@ If you want to know the detailed service endpoint, please check the [content det
         - https://pubsub.googleapis.com/v1/{project}/snapshots
 - #### Schema
     - IAM
-        - https://pubsub.googleapis.com/v1/{parent}/schemas
-        - https://pubsub.googleapis.com/v1/{name}
+        - pubsub.schemas.list
 
     - Service Endpoint
-        - https://pubsub.googleapis.com/pubsub/v1/projects/{projectId}/{resource}
+        - https://pubsub.googleapis.com/v1/{parent}/schemas
 
+#### [Functions](https://cloud.google.com/functions/docs/reference)
+- #### Function
+    - IAM
+        - 1st Generation
+          - cloudfunctions.functions.list
+          - storage.bucket.get
+        - 2nd Generation
+          - cloudfunctions.functions.list
+          - storage.bucket.get
+          - eventarc.providers.list
+
+    - Service Endpoint
+        - 1st Generation
+          - https://cloudfunctions.googleapis.com/v1/{parent=projects/*/locations/*}/functions
+          - https://storage.googleapis.com/storage/v1/b/{bucket}
+        - 2nd Generation
+          - https://cloudfunctions.googleapis.com/v2/{parent=projects/*/locations/*}/functions
+          - https://storage.googleapis.com/storage/v1/b/{bucket}
+          - https://eventarc.googleapis.com/v1/{parent=projects/*/locations/*}/providers
 ---
 
 ## Options
