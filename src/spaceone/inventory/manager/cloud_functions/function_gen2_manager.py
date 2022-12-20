@@ -225,7 +225,10 @@ class FunctionGen2Manager(GoogleCloudManager):
         try:
             number, unit = memory.split('Mi')
             return f'{number} MiB'
-        except:
+        except ValueError:
+            number, unit = memory.split('M')
+            return f'{number} MiB'
+        except Exception:
             number, unit = memory.split('Gi')
             return f'{number} GiB'
 
