@@ -27,7 +27,6 @@ cst_bucket.tags = {
 
 cst_bucket._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Name', 'data.name'),
         TextDyField.data_source('Location Type', 'data.location.location_type'),
         TextDyField.data_source('Location', 'data.location.location_display'),
         EnumDyField.data_source('Default Storage Class', 'data.default_storage_class',
