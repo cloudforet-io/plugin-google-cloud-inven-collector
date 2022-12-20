@@ -27,7 +27,6 @@ cst_instance.tags = {
 
 cst_instance._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('Name', 'data.name'),
         EnumDyField.data_source('State', 'data.display_state', default_state={
             'safe': ['RUNNING'],
             'disable': ['UNKNOWN', 'ON-DEMAND'],
