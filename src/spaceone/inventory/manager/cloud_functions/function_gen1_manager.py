@@ -161,6 +161,7 @@ class FunctionGen1Manager(GoogleCloudManager):
             'nodejs12': 'Node.js 12',
             'nodejs14': 'Node.js 14',
             'nodejs16': 'Node.js 16',
+            'nodejs18': 'Node.js 18',
             'php81': 'PHP 8.1',
             'php74': 'PHP 7.4',
             'python38': 'Python 3.8',
