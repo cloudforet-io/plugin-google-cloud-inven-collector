@@ -6,6 +6,7 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, S
     EnumDyField, SizeField
 from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, \
     CloudServiceTypeMeta
+from spaceone.inventory.conf.cloud_service_conf import *
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -22,7 +23,7 @@ cst_function.is_primary = True
 cst_function.is_major = True
 cst_function.labels = ['Compute']
 cst_function.tags = {
-    'spaceone:icon': 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/cloud_functions.svg',
+    'spaceone:icon': f'{ASSET_URL}/cloud_functions.svg',
     'spaceone:display_name': 'CloudFunctions'
 }
 

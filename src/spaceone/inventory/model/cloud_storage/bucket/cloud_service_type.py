@@ -5,6 +5,7 @@ from spaceone.inventory.libs.schema.metadata.dynamic_widget import CardWidget, C
 from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, SearchField, DateTimeDyField, EnumDyField, SizeField
 from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, \
     CloudServiceTypeMeta
+from spaceone.inventory.conf.cloud_service_conf import *
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -21,7 +22,7 @@ cst_bucket.is_primary = True
 cst_bucket.is_major = True
 cst_bucket.labels = ['Storage', 'Volume']
 cst_bucket.tags = {
-    'spaceone:icon': 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud_Storage.svg',
+    'spaceone:icon': f'{ASSET_URL}/Cloud_Storage.svg',
     'spaceone:display_name': 'CloudStorage'
 }
 

@@ -53,12 +53,16 @@ class TestCollector(TestCase):
             }
         '''
         options = {
-            "cloud_service_types": ["CloudFunctions"]
+            "cloud_service_types": ["CloudFunctions"],
+            # "custom_asset_url": 'http://xxxxx.spaceone.dev/icon/aws'
         }
         filter = {}
 
-        resource_stream = self.inventory.Collector.collect({'options': options, 'secret_data': secret_data,
-                                                            'filter': filter})
+        resource_stream = self.inventory.Collector.collect({
+            'options': options,
+            'secret_data': secret_data,
+            'filter': filter})
+
         print(resource_stream)
         for res in resource_stream:
             print_json(res)
