@@ -404,7 +404,7 @@ Please, set authentication privilege for followings:
 
 ### Cloud Service Type : Specify what to collect
 
-If cloud_service_types is added to the list elements in options, only the specified cloud service type is collected.
+If `cloud_service_types` is added to the list elements in options, only the specified cloud service type is collected.
 By default, if cloud_service_types is not specified in options, all services are collected.
 
 The cloud_service_types items that can be specified are as follows.
@@ -447,7 +447,7 @@ Update plugin through spacectl command with the created yaml file.
 
 ### Service Code Mapper : Update service code in Cloud Service Type.
 
-If service_code_mapper is in options, You can replace the existed service code into new value one. 
+If `service_code_mapper` is in options, You can replace the existed service code into new value one. 
 The default service code is listed below [service code list](#service-list) 
 <pre>
 <code>
@@ -456,6 +456,20 @@ The default service code is listed below [service code list](#service-list)
         "Compute Engine": "Your new service code",
         "Cloud SQL": "Your new service code",
     }
+}
+</code>
+</pre>
+
+### Custom Asset URL : Update ASSET_URL  in Cloud Service Type.
+
+If `custom_asset_url` is in options, You can change it to an asset_url that users will use instead of the default asset_url.  
+The default ASSET_URL in cloud_service_conf is 
+`https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud`.
+
+<pre>
+<code>
+{
+    "custom_asset_url": "https://xxxxx.spaceone.dev/icon/google"
 }
 </code>
 </pre>
