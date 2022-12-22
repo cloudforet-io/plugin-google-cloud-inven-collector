@@ -28,6 +28,8 @@ CLOUD_SERVICE_GROUP_MAP = {
     'CloudFunctions': ['FunctionGen2Manager', 'FunctionGen1Manager']
 }
 
+ASSET_URL = 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud'
+
 REGION_INFO = {
     "asia-east1": {"name": "Taiwan (Changhua County)",
                    "tags": {"latitude": "24.051196", "longitude": "120.516430", "continent": "asia_pacific"}},

@@ -6,6 +6,7 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, S
     ListDyField, EnumDyField
 from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, \
     CloudServiceTypeMeta
+from spaceone.inventory.conf.cloud_service_conf import *
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,7 +21,7 @@ cst_instance_template.group = 'ComputeEngine'
 cst_instance_template.service_code = 'Compute Engine'
 cst_instance_template.labels = ['Compute']
 cst_instance_template.tags = {
-    'spaceone:icon': 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Compute_Engine.svg',
+    'spaceone:icon': f'{ASSET_URL}/Compute_Engine.svg',
 }
 # Basic table for
 cst_instance_template._metadata = CloudServiceTypeMeta.set_meta(

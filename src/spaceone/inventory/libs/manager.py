@@ -8,7 +8,7 @@ from spaceone.core.manager import BaseManager
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 from spaceone.inventory.libs.schema.region import RegionResource, RegionResponse
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
-from spaceone.inventory.conf.cloud_service_conf import REGION_INFO
+from spaceone.inventory.conf.cloud_service_conf import REGION_INFO, ASSET_URL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,12 +34,17 @@ class GoogleCloudManager(BaseManager):
         for cloud_service_type in self.cloud_service_types:
             if 'service_code_mappers' in options:
                 svc_code_maps = options['service_code_mappers']
-                # _LOGGER.debug(f'svc_code_maps => {svc_code_maps}')
-                # _LOGGER.debug(f'service_code temp => {cloud_service_type.resource.service_code}')
                 if getattr(cloud_service_type.resource, 'service_code') and \
                         cloud_service_type.resource.service_code in svc_code_maps:
                     cloud_service_type.resource.service_code = svc_code_maps[cloud_service_type.resource.service_code]
-                # _LOGGER.debug(f'service_code end => {cloud_service_type.resource.service_code}')
+
+            if 'custom_asset_url' in options:
+                _tags = cloud_service_type.resource.tags
+
+                if 'spaceone:icon' in _tags:
+                    _icon = _tags['spaceone:icon']
+                    _tags['spaceone:icon'] = f'{options["custom_asset_url"]}/{_icon.split("/")[-1]}'
+
             yield cloud_service_type
 
     def collect_cloud_service(self, params) -> list:

@@ -6,6 +6,7 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, S
     EnumDyField, ListDyField
 from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, \
     CloudServiceTypeMeta
+from spaceone.inventory.conf.cloud_service_conf import *
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -22,7 +23,7 @@ cst_load_balancing.is_primary = True
 cst_load_balancing.is_major = True
 cst_load_balancing.labels = ['Networking']
 cst_load_balancing.tags = {
-    'spaceone:icon': 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Load_Balancing.svg',
+    'spaceone:icon': f'{ASSET_URL}/Load_Balancing.svg',
     'spaceone:display_name': 'LoadBalancing'
 }
 
