@@ -50,42 +50,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           token: ${{ secrets.PAT_TOKEN }}
-      - name: get versions
-        run: |
-          echo "old_version=$(cat src/VERSION)" >> $GITHUB_ENV
-          echo "old_major=$(cat src/VERSION | cut -c 2- | cut -d'.' -f1)" >> $GITHUB_ENV
-          echo "old_minor=$(cat src/VERSION | cut -c 2- | cut -d'.' -f2)" >> $GITHUB_ENV
-          echo "old_patch=$(cat src/VERSION | cut -c 2- | cut -d'.' -f3)" >> $GITHUB_ENV
-          echo "new_major=$(echo ${{ env.TAG }} | cut -c 2- | cut -d'.' -f1)" >> $GITHUB_ENV
-          echo "new_minor=$(echo ${{ env.TAG }} | cut -c 2- | cut -d'.' -f2)" >> $GITHUB_ENV
-          echo "new_patch=$(echo ${{ env.TAG }} | cut -c 2- | cut -d'.' -f3)" >> $GITHUB_ENV
-      - name: compare versions
-        run: |
-          if [ ${{ env.TAG }} -eq ${{ env.old_version }} ];
-          then
-            echo "New version cannot be the same as old version."
-            exit 1
-          elif [ ${{ env.old_major }} -gt ${{ env.new_major }} ];
-          then
-            echo "Old major version cannot be greater than new major version"
-            exit 1
-          elif [ ${{ env.old_minor }} -gt ${{ env.new_minor }} ];
-          then
-            echo "Old minor version cannot be greater than new minor version"
-            exit 1
-          elif [ ${{ env.old_minor }} -eq ${{ env.new_minor }} ];
-          then
-            if [ ${{ env.old_patch }} -ge ${{ env.new_patch }} ];
-            then
-              echo "Old patch version cannot be greater than new patch version in same minor version"
-              exit 1
-            else
-              echo "version=${{ env.TAG }}"
-            fi
-          else
-            echo "version=${{ env.TAG }}"
-          fi
-      - name: update version file
+      - name: update version file # That is used where the master_push actions
         run: |
           echo ${{ env.TAG }} > src/VERSION
           git config user.name github-actions
