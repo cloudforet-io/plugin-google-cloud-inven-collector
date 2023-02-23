@@ -30,10 +30,10 @@ class GoogleCloudConnector(BaseConnector):
         super().__init__(transaction=None, config=None)
         secret_data = kwargs.get('secret_data')
         self.project_id = secret_data.get('project_id')
-        credentials = google.oauth2.service_account.Credentials.from_service_account_info(secret_data)
+        self.credentials = google.oauth2.service_account.Credentials.from_service_account_info(secret_data)
         self.client = googleapiclient.discovery.build(self.google_client_service,
                                                       self.version,
-                                                      credentials=credentials)
+                                                      credentials=self.credentials)
 
     def verify(self, **kwargs):
         if self.client is None:

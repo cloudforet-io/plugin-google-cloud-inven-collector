@@ -20,6 +20,7 @@ from spaceone.inventory.connector.pub_sub.topic import TopicConnector
 from spaceone.inventory.connector.cloud_functions.function_gen2 import FunctionGen2Connector
 from spaceone.inventory.connector.cloud_functions.function_gen1 import FunctionGen1Connector
 from spaceone.inventory.connector.cloud_functions.eventarc import EventarcConnector
-
+from spaceone.inventory.connector.recommender.insight import InsightConnector
+from spaceone.inventory.connector.recommender.recommendation import RecommendationConnector
 
 
