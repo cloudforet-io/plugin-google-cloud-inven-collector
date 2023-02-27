@@ -4,10 +4,10 @@ import time
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
 from spaceone.inventory.connector.recommender.insight import InsightConnector
+from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
 from spaceone.inventory.model.recommender.insight.cloud_service import InsightResource, InsightResponse
 from spaceone.inventory.model.recommender.insight.cloud_service_type import CLOUD_SERVICE_TYPES
 from spaceone.inventory.model.recommender.insight.data import Insight
-from spaceone.inventory.connector.compute_engine.vm_instance import VMInstanceConnector
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,9 +43,10 @@ class InsightManager(GoogleCloudManager):
         # List all information through connector
         ##################################
 
-        vm_conn: VMInstanceConnector = self.locator.get_connector(VMInstanceConnector, **params)
-        regions_from_vm = vm_conn.list_regions()
-        print(regions_from_vm)
+        cloud_asset_conn: CloudAssetConnector = self.locator.get_connector(CloudAssetConnector, **params)
+        assets = cloud_asset_conn.list_assets_in_project()
+        print(assets)
 
-        insight_conn: InsightConnector = self.locator.get_connector(self.connector_name, **params)
-        insights = insight_conn.list_insights()
+        # insight_conn: InsightConnector = self.locator.get_connector(self.connector_name, **params)
+        # insights = insight_conn.list_insights()
+        # print(insights)

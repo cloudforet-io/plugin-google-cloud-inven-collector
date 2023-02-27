@@ -22,5 +22,6 @@ from spaceone.inventory.connector.cloud_functions.function_gen1 import FunctionG
 from spaceone.inventory.connector.cloud_functions.eventarc import EventarcConnector
 from spaceone.inventory.connector.recommender.insight import InsightConnector
 from spaceone.inventory.connector.recommender.recommendation import RecommendationConnector
+from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
 
 
