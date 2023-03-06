@@ -43,6 +43,7 @@ class TestCollector(TestCase):
 
     def test_collect(self):
         secret_data = _get_credentials()
+        print(secret_data)
         '''
         Options can be selected
         options = {"cloud_service_types": ["SQLWorkspace"]}
