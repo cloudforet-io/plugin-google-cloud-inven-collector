@@ -13,11 +13,11 @@ class InsightConnector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def list_insights(self, **query):
+    def list_insights(self, region, insight_type, **query):
         insights = []
-        query.update({'parent': f'projects/{self.project_id}/locations/us-central1-a/insightTypes/-'})
+        query.update({'parent': f'projects/{self.project_id}/locations/{region}/insightTypes/{insight_type}'})
         request = self.client.projects().locations().insightTypes().insights().list(**query)
-        print(request)
+
         while request is not None:
             response = request.execute()
             insights = [insight for insight in response.get('insights', [])]

@@ -32,7 +32,7 @@ class InsightManager(GoogleCloudManager):
         Response:
             CloudServiceResponse/ErrorResourceResponse
         """
-        _LOGGER.debug(f'** Recommendations BillingAccounts START **')
+        _LOGGER.debug(f'** Recommender START **')
 
         start_time = time.time()
         collected_cloud_services = []
@@ -46,48 +46,24 @@ class InsightManager(GoogleCloudManager):
         # 0. Gather All Related Resources
         # List all information through connector
         ##################################
-
         cloud_asset_conn: CloudAssetConnector = self.locator.get_connector(CloudAssetConnector, **params)
+
+        insight_type_map = self._create_insight_type_by_crawling()
         assets = cloud_asset_conn.list_assets_in_project()
 
-        asset_types = set()
-        asset_resources = set()
-        exist_regions = set(REGION_INFO.keys())
-        target_regions = set()
-        for asset in assets:
-            full_asset_type = asset['assetType']
-            asset_service, asset_resource = full_asset_type.split('.googleapis.com/')
-            print(full_asset_type)
-            print(asset['name'])
+        target_insights = self._create_target_parents(assets, insight_type_map)
 
-            asset_types.add(asset_service)
-            asset_resources.add(asset_resource)
+        # # for test
+        # target_insights = {'global': target_insights['global']}
+        # print(target_insights)
 
-            for region in exist_regions:
-                if region in asset['name']:
-                    target_regions.add(region)
-
-        print(target_regions)
-
-        insight_type_map = self._create_insight_type()
-        print(insight_type_map)
-
-        # insight_conn: InsightConnector = self.locator.get_connector(self.connector_name, **params)
-        # insights = insight_conn.list_insights()
-        # print(insights)
-
-        # try:
-        #     pass
-        # except Exception as e:
-        #     _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
-        #     error_response = self.generate_resource_error_response(e, 'Recommender', 'Insight', 1)
-        #     error_responses.append(error_response)
+        insights = self._list_insights(target_insights, params)
+        print(insights)
 
         _LOGGER.debug(f'** Recommender Insight Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 
-    @staticmethod
-    def _create_insight_type():
+    def _create_insight_type_by_crawling(self):
         res = requests.get("https://cloud.google.com/recommender/docs/insights/insight-types")
         soup = BeautifulSoup(res.content, 'html.parser')
         table = soup.find("table")
@@ -104,4 +80,63 @@ class InsightManager(GoogleCloudManager):
                 else:
                     insight_type = [insight_type]
                 insight_type_map[service] = insight_type
-        return insight_type_map
+
+        return self._transform_insight_type(insight_type_map)
+
+    @staticmethod
+    def _transform_insight_type(insight_type_map):
+        usable_insight_type_map = {}
+        for service, insight_type in insight_type_map.items():
+            for insight in insight_type:
+                try:
+                    prefix, svc, resource, _ = insight.split('.', 3)
+                except ValueError:
+                    prefix, svc, resource = insight.split('.', 2)
+
+                if usable_insight_type_map.get(svc):
+                    usable_insight_type_map[svc].append(insight)
+                else:
+                    usable_insight_type_map[svc] = [insight]
+
+        return usable_insight_type_map
+
+    def _create_target_parents(self, assets, insight_type_map):
+        target_insights = {}
+        for asset in assets:
+            full_asset_type = asset['assetType']
+            asset_service, asset_resource = full_asset_type.split('.googleapis.com/')
+            region = self._check_region(asset['name'])
+
+            if asset_service in insight_type_map:
+                if target_insights.get(region):
+                    for insight_type in insight_type_map[asset_service]:
+                        if insight_type not in target_insights[region]:
+                            target_insights[region].append(insight_type)
+                else:
+                    target_insights[region] = insight_type_map[asset_service]
+        return target_insights
+
+    @staticmethod
+    def _check_region(asset):
+        for region in REGION_INFO:
+            if region in asset:
+                return region
+            else:
+                continue
+        return 'global'
+
+    def _list_insights(self, target_insights, params):
+        insight_conn: InsightConnector = self.locator.get_connector(self.connector_name, **params)
+
+        insights = []
+        call_count = 0
+        for region, insight_types in target_insights.items():
+            for insight_type in insight_types:
+                insight = insight_conn.list_insights(region, insight_type)
+                call_count += 1
+                if insight:
+                    data = {'data': insight, 'region': region, 'insight_type': insight_type}
+                    insights.append(data)
+                time.sleep(0.1)
+        _LOGGER.debug(f'[Recommender] list_insights API Call Count: {call_count}')
+        return insights
