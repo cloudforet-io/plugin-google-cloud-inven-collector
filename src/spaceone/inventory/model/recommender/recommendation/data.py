@@ -1,6 +1,5 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, DictType, IntType, UnionType, BooleanType
-
+from schematics.types import ModelType, ListType, StringType, DictType, IntType, UnionType, FloatType
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
@@ -62,9 +61,9 @@ class OperationGroup(Model):
 
 class RecommendationContent(Model):
     operation_groups = ListType(ModelType(Operation), deserialize_from='operationGroups')
-    overview = DictType(UnionType(
-        [StringType(), BooleanType(), ListType(StringType), DictType(StringType()), ListType(DictType(StringType()))]
-    ))
+    overview = DictType(
+        UnionType([StringType(), IntType(), FloatType(), ListType(StringType()), DictType(StringType())])
+    )
 
 
 class RecommendationStateInfo(Model):

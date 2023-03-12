@@ -1,5 +1,5 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, DictType, UnionType, BooleanType
+from schematics.types import ModelType, ListType, StringType, DictType, UnionType, BooleanType, FloatType
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
@@ -24,6 +24,7 @@ class Insight(BaseResource):
     insight_subtype = StringType(deserialize_from='insightSubtype')
     content = DictType(UnionType(
         [StringType(), BooleanType(), ListType(StringType), DictType(StringType()), ListType(DictType(StringType()))]
+        # FloatType(), IntType()]
     ))
     last_refresh_time = StringType(deserialize_from='lastRefreshTime')
     observation_period = StringType(deserialize_from='observationPeriod')
@@ -47,3 +48,24 @@ class Insight(BaseResource):
 
     class Options:
         serialize_when_none = False
+
+
+class OverallStats(Model):
+    reserved_count = FloatType(deserialize_from='reservedCount')
+    unassigned_count = FloatType(deserialize_from='unassignedCount')
+    unassigned_ratio = FloatType(deserialize_from='unassignedRatio')
+
+
+class RegionStats(Model):
+    region = StringType()
+    stats = ModelType(OverallStats)
+
+
+class IPAddressInsightContent(Model):
+    project_uri = StringType(deserialize_from='projectUri')
+    overall_stats = ModelType(OverallStats, deserialize_from='overallStats')
+    region_stats = ListType(ModelType(RegionStats), deserialize_from='regionStats')
+
+
+class IPAddressInsight(Insight):
+    content = ModelType(IPAddressInsightContent)
