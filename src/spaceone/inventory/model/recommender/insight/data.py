@@ -22,7 +22,7 @@ class Insight(BaseResource):
     description = StringType()
     target_resources = ListType(StringType(deserialize_from='targetResources'))
     insight_subtype = StringType(deserialize_from='insightSubtype')
-    content = DictType(UnionType([BooleanType(), StringType(), ListType(StringType)]))
+    content = DictType(UnionType([BooleanType(), StringType(), ListType(StringType), DictType(StringType)]))
     last_refresh_time = StringType(deserialize_from='lastRefreshTime')
     observation_period = StringType(deserialize_from='observationPeriod')
     state_info = ModelType(InsightStateInfo, deserialize_from='stateInfo')
