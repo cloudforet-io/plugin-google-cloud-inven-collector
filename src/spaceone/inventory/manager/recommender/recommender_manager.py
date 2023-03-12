@@ -14,7 +14,7 @@ from spaceone.inventory.model.recommender.insight.cloud_service import InsightRe
 from spaceone.inventory.model.recommender.recommendation.cloud_service import RecommendationResource, \
     RecommendationResponse
 from spaceone.inventory.model.recommender.insight.cloud_service_type import CLOUD_SERVICE_TYPES
-from spaceone.inventory.model.recommender.insight.data import Insight
+from spaceone.inventory.model.recommender.insight.data import Insight, IPAddressInsight
 from spaceone.inventory.model.recommender.recommendation.data import Recommendation
 
 _LOGGER = logging.getLogger(__name__)
@@ -178,7 +178,10 @@ class RecommenderManager(GoogleCloudManager):
             'display': display
         })
 
-        insight_data = Insight(origin_insight, strict=False)
+        try:
+            insight_data = Insight(origin_insight, strict=False)
+        except Exception as e:
+            insight_data = IPAddressInsight(origin_insight, strict=False)
 
         insight_resource = InsightResource({
             'name': insight_data.name,
