@@ -62,7 +62,7 @@ class OperationGroup(Model):
 
 class RecommendationContent(Model):
     operation_groups = ListType(ModelType(Operation), deserialize_from='operationGroups')
-    overview = DictType(UnionType([BooleanType(), StringType()]))
+    overview = DictType(UnionType([BooleanType(), StringType(), ListType(StringType)]))
 
 
 class RecommendationStateInfo(Model):
