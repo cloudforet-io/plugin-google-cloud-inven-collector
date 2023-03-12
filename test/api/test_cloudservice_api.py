@@ -43,6 +43,7 @@ class TestCollector(TestCase):
 
     def test_collect(self):
         secret_data = _get_credentials()
+        print(secret_data)
         '''
         Options can be selected
         options = {"cloud_service_types": ["SQLWorkspace"]}
@@ -53,7 +54,8 @@ class TestCollector(TestCase):
             }
         '''
         options = {
-            "cloud_service_types": ["CloudFunctions"],
+            # "cloud_service_types": ["CloudFunctions"],
+            "cloud_service_types": ["Recommender"]
             # "custom_asset_url": 'http://xxxxx.spaceone.dev/icon/google'
         }
         filter = {}

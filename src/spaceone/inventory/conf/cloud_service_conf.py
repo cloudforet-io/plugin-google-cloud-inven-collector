@@ -5,27 +5,43 @@ SUPPORTED_FEATURES = ['garbage_collection']
 SUPPORTED_SCHEDULES = ['hours']
 FILTER_FORMAT = []
 CLOUD_SERVICE_GROUP_MAP = {
-    'ComputeEngine': ['VMInstanceManager',
-                      'SnapshotManager',
-                      'MachineImageManager',
-                      'InstanceTemplateManager',
-                      'InstanceGroupManager',
-                      'DiskManager'],
-    'CloudSQL': ['CloudSQLManager'],
-    'BigQuery': ['SQLWorkspaceManager'],
-    'CloudStorage': ['StorageManager'],
-    'Networking': ['ExternalIPAddressManager',
-                   'FirewallManager',
-                   'LoadBalancingManager',
-                   'RouteManager',
-                   'VPCNetworkManager'],
+    'ComputeEngine': [
+        'VMInstanceManager',
+        'SnapshotManager',
+        'MachineImageManager',
+        'InstanceTemplateManager',
+        'InstanceGroupManager',
+        'DiskManager'
+    ],
+    'CloudSQL': [
+        'CloudSQLManager'
+    ],
+    'BigQuery': [
+        'SQLWorkspaceManager'
+    ],
+    'CloudStorage': [
+        'StorageManager'
+    ],
+    'Networking': [
+        'ExternalIPAddressManager',
+        'FirewallManager',
+        'LoadBalancingManager',
+        'RouteManager',
+        'VPCNetworkManager'
+    ],
     'Pub/Sub': [
         'SchemaManager',
         'SnapshotManager',
         'SubscriptionManager',
         'TopicManager'
     ],
-    'CloudFunctions': ['FunctionGen2Manager', 'FunctionGen1Manager']
+    'CloudFunctions': [
+        'FunctionGen2Manager',
+        'FunctionGen1Manager'
+    ],
+    'Recommender': [
+        'RecommenderManager',
+    ]
 }
 
 ASSET_URL = 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud'

@@ -36,7 +36,10 @@ setup(
         'spaceone-tester',
         'schematics',
         'google-api-python-client',
-        'MarkupSafe>=2.0.0rc2'
+        'MarkupSafe>=2.0.0rc2',
+        'google-cloud-storage',
+        'requests',
+        'beautifulsoup4'
     ],
     package_data={
         'spaceone': ['inventory/model/*/*/widget/*.yml']
