@@ -1,7 +1,11 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, DictType, IntType
+from schematics.types import ModelType, ListType, StringType, DictType, IntType, UnionType, BooleanType
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
+
+
+class Display(Model):
+    instance_type = StringType(deserialize_from='instanceType')
 
 
 class Money(Model):
@@ -57,8 +61,8 @@ class OperationGroup(Model):
 
 
 class RecommendationContent(Model):
-    operation_groups = ListType(DictType(ModelType(OperationGroup)), deserialize_from='operationGroups')
-    overview = DictType(StringType)
+    operation_groups = ListType(ModelType(Operation), deserialize_from='operationGroups')
+    overview = DictType(UnionType([BooleanType(), StringType()]))
 
 
 class RecommendationStateInfo(Model):
@@ -83,11 +87,12 @@ class Recommendation(BaseResource):
     etag = StringType()
     associated_insights = ListType(ModelType(InsightReference), deserialize_from='associatedInsights')
     xor_group_id = StringType(deserialize_from='xorGroupId')
+    display = ModelType(Display)
 
     def reference(self):
         return {
-            "resource_id": '',
-            "external_link": f''
+            "resource_id": self.name,
+            "external_link": f'https://console.cloud.google.com/home/recommendations?project={self.project}'
         }
 
     class Options:

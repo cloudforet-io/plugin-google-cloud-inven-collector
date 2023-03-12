@@ -1,7 +1,11 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, DictType
+from schematics.types import ModelType, ListType, StringType, DictType, UnionType, BooleanType
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
+
+
+class Display(Model):
+    insight_type = StringType()
 
 
 class InsightStateInfo(Model):
@@ -18,7 +22,7 @@ class Insight(BaseResource):
     description = StringType()
     target_resources = ListType(StringType(deserialize_from='targetResources'))
     insight_subtype = StringType(deserialize_from='insightSubtype')
-    content = DictType(StringType())
+    content = DictType(UnionType([BooleanType(), StringType()]))
     last_refresh_time = StringType(deserialize_from='lastRefreshTime')
     observation_period = StringType(deserialize_from='observationPeriod')
     state_info = ModelType(InsightStateInfo, deserialize_from='stateInfo')
@@ -31,11 +35,12 @@ class Insight(BaseResource):
     etag = StringType()
     associated_recommendations = ListType(ModelType(RecommendationReference),
                                           deserialize_from='associatedRecommendations')
+    display = ModelType(Display)
 
     def reference(self):
         return {
-            "resource_id": '',
-            "external_link": f''
+            "resource_id": self.name,
+            "external_link": f"https://console.cloud.google.com/home/recommendations?project={self.project}"
         }
 
     class Options:

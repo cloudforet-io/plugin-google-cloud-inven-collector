@@ -1,6 +1,6 @@
 ---
-cloud_service_group: "Pub/Sub"
-cloud_service_type: Schema
+cloud_service_group: "Recommender"
+cloud_service_type: Recommendation
 name: Count by Region
 query:
   aggregate:

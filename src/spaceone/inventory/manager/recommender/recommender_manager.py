@@ -5,18 +5,22 @@ import requests
 from bs4 import BeautifulSoup
 
 from spaceone.inventory.conf.cloud_service_conf import REGION_INFO
+from spaceone.inventory.connector import RecommendationConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
 from spaceone.inventory.connector.recommender.insight import InsightConnector
 from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
 from spaceone.inventory.model.recommender.insight.cloud_service import InsightResource, InsightResponse
+from spaceone.inventory.model.recommender.recommendation.cloud_service import RecommendationResource, \
+    RecommendationResponse
 from spaceone.inventory.model.recommender.insight.cloud_service_type import CLOUD_SERVICE_TYPES
 from spaceone.inventory.model.recommender.insight.data import Insight
+from spaceone.inventory.model.recommender.recommendation.data import Recommendation
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class InsightManager(GoogleCloudManager):
+class RecommenderManager(GoogleCloudManager):
     connector_name = 'InsightConnector'
     cloud_service_types = CLOUD_SERVICE_TYPES
 
@@ -37,28 +41,52 @@ class InsightManager(GoogleCloudManager):
         start_time = time.time()
         collected_cloud_services = []
         error_responses = []
-        schema_id = ""
 
         secret_data = params['secret_data']
         project_id = secret_data['project_id']
 
-        ##################################
-        # 0. Gather All Related Resources
-        # List all information through connector
-        ##################################
         cloud_asset_conn: CloudAssetConnector = self.locator.get_connector(CloudAssetConnector, **params)
 
         insight_type_map = self._create_insight_type_by_crawling()
         assets = cloud_asset_conn.list_assets_in_project()
 
         target_insights = self._create_target_parents(assets, insight_type_map)
-
-        # # for test
-        # target_insights = {'global': target_insights['global']}
-        # print(target_insights)
-
         insights = self._list_insights(target_insights, params)
-        print(insights)
+
+        target_recommendation_names = []
+        for insight in insights:
+            origin_insights = insight["data"]
+            region = insight["region"]
+            insight_type = insight["insight_type"]
+            for origin_insight in origin_insights:
+                try:
+                    recommendation_names = []
+                    insight_response = self._create_insight_resource(origin_insight, region, insight_type, project_id)
+
+                    if associated_recommendations := origin_insight.get('associatedRecommendations'):
+                        recommendation_names = self._list_recommendation_names(associated_recommendations)
+
+                    collected_cloud_services.append(insight_response)
+                    target_recommendation_names.extend(recommendation_names)
+
+                except Exception as e:
+                    _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
+                    error_response = self.generate_resource_error_response(e, 'Recommender', 'Insight',
+                                                                           origin_insight.get('name'))
+                    error_responses.append(error_response)
+
+        recommendation_conn: RecommendationConnector = self.locator.get_connector(RecommendationConnector, **params)
+        for recommendation_name in target_recommendation_names:
+            try:
+                recommendation = recommendation_conn.get_recommendation(recommendation_name)
+                recommendation_response = self._create_recommendation_response(recommendation, project_id)
+                collected_cloud_services.append(recommendation_response)
+
+            except Exception as e:
+                _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
+                error_response = self.generate_resource_error_response(e, 'Recommender', 'Recommendation',
+                                                                       recommendation_name)
+                error_responses.append(error_response)
 
         _LOGGER.debug(f'** Recommender Insight Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
@@ -140,3 +168,68 @@ class InsightManager(GoogleCloudManager):
                 time.sleep(0.1)
         _LOGGER.debug(f'[Recommender] list_insights API Call Count: {call_count}')
         return insights
+
+    @staticmethod
+    def _create_insight_resource(origin_insight, region, insight_type, project_id):
+        display = {
+            'insight_type': insight_type
+        }
+        origin_insight.update({
+            'display': display
+        })
+
+        insight_data = Insight(origin_insight, strict=False)
+
+        insight_resource = InsightResource({
+            'name': insight_data.name,
+            'account': project_id,
+            'tags': {},
+            'region_code': region,
+            'instance_type': '',
+            'instance_size': 0,
+            'data': insight_data,
+            'reference': ReferenceModel(insight_data.reference())
+        })
+        return InsightResponse({'resource': insight_resource})
+
+    def _create_recommendation_response(self, recommendation, project_id):
+        region, instance_type = self._get_region_and_instance_type(recommendation['name'])
+
+        display = {
+            'instance_type': instance_type
+        }
+
+        recommendation.update({
+            'display': display
+        })
+
+        recommendation_data = Recommendation(recommendation, strict=False)
+        recommendation_resource = RecommendationResource({
+            'name': recommendation_data.get('name', 'Unknown'),
+            'account': project_id,
+            'tags': {},
+            'region_code': region,
+            'instance_type': '',
+            'instance_size': 0,
+            'data': recommendation_data,
+            'reference': ReferenceModel(recommendation_data.reference())
+        })
+
+        return RecommendationResponse({'resource': recommendation_resource})
+
+    @staticmethod
+    def _list_recommendation_names(recommendations):
+        recommendation_names = []
+        for recommendation in recommendations:
+            recommendation_names.append(recommendation['recommendation'])
+        return recommendation_names
+
+    @staticmethod
+    def _get_region_and_instance_type(name):
+        try:
+            project_id, resource = name.split('locations/')
+            region, _, instance_type, _ = resource.split('/', 3)
+            return region, instance_type
+
+        except Exception as e:
+            _LOGGER.error(f'[_get_region] recommendation passing error (data: {name}) => {e}', exc_info=True)
