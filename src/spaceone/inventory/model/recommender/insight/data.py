@@ -1,5 +1,6 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, DictType, UnionType, BooleanType
+from typing import Any
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
@@ -22,7 +23,7 @@ class Insight(BaseResource):
     description = StringType()
     target_resources = ListType(StringType(deserialize_from='targetResources'))
     insight_subtype = StringType(deserialize_from='insightSubtype')
-    content = DictType(UnionType([BooleanType(), StringType(), ListType(StringType)]))
+    content = DictType(UnionType([StringType(), BooleanType(), ListType(StringType), DictType(StringType())]))
     last_refresh_time = StringType(deserialize_from='lastRefreshTime')
     observation_period = StringType(deserialize_from='observationPeriod')
     state_info = ModelType(InsightStateInfo, deserialize_from='stateInfo')
