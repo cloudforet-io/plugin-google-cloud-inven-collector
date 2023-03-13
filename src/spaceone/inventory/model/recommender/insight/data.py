@@ -24,7 +24,6 @@ class Insight(BaseResource):
     insight_subtype = StringType(deserialize_from='insightSubtype')
     content = DictType(UnionType(
         [StringType(), BooleanType(), ListType(StringType), DictType(StringType()), ListType(DictType(StringType()))]
-        # FloatType(), IntType()]
     ))
     last_refresh_time = StringType(deserialize_from='lastRefreshTime')
     observation_period = StringType(deserialize_from='observationPeriod')
