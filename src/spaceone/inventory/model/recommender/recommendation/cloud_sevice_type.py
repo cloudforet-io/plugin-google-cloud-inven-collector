@@ -66,6 +66,6 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
     ]
 )
 
-CLOUD_SERVICE_TYPES = [
+RECOMMENDATION_CLOUD_SERVICE_TYPES = [
     CloudServiceTypeResponse({'resource': cst_recommendation}),
 ]
