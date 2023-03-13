@@ -18,12 +18,11 @@ cst_recommendation.name = 'Recommendation'
 cst_recommendation.provider = 'google_cloud'
 cst_recommendation.group = 'Recommender'
 cst_recommendation.service_code = 'Recommender'
-cst_recommendation.labels = ['Application Integration']
+cst_recommendation.labels = ['Analytics']
 cst_recommendation.is_primary = True
 cst_recommendation.is_major = True
 cst_recommendation.tags = {
-    'spaceone:icon': f'{ASSET_URL}/Google-cloud-platform-icon.svg',
-    'spaceone:display_name': 'Recommender'
+    'spaceone:icon': f'{ASSET_URL}/gcp-icon.svg',
 }
 
 cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
