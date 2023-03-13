@@ -52,6 +52,7 @@ class RecommendationManager(GoogleCloudManager):
                                                                        recommendation_name)
                 error_responses.append(error_response)
 
+        collected_cloud_services.extend(self.cloud_service_types)
         _LOGGER.debug(f'** Recommender Recommendation Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
 

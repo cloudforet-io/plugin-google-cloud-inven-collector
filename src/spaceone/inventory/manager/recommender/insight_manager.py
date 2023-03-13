@@ -14,7 +14,6 @@ from spaceone.inventory.model.recommender.insight.cloud_service_type import CLOU
 from spaceone.inventory.model.recommender.insight.data import Insight, IPAddressInsight
 from spaceone.inventory.manager.recommender.recommendation_manager import RecommendationManager
 
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -75,8 +74,12 @@ class InsightManager(GoogleCloudManager):
 
         _LOGGER.debug(f'** Recommender Insight Finished {time.time() - start_time} Seconds **')
 
+        # collect recommendation
         params['recommendation_names'] = target_recommendation_names
-        RecommendationManager().collect_cloud_service(params)
+        recommendation_cloud_services, recommendation_errors = RecommendationManager().collect_cloud_service(params)
+
+        collected_cloud_services.extend(recommendation_cloud_services)
+        error_responses.extend(recommendation_errors)
 
         return collected_cloud_services, error_responses
 
