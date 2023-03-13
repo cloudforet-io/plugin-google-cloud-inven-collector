@@ -16,6 +16,7 @@ from spaceone.inventory.model.recommender.recommendation.cloud_service import Re
 from spaceone.inventory.model.recommender.insight.cloud_service_type import CLOUD_SERVICE_TYPES
 from spaceone.inventory.model.recommender.insight.data import Insight, IPAddressInsight
 from spaceone.inventory.model.recommender.recommendation.data import Recommendation
+from spaceone.inventory.model.recommender.recommendation.cloud_sevice_type import RECOMMENDATION_CLOUD_SERVICE_TYPES
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -76,6 +77,7 @@ class RecommenderManager(GoogleCloudManager):
                     error_responses.append(error_response)
 
         recommendation_conn: RecommendationConnector = self.locator.get_connector(RecommendationConnector, **params)
+        self.cloud_service_types = RECOMMENDATION_CLOUD_SERVICE_TYPES
         for recommendation_name in target_recommendation_names:
             try:
                 recommendation = recommendation_conn.get_recommendation(recommendation_name)
