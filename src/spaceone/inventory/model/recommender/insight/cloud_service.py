@@ -14,7 +14,7 @@ insight_detail = ItemDynamicLayout.set_fields('Insight Details', fields=[
         'alert': ['STATE_UNSPECIFIED', 'DISMISSED'],
     }),
     EnumDyField.data_source('Severity', 'data.severity', default_badge={
-        'primary': ['CRITICAL', 'HIGH', 'SEVERITY_UNSPECIFIED'], 'gray.500': ['MEDIUM', 'LOW']
+        'red.500': ['CRITICAL', 'HIGH', 'SEVERITY_UNSPECIFIED'], 'gray.500': ['MEDIUM', 'LOW']
     }),
     EnumDyField.data_source('Category', 'data.category', default_badge={
         'indigo.500': ['COST'],

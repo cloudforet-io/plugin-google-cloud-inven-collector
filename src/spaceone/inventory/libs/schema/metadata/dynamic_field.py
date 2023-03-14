@@ -23,7 +23,7 @@ BACKGROUND_COLORS = [
     'indigo.800', 'indigo.900',
 ]
 
-TYPE_BADGE = ['primary', 'indigo.500', 'coral.600', 'peacock.500', 'green.500', 'gray.500']
+TYPE_BADGE = ['primary', 'indigo.500', 'coral.600', 'peacock.500', 'green.500', 'gray.500', 'red.500']
 
 
 class FieldReference(Model):

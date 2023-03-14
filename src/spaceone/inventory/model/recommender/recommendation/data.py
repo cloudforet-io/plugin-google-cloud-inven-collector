@@ -7,6 +7,7 @@ class Display(Model):
     instance_type = StringType()
     instance_type_name = StringType()
     instance_type_description = StringType()
+    priority_display = StringType()
 
 
 class Money(Model):
