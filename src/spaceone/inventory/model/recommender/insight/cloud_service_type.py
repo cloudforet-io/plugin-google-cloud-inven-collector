@@ -22,7 +22,7 @@ cst_insight.labels = ['Analytics']
 cst_insight.is_primary = True
 cst_insight.is_major = True
 cst_insight.tags = {
-    'spaceone:icon': f'{ASSET_URL}/gcp-icon.svg',
+    'spaceone:icon': f'{ASSET_URL}/user_preferences.svg',
 }
 
 cst_insight._metadata = CloudServiceTypeMeta.set_meta(
@@ -34,7 +34,7 @@ cst_insight._metadata = CloudServiceTypeMeta.set_meta(
             'alert': ['STATE_UNSPECIFIED', 'DISMISSED'],
         }),
         EnumDyField.data_source('Severity', 'data.severity', default_badge={
-            'indigo.500': ['CRITICAL', 'HIGH', 'SEVERITY_UNSPECIFIED'], 'yellow.500': ['MEDIUM', 'LOW']
+            'primary': ['CRITICAL', 'HIGH', 'SEVERITY_UNSPECIFIED'], 'gray.500': ['MEDIUM', 'LOW']
         }),
         EnumDyField.data_source('Category', 'data.category', default_badge={
             'indigo.500': ['COST'],
@@ -45,10 +45,14 @@ cst_insight._metadata = CloudServiceTypeMeta.set_meta(
             'yellow.500': ['SECURITY'],
             'coral.500': ['CATEGORY_UNSPECIFIED']
         }),
-        TextDyField.data_source('Location', 'region_code'),
-        TextDyField.data_source('Insight type', 'data.display.insight_type'),
+        TextDyField.data_source('Insight type', 'data.display.insight_type_display', default_outline_badge=[
+            'Cloud Asset insights', 'Dataflow insights', 'Error Reporting notification insights',
+            'Firewall insights', 'GKE diagnosis insights', 'IAM policy insights',
+            'IAM service account insights science', 'Idle Compute Engine resources insights',
+            'Lateral movement insights', 'Managed instance group insights', 'Unattended project insights',
+            'VM instance insights'
+        ]),
         TextDyField.data_source('Insight subtype', 'data.insight_subtype'),
-        DateTimeDyField.data_source('Resource creation time', 'data.content.resource_creation_time'),
         DateTimeDyField.data_source('Last refresh time', 'data.last_refresh_time'),
         TextDyField.data_source('Etag', 'data.etag'),
     ],
@@ -56,7 +60,7 @@ cst_insight._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name='Status', key='data.state_info.state'),
         SearchField.set(name='Severity', key='data.severity'),
         SearchField.set(name='Category', key='data.category'),
-        SearchField.set(name='Insight type', key='data.display.insight_type'),
+        SearchField.set(name='Insight type', key='data.display.insight_type_display'),
         SearchField.set(name='Insight subtype', key='data.insight_subtype'),
         SearchField.set(name='Etag', key='data.etag'),
     ],
