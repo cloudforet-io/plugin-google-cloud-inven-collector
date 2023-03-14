@@ -44,10 +44,10 @@ class InsightManager(GoogleCloudManager):
 
         cloud_asset_conn: CloudAssetConnector = self.locator.get_connector(CloudAssetConnector, **params)
 
-        insight_type_map = self._create_insight_type_by_crawling()
+        usable_insight_type_map, insight_type_map = self._create_insight_type_by_crawling()
         assets = cloud_asset_conn.list_assets_in_project()
 
-        target_insights = self._create_target_parents(assets, insight_type_map)
+        target_insights = self._create_target_parents(assets, usable_insight_type_map)
         insights = self._list_insights(target_insights, params)
 
         target_recommendation_names = []
@@ -58,8 +58,8 @@ class InsightManager(GoogleCloudManager):
             for origin_insight in origin_insights:
                 try:
                     recommendation_names = []
-                    insight_response = self._create_insight_resource(origin_insight, region, insight_type, project_id)
-
+                    insight_response = self._create_insight_resource(origin_insight, region, insight_type,
+                                                                     project_id, insight_type_map)
                     if associated_recommendations := origin_insight.get('associatedRecommendations'):
                         recommendation_names = self._list_recommendation_names(associated_recommendations)
 
@@ -101,7 +101,7 @@ class InsightManager(GoogleCloudManager):
                     insight_type = [insight_type]
                 insight_type_map[service] = insight_type
 
-        return self._transform_insight_type(insight_type_map)
+        return self._transform_insight_type(insight_type_map), self._switch_insight_type_key_to_value(insight_type_map)
 
     @staticmethod
     def _transform_insight_type(insight_type_map):
@@ -119,6 +119,17 @@ class InsightManager(GoogleCloudManager):
                     usable_insight_type_map[svc] = [insight]
 
         return usable_insight_type_map
+
+    @staticmethod
+    def _switch_insight_type_key_to_value(insight_type_map):
+        new_insight_type_map = {}
+        for key, value in insight_type_map.items():
+            if isinstance(value, list):
+                for element in value:
+                    new_insight_type_map[element] = key
+            else:
+                new_insight_type_map[value] = key
+        return new_insight_type_map
 
     def _create_target_parents(self, assets, insight_type_map):
         target_insights = {}
@@ -162,9 +173,10 @@ class InsightManager(GoogleCloudManager):
         return insights
 
     @staticmethod
-    def _create_insight_resource(origin_insight, region, insight_type, project_id):
+    def _create_insight_resource(origin_insight, region, insight_type, project_id, insight_type_map):
         display = {
-            'insight_type': insight_type
+            'insight_type': insight_type,
+            'insight_type_display': insight_type_map[insight_type],
         }
         origin_insight.update({
             'display': display

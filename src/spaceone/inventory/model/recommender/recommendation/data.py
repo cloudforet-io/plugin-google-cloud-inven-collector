@@ -4,7 +4,9 @@ from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class Display(Model):
-    instance_type = StringType(deserialize_from='instanceType')
+    instance_type = StringType()
+    instance_type_name = StringType()
+    instance_type_description = StringType()
 
 
 class Money(Model):

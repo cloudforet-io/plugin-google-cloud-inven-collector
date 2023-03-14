@@ -22,13 +22,12 @@ cst_recommendation.labels = ['Analytics']
 cst_recommendation.is_primary = True
 cst_recommendation.is_major = True
 cst_recommendation.tags = {
-    'spaceone:icon': f'{ASSET_URL}/gcp-icon.svg',
+    'spaceone:icon': f'{ASSET_URL}/user_preferences.svg',
 }
 
 cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source('description', 'data.description'),
-        TextDyField.data_source('Recommendation action', 'data.content.overview.recommendedAction'),
         EnumDyField.data_source('State', 'data.state_info.state', default_state={
             'safe': ['ACTIVE', 'SUCCEEDED'],
             'disable': ['CLAIMED'],
@@ -43,20 +42,26 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
             'yellow.500': ['SECURITY'],
             'coral.500': ['CATEGORY_UNSPECIFIED']
         }),
-        TextDyField.data_source('Location', 'region_code'),
-        TextDyField.data_source('Recommender subtype', 'data.recommender_subtype'),
+        EnumDyField.data_source('Priority', 'data.display.priority_display', default_badge={
+            'red.500': ['Highest'],
+            'coral.500': ['Second Highest'],
+            'yellow.300': ['Second Lowest'],
+            'gray.500': ['Lowest'],
+            'gray': ['Unspecified']
+        }),
+        TextDyField.data_source('Instance type name', 'data.display.instance_type_name'),
+        TextDyField.data_source('Short description', 'data.display.instance_type_description'),
         TextDyField.data_source('Instance type', 'data.display.instance_type'),
         DateTimeDyField.data_source('Last refresh time', 'data.last_refresh_time'),
-        TextDyField.data_source('priority', 'data.priority'),
     ],
     search=[
-        SearchField.set(name='Recommendation action', key='data.content.overview.recommendedAction'),
         SearchField.set(name='State', key='data.state_info.state'),
         SearchField.set(name='Category', key='data.primary_impact.category'),
+        SearchField.set(name='Priority', key='data.display.priority_display'),
         SearchField.set(name='Location', key='region_code'),
-        SearchField.set(name='Insight type', key='data.display.insight_type'),
-        SearchField.set(name='Recommender subtype', key='data.recommender_subtype'),
-        SearchField.set(name='priority', key='data.priority'),
+        SearchField.set(name='Instance name', key='data.display.instance_type_name'),
+        SearchField.set(name='Short description', key='data.display.instance_type_description'),
+        SearchField.set(name='Insight type', key='data.display.insight_type')
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

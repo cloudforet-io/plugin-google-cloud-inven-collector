@@ -6,6 +6,7 @@ from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 class Display(Model):
     insight_type = StringType()
+    insight_type_display = StringType()
 
 
 class InsightStateInfo(Model):

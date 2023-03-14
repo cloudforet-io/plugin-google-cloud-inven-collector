@@ -14,7 +14,7 @@ insight_detail = ItemDynamicLayout.set_fields('Insight Details', fields=[
         'alert': ['STATE_UNSPECIFIED', 'DISMISSED'],
     }),
     EnumDyField.data_source('Severity', 'data.severity', default_badge={
-        'indigo.500': ['CRITICAL', 'HIGH', 'SEVERITY_UNSPECIFIED'], 'yellow.500': ['MEDIUM', 'LOW']
+        'primary': ['CRITICAL', 'HIGH', 'SEVERITY_UNSPECIFIED'], 'gray.500': ['MEDIUM', 'LOW']
     }),
     EnumDyField.data_source('Category', 'data.category', default_badge={
         'indigo.500': ['COST'],
@@ -26,7 +26,13 @@ insight_detail = ItemDynamicLayout.set_fields('Insight Details', fields=[
         'coral.500': ['CATEGORY_UNSPECIFIED']
     }),
     TextDyField.data_source('Insight subtype', 'data.insight_subtype'),
-    TextDyField.data_source('Insight type', 'data.display.insight_type'),
+    TextDyField.data_source('Insight type', 'data.display.insight_type_display', default_outline_badge=[
+        'Cloud Asset insights', 'Dataflow insights', 'Error Reporting notification insights',
+        'Firewall insights', 'GKE diagnosis insights', 'IAM policy insights',
+        'IAM service account insights science', 'Idle Compute Engine resources insights',
+        'Lateral movement insights', 'Managed instance group insights', 'Unattended project insights',
+        'VM instance insights'
+    ]),
     DateTimeDyField.data_source('Resource creation time', 'data.content.resource_creation_time'),
     TextDyField.data_source('Resource is external', 'data.content.resource_is_external'),
     DateTimeDyField.data_source('Last refresh time', 'data.last_refresh_time'),
