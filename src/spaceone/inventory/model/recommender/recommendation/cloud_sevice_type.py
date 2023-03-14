@@ -42,12 +42,12 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
             'yellow.500': ['SECURITY'],
             'coral.500': ['CATEGORY_UNSPECIFIED']
         }),
-        EnumDyField.data_source('Priority', 'data.display.priority_display', default_badge={
+        EnumDyField.data_source('Priority level', 'data.display.priority_display', default_badge={
             'red.500': ['Highest'],
             'coral.500': ['Second Highest'],
             'yellow.300': ['Second Lowest'],
             'gray.500': ['Lowest'],
-            'gray': ['Unspecified']
+            'black': ['Unspecified']
         }),
         TextDyField.data_source('Instance type name', 'data.display.instance_type_name'),
         TextDyField.data_source('Short description', 'data.display.instance_type_description'),
@@ -57,8 +57,8 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
     search=[
         SearchField.set(name='State', key='data.state_info.state'),
         SearchField.set(name='Category', key='data.primary_impact.category'),
-        SearchField.set(name='Priority', key='data.display.priority_display'),
-        SearchField.set(name='Location', key='region_code'),
+        SearchField.set(name='Priority', key='data.priority'),
+        SearchField.set(name='Priority level', key='data.display.priority_display'),
         SearchField.set(name='Instance name', key='data.display.instance_type_name'),
         SearchField.set(name='Short description', key='data.display.instance_type_description'),
         SearchField.set(name='Insight type', key='data.display.insight_type')

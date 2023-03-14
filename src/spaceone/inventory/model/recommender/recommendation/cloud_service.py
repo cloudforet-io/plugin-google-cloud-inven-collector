@@ -19,12 +19,12 @@ recommendation_detail = ItemDynamicLayout.set_fields('Recommendation Details', f
     TextDyField.data_source('instance_type', 'data.display.instance_type'),
     DateTimeDyField.data_source('Last refresh time', 'data.last_refresh_time'),
     TextDyField.data_source('Priority', 'data.priority'),
-    EnumDyField.data_source('Priority levels', 'data.display.priority_display', default_badge={
+    EnumDyField.data_source('Priority level', 'data.display.priority_display', default_badge={
         'red.500': ['Highest'],
         'coral.500': ['Second Highest'],
         'yellow.300': ['Second Lowest'],
         'gray.500': ['Lowest'],
-        'gray': ['Unspecified']
+        'black': ['Unspecified']
     })
 ])
 
