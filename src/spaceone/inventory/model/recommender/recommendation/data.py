@@ -8,6 +8,7 @@ class Display(Model):
     instance_type_name = StringType()
     instance_type_description = StringType()
     priority_display = StringType()
+    resource = StringType()
 
 
 class Money(Model):
@@ -96,7 +97,7 @@ class Recommendation(BaseResource):
     def reference(self):
         return {
             "resource_id": self.name,
-            "external_link": f'https://console.cloud.google.com/home/recommendations?project={self.project}'
+            "external_link": f'https://console.cloud.google.com/home/recommendations'
         }
 
     class Options:

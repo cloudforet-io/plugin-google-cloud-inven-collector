@@ -113,6 +113,9 @@ class RecommendationManager(GoogleCloudManager):
             'priority_display': self.convert_readable_priority(recommendation['priority']),
         }
 
+        if resource := recommendation['content']['overview'].get('resourceName'):
+            display['resource'] = self._change_resource(resource)
+
         recommendation.update({
             'display': display
         })
@@ -153,3 +156,12 @@ class RecommendationManager(GoogleCloudManager):
             return 'Lowest'
         else:
             return 'Unspecified'
+
+    @staticmethod
+    def _change_resource(resource):
+        try:
+            prefix, sub_resource = resource.split('com/')
+            return sub_resource
+        except ValueError:
+            return resource
+
