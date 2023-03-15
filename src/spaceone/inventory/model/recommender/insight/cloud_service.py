@@ -42,7 +42,10 @@ detail_meta = ListDynamicLayout.set_layouts('Details', layouts=[insight_detail])
 
 recommendations = SimpleTableDynamicLayout.set_tags('Recommendations', root_path='data.associated_recommendations',
                                                     fields=[
-                                                        TextDyField.data_source('Name', 'recommendation'),
+                                                        TextDyField.data_source('Name', 'recommendation', reference={
+                                                            'resource_type': 'inventory.CloudService',
+                                                            'reference_key': 'data.name'
+                                                        }),
                                                     ])
 insight_recommendation_meta = ListDynamicLayout.set_layouts('Recommendation', layouts=[recommendations])
 

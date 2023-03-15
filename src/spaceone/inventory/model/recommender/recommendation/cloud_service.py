@@ -53,7 +53,7 @@ overview_detail = ItemDynamicLayout.set_fields('Content overview', root_path='da
     TextDyField.data_source('Resource name', 'resourceName'),
     TextDyField.data_source('Recommendation action', 'recommendedAction'),
 ])
-operation_detail = SimpleTableDynamicLayout.set_tags('Operations', root_path='data.content.operation_groups',
+operation_detail = SimpleTableDynamicLayout.set_tags('Operations', root_path='data.content.operation_groups.operations',
                                                      fields=[
                                                          TextDyField.data_source('Action', 'action'),
                                                          TextDyField.data_source('Resource type', 'resource_type'),
@@ -69,7 +69,10 @@ operation_detail = SimpleTableDynamicLayout.set_tags('Operations', root_path='da
                                                      ])
 
 recommendation_insight_meta = TableDynamicLayout.set_fields('Insights', root_path='data.associated_insights', fields=[
-    TextDyField.data_source('Name', 'insight')
+    TextDyField.data_source('Name', 'insight', reference={
+        'resource_type': 'inventory.CloudService',
+        'reference_key': 'data.name'
+    })
 ])
 
 detail_meta = ListDynamicLayout.set_layouts('Details',
