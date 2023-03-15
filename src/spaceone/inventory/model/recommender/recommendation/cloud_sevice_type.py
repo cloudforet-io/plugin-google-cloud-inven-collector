@@ -52,7 +52,10 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source('Instance type name', 'data.display.instance_type_name'),
         TextDyField.data_source('Short description', 'data.display.instance_type_description'),
         TextDyField.data_source('Instance type', 'data.display.instance_type'),
-        TextDyField.data_source('Related resource', 'data.content.overview.resource'),
+        TextDyField.data_source('Related resource', 'data.display.resource', reference={
+            'resource_type': 'inventory.CloudService',
+            'reference_key': 'data.resource_id'
+        }),
         DateTimeDyField.data_source('Last refresh time', 'data.last_refresh_time'),
     ],
     search=[
@@ -60,9 +63,9 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name='Category', key='data.primary_impact.category'),
         SearchField.set(name='Priority', key='data.priority'),
         SearchField.set(name='Priority level', key='data.display.priority_display'),
-        SearchField.set(name='Related resource', key='data.content.overview.resource'),
+        SearchField.set(name='Related resource', key='data.display.resource'),
         SearchField.set(name='Related resource name', key='data.content.overview.resourceName'),
-        SearchField.set(name='Instance name', key='data.display.instance_type_name'),
+        SearchField.set(name='Instance type name', key='data.display.instance_type_name'),
         SearchField.set(name='Short description', key='data.display.instance_type_description'),
         SearchField.set(name='Insight type', key='data.display.insight_type')
     ],

@@ -43,7 +43,7 @@ class Insight(BaseResource):
     def reference(self):
         return {
             "resource_id": self.name,
-            "external_link": f"https://console.cloud.google.com/home/recommendations?project={self.project}"
+            "external_link": f"https://console.cloud.google.com/home/recommendations"
         }
 
     class Options:
