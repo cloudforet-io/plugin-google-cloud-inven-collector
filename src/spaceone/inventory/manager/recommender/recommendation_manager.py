@@ -160,8 +160,8 @@ class RecommendationManager(GoogleCloudManager):
     @staticmethod
     def _change_resource(resource):
         try:
-            prefix, sub_resource = resource.split('com/')
-            return sub_resource
+            resource_name = resource.split('/')[-1]
+            return resource_name
         except ValueError:
             return resource
 
