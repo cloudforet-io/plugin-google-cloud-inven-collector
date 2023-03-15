@@ -62,9 +62,8 @@ operation_detail = SimpleTableDynamicLayout.set_tags('Operations', root_path='da
                                                          TextDyField.data_source('Source resource', 'source_resource'),
                                                          TextDyField.data_source('Source path', 'source_path'),
                                                          TextDyField.data_source('Path filters', 'path_filters'),
-                                                         TextDyField.data_source('Path filters', 'path_filters'),
                                                          TextDyField.data_source('Path value matchers',
-                                                                                 'Path value matchers'),
+                                                                                 'path_value_matchers'),
                                                          TextDyField.data_source('Value', 'value'),
                                                          TextDyField.data_source('Value matcher', 'value_matcher'),
                                                      ])

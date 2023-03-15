@@ -52,6 +52,7 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source('Instance type name', 'data.display.instance_type_name'),
         TextDyField.data_source('Short description', 'data.display.instance_type_description'),
         TextDyField.data_source('Instance type', 'data.display.instance_type'),
+        TextDyField.data_source('Recommended resource', 'data.content.overview.resource'),
         DateTimeDyField.data_source('Last refresh time', 'data.last_refresh_time'),
     ],
     search=[
@@ -59,6 +60,8 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name='Category', key='data.primary_impact.category'),
         SearchField.set(name='Priority', key='data.priority'),
         SearchField.set(name='Priority level', key='data.display.priority_display'),
+        SearchField.set(name='Recommended resource', key='data.content.overview.resource'),
+        SearchField.set(name='Recommended resource name', key='data.content.overview.resourceName'),
         SearchField.set(name='Instance name', key='data.display.instance_type_name'),
         SearchField.set(name='Short description', key='data.display.instance_type_description'),
         SearchField.set(name='Insight type', key='data.display.insight_type')
