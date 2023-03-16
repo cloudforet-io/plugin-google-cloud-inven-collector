@@ -40,6 +40,7 @@ class BaseResource(Model):
     region = StringType(serialize_when_none=False)
     self_link = StringType(deserialize_from='selfLink', serialize_when_none=False)
     google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
+    log_support_providers = ListType(StringType(), default=['google_cloud', 'atlassian'])
 
 
 class CloudServiceResource(Model):

@@ -165,3 +165,4 @@ class VMInstance(Model):
     disks = ListType(ModelType(Disk))
     autoscaler = ModelType(AutoScaler, serialize_when_none=False)
     google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
+    log_support_providers = ListType(StringType(), default=['google_cloud', 'atlassian'])
