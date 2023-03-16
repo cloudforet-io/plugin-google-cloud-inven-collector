@@ -54,7 +54,7 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source('Instance type', 'data.display.instance_type'),
         TextDyField.data_source('Related resource', 'data.display.resource', reference={
             'resource_type': 'inventory.CloudService',
-            'reference_key': 'data.resource_id'
+            'reference_key': 'data.name'
         }),
         DateTimeDyField.data_source('Last refresh time', 'data.last_refresh_time'),
     ],
