@@ -51,6 +51,7 @@ The following is a list of services being collected and service code information
 |5|BigQuery|bigquery|
 |6|Cloud Pub/Sub|pubsub|
 |7|Cloud Functions|cloudfunctions|
+|8|Recommender|recommender
 
 If you want to know the detailed service endpoint, please check the [content details](###content-details) below.
 
@@ -86,6 +87,9 @@ If you want to know the detailed service endpoint, please check the [content det
         * [Schema](#schema)
     * [Cloud Fuctions](#cloud-functions)
         * [Function](#function)
+    * [Recommender](#recommender)
+        * [Recommendation](#recommendation)
+        * [Insight](#insight)
     * [Options](#options)
       * [CloudServiceType](#cloud-service-type--specify-what-to-collect)
       * [ServiceCodeMapper](#service-code-mapper--update-service-code-in-cloud-service-type)
@@ -398,6 +402,25 @@ Please, set authentication privilege for followings:
           - https://cloudfunctions.googleapis.com/v2/{parent=projects/*/locations/*}/functions
           - https://storage.googleapis.com/storage/v1/b/{bucket}
           - https://eventarc.googleapis.com/v1/{parent=projects/*/locations/*}/providers
+
+#### [Recommender](https://cloud.google.com/recommender/docs/overview)
+- #### Recommendation & Insight
+    - IAM
+        - cloudasset.assets.listResource
+        - cloudasset.assets.listIamPolicy
+        - cloudasset.assets.listOrgPolicy
+        - cloudasset.assets.listAccessPolicy
+        - cloudasset.assets.listOSInventories
+        - recommender.*.get
+        - recommender.*.list
+
+    - Recommendation Service Endpoint
+        - https://recommender.googleapis.com/v1/{name=projects/*/locations/*/recommenders/*/recommendations/*}
+
+    - Insight Service Endpoint
+        - https://cloudasset.googleapis.com/v1/{parent=*/*}/assets
+        - https://recommender.googleapis.com/v1/{parent=projects/*/locations/*/insightTypes/*}/insights
+
 ---
 
 ## Options
