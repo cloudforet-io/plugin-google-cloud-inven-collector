@@ -208,9 +208,16 @@ class InsightManager(GoogleCloudManager):
             recommendation_names.append(recommendation['recommendation'])
         return recommendation_names
 
-    @staticmethod
-    def _change_target_resources(resources):
+    def _change_target_resources(self, resources):
         new_target_resources = []
         for resource in resources:
-            new_target_resources.append({'name': resource})
+            new_target_resources.append({'name': self._change_resource_name(resource)})
         return new_target_resources
+
+    @staticmethod
+    def _change_resource_name(resource):
+        try:
+            resource_name = resource.split('/')[-1]
+            return resource_name
+        except ValueError:
+            return resource
