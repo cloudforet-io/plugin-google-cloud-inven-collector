@@ -49,7 +49,14 @@ recommendations = SimpleTableDynamicLayout.set_tags('Recommendations', root_path
                                                     ])
 insight_recommendation_meta = ListDynamicLayout.set_layouts('Recommendation', layouts=[recommendations])
 
-target_resources = SimpleTableDynamicLayout.set_tags('Target resource', root_path='data.target_resources')
+target_resources = SimpleTableDynamicLayout.set_tags('Target resource',
+                                                     root_path='data.display.target_resources_display',
+                                                     fields=[
+                                                         TextDyField.data_source('Resource name', 'name', reference={
+                                                             'resource_type': 'inventory.CloudService',
+                                                             'reference_key': 'data.name'
+                                                         }),
+                                                     ])
 insight_target_resource_meta = ListDynamicLayout.set_layouts('Target resource', layouts=[target_resources])
 
 insight_meta = CloudServiceMeta.set_layouts([detail_meta, insight_recommendation_meta, insight_target_resource_meta])

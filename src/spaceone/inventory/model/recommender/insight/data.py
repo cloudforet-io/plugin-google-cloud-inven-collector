@@ -7,6 +7,7 @@ from spaceone.inventory.libs.schema.cloud_service import BaseResource
 class Display(Model):
     insight_type = StringType()
     insight_type_display = StringType()
+    target_resources_display = ListType(DictType(StringType))
 
 
 class InsightStateInfo(Model):
@@ -21,7 +22,7 @@ class RecommendationReference(Model):
 class Insight(BaseResource):
     name = StringType()
     description = StringType()
-    target_resources = ListType(StringType(deserialize_from='targetResources'))
+    target_resources = ListType(StringType(), deserialize_from='targetResources')
     insight_subtype = StringType(deserialize_from='insightSubtype')
     content = DictType(UnionType(
         [StringType(), BooleanType(), ListType(StringType), DictType(StringType()), ListType(DictType(StringType()))]

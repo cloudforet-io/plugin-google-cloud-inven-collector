@@ -172,8 +172,7 @@ class InsightManager(GoogleCloudManager):
         _LOGGER.debug(f'[Recommender] list_insights API Call Count: {call_count}')
         return insights
 
-    @staticmethod
-    def _create_insight_resource(origin_insight, region, insight_type, project_id, insight_type_map):
+    def _create_insight_resource(self, origin_insight, region, insight_type, project_id, insight_type_map):
         display = {
             'insight_type': insight_type,
             'insight_type_display': insight_type_map[insight_type],
@@ -181,6 +180,9 @@ class InsightManager(GoogleCloudManager):
         origin_insight.update({
             'display': display
         })
+
+        if target_resources := origin_insight.get('targetResources'):
+            display['target_resources_display'] = self._change_target_resources(target_resources)
 
         try:
             insight_data = Insight(origin_insight, strict=False)
@@ -205,3 +207,10 @@ class InsightManager(GoogleCloudManager):
         for recommendation in recommendations:
             recommendation_names.append(recommendation['recommendation'])
         return recommendation_names
+
+    @staticmethod
+    def _change_target_resources(resources):
+        new_target_resources = []
+        for resource in resources:
+            new_target_resources.append({'name': resource})
+        return new_target_resources
