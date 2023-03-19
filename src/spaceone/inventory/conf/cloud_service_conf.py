@@ -41,6 +41,9 @@ CLOUD_SERVICE_GROUP_MAP = {
     ],
     'Recommender': [
         'InsightManager'
+    ],
+    'Recommender_v2': [
+        'RecommendationManager'
     ]
 }
 

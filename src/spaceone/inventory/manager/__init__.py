@@ -19,3 +19,4 @@ from spaceone.inventory.manager.pub_sub.topic_manager import TopicManager
 from spaceone.inventory.manager.cloud_functions.function_gen2_manager import FunctionGen2Manager
 from spaceone.inventory.manager.cloud_functions.function_gen1_manager import FunctionGen1Manager
 from spaceone.inventory.manager.recommender.insight_manager import InsightManager
+from spaceone.inventory.manager.recommender_v2.recommendation_manager import RecommendationManager
