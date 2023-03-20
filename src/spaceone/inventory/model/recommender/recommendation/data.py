@@ -3,12 +3,31 @@ from schematics.types import ModelType, ListType, StringType, DictType, IntType,
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
+class TargetResource(Model):
+    name = StringType()
+    display_name = StringType()
+
+
+class Insight(Model):
+    name = StringType()
+    description = StringType()
+    last_refresh_time = StringType()
+    observation_period = StringType()
+    state = StringType()
+    category = StringType()
+    insight_subtype = StringType()
+    severity = StringType()
+    etag = StringType()
+    target_resources = ListType(ModelType(TargetResource))
+
+
 class Display(Model):
-    instance_type = StringType()
-    instance_type_name = StringType()
-    instance_type_description = StringType()
+    recommender_id = StringType()
+    recommender_id_name = StringType()
+    recommender_id_description = StringType()
     priority_display = StringType()
     resource = StringType()
+    insights = ListType(ModelType(Insight), default=[])
 
 
 class Money(Model):
@@ -46,6 +65,19 @@ class Impact(Model):
     reliability_projection = ModelType(ReliabilityProjection, deserialize_from='reliabilityProjection')
 
 
+class Resources(Model):
+    type = StringType()
+    amount = FloatType()
+
+
+class Value(Model):
+    name = StringType()
+    description = StringType()
+    plan = StringType()
+    resources = ListType(ModelType(Resources), default=[])
+    type = StringType()
+
+
 class Operation(Model):
     action = StringType()
     resource_type = StringType(deserialize_from='resourceType')
@@ -55,7 +87,6 @@ class Operation(Model):
     source_path = StringType(deserialize_from='sourcePath')
     path_filters = DictType(StringType, deserialize_from='pathFilters')
     path_value_matchers = DictType(StringType, deserialize_from='pathValueMatchers')
-    value = StringType()
     value_matcher = DictType(StringType, deserialize_from='valueMatcher')
 
 
