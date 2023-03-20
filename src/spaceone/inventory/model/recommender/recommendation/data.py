@@ -28,6 +28,9 @@ class Display(Model):
     priority_display = StringType()
     resource = StringType()
     insights = ListType(ModelType(Insight), default=[])
+    output_display = StringType(serialize_when_none=False, default='show')
+    overview = StringType()
+    operations = StringType()
 
 
 class Money(Model):

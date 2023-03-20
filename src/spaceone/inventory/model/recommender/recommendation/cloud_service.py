@@ -1,7 +1,7 @@
 from schematics.types import ModelType, StringType, PolyModelType, DictType
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, ListDynamicLayout, \
     TableDynamicLayout, SimpleTableDynamicLayout
-from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, EnumDyField, DateTimeDyField
+from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, EnumDyField, DateTimeDyField, MoreField
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
 from spaceone.inventory.model.recommender.recommendation.data import Recommendation
 
@@ -47,31 +47,35 @@ primary_impact_detail = ItemDynamicLayout.set_fields('Primary impact', fields=[
     TextDyField.data_source('Reliability projection', 'data.primary_impact.reliability_projection'),
 ])
 
-# overview_detail = ItemDynamicLayout.set_fields('Content overview', root_path='data.content.overview', fields=[
-#     TextDyField.data_source('Location', 'location'),
-#     TextDyField.data_source('Resource', 'resource'),
-#     TextDyField.data_source('Resource name', 'resourceName'),
-#     TextDyField.data_source('Recommendation action', 'recommendedAction'),
-# ])
-
-operation_detail = SimpleTableDynamicLayout.set_tags('Operations', root_path='data.content.operation_groups.operations',
-                                                     fields=[
-                                                         TextDyField.data_source('Action', 'action'),
-                                                         TextDyField.data_source('Resource type', 'resource_type'),
-                                                         TextDyField.data_source('Resource', 'resource'),
-                                                         TextDyField.data_source('Path', 'path'),
-                                                         TextDyField.data_source('Source resource', 'source_resource'),
-                                                         TextDyField.data_source('Source path', 'source_path'),
-                                                         TextDyField.data_source('Path filters', 'path_filters'),
-                                                         TextDyField.data_source('Path value matchers',
-                                                                                 'path_value_matchers'),
-                                                         TextDyField.data_source('Value', 'value'),
-                                                         TextDyField.data_source('Value matcher', 'value_matcher'),
-                                                     ])
+content_detail = ItemDynamicLayout.set_fields('Overview', fields=[
+    MoreField.data_source('Overview', 'data.display.output_display', options={
+        'sub_key': 'data.display.overview',
+        'layout': {
+            'name': 'Overview',
+            'type': 'popup',
+            'options': {
+                'layout': {
+                    'type': 'raw'
+                }
+            }
+        }
+    }),
+    MoreField.data_source('Operations', 'data.display.output_display', options={
+        'sub_key': 'data.display.operations',
+        'layout': {
+            'name': 'Overview',
+            'type': 'popup',
+            'options': {
+                'layout': {
+                    'type': 'raw'
+                }
+            }
+        }
+    })
+])
 
 detail_meta = ListDynamicLayout.set_layouts('Details',
-                                            layouts=[recommendation_detail, primary_impact_detail,
-                                                     operation_detail])
+                                            layouts=[recommendation_detail, primary_impact_detail, content_detail])
 
 insight_table_meta = TableDynamicLayout.set_fields('Insights', root_path='data.display.insights', fields=[
     TextDyField.data_source('Description', 'description'),
@@ -98,7 +102,8 @@ insight_table_meta = TableDynamicLayout.set_fields('Insights', root_path='data.d
     TextDyField.data_source('etag', 'etag')
 ])
 
-resource_table_meta = TableDynamicLayout.set_fields('Target resources', root_path='data.display.target_resources',
+resource_table_meta = TableDynamicLayout.set_fields('Target resources',
+                                                    root_path='data.display.insights.target_resources',
                                                     fields=[
                                                         TextDyField.data_source('Resource name', 'name'),
                                                         TextDyField.data_source('Link', 'display_name', reference={

@@ -1,6 +1,7 @@
 import logging
 import time
 import requests
+import json
 
 from bs4 import BeautifulSoup
 from spaceone.inventory.libs.manager import GoogleCloudManager
@@ -71,6 +72,8 @@ class RecommendationManager(GoogleCloudManager):
                         'recommender_id_name': recommender_id_map[recommender_id]['name'],
                         'recommender_id_description': recommender_id_map[recommender_id]['short_description'],
                         'priority_display': self.convert_readable_priority(recommendation['priority']),
+                        'overview': json.dumps(recommendation['content']['overview']),
+                        'operations': json.dumps(recommendation['content']['operationGroups'])
                     }
 
                     if resource := recommendation['content']['overview'].get('resourceName'):
