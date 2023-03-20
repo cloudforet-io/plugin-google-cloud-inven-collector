@@ -49,9 +49,9 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
             'gray.500': ['Lowest'],
             'black': ['Unspecified']
         }),
-        TextDyField.data_source('Instance type name', 'data.display.instance_type_name'),
-        TextDyField.data_source('Short description', 'data.display.instance_type_description'),
-        TextDyField.data_source('Instance type', 'data.display.instance_type'),
+        TextDyField.data_source('Recommender name', 'data.display.recommender_id_name'),
+        TextDyField.data_source('Short description', 'data.display.recommender_id_description'),
+        TextDyField.data_source('Recommender id', 'data.display.recommender_id'),
         TextDyField.data_source('Related resource', 'data.display.resource', reference={
             'resource_type': 'inventory.CloudService',
             'reference_key': 'data.name'
@@ -65,9 +65,9 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name='Priority level', key='data.display.priority_display'),
         SearchField.set(name='Related resource', key='data.display.resource'),
         SearchField.set(name='Related resource name', key='data.content.overview.resourceName'),
-        SearchField.set(name='Instance type name', key='data.display.instance_type_name'),
-        SearchField.set(name='Short description', key='data.display.instance_type_description'),
-        SearchField.set(name='Insight type', key='data.display.insight_type')
+        SearchField.set(name='Recommender name', key='data.display.recommender_id_name'),
+        SearchField.set(name='Short description', key='data.display.recommender_id_description'),
+        SearchField.set(name='Recommender id', key='data.display.recommender_id')
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

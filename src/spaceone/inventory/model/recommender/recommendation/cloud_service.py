@@ -14,9 +14,9 @@ recommendation_detail = ItemDynamicLayout.set_fields('Recommendation Details', f
         'alert': ['STATE_UNSPECIFIED', 'DISMISSED', 'FAILED'],
     }),
     TextDyField.data_source('Recommender subtype', 'data.recommender_subtype'),
-    TextDyField.data_source('Instance type name', 'data.display.instance_type_name'),
-    TextDyField.data_source('Short description', 'data.display.instance_type_description'),
-    TextDyField.data_source('instance_type', 'data.display.instance_type'),
+    TextDyField.data_source('Recommender name', 'data.display.recommender_id_name'),
+    TextDyField.data_source('Short description', 'data.display.recommender_id_description'),
+    TextDyField.data_source('Recommender id', 'data.display.recommender_id'),
     DateTimeDyField.data_source('Last refresh time', 'data.last_refresh_time'),
     TextDyField.data_source('Priority', 'data.priority'),
     EnumDyField.data_source('Priority level', 'data.display.priority_display', default_badge={
@@ -47,12 +47,13 @@ primary_impact_detail = ItemDynamicLayout.set_fields('Primary impact', fields=[
     TextDyField.data_source('Reliability projection', 'data.primary_impact.reliability_projection'),
 ])
 
-overview_detail = ItemDynamicLayout.set_fields('Content overview', root_path='data.content.overview', fields=[
-    TextDyField.data_source('Location', 'location'),
-    TextDyField.data_source('Resource', 'resource'),
-    TextDyField.data_source('Resource name', 'resourceName'),
-    TextDyField.data_source('Recommendation action', 'recommendedAction'),
-])
+# overview_detail = ItemDynamicLayout.set_fields('Content overview', root_path='data.content.overview', fields=[
+#     TextDyField.data_source('Location', 'location'),
+#     TextDyField.data_source('Resource', 'resource'),
+#     TextDyField.data_source('Resource name', 'resourceName'),
+#     TextDyField.data_source('Recommendation action', 'recommendedAction'),
+# ])
+
 operation_detail = SimpleTableDynamicLayout.set_tags('Operations', root_path='data.content.operation_groups.operations',
                                                      fields=[
                                                          TextDyField.data_source('Action', 'action'),
@@ -68,17 +69,47 @@ operation_detail = SimpleTableDynamicLayout.set_tags('Operations', root_path='da
                                                          TextDyField.data_source('Value matcher', 'value_matcher'),
                                                      ])
 
-recommendation_insight_meta = TableDynamicLayout.set_fields('Insights', root_path='data.associated_insights', fields=[
-    TextDyField.data_source('Name', 'insight', reference={
-        'resource_type': 'inventory.CloudService',
-        'reference_key': 'data.name'
-    })
+detail_meta = ListDynamicLayout.set_layouts('Details',
+                                            layouts=[recommendation_detail, primary_impact_detail,
+                                                     operation_detail])
+
+insight_table_meta = TableDynamicLayout.set_fields('Insights', root_path='data.display.insights', fields=[
+    TextDyField.data_source('Description', 'description'),
+    EnumDyField.data_source('State', 'state', default_state={
+        'safe': ['ACTIVE'],
+        'disable': ['ACCEPTED'],
+        'alert': ['STATE_UNSPECIFIED', 'DISMISSED'],
+    }),
+    EnumDyField.data_source('Severity', 'severity', default_badge={
+        'red.500': ['CRITICAL', 'HIGH', 'SEVERITY_UNSPECIFIED'], 'gray.500': ['MEDIUM', 'LOW']
+    }),
+    EnumDyField.data_source('Category', 'category', default_badge={
+        'indigo.500': ['COST'],
+        'peacock.500': ['SUSTAINABILITY'],
+        'violet.500': ['RELIABILITY'],
+        'blue.500': ['PERFORMANCE'],
+        'green.500': ['MANAGEABILITY'],
+        'yellow.500': ['SECURITY'],
+        'coral.500': ['CATEGORY_UNSPECIFIED']
+    }),
+    TextDyField.data_source('Insight subtype', 'insight_subtype'),
+    TextDyField.data_source('Name', 'name'),
+    TextDyField.data_source('Last refresh time', 'last_refresh_time'),
+    TextDyField.data_source('etag', 'etag')
 ])
 
-detail_meta = ListDynamicLayout.set_layouts('Details',
-                                            layouts=[recommendation_detail, primary_impact_detail, overview_detail,
-                                                     operation_detail])
-recommendation_meta = CloudServiceMeta.set_layouts([detail_meta, recommendation_insight_meta])
+resource_table_meta = TableDynamicLayout.set_fields('Target resources', root_path='data.display.target_resources',
+                                                    fields=[
+                                                        TextDyField.data_source('Resource name', 'name'),
+                                                        TextDyField.data_source('Link', 'display_name', reference={
+                                                            'resource_type': 'inventory.CloudService',
+                                                            'reference_key': 'data.name'
+                                                        }),
+                                                    ])
+
+insight_meta = ListDynamicLayout.set_layouts('Insight',
+                                             layouts=[insight_table_meta, resource_table_meta])
+recommendation_meta = CloudServiceMeta.set_layouts([detail_meta, insight_meta])
 
 
 class RecommenderResource(CloudServiceResource):

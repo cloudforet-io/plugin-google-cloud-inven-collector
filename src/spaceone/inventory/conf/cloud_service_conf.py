@@ -40,9 +40,6 @@ CLOUD_SERVICE_GROUP_MAP = {
         'FunctionGen1Manager'
     ],
     'Recommender': [
-        'InsightManager'
-    ],
-    'Recommender_v2': [
         'RecommendationManager'
     ]
 }

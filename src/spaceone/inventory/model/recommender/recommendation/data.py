@@ -1,7 +1,24 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, DictType, IntType, UnionType, FloatType
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
-from spaceone.inventory.model.recommender.insight.data import Insight, IPAddressInsight
+
+
+class TargetResource(Model):
+    name = StringType()
+    display_name = StringType()
+
+
+class Insight(Model):
+    name = StringType()
+    description = StringType()
+    last_refresh_time = StringType()
+    observation_period = StringType()
+    state = StringType()
+    category = StringType()
+    insight_subtype = StringType()
+    severity = StringType()
+    etag = StringType()
+    target_resources = ListType(ModelType(TargetResource))
 
 
 class Display(Model):
@@ -10,7 +27,7 @@ class Display(Model):
     recommender_id_description = StringType()
     priority_display = StringType()
     resource = StringType()
-    insights = ListType(ModelType(Insight or IPAddressInsight), default=[])
+    insights = ListType(ModelType(Insight), default=[])
 
 
 class Money(Model):
@@ -70,7 +87,6 @@ class Operation(Model):
     source_path = StringType(deserialize_from='sourcePath')
     path_filters = DictType(StringType, deserialize_from='pathFilters')
     path_value_matchers = DictType(StringType, deserialize_from='pathValueMatchers')
-    value = UnionType([ModelType(Value), IntType(), StringType(), FloatType(), ListType(StringType())])
     value_matcher = DictType(StringType, deserialize_from='valueMatcher')
 
 
@@ -117,17 +133,3 @@ class Recommendation(BaseResource):
 
     class Options:
         serialize_when_none = False
-
-
-class Test(Model):
-    value = ModelType(Value)
-
-
-if __name__ == '__main__':
-    a = {'value': {'name': 'cud-recommendation-1448850107',
-                   'description': 'Commitment purchase based on CUD recommendation cud-recommendation-1448850107',
-                   'plan': 'TWELVE_MONTH', 'resources': [
-            {'type': 'MEMORY', 'amount': 1024}],
-                   'type': 'GENERAL_PURPOSE_E2'}}
-
-    print(Test(a).to_primitive())
