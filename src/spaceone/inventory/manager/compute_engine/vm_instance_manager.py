@@ -4,10 +4,12 @@ from typing import Tuple, List
 
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.connector.compute_engine.vm_instance import VMInstanceConnector
-from spaceone.inventory.manager.compute_engine.vm_instance.vm_instance_manager_resource_helper import VMInstanceManagerResourceHelper
+from spaceone.inventory.manager.compute_engine.vm_instance.vm_instance_manager_resource_helper import \
+    VMInstanceManagerResourceHelper
 from spaceone.inventory.manager.compute_engine.vm_instance import InstanceGroupManagerResourceHelper
 from spaceone.inventory.manager.compute_engine.vm_instance.disk_manager_resource_helper import DiskManagerResourceHelper
-from spaceone.inventory.manager.compute_engine.vm_instance.firewall_manager_resource_helper import FirewallManagerResourceHelper
+from spaceone.inventory.manager.compute_engine.vm_instance.firewall_manager_resource_helper import \
+    FirewallManagerResourceHelper
 from spaceone.inventory.manager.compute_engine.vm_instance.load_balancer_manager_resource_helper import \
     LoadBalancerManagerResourceHelper
 from spaceone.inventory.manager.compute_engine.vm_instance.nic_manager_resource_helper import NICManagerResourceHelper
@@ -162,7 +164,7 @@ class VMInstanceManager(GoogleCloudManager):
         firewall_names = [d.get('name') for d in firewall_vos if d.get('name', '') != '']
         server_data = vm_instance_manager_helper.get_server_info(instance, instance_types, disks, zone_info,
                                                                  public_images, instance_in_managed_instance_groups)
-        google_cloud_monitoring_filters = [{'key': 'resource.labels.instance_id', 'value': instance.get('id')}]
+        google_cloud_filters = [{'key': 'resource.labels.instance_id', 'value': instance.get('id')}]
         google_cloud = server_data['data'].get('google_cloud', {})
         _google_cloud = google_cloud.to_primitive()
         labels = _google_cloud.get('labels', [])
@@ -189,7 +191,11 @@ class VMInstanceManager(GoogleCloudManager):
             'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
                                                                         "compute.googleapis.com/instance",
                                                                         instance.get('id'),
-                                                                        google_cloud_monitoring_filters)
+                                                                        google_cloud_filters),
+            'google_cloud_logging': self.set_google_cloud_logging(project_id,
+                                                                  'gce_instance',
+                                                                  instance.get('id'),
+                                                                  google_cloud_filters)
         })
         ##################################
         # 3. Make Return Resource

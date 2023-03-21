@@ -5,6 +5,7 @@ from .base import BaseMetaData, BaseResponse, MetaDataView, MetaDataViewSubData,
 from spaceone.inventory.model.compute_engine.instance.data import VMInstance, NIC, Disk
 from spaceone.inventory.libs.schema.region import RegionResource
 from spaceone.inventory.libs.schema.google_cloud_monitoring import GoogleCloudMonitoringModel
+from spaceone.inventory.libs.schema.google_cloud_logging import GoogleCloudLoggingModel
 
 
 class Labels(Model):
@@ -40,6 +41,7 @@ class BaseResource(Model):
     region = StringType(serialize_when_none=False)
     self_link = StringType(deserialize_from='selfLink', serialize_when_none=False)
     google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)
 
 
 class CloudServiceResource(Model):

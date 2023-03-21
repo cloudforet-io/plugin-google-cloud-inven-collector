@@ -1,6 +1,7 @@
 from schematics import Model
 from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType, DictType
 from spaceone.inventory.libs.schema.google_cloud_monitoring import GoogleCloudMonitoringModel
+from spaceone.inventory.libs.schema.google_cloud_logging import GoogleCloudLoggingModel
 
 
 # common
@@ -165,3 +166,4 @@ class VMInstance(Model):
     disks = ListType(ModelType(Disk))
     autoscaler = ModelType(AutoScaler, serialize_when_none=False)
     google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)
