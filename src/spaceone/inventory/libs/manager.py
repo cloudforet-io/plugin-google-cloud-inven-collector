@@ -114,6 +114,17 @@ class GoogleCloudManager(BaseManager):
         # }
 
     @staticmethod
+    def set_google_cloud_logging(project_id, resource_type, resource_id, filters):
+        return {
+            'name': f'projects/{project_id}',
+            'resource_id': resource_id,
+            'filters': [{
+                'resource_type': resource_type,
+                'labels': filters
+            }]
+        }
+
+    @staticmethod
     def get_param_in_url(url, key):
         param = ""
         raw_path = urlparse(url).path
