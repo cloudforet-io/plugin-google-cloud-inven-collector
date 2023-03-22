@@ -6,20 +6,20 @@ from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, C
 from spaceone.inventory.model.recommender.recommendation.data import Recommendation
 
 recommendation_detail = ItemDynamicLayout.set_fields('Recommendation Details', fields=[
-    TextDyField.data_source('name', 'data.name'),
-    TextDyField.data_source('description', 'data.description'),
+    TextDyField.data_source('Name', 'data.name'),
+    TextDyField.data_source('Description', 'data.description'),
     EnumDyField.data_source('State', 'data.state_info.state', default_state={
         'safe': ['ACTIVE', 'SUCCEEDED'],
         'disable': ['CLAIMED'],
         'alert': ['STATE_UNSPECIFIED', 'DISMISSED', 'FAILED'],
     }),
-    TextDyField.data_source('Recommender subtype', 'data.recommender_subtype'),
-    TextDyField.data_source('Recommender name', 'data.display.recommender_id_name'),
-    TextDyField.data_source('Short description', 'data.display.recommender_id_description'),
-    TextDyField.data_source('Recommender id', 'data.display.recommender_id'),
-    DateTimeDyField.data_source('Last refresh time', 'data.last_refresh_time'),
+    TextDyField.data_source('Recommender Subtype', 'data.recommender_subtype'),
+    TextDyField.data_source('Recommender Name', 'data.display.recommender_id_name'),
+    TextDyField.data_source('Short Description', 'data.display.recommender_id_description'),
+    TextDyField.data_source('Recommender ID', 'data.display.recommender_id'),
+    DateTimeDyField.data_source('Last Refresh Time', 'data.last_refresh_time'),
     TextDyField.data_source('Priority', 'data.priority'),
-    EnumDyField.data_source('Priority level', 'data.display.priority_display', default_badge={
+    EnumDyField.data_source('Priority Level', 'data.display.priority_display', default_badge={
         'red.500': ['Highest'],
         'coral.500': ['Second Highest'],
         'yellow.300': ['Second Lowest'],
@@ -28,7 +28,7 @@ recommendation_detail = ItemDynamicLayout.set_fields('Recommendation Details', f
     })
 ])
 
-primary_impact_detail = ItemDynamicLayout.set_fields('Primary impact', fields=[
+primary_impact_detail = ItemDynamicLayout.set_fields('Primary Impact', fields=[
     EnumDyField.data_source('Category', 'data.primary_impact.category', default_badge={
         'indigo.500': ['COST'],
         'peacock.500': ['SUSTAINABILITY'],
@@ -38,13 +38,13 @@ primary_impact_detail = ItemDynamicLayout.set_fields('Primary impact', fields=[
         'yellow.500': ['SECURITY'],
         'coral.500': ['CATEGORY_UNSPECIFIED']
     }),
-    TextDyField.data_source('Cost Currency code', 'data.primary_impact.cost_projection.cost.currency_code'),
-    TextDyField.data_source('Cost units', 'data.primary_impact.cost_projection.cost.units'),
-    TextDyField.data_source('Cost nanos', 'data.primary_impact.cost_projection.cost.nanos'),
-    TextDyField.data_source('Cost duration', 'data.primary_impact.cost_projection.cost.duration'),
-    TextDyField.data_source('Security projection', 'data.primary_impact.security_projection'),
-    TextDyField.data_source('Sustainability projection', 'data.primary_impact.sustainability_projection'),
-    TextDyField.data_source('Reliability projection', 'data.primary_impact.reliability_projection'),
+    TextDyField.data_source('Cost Currency Code', 'data.primary_impact.cost_projection.cost.currency_code'),
+    TextDyField.data_source('Cost Units', 'data.primary_impact.cost_projection.cost.units'),
+    TextDyField.data_source('Cost Nanos', 'data.primary_impact.cost_projection.cost.nanos'),
+    TextDyField.data_source('Cost Duration', 'data.primary_impact.cost_projection.cost.duration'),
+    TextDyField.data_source('Security Projection', 'data.primary_impact.security_projection'),
+    TextDyField.data_source('Sustainability Projection', 'data.primary_impact.sustainability_projection'),
+    TextDyField.data_source('Reliability Projection', 'data.primary_impact.reliability_projection'),
 ])
 
 content_detail = ItemDynamicLayout.set_fields('Overview', fields=[
@@ -96,16 +96,16 @@ insight_table_meta = TableDynamicLayout.set_fields('Insights', root_path='data.d
         'yellow.500': ['SECURITY'],
         'coral.500': ['CATEGORY_UNSPECIFIED']
     }),
-    TextDyField.data_source('Insight subtype', 'insight_subtype'),
+    TextDyField.data_source('Insight Subtype', 'insight_subtype'),
     TextDyField.data_source('Name', 'name'),
-    TextDyField.data_source('Last refresh time', 'last_refresh_time'),
-    TextDyField.data_source('etag', 'etag')
+    TextDyField.data_source('Last Refresh Time', 'last_refresh_time'),
+    TextDyField.data_source('Etag', 'etag')
 ])
 
-resource_table_meta = TableDynamicLayout.set_fields('Target resources',
+resource_table_meta = TableDynamicLayout.set_fields('Target Resources',
                                                     root_path='data.display.insights.target_resources',
                                                     fields=[
-                                                        TextDyField.data_source('Resource name', 'name'),
+                                                        TextDyField.data_source('Resource Name', 'name'),
                                                         TextDyField.data_source('Link', 'display_name', reference={
                                                             'resource_type': 'inventory.CloudService',
                                                             'reference_key': 'data.name'
