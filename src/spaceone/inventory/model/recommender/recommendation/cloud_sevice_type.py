@@ -27,7 +27,7 @@ cst_recommendation.tags = {
 
 cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source('description', 'data.description'),
+        TextDyField.data_source('Description', 'data.description'),
         EnumDyField.data_source('State', 'data.state_info.state', default_state={
             'safe': ['ACTIVE', 'SUCCEEDED'],
             'disable': ['CLAIMED'],
@@ -42,32 +42,20 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
             'yellow.500': ['SECURITY'],
             'coral.500': ['CATEGORY_UNSPECIFIED']
         }),
-        EnumDyField.data_source('Priority level', 'data.display.priority_display', default_badge={
-            'red.500': ['Highest'],
-            'coral.500': ['Second Highest'],
-            'yellow.300': ['Second Lowest'],
-            'gray.500': ['Lowest'],
-            'black': ['Unspecified']
-        }),
-        TextDyField.data_source('Recommender name', 'data.display.recommender_id_name'),
-        TextDyField.data_source('Short description', 'data.display.recommender_id_description'),
-        TextDyField.data_source('Recommender id', 'data.display.recommender_id'),
-        TextDyField.data_source('Related resource', 'data.display.resource', reference={
-            'resource_type': 'inventory.CloudService',
-            'reference_key': 'data.name'
-        }),
-        DateTimeDyField.data_source('Last refresh time', 'data.last_refresh_time'),
+        TextDyField.data_source('Priority Level', 'data.display.priority_display'),
+        TextDyField.data_source('Recommender Name', 'data.display.recommender_id_name'),
+        DateTimeDyField.data_source('Last Refresh Time', 'data.last_refresh_time'),
     ],
     search=[
         SearchField.set(name='State', key='data.state_info.state'),
         SearchField.set(name='Category', key='data.primary_impact.category'),
         SearchField.set(name='Priority', key='data.priority'),
-        SearchField.set(name='Priority level', key='data.display.priority_display'),
-        SearchField.set(name='Related resource', key='data.display.resource'),
-        SearchField.set(name='Related resource name', key='data.content.overview.resourceName'),
-        SearchField.set(name='Recommender name', key='data.display.recommender_id_name'),
-        SearchField.set(name='Short description', key='data.display.recommender_id_description'),
-        SearchField.set(name='Recommender id', key='data.display.recommender_id')
+        SearchField.set(name='Priority Level', key='data.display.priority_display'),
+        SearchField.set(name='Related Resource', key='data.display.resource'),
+        SearchField.set(name='Related Resource Name', key='data.content.overview.resourceName'),
+        SearchField.set(name='Recommender Name', key='data.display.recommender_id_name'),
+        SearchField.set(name='Short Description', key='data.display.recommender_id_description'),
+        SearchField.set(name='Recommender ID', key='data.display.recommender_id')
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
