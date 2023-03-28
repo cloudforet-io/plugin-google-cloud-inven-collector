@@ -38,10 +38,11 @@ primary_impact_detail = ItemDynamicLayout.set_fields('Primary Impact', fields=[
         'yellow.500': ['SECURITY'],
         'coral.500': ['CATEGORY_UNSPECIFIED']
     }),
+    TextDyField.data_source('Cost Description', 'data.display.cost_description'),
     TextDyField.data_source('Cost Currency Code', 'data.primary_impact.cost_projection.cost.currency_code'),
     TextDyField.data_source('Cost Units', 'data.primary_impact.cost_projection.cost.units'),
     TextDyField.data_source('Cost Nanos', 'data.primary_impact.cost_projection.cost.nanos'),
-    TextDyField.data_source('Cost Duration', 'data.primary_impact.cost_projection.cost.duration'),
+    TextDyField.data_source('Cost Duration', 'data.primary_impact.cost_projection.duration'),
     TextDyField.data_source('Security Projection', 'data.primary_impact.security_projection'),
     TextDyField.data_source('Sustainability Projection', 'data.primary_impact.sustainability_projection'),
     TextDyField.data_source('Reliability Projection', 'data.primary_impact.reliability_projection'),

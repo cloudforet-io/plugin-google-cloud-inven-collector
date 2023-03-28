@@ -31,6 +31,7 @@ class Display(Model):
     output_display = StringType(serialize_when_none=False, default='show')
     overview = StringType()
     operations = StringType()
+    cost_description = StringType()
 
 
 class Money(Model):
