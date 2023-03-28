@@ -25,6 +25,18 @@ _UNAVAILABLE_RECOMMENDER_IDS = [
     'google.cloudfunctions.PerformanceRecommender'
 ]
 
+_COST_RECOMMENDER_IDS = [
+    'google.bigquery.capacityCommitments.Recommender',
+    'google.cloudsql.instance.IdleRecommender',
+    'google.cloudsql.instance.OverprovisionedRecommender',
+    'google.compute.commitment.UsageCommitmentRecommender',
+    'google.cloudbilling.commitment.SpendBasedCommitmentRecommender',
+    'google.compute.image.IdleResourceRecommender',
+    'google.compute.address.IdleResourceRecommender',
+    'google.compute.disk.IdleResourceRecommender',
+    'google.compute.instance.IdleResourceRecommender'
+]
+
 
 class RecommendationManager(GoogleCloudManager):
     connector_name = 'RecommendationConnector'
@@ -183,9 +195,16 @@ class RecommendationManager(GoogleCloudManager):
         recommendation_parents = []
         for location in locations:
             for recommender_id in recommendation_type_map.keys():
-                recommendation_parents.append(
-                    f'projects/{self.project_id}/locations/{location}/recommenders/{recommender_id}'
-                )
+                if recommender_id in _COST_RECOMMENDER_IDS and location != 'global':
+                    regions_and_zones = [location, f'{location}-a', f'{location}-b', f'{location}-c']
+                    for region_or_zone in regions_and_zones:
+                        recommendation_parents.append(
+                            f'projects/{self.project_id}/locations/{region_or_zone}/recommenders/{recommender_id}'
+                        )
+                else:
+                    recommendation_parents.append(
+                        f'projects/{self.project_id}/locations/{location}/recommenders/{recommender_id}'
+                    )
 
         return recommendation_parents
 
