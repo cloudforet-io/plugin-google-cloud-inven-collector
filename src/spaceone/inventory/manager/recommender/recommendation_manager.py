@@ -195,7 +195,8 @@ class RecommendationManager(GoogleCloudManager):
         recommendation_parents = []
         for location in locations:
             for recommender_id in recommendation_type_map.keys():
-                if recommender_id in _COST_RECOMMENDER_IDS and location != 'global':
+                if recommender_id in _COST_RECOMMENDER_IDS and location != 'global' \
+                        and location[-2:] not in ['-a', '-b', '-c']:
                     regions_and_zones = [location, f'{location}-a', f'{location}-b', f'{location}-c']
                     for region_or_zone in regions_and_zones:
                         recommendation_parents.append(
