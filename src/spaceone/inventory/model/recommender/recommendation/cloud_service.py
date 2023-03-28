@@ -108,7 +108,7 @@ resource_table_meta = TableDynamicLayout.set_fields('Target Resources',
                                                         TextDyField.data_source('Resource Name', 'name'),
                                                         TextDyField.data_source('Link', 'display_name', reference={
                                                             'resource_type': 'inventory.CloudService',
-                                                            'reference_key': 'data.name'
+                                                            'reference_key': 'name'
                                                         }),
                                                     ])
 
