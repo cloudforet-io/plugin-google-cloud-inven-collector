@@ -4,6 +4,8 @@ import requests
 import json
 
 from bs4 import BeautifulSoup
+import humanize
+
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
 from spaceone.inventory.libs.schema.base import ReferenceModel
@@ -21,6 +23,18 @@ _UNAVAILABLE_RECOMMENDER_IDS = [
     'google.cloudbilling.commitment.SpendBasedCommitmentRecommender',
     'google.accounts.security.SecurityKeyRecommender',
     'google.cloudfunctions.PerformanceRecommender'
+]
+
+_COST_RECOMMENDER_IDS = [
+    'google.bigquery.capacityCommitments.Recommender',
+    'google.cloudsql.instance.IdleRecommender',
+    'google.cloudsql.instance.OverprovisionedRecommender',
+    'google.compute.commitment.UsageCommitmentRecommender',
+    'google.cloudbilling.commitment.SpendBasedCommitmentRecommender',
+    'google.compute.image.IdleResourceRecommender',
+    'google.compute.address.IdleResourceRecommender',
+    'google.compute.disk.IdleResourceRecommender',
+    'google.compute.instance.IdleResourceRecommender'
 ]
 
 
@@ -78,6 +92,11 @@ class RecommendationManager(GoogleCloudManager):
 
                     if resource := recommendation['content']['overview'].get('resourceName'):
                         display['resource'] = self._change_resource(resource)
+
+                    if cost_info := recommendation['primaryImpact'].get('costProjection'):
+                        cost = cost_info.get('cost', {})
+                        duration = cost_info.get('duration', '')
+                        display['cost_description'] = self._change_cost_to_description(cost, duration)
 
                     if insights := recommendation['associatedInsights']:
                         insight_conn: InsightConnector = self.locator.get_connector(InsightConnector, **params)
@@ -176,9 +195,16 @@ class RecommendationManager(GoogleCloudManager):
         recommendation_parents = []
         for location in locations:
             for recommender_id in recommendation_type_map.keys():
-                recommendation_parents.append(
-                    f'projects/{self.project_id}/locations/{location}/recommenders/{recommender_id}'
-                )
+                if recommender_id in _COST_RECOMMENDER_IDS and location != 'global':
+                    regions_and_zones = [location, f'{location}-a', f'{location}-b', f'{location}-c']
+                    for region_or_zone in regions_and_zones:
+                        recommendation_parents.append(
+                            f'projects/{self.project_id}/locations/{region_or_zone}/recommenders/{recommender_id}'
+                        )
+                else:
+                    recommendation_parents.append(
+                        f'projects/{self.project_id}/locations/{location}/recommenders/{recommender_id}'
+                    )
 
         return recommendation_parents
 
@@ -213,6 +239,46 @@ class RecommendationManager(GoogleCloudManager):
             return resource_name
         except ValueError:
             return resource
+
+    @staticmethod
+    def _change_cost_to_description(cost, duration):
+        currency = cost.get('currencyCode', '')
+        total_cost = 0
+        increase = False
+        description = ''
+
+        if nanos := cost.get('nanos', 0):
+            if nanos < 0:
+                nanos = -nanos / 1000000000
+            else:
+                nanos = nanos / 1000000000
+                increase = True
+            total_cost += nanos
+
+        if units := int(cost.get('units', 0)):
+            if units < 0:
+                units = -units
+            else:
+                increase = True
+            total_cost += units
+
+        total_cost = round(total_cost, 2)
+
+        if duration:
+            duration = int(duration[:-1])
+            duration = humanize.time.naturaldelta(duration)
+
+        if 'days' in duration:
+            description = f'{total_cost}/month'
+
+        if 'USD' in currency:
+            currency = '$'
+            description = f'{currency}{description}'
+
+        if not increase:
+            description = f'{description} cost savings'
+
+        return description
 
     @staticmethod
     def _list_insights(insights, insight_conn):

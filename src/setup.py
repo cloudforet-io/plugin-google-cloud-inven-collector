@@ -39,7 +39,8 @@ setup(
         'MarkupSafe>=2.0.0rc2',
         'google-cloud-storage',
         'requests',
-        'beautifulsoup4'
+        'beautifulsoup4',
+        'humanize'
     ],
     package_data={
         'spaceone': ['inventory/model/*/*/widget/*.yml']
