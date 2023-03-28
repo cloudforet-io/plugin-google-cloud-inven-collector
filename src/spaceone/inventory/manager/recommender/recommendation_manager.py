@@ -156,16 +156,20 @@ class RecommendationManager(GoogleCloudManager):
     def _create_target_locations(asset_names):
         locations = []
         for asset_name in asset_names:
-            try:
-                prefix, sub_asset = asset_name.split('locations/')
-                location, _ = sub_asset.split('/', 1)
+            if 'locations/' in asset_name or 'regions/' in asset_name and 'subnetworks' not in asset_name:
+                try:
+                    prefix, sub_asset = asset_name.split('locations/')
+                    location, _ = sub_asset.split('/', 1)
 
-                if location not in locations:
-                    locations.append(location)
+                    if location not in locations:
+                        locations.append(location)
 
-            except ValueError:
-                continue
+                except ValueError:
+                    prefix, sub_asset = asset_name.split('regions/')
+                    location, _ = sub_asset.split('/', 1)
 
+                    if location not in locations:
+                        locations.append(location)
         return locations
 
     def _create_recommendation_parents(self, locations, recommendation_type_map):
