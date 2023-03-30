@@ -160,7 +160,8 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
             "deletion_protection": instance.get('deletionProtection', False),
             "scheduling": self._get_scheduling(instance),
             "tags": self.get_tag_items(instance.get('tags', {}).get('items', [])),
-            "access_policies": self._get_access_policies(instance),
+            "ssh_keys": self._get_ssh_keys(instance.get('metadata', {}).get('items', [])),
+            "service_accounts": self._list_service_accounts(instance),
             "labels": self._get_labels(instance.get('labels', {})),
             'is_managed_instance': True if instance.get('selfLink',
                                                         '') in instance_in_managed_instance_groups else False,
@@ -347,7 +348,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
         return tags
 
     @staticmethod
-    def _get_access_policies(instance):
+    def _list_service_accounts(instance):
         access_policies = []
         if service_accounts := instance.get('serviceAccounts', []):
             for service_account in service_accounts:
@@ -366,3 +367,22 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                     'scopes': readable_scopes
                 })
         return access_policies
+
+    @staticmethod
+    def _get_ssh_keys(items):
+        ssh_keys_info = {
+            'ssh_keys': [],
+            'block_project_ssh_keys': 'OFF'
+        }
+        if items:
+            for item in items:
+                if item['key'] == 'block-project-ssh-keys':
+                    ssh_keys_info['block_project_ssh_keys'] = 'ON'
+                if item['key'] == 'ssh-keys':
+                    user_name, ssh_key = item['value'].split(':')
+                    ssh_keys_info['ssh_keys'].append({
+                        'user_name': user_name,
+                        'display_name': 'show',
+                        'ssh_key': ssh_key
+                    })
+        return ssh_keys_info

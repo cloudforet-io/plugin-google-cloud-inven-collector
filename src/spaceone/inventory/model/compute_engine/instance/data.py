@@ -62,6 +62,17 @@ class Scheduling(Model):
     preemptible = BooleanType(default=False)
 
 
+class Key(Model):
+    user_name = StringType()
+    ssh_key = StringType()
+    display_name = StringType()
+
+
+class SSHKey(Model):
+    block_project_ssh_keys = StringType()
+    ssh_keys = ListType(ModelType(Key))
+
+
 class GoogleCloud(Model):
     self_link = StringType()
     fingerprint = StringType()
@@ -70,7 +81,8 @@ class GoogleCloud(Model):
     scheduling = ModelType(Scheduling)
     tags = ListType(ModelType(Tags))
     labels = ListType(ModelType(Labels), default=[])
-    access_policies = ListType(ModelType(AccessPolicy), default=[])
+    ssh_keys = ModelType(SSHKey)
+    service_accounts = ListType(ModelType(AccessPolicy), default=[])
     is_managed_instance = BooleanType(default=False)
 
 
