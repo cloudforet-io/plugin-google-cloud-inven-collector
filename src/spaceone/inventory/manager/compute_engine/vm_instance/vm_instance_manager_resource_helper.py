@@ -379,7 +379,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 if item['key'] == 'block-project-ssh-keys':
                     ssh_keys_info['block_project_ssh_keys'] = 'ON'
                 if item['key'] == 'ssh-keys':
-                    user_name, ssh_key = item['value'].split(':')
+                    user_name, ssh_key = item['value'].split(':', 1)
                     ssh_keys_info['ssh_keys'].append({
                         'user_name': user_name,
                         'display_name': 'show',
