@@ -1,13 +1,13 @@
 from schematics.types import ModelType, StringType, PolyModelType
 
 from spaceone.inventory.model.compute_engine.instance.data import VMInstance
-from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, EnumDyField, ListDyField, DateTimeDyField, \
+from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, EnumDyField, ListDyField, \
+    DateTimeDyField, \
     SizeField
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, TableDynamicLayout, \
     ListDynamicLayout
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceMeta, CloudServiceResource, \
     CloudServiceResponse
-
 
 '''
 VM Instance
@@ -25,9 +25,10 @@ vm_instance = ItemDynamicLayout.set_fields('VM Instance', fields=[
     EnumDyField.data_source('Preemptible', 'data.google_cloud.scheduling.preemptible', default_badge={
         'indigo.500': ['true'], 'coral.600': ['false']
     }),
-    EnumDyField.data_source('Is Managed Instance in Instance Group', 'data.google_cloud.is_managed_instance', default_badge={
-        'indigo.500': ['true'], 'coral.600': ['false']
-    }),
+    EnumDyField.data_source('Is Managed Instance in Instance Group', 'data.google_cloud.is_managed_instance',
+                            default_badge={
+                                'indigo.500': ['true'], 'coral.600': ['false']
+                            }),
     TextDyField.data_source('Instance Type', 'data.compute.instance_type'),
     TextDyField.data_source('Image', 'data.compute.image'),
     TextDyField.data_source('Region', 'region_code'),
@@ -74,14 +75,16 @@ hardware_manager = ItemDynamicLayout.set_fields('Hardware', root_path='data.hard
     TextDyField.data_source('CPU Model', 'cpu_model'),
 ])
 
-compute_engine = ListDynamicLayout.set_layouts('Compute Engine', layouts=[vm_instance, google_cloud_vpc, instance_group_manager])
+compute_engine = ListDynamicLayout.set_layouts('Compute Engine',
+                                               layouts=[vm_instance, google_cloud_vpc, instance_group_manager])
 
 disk = TableDynamicLayout.set_fields('Disk', root_path='data.disks', fields=[
     TextDyField.data_source('Index', 'device_index'),
     TextDyField.data_source('Name', 'tags.disk_name'),
     SizeField.data_source('Size', 'size'),
     TextDyField.data_source('Disk ID', 'tags.disk_id'),
-    EnumDyField.data_source('Disk Type', 'tags.disk_type', default_outline_badge=['local-ssd', 'pd-balanced', 'pd-ssd', 'pd-standard']),
+    EnumDyField.data_source('Disk Type', 'tags.disk_type',
+                            default_outline_badge=['local-ssd', 'pd-balanced', 'pd-ssd', 'pd-standard']),
     TextDyField.data_source('Read IOPS', 'tags.read_iops'),
     TextDyField.data_source('Write IOPS', 'tags.write_iops'),
     TextDyField.data_source('Read Throughput(MB/s)', 'tags.read_throughput'),
@@ -131,7 +134,11 @@ labels = TableDynamicLayout.set_fields('Labels', root_path='data.google_cloud.la
     TextDyField.data_source('Value', 'value'),
 ])
 
-vm_instance_meta = CloudServiceMeta.set_layouts([compute_engine, labels, disk, nic, firewall, lb])
+tags = TableDynamicLayout.set_fields('Tags', root_path='data.google_cloud.tags', fields=[
+    TextDyField.data_source('Item', 'key')
+])
+
+vm_instance_meta = CloudServiceMeta.set_layouts([compute_engine, labels, tags, disk, nic, firewall, lb])
 
 
 class ComputeEngineResource(CloudServiceResource):

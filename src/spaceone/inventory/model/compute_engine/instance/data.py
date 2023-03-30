@@ -10,6 +10,10 @@ class Labels(Model):
     value = StringType()
 
 
+class Tags(Model):
+    key = StringType()
+
+
 # InstanceGroup
 class InstanceGroup(Model):
     id = StringType()
@@ -32,7 +36,8 @@ class Compute(Model):
     az = StringType()
     instance_id = StringType()
     instance_name = StringType(default='')
-    instance_state = StringType(choices=('PROVISIONING', 'STAGING', 'RUNNING', 'STOPPING', 'REPAIRING', 'SUSPENDING', 'SUSPENDED', 'TERMINATED'))
+    instance_state = StringType(choices=(
+    'PROVISIONING', 'STAGING', 'RUNNING', 'STOPPING', 'REPAIRING', 'SUSPENDING', 'SUSPENDED', 'TERMINATED'))
     instance_type = StringType()
     account = StringType()
     image = StringType()
@@ -53,6 +58,7 @@ class GoogleCloud(Model):
     reservation_affinity = StringType(default="ANY_RESERVATION")
     deletion_protection = BooleanType(default=False)
     scheduling = ModelType(Scheduling)
+    tags = ListType(ModelType(Tags))
     labels = ListType(ModelType(Labels), default=[])
     is_managed_instance = BooleanType(default=False)
 
@@ -110,8 +116,8 @@ class NIC(Model):
     device_index = IntType()
     device = StringType(default="")
     cidr = StringType()
-    nic_type = StringType(default="Virtual")    # 확인 필요
-    ip_addresses = ListType(StringType())       # 확인필요 (accessConfig)
+    nic_type = StringType(default="Virtual")  # 확인 필요
+    ip_addresses = ListType(StringType())  # 확인필요 (accessConfig)
     mac_address = StringType(default="")
     public_ip_address = StringType()
     tags = DictType(StringType, default={})
@@ -121,9 +127,9 @@ class NIC(Model):
 class SecurityGroup(Model):
     priority = IntType(serialize_when_none=False)
     protocol = StringType()
-    remote = StringType()                                   # mimic
-    remote_id = StringType(serialize_when_none=False)       # filter value
-    remote_cidr = StringType(serialize_when_none=False)     # cidr
+    remote = StringType()  # mimic
+    remote_id = StringType(serialize_when_none=False)  # filter value
+    remote_cidr = StringType(serialize_when_none=False)  # cidr
     security_group_name = StringType(default="")
     port_range_min = IntType(serialize_when_none=False)
     port_range_max = IntType(serialize_when_none=False)
