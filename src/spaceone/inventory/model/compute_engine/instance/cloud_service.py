@@ -4,7 +4,7 @@ from spaceone.inventory.model.compute_engine.instance.data import VMInstance
 from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, EnumDyField, ListDyField, \
     DateTimeDyField, SizeField, MoreField
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, TableDynamicLayout, \
-    ListDynamicLayout
+    ListDynamicLayout, SimpleTableDynamicLayout
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceMeta, CloudServiceResource, \
     CloudServiceResponse
 
@@ -74,34 +74,58 @@ hardware_manager = ItemDynamicLayout.set_fields('Hardware', root_path='data.hard
     TextDyField.data_source('CPU Model', 'cpu_model'),
 ])
 
-access_polices = TableDynamicLayout.set_fields('Access Policy', root_path='data.google_cloud.access_policies', fields=[
-    TextDyField.data_source('Service Account', 'service_account'),
-    MoreField.data_source('Cloud API access scopes', 'display_name', options={
-        'layout': {
-            'name': 'Details',
-            'options': {
-                'type': 'popup',
-                'layout': {
-                    'type': 'simple-table',
-                    'options': {
-                        'root_path': 'scopes',
-                        'fields': [
-                            {
-                                "type": "text",
-                                "key": "description",
-                                "name": "Scope"
-                            }
-                        ]
-                    }
-                }
-            }
-        }
-    })
+ssh_keys = SimpleTableDynamicLayout.set_tags('SSH Keys', root_path='data.google_cloud.ssh_keys.ssh_keys',
+                                             fields=[
+                                                 TextDyField.data_source('User Name', 'user_name'),
+                                                 MoreField.data_source('Overview', 'display_name',
+                                                                       options={
+                                                                           'sub_key': 'ssh_key',
+                                                                           'layout': {
+                                                                               'name': 'SSH Key',
+                                                                               'type': 'popup',
+                                                                               'options': {
+                                                                                   'layout': {
+                                                                                       'type': 'raw'
+                                                                                   }
+                                                                               }
+                                                                           }
+                                                                       })
+                                             ])
+ssh_options = ItemDynamicLayout.set_fields('SSH Key Options', root_path='data.google_cloud.ssh_keys', fields=[
+    TextDyField.data_source('Block project-wide SSH keys', 'block_project_ssh_keys')
 ])
 
+service_accounts = TableDynamicLayout.set_fields('API and Identity Management',
+                                                 root_path='data.google_cloud.service_accounts',
+                                                 fields=[
+                                                     TextDyField.data_source('Service Account', 'service_account'),
+                                                     MoreField.data_source('Cloud API access scopes', 'display_name',
+                                                                           options={
+                                                                               'layout': {
+                                                                                   'name': 'Details',
+                                                                                   'options': {
+                                                                                       'type': 'popup',
+                                                                                       'layout': {
+                                                                                           'type': 'simple-table',
+                                                                                           'options': {
+                                                                                               'root_path': 'scopes',
+                                                                                               'fields': [
+                                                                                                   {
+                                                                                                       "type": "text",
+                                                                                                       "key": "description",
+                                                                                                       "name": "Scope Description"
+                                                                                                   }
+                                                                                               ]
+                                                                                           }
+                                                                                       }
+                                                                                   }
+                                                                               }
+                                                                           })
+                                                 ])
+
 compute_engine = ListDynamicLayout.set_layouts('Compute Engine',
-                                               layouts=[vm_instance, google_cloud_vpc, access_polices,
-                                                        instance_group_manager])
+                                               layouts=[vm_instance, google_cloud_vpc, ssh_keys, ssh_options,
+                                                        service_accounts, instance_group_manager])
 
 disk = TableDynamicLayout.set_fields('Disk', root_path='data.disks', fields=[
     TextDyField.data_source('Index', 'device_index'),
