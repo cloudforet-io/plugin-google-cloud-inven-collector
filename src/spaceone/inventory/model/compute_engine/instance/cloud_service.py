@@ -2,8 +2,7 @@ from schematics.types import ModelType, StringType, PolyModelType
 
 from spaceone.inventory.model.compute_engine.instance.data import VMInstance
 from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, EnumDyField, ListDyField, \
-    DateTimeDyField, \
-    SizeField
+    DateTimeDyField, SizeField, MoreField
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, TableDynamicLayout, \
     ListDynamicLayout
 from spaceone.inventory.libs.schema.cloud_service import CloudServiceMeta, CloudServiceResource, \
@@ -75,8 +74,34 @@ hardware_manager = ItemDynamicLayout.set_fields('Hardware', root_path='data.hard
     TextDyField.data_source('CPU Model', 'cpu_model'),
 ])
 
+access_polices = TableDynamicLayout.set_fields('Access Policy', root_path='data.google_cloud.access_policies', fields=[
+    TextDyField.data_source('Service Account', 'service_account'),
+    MoreField.data_source('Cloud API access scopes', 'display_name', options={
+        'layout': {
+            'name': 'Details',
+            'options': {
+                'type': 'popup',
+                'layout': {
+                    'type': 'simple-table',
+                    'options': {
+                        'root_path': 'scopes',
+                        'fields': [
+                            {
+                                "type": "text",
+                                "key": "description",
+                                "name": "Scope"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    })
+])
+
 compute_engine = ListDynamicLayout.set_layouts('Compute Engine',
-                                               layouts=[vm_instance, google_cloud_vpc, instance_group_manager])
+                                               layouts=[vm_instance, google_cloud_vpc, access_polices,
+                                                        instance_group_manager])
 
 disk = TableDynamicLayout.set_fields('Disk', root_path='data.disks', fields=[
     TextDyField.data_source('Index', 'device_index'),
