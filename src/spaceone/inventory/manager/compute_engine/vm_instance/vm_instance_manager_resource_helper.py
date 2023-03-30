@@ -158,8 +158,10 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
             "reservation_affinity": self._get_reservation_affinity(instance),
             "deletion_protection": instance.get('deletionProtection', False),
             "scheduling": self._get_scheduling(instance),
+            "tags": self.get_tag_items(instance.get('tags', {}).get('items', [])),
             "labels": self._get_labels(instance.get('labels', {})),
-            'is_managed_instance': True if instance.get('selfLink', '') in instance_in_managed_instance_groups else False,
+            'is_managed_instance': True if instance.get('selfLink',
+                                                        '') in instance_in_managed_instance_groups else False,
         }
 
         return GoogleCloud(google_cloud, strict=False)
@@ -334,3 +336,10 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
                 'value': label_value
             })
         return changed_labels
+
+    @staticmethod
+    def get_tag_items(items):
+        tags = []
+        for item in items:
+            tags.append({'key': item})
+        return tags
