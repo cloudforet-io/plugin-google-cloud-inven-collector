@@ -14,6 +14,16 @@ class Tags(Model):
     key = StringType()
 
 
+class Description(Model):
+    description = StringType()
+
+
+class AccessPolicy(Model):
+    service_account = StringType()
+    display_name = StringType()
+    scopes = ListType(ModelType(Description))
+
+
 # InstanceGroup
 class InstanceGroup(Model):
     id = StringType()
@@ -37,7 +47,7 @@ class Compute(Model):
     instance_id = StringType()
     instance_name = StringType(default='')
     instance_state = StringType(choices=(
-    'PROVISIONING', 'STAGING', 'RUNNING', 'STOPPING', 'REPAIRING', 'SUSPENDING', 'SUSPENDED', 'TERMINATED'))
+        'PROVISIONING', 'STAGING', 'RUNNING', 'STOPPING', 'REPAIRING', 'SUSPENDING', 'SUSPENDED', 'TERMINATED'))
     instance_type = StringType()
     account = StringType()
     image = StringType()
@@ -60,6 +70,7 @@ class GoogleCloud(Model):
     scheduling = ModelType(Scheduling)
     tags = ListType(ModelType(Tags))
     labels = ListType(ModelType(Labels), default=[])
+    access_policies = ListType(ModelType(AccessPolicy), default=[])
     is_managed_instance = BooleanType(default=False)
 
 

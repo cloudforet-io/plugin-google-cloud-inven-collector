@@ -1,5 +1,6 @@
 import logging
 
+from spaceone.inventory.conf.cloud_service_conf import OAUTH_SCOPES
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.model.compute_engine.instance.data import Compute, GoogleCloud, OS, Hardware
 from spaceone.inventory.connector.compute_engine.vm_instance import VMInstanceConnector
@@ -159,6 +160,7 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
             "deletion_protection": instance.get('deletionProtection', False),
             "scheduling": self._get_scheduling(instance),
             "tags": self.get_tag_items(instance.get('tags', {}).get('items', [])),
+            "access_policies": self._get_access_policies(instance),
             "labels": self._get_labels(instance.get('labels', {})),
             'is_managed_instance': True if instance.get('selfLink',
                                                         '') in instance_in_managed_instance_groups else False,
@@ -343,3 +345,24 @@ class VMInstanceManagerResourceHelper(GoogleCloudManager):
         for item in items:
             tags.append({'key': item})
         return tags
+
+    @staticmethod
+    def _get_access_policies(instance):
+        access_policies = []
+        if service_accounts := instance.get('serviceAccounts', []):
+            for service_account in service_accounts:
+                email = service_account.get('email', '')
+                scopes = service_account.get('scopes', [])
+                readable_scopes = []
+                for scope in scopes:
+                    try:
+                        readable_scopes.append({'description': OAUTH_SCOPES[scope]})
+                    except KeyError:
+                        continue
+
+                access_policies.append({
+                    'service_account': email,
+                    'display_name': 'Allow default access',
+                    'scopes': readable_scopes
+                })
+        return access_policies
