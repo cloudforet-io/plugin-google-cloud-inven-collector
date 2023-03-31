@@ -11,8 +11,8 @@ recommender_details = ItemDynamicLayout.set_fields('Recommender Details', fields
     TextDyField.data_source('Description', 'data.description'),
     EnumDyField.data_source('State', 'data.state', default_state={
         'safe': ['ok'],
-        'disable': ['error'],
-        'alert': ['warning'],
+        'alert': ['error'],
+        'warning': ['warning'],
     }),
     TextDyField.data_source('Resource Count', 'data.resource_count'),
     TextDyField.data_source('Cost Savings', 'data.cost_savings'),

@@ -29,8 +29,8 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source('Description', 'data.description'),
         EnumDyField.data_source('State', 'data.state', default_state={
             'safe': ['ok'],
-            'disable': ['error'],
-            'alert': ['warning']
+            'alert': ['error'],
+            'warning': ['warning']
         }),
         EnumDyField.data_source('Category', 'data.category', default_badge={
             'indigo.500': ['COST'],
