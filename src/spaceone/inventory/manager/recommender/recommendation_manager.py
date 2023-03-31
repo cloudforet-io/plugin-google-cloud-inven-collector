@@ -4,7 +4,6 @@ import requests
 import json
 
 from bs4 import BeautifulSoup
-import humanize
 
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
@@ -13,6 +12,7 @@ from spaceone.inventory.model.recommender.recommendation.cloud_sevice_type impor
 from spaceone.inventory.model.recommender.recommendation.cloud_service import RecommendationResource, \
     RecommendationResponse
 from spaceone.inventory.model.recommender.recommendation.data import Recommendation
+from spaceone.inventory.model.recommender.recommendation.recommender_data import Recommender
 from spaceone.inventory.connector import RecommendationConnector, InsightConnector
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,6 +42,7 @@ class RecommendationManager(GoogleCloudManager):
     connector_name = 'RecommendationConnector'
     cloud_service_types = CLOUD_SERVICE_TYPES
     project_id = None
+    recommender_map = {}
 
     def collect_cloud_service(self, params):
         """
@@ -63,18 +64,18 @@ class RecommendationManager(GoogleCloudManager):
 
         secret_data = params['secret_data']
         self.project_id = secret_data['project_id']
+        self.recommender_map = self._create_recommendation_id_map_by_crawling()
 
         cloud_asset_conn: CloudAssetConnector = self.locator.get_connector(CloudAssetConnector, **params)
         assets = cloud_asset_conn.list_assets_in_project()
         asset_names = [asset['name'] for asset in assets]
         target_locations = self._create_target_locations(asset_names)
 
-        recommender_id_map = self._create_recommendation_id_map_by_crawling()
-
-        recommendation_parents = self._create_recommendation_parents(target_locations, recommender_id_map)
+        recommendation_parents = self._create_recommendation_parents(target_locations)
 
         recommendation_conn: RecommendationConnector = self.locator.get_connector(RecommendationConnector, **params)
 
+        preprocessed_recommendations = []
         for recommendation_parent in recommendation_parents:
             recommendations = recommendation_conn.list_recommendations(recommendation_parent)
             for recommendation in recommendations:
@@ -83,11 +84,13 @@ class RecommendationManager(GoogleCloudManager):
 
                     display = {
                         'recommender_id': recommender_id,
-                        'recommender_id_name': recommender_id_map[recommender_id]['name'],
-                        'recommender_id_description': recommender_id_map[recommender_id]['short_description'],
+                        'recommender_id_name': self.recommender_map[recommender_id]['name'],
+                        'recommender_id_description': self.recommender_map[recommender_id]['short_description'],
                         'priority_display': self.convert_readable_priority(recommendation['priority']),
                         'overview': json.dumps(recommendation['content']['overview']),
-                        'operations': json.dumps(recommendation['content']['operationGroups'])
+                        'operations': json.dumps(recommendation['content']['operationGroups']),
+                        'operation_actions': self._get_actions(recommendation['content']),
+                        'location': self._get_location(recommendation_parent)
                     }
 
                     if resource := recommendation['content']['overview'].get('resourceName'):
@@ -95,8 +98,7 @@ class RecommendationManager(GoogleCloudManager):
 
                     if cost_info := recommendation['primaryImpact'].get('costProjection'):
                         cost = cost_info.get('cost', {})
-                        duration = cost_info.get('duration', '')
-                        display['cost_description'] = self._change_cost_to_description(cost, duration)
+                        display['cost'], display['cost_description'] = self._change_cost_to_description(cost)
 
                     if insights := recommendation['associatedInsights']:
                         insight_conn: InsightConnector = self.locator.get_connector(InsightConnector, **params)
@@ -108,25 +110,61 @@ class RecommendationManager(GoogleCloudManager):
                     })
 
                     recommendation_data = Recommendation(recommendation, strict=False)
-                    recommendation_resource = RecommendationResource({
-                        'name': recommendation_data.get('name', 'Unknown'),
-                        'account': self.project_id,
-                        'tags': {},
-                        'region_code': region,
-                        'instance_type': '',
-                        'instance_size': 0,
-                        'data': recommendation_data,
-                        'reference': ReferenceModel(recommendation_data.reference())
-                    })
-
-                    recommendation_response = RecommendationResponse({'resource': recommendation_resource})
-                    collected_cloud_services.append(recommendation_response)
+                    preprocessed_recommendations.append(recommendation_data.to_primitive())
 
                 except Exception as e:
                     _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
                     error_response = self.generate_resource_error_response(e, 'Recommender',
                                                                            'Recommendation', recommendation)
                     error_responses.append(error_response)
+
+        recommenders = self._create_recommenders(preprocessed_recommendations)
+        merged_recommenders = self._merge_recommenders(recommenders)
+        for recommender in merged_recommenders:
+            try:
+                total_cost = 0
+                resource_count = 0
+                total_priority_level = {
+                    'Lowest': 0,
+                    'Second Lowest': 0,
+                    'Highest': 0,
+                    'Second Highest': 0
+                }
+                for recommendation in recommender['recommendations']:
+                    if recommender['category'] == 'COST':
+                        total_cost += recommendation.get('cost', 0)
+
+                    if recommendation.get('affected_resource'):
+                        resource_count += 1
+
+                    total_priority_level[recommendation.get('priority_level')] += 1
+
+                if total_cost:
+                    recommender['cost_savings'] = f'Total ${round(total_cost, 2)}/month'
+                if resource_count:
+                    recommender['resource_count'] = resource_count
+                recommender['state'] = self._get_state(total_priority_level)
+
+                recommender_data = Recommender(recommender, strict=False)
+
+                recommender_resource = RecommendationResource({
+                    'name': recommender_data.name,
+                    'account': self.project_id,
+                    'tags': {},
+                    'region_code': 'global',
+                    'instance_type': '',
+                    'instance_size': 0,
+                    'data': recommender_data,
+                    'reference': ReferenceModel(recommender_data.reference())
+                })
+                recommendation_response = RecommendationResponse({'resource': recommender_resource})
+                collected_cloud_services.append(recommendation_response)
+
+            except Exception as e:
+                _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
+                error_response = self.generate_resource_error_response(e, 'Recommender',
+                                                                       'Recommendation', recommender)
+                error_responses.append(error_response)
 
         _LOGGER.debug(f'** Recommender Recommendation Finished {time.time() - start_time} Seconds **')
         return collected_cloud_services, error_responses
@@ -191,10 +229,10 @@ class RecommendationManager(GoogleCloudManager):
                         locations.append(location)
         return locations
 
-    def _create_recommendation_parents(self, locations, recommendation_type_map):
+    def _create_recommendation_parents(self, locations):
         recommendation_parents = []
         for location in locations:
-            for recommender_id in recommendation_type_map.keys():
+            for recommender_id in self.recommender_map.keys():
                 if recommender_id in _COST_RECOMMENDER_IDS and location != 'global' \
                         and location[-2:] not in ['-a', '-b', '-c']:
                     regions_and_zones = [location, f'{location}-a', f'{location}-b', f'{location}-c']
@@ -242,44 +280,30 @@ class RecommendationManager(GoogleCloudManager):
             return resource
 
     @staticmethod
-    def _change_cost_to_description(cost, duration):
-        currency = cost.get('currencyCode', '')
+    def _change_cost_to_description(cost):
+        currency = cost.get('currencyCode', 'USD')
         total_cost = 0
-        increase = False
-        description = ''
 
         if nanos := cost.get('nanos', 0):
             if nanos < 0:
                 nanos = -nanos / 1000000000
             else:
                 nanos = nanos / 1000000000
-                increase = True
             total_cost += nanos
 
         if units := int(cost.get('units', 0)):
             if units < 0:
                 units = -units
-            else:
-                increase = True
             total_cost += units
 
         total_cost = round(total_cost, 2)
-
-        if duration:
-            duration = int(duration[:-1])
-            duration = humanize.time.naturaldelta(duration)
-
-        if 'days' in duration:
-            description = f'{total_cost}/month'
+        description = f'{total_cost}/month'
 
         if 'USD' in currency:
             currency = '$'
             description = f'{currency}{description}'
 
-        if not increase:
-            description = f'{description} cost savings'
-
-        return description
+        return total_cost, description
 
     @staticmethod
     def _list_insights(insights, insight_conn):
@@ -321,3 +345,106 @@ class RecommendationManager(GoogleCloudManager):
             return resource_name
         except ValueError:
             return resource
+
+    @staticmethod
+    def _get_location(recommendation_parent):
+        try:
+            project_id, parent_info = recommendation_parent.split('locations/')
+            location, _ = parent_info.split('/', 1)
+            return location
+        except Exception as e:
+            _LOGGER.error(f'[get_location] recommendation passing error (data: {recommendation_parent}) => {e}',
+                          exc_info=True)
+
+    @staticmethod
+    def _get_actions(content):
+        overview = content.get('overview', {})
+        operation_groups = content.get('operationGroups', [])
+        actions = ''
+
+        if recommended_action := overview.get('recommendedAction'):
+            return recommended_action
+
+        else:
+            for operation_group in operation_groups:
+                operations = operation_group.get('operations', [])
+                for operation in operations:
+                    action = operation.get('action', 'test')
+                    first, others = action[0], action[1:]
+                    action = first.upper() + others
+
+                    if action == 'Test':
+                        continue
+                    elif actions:
+                        actions += f' and {action}'
+                    else:
+                        actions += action
+
+            return actions
+
+    @staticmethod
+    def _create_recommenders(preprocessed_recommendations):
+        recommenders = []
+        for pre_recommendation in preprocessed_recommendations:
+
+            redefined_insights = []
+            if insights := pre_recommendation['display']['insights']:
+                for insight in insights:
+                    redefined_insights.append({
+                        'description': insight['description'],
+                        'severity': insight['severity'],
+                        'category': insight['category']
+                    })
+
+            redefined_recommendations = [{
+                'description': pre_recommendation['description'],
+                'state': pre_recommendation['state_info']['state'],
+                'affected_resource': pre_recommendation['display']['resource'],
+                'location': pre_recommendation['display']['location'],
+                'priority_level': pre_recommendation['display']['priority_display'],
+                'operations': pre_recommendation['display']['operation_actions'],
+                'cost': pre_recommendation['display']['cost'],
+                'cost_savings': pre_recommendation['display']['cost_description'],
+                'insights': redefined_insights
+            }]
+
+            recommender = {
+                'name': pre_recommendation['display']['recommender_id_name'],
+                'id': pre_recommendation['display']['recommender_id'],
+                'description': pre_recommendation['display']['recommender_id_description'],
+                'category': pre_recommendation['primary_impact']['category'],
+                'recommendations': redefined_recommendations
+            }
+
+            recommenders.append(recommender)
+        return recommenders
+
+    def _merge_recommenders(self, recommenders):
+        merged_recommenders = []
+        for recommender in recommenders:
+            recommender_id = recommender['id']
+            if 'recommendations' not in self.recommender_map[recommender_id]:
+                self.recommender_map[recommender_id].update(recommender)
+            else:
+                for recommendation in recommender['recommendations']:
+                    self.recommender_map[recommender_id]['recommendations'].append(recommendation)
+            merged_recommenders.append(self.recommender_map[recommender_id])
+        return merged_recommenders
+
+    @staticmethod
+    def _get_state(total_priority_level):
+        if total_priority_level['Highest'] > 0:
+            return 'Error'
+
+        highest_count = 0
+        total_count = 0
+        for level, count in total_priority_level.items():
+            total_count += 1
+
+            if level == 'Highest':
+                highest_count += 1
+
+        if highest_count / total_count >= 0.5:
+            return 'Warning'
+        else:
+            return 'OK'
