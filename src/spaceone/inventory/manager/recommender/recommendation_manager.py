@@ -12,7 +12,7 @@ from spaceone.inventory.model.recommender.recommendation.cloud_sevice_type impor
 from spaceone.inventory.model.recommender.recommendation.cloud_service import RecommendationResource, \
     RecommendationResponse
 from spaceone.inventory.model.recommender.recommendation.data import Recommendation
-from spaceone.inventory.model.recommender.recommendation.redefined_data import Recommender
+from spaceone.inventory.model.recommender.recommendation.recommender_data import Recommender
 from spaceone.inventory.connector import RecommendationConnector, InsightConnector
 
 _LOGGER = logging.getLogger(__name__)
@@ -140,7 +140,7 @@ class RecommendationManager(GoogleCloudManager):
                     total_priority_level[recommendation.get('priority_level')] += 1
 
                 if total_cost:
-                    recommender['cost_savings'] = f'Total ${total_cost}/month'
+                    recommender['cost_savings'] = f'Total ${round(total_cost, 2)}/month'
                 if resource_count:
                     recommender['resource_count'] = resource_count
                 recommender['state'] = self._get_state(total_priority_level)

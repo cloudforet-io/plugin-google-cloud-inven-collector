@@ -3,8 +3,7 @@ import os
 from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import *
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import CardWidget, ChartWidget
-from spaceone.inventory.libs.schema.metadata.dynamic_field import EnumDyField, TextDyField, SizeField, SearchField, \
-    DateTimeDyField
+from spaceone.inventory.libs.schema.metadata.dynamic_field import EnumDyField, TextDyField, SearchField
 from spaceone.inventory.conf.cloud_service_conf import *
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
@@ -28,12 +27,12 @@ cst_recommendation.tags = {
 cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source('Description', 'data.description'),
-        EnumDyField.data_source('State', 'data.state_info.state', default_state={
-            'safe': ['ACTIVE', 'SUCCEEDED'],
-            'disable': ['CLAIMED'],
-            'alert': ['STATE_UNSPECIFIED', 'DISMISSED', 'FAILED'],
+        EnumDyField.data_source('State', 'data.state', default_state={
+            'safe': ['OK'],
+            'disable': ['Error'],
+            'alert': ['Warning']
         }),
-        EnumDyField.data_source('Category', 'data.primary_impact.category', default_badge={
+        EnumDyField.data_source('Category', 'data.category', default_badge={
             'indigo.500': ['COST'],
             'peacock.500': ['SUSTAINABILITY'],
             'violet.500': ['RELIABILITY'],
@@ -42,20 +41,14 @@ cst_recommendation._metadata = CloudServiceTypeMeta.set_meta(
             'yellow.500': ['SECURITY'],
             'coral.500': ['CATEGORY_UNSPECIFIED']
         }),
-        TextDyField.data_source('Priority Level', 'data.display.priority_display'),
-        TextDyField.data_source('Recommender Name', 'data.display.recommender_id_name'),
-        DateTimeDyField.data_source('Last Refresh Time', 'data.last_refresh_time'),
+        TextDyField.data_source('Resource Count', 'data.resource_count'),
+        TextDyField.data_source('Cost Savings', 'data.cost_savings'),
     ],
     search=[
-        SearchField.set(name='State', key='data.state_info.state'),
-        SearchField.set(name='Category', key='data.primary_impact.category'),
-        SearchField.set(name='Priority', key='data.priority'),
-        SearchField.set(name='Priority Level', key='data.display.priority_display'),
-        SearchField.set(name='Related Resource', key='data.display.resource'),
-        SearchField.set(name='Related Resource Name', key='data.content.overview.resourceName'),
-        SearchField.set(name='Recommender Name', key='data.display.recommender_id_name'),
-        SearchField.set(name='Short Description', key='data.display.recommender_id_description'),
-        SearchField.set(name='Recommender ID', key='data.display.recommender_id')
+        SearchField.set(name='Description', key='data.description'),
+        SearchField.set(name='ID', key='data.id'),
+        SearchField.set(name='State', key='data.state'),
+        SearchField.set(name='Category', key='data.category'),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
