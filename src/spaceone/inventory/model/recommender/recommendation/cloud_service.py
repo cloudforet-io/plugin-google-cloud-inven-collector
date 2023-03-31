@@ -10,13 +10,13 @@ recommender_details = ItemDynamicLayout.set_fields('Recommender Details', fields
     TextDyField.data_source('ID', 'data.id'),
     TextDyField.data_source('Description', 'data.description'),
     EnumDyField.data_source('State', 'data.state', default_state={
-        'safe': ['OK'],
-        'disable': ['Error'],
-        'alert': ['Warning'],
+        'safe': ['ok'],
+        'disable': ['error'],
+        'alert': ['warning'],
     }),
     TextDyField.data_source('Resource Count', 'data.resource_count'),
     TextDyField.data_source('Cost Savings', 'data.cost_savings'),
-    EnumDyField.data_source('Priority Level', 'data.display.priority_display', default_badge={
+    EnumDyField.data_source('Priority Level', 'data.primary_priority_level', default_badge={
         'red.500': ['Highest'],
         'coral.500': ['Second Highest'],
         'yellow.300': ['Second Lowest'],

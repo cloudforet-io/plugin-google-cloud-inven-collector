@@ -27,7 +27,8 @@ class Recommender(BaseResource):
     name = StringType()
     id = StringType()
     description = StringType()
-    state = StringType(choices=('OK', 'Warning', 'Error'))
+    state = StringType(choices=('ok', 'warning', 'error'))
+    primary_priority_level = StringType()
     category = StringType(choices=(
         'CATEGORY_UNSPECIFIED', 'COST', 'SECURITY', 'PERFORMANCE', 'MANAGEABILITY', 'SUSTAINABILITY', 'RELIABILITY'
     ))

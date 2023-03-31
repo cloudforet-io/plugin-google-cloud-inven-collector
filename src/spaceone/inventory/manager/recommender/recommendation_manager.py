@@ -143,7 +143,9 @@ class RecommendationManager(GoogleCloudManager):
                     recommender['cost_savings'] = f'Total ${round(total_cost, 2)}/month'
                 if resource_count:
                     recommender['resource_count'] = resource_count
-                recommender['state'] = self._get_state(total_priority_level)
+
+                recommender['state'], recommender['primary_priority_level'] = self._get_state_and_priority(
+                    total_priority_level)
 
                 recommender_data = Recommender(recommender, strict=False)
 
@@ -432,19 +434,14 @@ class RecommendationManager(GoogleCloudManager):
         return merged_recommenders
 
     @staticmethod
-    def _get_state(total_priority_level):
+    def _get_state_and_priority(total_priority_level):
         if total_priority_level['Highest'] > 0:
-            return 'Error'
+            return 'error', 'Highest'
 
-        highest_count = 0
-        total_count = 0
-        for level, count in total_priority_level.items():
-            total_count += 1
+        if total_priority_level['Second Highest'] > 0:
+            return 'warning', 'Second Highest'
 
-            if level == 'Highest':
-                highest_count += 1
-
-        if highest_count / total_count >= 0.5:
-            return 'Warning'
+        if total_priority_level['Second Lowest'] > 0:
+            return 'ok', 'Second Lowest'
         else:
-            return 'OK'
+            return 'ok', 'Lowest'
