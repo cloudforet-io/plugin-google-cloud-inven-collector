@@ -51,9 +51,9 @@ jobs:
           uses: docker/build-push-action@v1
           with:
             path: .
-            repository: cloudforetdev/${{ env.SERVICE }}
-            username: ${{ secrets.CLOUDFORET_DOCKER_USERNAME }}
-            password: ${{ secrets.CLOUDFORET_DOCKER_PASSWORD }}
+            repository: pyengine/${{ env.SERVICE }}
+            username: ${{ secrets.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
             tags: ${{ env.VERSION }}
         - name: Notice when job fails
           if: failure()
