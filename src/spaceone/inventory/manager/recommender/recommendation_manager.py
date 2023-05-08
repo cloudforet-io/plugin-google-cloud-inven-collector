@@ -5,6 +5,7 @@ import json
 
 from bs4 import BeautifulSoup
 
+from spaceone.inventory.conf.cloud_service_conf import REGION_INFO
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
 from spaceone.inventory.libs.schema.base import ReferenceModel
@@ -233,6 +234,7 @@ class RecommendationManager(GoogleCloudManager):
 
     def _create_recommendation_parents(self, locations):
         recommendation_parents = []
+        locations = self._select_available_locations(locations)
         for location in locations:
             for recommender_id in self.recommender_map.keys():
                 if recommender_id in _COST_RECOMMENDER_IDS and location != 'global' \
@@ -445,3 +447,16 @@ class RecommendationManager(GoogleCloudManager):
             return 'ok', 'Second Lowest'
         else:
             return 'ok', 'Lowest'
+
+    @staticmethod
+    def _select_available_locations(locations):
+        available_locations = []
+        for location in locations:
+
+            if location[-2:] in ['-a', '-b', '-c']:
+                available_locations.append(location[:-2])
+
+            if location in REGION_INFO:
+                available_locations.append(location)
+
+        return available_locations
