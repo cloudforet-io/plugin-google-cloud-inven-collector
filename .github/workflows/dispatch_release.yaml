@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: '`vx.y.z` 형태로 버전을 입력해주세요.'
+        description: 'enter version(x.y.z)'
         required: true
         default: v1.0.0
 
