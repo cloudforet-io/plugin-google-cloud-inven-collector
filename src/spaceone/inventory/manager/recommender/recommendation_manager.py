@@ -89,7 +89,7 @@ class RecommendationManager(GoogleCloudManager):
                         'recommender_id_description': self.recommender_map[recommender_id]['short_description'],
                         'priority_display': self.convert_readable_priority(recommendation['priority']),
                         'overview': json.dumps(recommendation['content']['overview']),
-                        'operations': json.dumps(recommendation['content']['operationGroups']),
+                        'operations': json.dumps(recommendation['content'].get('operationGroups', '')),
                         'operation_actions': self._get_actions(recommendation['content']),
                         'location': self._get_location(recommendation_parent)
                     }
