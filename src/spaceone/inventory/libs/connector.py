@@ -13,7 +13,7 @@ class GoogleCloudConnector(BaseConnector):
     google_client_service = 'compute'
     version = 'v1'
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         kwargs
             - schema
@@ -27,7 +27,7 @@ class GoogleCloudConnector(BaseConnector):
             - ...
         """
 
-        super().__init__(transaction=None, config=None)
+        super().__init__(*args, **kwargs)
         secret_data = kwargs.get('secret_data')
         self.project_id = secret_data.get('project_id')
         self.credentials = google.oauth2.service_account.Credentials.from_service_account_info(secret_data)
