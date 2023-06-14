@@ -186,22 +186,27 @@ class RecommendationManager(GoogleCloudManager):
             cols = [ele.text.strip() for ele in cols]
             if cols:
                 try:
-                    category, name, recommender_id, short_description = cols
+                    category, name, recommender_id, short_description, etc = cols
                 except ValueError:
-                    name, recommender_id, short_description = cols
+                    name, recommender_id, short_description, etc = cols
 
-                if recommender_id.count('google.') > 1:
-                    recommender_ids = []
-                    re_ids = recommender_id.split('google.')[1:]
-                    for re_id in re_ids:
-                        re_id = 'google.' + re_id
-                        if re_id not in _UNAVAILABLE_RECOMMENDER_IDS:
-                            recommender_ids.append(re_id)
+                recommender_ids = []
+                if 'Cloud SQL performance recommender' in name:
+                    name = 'Cloud SQL performance recommender'
+                    short_description = 'Improve Cloud SQL instance performance'
+                    recommender_ids = ['google.cloudsql.instance.PerformanceRecommender']
                 else:
-                    if recommender_id not in _UNAVAILABLE_RECOMMENDER_IDS:
-                        recommender_ids = [recommender_id]
+                    if recommender_id.count('google.') > 1:
+                        re_ids = recommender_id.split('google.')[1:]
+                        for re_id in re_ids:
+                            re_id = 'google.' + re_id
+                            if re_id not in _UNAVAILABLE_RECOMMENDER_IDS:
+                                recommender_ids.append(re_id)
                     else:
-                        continue
+                        if recommender_id not in _UNAVAILABLE_RECOMMENDER_IDS:
+                            recommender_ids = [recommender_id]
+                        else:
+                            continue
 
                 for recommender_id in recommender_ids:
                     recommendation_id_map[recommender_id] = {
