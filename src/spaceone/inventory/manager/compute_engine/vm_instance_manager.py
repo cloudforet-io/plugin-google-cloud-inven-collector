@@ -173,8 +173,9 @@ class VMInstanceManager(GoogleCloudManager):
         # Get GPU info
         if gpus_info := instance.get('guestAccelerators', []):
             gpus = self._get_gpu_info(gpus_info)
-            server_data['data'].update({'gpus': gpus})
-            server_data['data'].update({'display': {'gpus': self._change_human_readable(gpus)}})
+            server_data['data'].update({'gpus': gpus,
+                                        'total_gpu_count': sum([gpu.get('gpu_count', 0) for gpu in gpus]),
+                                        'display': {'gpus': self._change_human_readable(gpus)}})
 
         path, instance_type = instance.get('machineType').split('machineTypes/')
 
