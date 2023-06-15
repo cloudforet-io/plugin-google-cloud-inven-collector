@@ -170,6 +170,14 @@ class VMInstanceManager(GoogleCloudManager):
         labels = _google_cloud.get('labels', [])
         _name = instance.get('name', '')
 
+        # Get GPU info
+        if gpus_info := instance.get('guestAccelerators', []):
+            gpus = self._get_gpu_info(gpus_info)
+            server_data['data'].update({'gpus': gpus})
+            server_data['data'].update({'display': {'gpus': self._change_human_readable(gpus)}})
+
+        path, instance_type = instance.get('machineType').split('machineTypes/')
+
         ''' Gather all resources information '''
         '''
         server_data.update({
@@ -203,7 +211,7 @@ class VMInstanceManager(GoogleCloudManager):
         server_data.update({
             'name': _name,
             'account': project_id,
-            'instance_type': server_data.get('data', {}).get('compute', {}).get('instance_type', ''),
+            'instance_type': instance_type,
             'instance_size': server_data.get('data', {}).get('hardware', {}).get('core', 0),
             'launched_at': server_data.get('data', {}).get('compute', {}).get('launched_at', ''),
             'tags': labels,
@@ -219,3 +227,20 @@ class VMInstanceManager(GoogleCloudManager):
         zone = self.get_param_in_url(url_zone, 'zones')
         region = self.parse_region_from_zone(zone)
         return zone, region
+
+    @staticmethod
+    def _get_gpu_info(gpus_info):
+        gpu_items = []
+        for gpu_info in gpus_info:
+            path, gpu_machine_type = gpu_info.get('acceleratorType').split('acceleratorTypes/')
+            gpus = gpu_info.get('acceleratorCount')
+            gpu_items.append({'gpu_count': gpus, 'gpu_machine_type': gpu_machine_type})
+        return gpu_items
+
+    @staticmethod
+    def _change_human_readable(gpus: list) -> list:
+        readable_gpus = []
+        for gpu in gpus:
+            readable_machine_type = gpu['gpu_machine_type'].replace('-', ' ').upper()
+            readable_gpus.append(f"{gpu['gpu_count']}x{readable_machine_type}")
+        return readable_gpus

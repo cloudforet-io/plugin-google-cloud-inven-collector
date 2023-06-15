@@ -29,6 +29,8 @@ vm_instance = ItemDynamicLayout.set_fields('VM Instance', fields=[
                                 'indigo.500': ['true'], 'coral.600': ['false']
                             }),
     TextDyField.data_source('Instance Type', 'data.compute.instance_type'),
+    ListDyField.data_source('GPUs', 'data.display.gpus',
+                            default_badge={'type': 'outline', 'delimiter': '<br>'}),
     TextDyField.data_source('Image', 'data.compute.image'),
     TextDyField.data_source('Region', 'region_code'),
     TextDyField.data_source('Availability Zone', 'data.compute.az'),
