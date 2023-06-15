@@ -188,6 +188,7 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
                             'TERMINATED': {'label': 'Terminated'}
                         }),
         SearchField.set(name='Instance Type', key='data.compute.instance_type'),
+        SearchField.set(name='GPUs', key='data.display.gpus'),
         SearchField.set(name='Key Pair', key='data.compute.keypair'),
         SearchField.set(name='Image', key='data.compute.image'),
         SearchField.set(name='Availability Zone', key='data.compute.az'),
