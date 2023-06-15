@@ -197,6 +197,7 @@ class VMInstance(Model):
     hardware = ModelType(Hardware)
     compute = ModelType(Compute)
     gpus = ListType(ModelType(GPU))
+    total_gpu_count = IntType()
     load_balancers = ListType(ModelType(LoadBalancer))
     security_group = ListType(ModelType(SecurityGroup))
     vpc = ModelType(VPC)

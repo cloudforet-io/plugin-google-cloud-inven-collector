@@ -29,6 +29,7 @@ vm_instance = ItemDynamicLayout.set_fields('VM Instance', fields=[
                                 'indigo.500': ['true'], 'coral.600': ['false']
                             }),
     TextDyField.data_source('Instance Type', 'data.compute.instance_type'),
+    TextDyField.data_source('Total GPU Count', 'data.total_gpu_count'),
     ListDyField.data_source('GPUs', 'data.display.gpus',
                             default_badge={'type': 'outline', 'delimiter': '<br>'}),
     TextDyField.data_source('Image', 'data.compute.image'),
