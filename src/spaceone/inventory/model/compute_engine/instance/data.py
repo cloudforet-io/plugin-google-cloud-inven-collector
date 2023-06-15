@@ -181,12 +181,22 @@ class Subnet(Model):
     self_link = StringType()
 
 
+class GPU(Model):
+    gpu_machine_type = StringType(serialize_when_none=False)
+    gpu_count = IntType(serialize_when_none=False)
+
+
+class Display(Model):
+    gpus = ListType(StringType, default=[])
+
+
 class VMInstance(Model):
     os = ModelType(OS)
     google_cloud = ModelType(GoogleCloud)
     primary_ip_address = StringType()
     hardware = ModelType(Hardware)
     compute = ModelType(Compute)
+    gpus = ListType(ModelType(GPU))
     load_balancers = ListType(ModelType(LoadBalancer))
     security_group = ListType(ModelType(SecurityGroup))
     vpc = ModelType(VPC)
@@ -196,3 +206,4 @@ class VMInstance(Model):
     autoscaler = ModelType(AutoScaler, serialize_when_none=False)
     google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
     google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)
+    display = ModelType(Display, serialize_when_none=False)

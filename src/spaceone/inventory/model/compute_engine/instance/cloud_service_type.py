@@ -43,6 +43,8 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source('Instance Type', 'data.compute.instance_type'),
         TextDyField.data_source('Core', 'data.hardware.core'),
         TextDyField.data_source('Memory', 'data.hardware.memory'),
+        TextDyField.data_source('GPUs', 'ip_addresses', options={'is_optional': True},
+                                default_badge={'type': 'outline', 'delimiter': '<br>'}),
         TextDyField.data_source('Instance ID', 'data.compute.instance_id', options={'is_optional': True}),
         TextDyField.data_source('Key Pair', 'data.compute.keypair', options={'is_optional': True}),
         TextDyField.data_source('Image', 'data.compute.image', options={'is_optional': True}),
@@ -186,6 +188,7 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
                             'TERMINATED': {'label': 'Terminated'}
                         }),
         SearchField.set(name='Instance Type', key='data.compute.instance_type'),
+        SearchField.set(name='GPUs', key='data.display.gpus'),
         SearchField.set(name='Key Pair', key='data.compute.keypair'),
         SearchField.set(name='Image', key='data.compute.image'),
         SearchField.set(name='Availability Zone', key='data.compute.az'),
