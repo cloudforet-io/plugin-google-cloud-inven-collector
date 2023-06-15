@@ -43,7 +43,7 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source('Instance Type', 'data.compute.instance_type'),
         TextDyField.data_source('Core', 'data.hardware.core'),
         TextDyField.data_source('Memory', 'data.hardware.memory'),
-        TextDyField.data_source('GPUs', 'data.display.gpus', options={'is_optional': True},
+        TextDyField.data_source('GPUs', 'data.display.gpus',
                                 default_badge={'type': 'outline', 'delimiter': '<br>'}),
         TextDyField.data_source('Instance ID', 'data.compute.instance_id', options={'is_optional': True}),
         TextDyField.data_source('Key Pair', 'data.compute.keypair', options={'is_optional': True}),
