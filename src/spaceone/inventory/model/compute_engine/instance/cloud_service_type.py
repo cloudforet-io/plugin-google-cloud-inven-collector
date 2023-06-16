@@ -190,7 +190,7 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
                             'TERMINATED': {'label': 'Terminated'}
                         }),
         SearchField.set(name='Instance Type', key='data.compute.instance_type'),
-        SearchField.set(name='Has GPU', key='data.display.has_gpu'),
+        SearchField.set(name='Has GPU', key='data.display.has_gpu', data_type='boolean'),
         SearchField.set(name='Total GPU Count', key='data.total_gpu_count', data_type='integer'),
         SearchField.set(name='GPUs', key='data.display.gpus'),
         SearchField.set(name='Key Pair', key='data.compute.keypair'),
