@@ -188,6 +188,7 @@ class GPU(Model):
 
 class Display(Model):
     gpus = ListType(StringType, default=[])
+    has_gpu = BooleanType(default=False)
 
 
 class VMInstance(Model):
