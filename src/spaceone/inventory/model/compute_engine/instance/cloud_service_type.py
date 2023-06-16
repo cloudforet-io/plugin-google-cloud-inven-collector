@@ -2,9 +2,7 @@ import os
 
 from spaceone.inventory.libs.common_parser import *
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import CardWidget, ChartWidget
-from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, SearchField, DateTimeDyField, \
-    ListDyField, \
-    EnumDyField, SizeField
+from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, SearchField, EnumDyField, SizeField
 from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, \
     CloudServiceTypeMeta
 from spaceone.inventory.conf.cloud_service_conf import *
@@ -43,10 +41,10 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source('Instance Type', 'data.compute.instance_type'),
         TextDyField.data_source('Core', 'data.hardware.core'),
         TextDyField.data_source('Memory', 'data.hardware.memory'),
-        TextDyField.data_source('Preemptible', 'data.compute.scheduling.preemptible'),
+        TextDyField.data_source('Preemptible', 'data.compute.scheduling.preemptible', options={'is_optional': True}),
         EnumDyField.data_source('Has GPU', 'data.display.has_gpu', default_badge={
             'indigo.500': ['True'], 'coral.600': ['False']}),
-        SizeField.data_source('Total GPU Count', 'data.total_gpu_count', options={'is_optional': True}),
+        TextDyField.data_source('Total GPU Count', 'data.total_gpu_count', options={'is_optional': True}),
         TextDyField.data_source('GPUs', 'data.display.gpus',
                                 default_badge={'type': 'outline', 'delimiter': '<br>'}, options={'is_optional': True}),
         TextDyField.data_source('Instance ID', 'data.compute.instance_id', options={'is_optional': True}),
@@ -192,7 +190,7 @@ cst_vm_instance._metadata = CloudServiceTypeMeta.set_meta(
                             'TERMINATED': {'label': 'Terminated'}
                         }),
         SearchField.set(name='Instance Type', key='data.compute.instance_type'),
-        SearchField.set(name='Has GPU', key='data.display.has_gpu', data_type='boolean'),
+        SearchField.set(name='Has GPU', key='data.display.has_gpu'),
         SearchField.set(name='Total GPU Count', key='data.total_gpu_count', data_type='integer'),
         SearchField.set(name='GPUs', key='data.display.gpus'),
         SearchField.set(name='Key Pair', key='data.compute.keypair'),
