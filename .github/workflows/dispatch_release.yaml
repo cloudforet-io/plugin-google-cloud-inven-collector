@@ -10,7 +10,7 @@ on:
 
 env:
   TAG: ${{ github.event.inputs.tag }}
-  SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 jobs:
   owner_check:
