@@ -101,6 +101,11 @@ class SubscriptionManager(GoogleCloudManager):
                     'project': project_id,
                     'display': subscription_display
                 })
+
+                subscription.update(self.set_google_cloud_logging_v2(
+                    'Pub/Sub', 'Subscription', project_id, subscription_name
+                ))
+
                 subscription_data = Subscription(subscription, strict=False)
 
                 ##################################
