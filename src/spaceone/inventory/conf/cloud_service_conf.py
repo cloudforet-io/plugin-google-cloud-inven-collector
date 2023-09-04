@@ -44,6 +44,35 @@ CLOUD_SERVICE_GROUP_MAP = {
     ]
 }
 
+CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
+    'ComputeEngine': {
+        'Instance': {
+            'resource_type': 'gce_instance',
+            'labels_key': 'resource.labels.instance_id'
+        }
+    },
+    'CloudSQL': {},
+    'BigQuery': {},
+    'CloudStorage': {},
+    'Networking': {},
+    'Pub/Sub': {
+        'Topic': {
+            'resource_type': 'pubsub_topic',
+            'labels_key': 'resource.labels.topic_id'
+        },
+        'Subscription': {
+            'resource_type': 'pubsub_subscription',
+            'labels_key': 'resource.labels.subscription_id'
+        },
+        'Snapshot': {
+            'resource_type': 'pubsub_snapshot',
+            'labels_key': 'resource.labels.snapshot_id'
+        }
+    },
+    'CloudFunctions': {},
+    'Recommender': {}
+}
+
 ASSET_URL = 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud'
 
 REGION_INFO = {

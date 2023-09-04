@@ -5,6 +5,7 @@ import ipaddress
 from urllib.parse import urlparse
 
 from spaceone.core.manager import BaseManager
+from spaceone.inventory.conf.cloud_service_conf import CLOUD_LOGGING_RESOURCE_TYPE_MAP
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 from spaceone.inventory.libs.schema.region import RegionResource, RegionResponse
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
@@ -114,6 +115,13 @@ class GoogleCloudManager(BaseManager):
         # }
 
     @staticmethod
+    def create_logging_query(key, value) -> list:
+        return [{
+            'key': key,
+            'value': value
+        }]
+
+    @staticmethod
     def set_google_cloud_logging(project_id, resource_type, resource_id, filters):
         return {
             'name': f'projects/{project_id}',
@@ -122,6 +130,17 @@ class GoogleCloudManager(BaseManager):
                 'resource_type': resource_type,
                 'labels': filters
             }]
+        }
+
+    def set_google_cloud_logging_v2(self, service, cloud_service_type, project_id, resource_id):
+        cloud_logging_info = CLOUD_LOGGING_RESOURCE_TYPE_MAP[service][cloud_service_type]
+        resource_type = cloud_logging_info.get('resource_type', [])
+        labels_key = cloud_logging_info.get('labels_key', [])
+        return {
+            'google_cloud_logging': self.set_google_cloud_logging(
+                project_id, resource_type, resource_id,
+                self.create_logging_query(labels_key, resource_id)
+            )
         }
 
     @staticmethod
