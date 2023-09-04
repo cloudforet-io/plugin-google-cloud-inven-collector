@@ -10,8 +10,6 @@ from spaceone.inventory.model.pub_sub.topic.data import Topic, Subscription, Sna
 
 _LOGGER = logging.getLogger(__name__)
 
-CLOUD_LOGGING_RESOURCE_TYPE = 'pubsub_topic'
-
 
 class TopicManager(GoogleCloudManager):
     connector_name = 'TopicConnector'
@@ -97,12 +95,9 @@ class TopicManager(GoogleCloudManager):
                     'display': display
                 })
 
-                topic_logging_filter = [{'key': 'resource.labels.topic_id', 'value': topic_name}]
-                topic.update({
-                    'google_cloud_logging': self.set_google_cloud_logging(
-                        project_id, CLOUD_LOGGING_RESOURCE_TYPE, topic_name, topic_logging_filter
-                    )
-                })
+                topic.update(self.set_google_cloud_logging_v2(
+                    'Pub/Sub', 'Topic', project_id, topic_name
+                ))
 
                 topic_data = Topic(topic, strict=False)
                 ##################################
