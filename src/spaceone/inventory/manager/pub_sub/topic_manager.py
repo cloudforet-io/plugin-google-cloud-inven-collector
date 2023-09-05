@@ -95,9 +95,11 @@ class TopicManager(GoogleCloudManager):
                     'display': display
                 })
 
-                topic.update(self.set_google_cloud_logging_v2(
-                    'Pub/Sub', 'Topic', project_id, topic_name
-                ))
+                topic.update({
+                    'google_cloud_logging': self.set_google_cloud_logging(
+                        'Pub/Sub', 'Topic', project_id, topic_name
+                    )
+                })
 
                 topic_data = Topic(topic, strict=False)
                 ##################################

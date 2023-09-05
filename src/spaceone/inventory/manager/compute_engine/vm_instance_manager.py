@@ -209,6 +209,12 @@ class VMInstanceManager(GoogleCloudManager):
                                                                   instance.get('id'),
                                                                   google_cloud_filters)
         })
+
+        server_data['data'].update({
+            'google_cloud_logging': self.set_google_cloud_logging(
+                'ComputeEngine', 'Instance', project_id, instance.get('id'))
+        })
+
         ##################################
         # 3. Make Return Resource
         ##################################

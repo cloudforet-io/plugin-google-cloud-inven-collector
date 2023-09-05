@@ -63,6 +63,13 @@ class SnapshotManager(GoogleCloudManager):
                     'id': snapshot_id,
                     'project': project_id,
                 })
+
+                snapshot.update({
+                    'google_cloud_logging': self.set_google_cloud_logging(
+                        'Pub/Sub', 'Snapshot', project_id, snapshot_name
+                    )
+                })
+
                 snapshot_data = Snapshot(snapshot, strict=False)
 
                 ##################################
