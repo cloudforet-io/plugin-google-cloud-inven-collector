@@ -100,47 +100,21 @@ class GoogleCloudManager(BaseManager):
             }]
         }
 
-        # metric_filter = f"metric.type = starts_with('{metric_type}')"
-        #
-        # filter_list = []
-        # for _filter in filters:
-        #     filter_list.append(f"{_filter['key']} = {_filter['value']}")
-        #
-        # or_merge_filter = ' OR '.join(filter_list)
-        # merge_filter = ' AND '.join([metric_filter, or_merge_filter])
-        #
-        # return {
-        #     'name': f'projects/{project_id}',
-        #     'filters': [merge_filter]
-        # }
-
     @staticmethod
-    def create_logging_query(key, value) -> list:
-        return [{
-            'key': key,
-            'value': value
-        }]
-
-    @staticmethod
-    def set_google_cloud_logging(project_id, resource_type, resource_id, filters):
+    def set_google_cloud_logging(service, cloud_service_type, project_id, resource_id):
+        cloud_logging_info = CLOUD_LOGGING_RESOURCE_TYPE_MAP[service][cloud_service_type]
+        resource_type = cloud_logging_info.get('resource_type', [])
+        labels_key = cloud_logging_info.get('labels_key', [])
         return {
             'name': f'projects/{project_id}',
             'resource_id': resource_id,
             'filters': [{
                 'resource_type': resource_type,
-                'labels': filters
+                'labels': [{
+                    'key': labels_key,
+                    'value': resource_id
+                }]
             }]
-        }
-
-    def set_google_cloud_logging_v2(self, service, cloud_service_type, project_id, resource_id):
-        cloud_logging_info = CLOUD_LOGGING_RESOURCE_TYPE_MAP[service][cloud_service_type]
-        resource_type = cloud_logging_info.get('resource_type', [])
-        labels_key = cloud_logging_info.get('labels_key', [])
-        return {
-            'google_cloud_logging': self.set_google_cloud_logging(
-                project_id, resource_type, resource_id,
-                self.create_logging_query(labels_key, resource_id)
-            )
         }
 
     @staticmethod
