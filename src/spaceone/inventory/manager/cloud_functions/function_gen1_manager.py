@@ -109,6 +109,14 @@ class FunctionGen1Manager(GoogleCloudManager):
                     'project': project_id,
                     'display': display
                 })
+
+                function.update({
+                    'google_cloud_logging': self.set_google_cloud_logging(
+                        'CloudFunctions', 'Function', project_id, function_id
+                    )
+                })
+                print(function)
+
                 function_data = FunctionGen1(function, strict=False)
 
                 function_resource = FunctionResource({

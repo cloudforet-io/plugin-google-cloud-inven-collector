@@ -87,6 +87,12 @@ class StorageManager(GoogleCloudManager):
                     'labels': labels
                 })
 
+                bucket.update({
+                    'google_cloud_logging': self.set_google_cloud_logging(
+                        'CloudStorage', 'Bucket', project_id, bucket_name
+                    ),
+                })
+
                 bucket_data = Storage(bucket, strict=False)
 
                 ##################################

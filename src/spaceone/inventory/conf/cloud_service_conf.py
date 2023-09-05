@@ -53,7 +53,12 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
     },
     'CloudSQL': {},
     'BigQuery': {},
-    'CloudStorage': {},
+    'CloudStorage': {
+        'Bucket': {
+            'resource_type': 'gcs_bucket',
+            'labels_key': 'resource.labels.bucket_name'
+        }
+    },
     'Networking': {},
     'Pub/Sub': {
         'Topic': {
@@ -69,7 +74,12 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             'labels_key': 'resource.labels.snapshot_id'
         }
     },
-    'CloudFunctions': {},
+    'CloudFunctions': {
+        'Function': {
+            'resource_type': 'cloud_function',
+            'labels_key': 'resource.labels.function_name'
+        }
+    },
     'Recommender': {}
 }
 
