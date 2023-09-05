@@ -83,6 +83,12 @@ class InstanceTemplateManager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                inst_template.update({
+                    'google_cloud_logging': self.set_google_cloud_logging(
+                        'ComputeEngine', 'InstanceTemplate', project_id, inst_template_id
+                    )
+                })
+
                 instance_template_data = InstanceTemplate(inst_template, strict=False)
                 # labels -> tags
                 default_region = 'global'

@@ -9,7 +9,6 @@ from spaceone.inventory.model.compute_engine.disk.cloud_service_type import CLOU
 from spaceone.inventory.model.compute_engine.disk.cloud_service import DiskResource, DiskResponse
 from spaceone.inventory.model.compute_engine.disk.data import Disk
 
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -85,6 +84,13 @@ class DiskManager(GoogleCloudManager):
                                                                                 disk.get('name'),
                                                                                 google_cloud_monitoring_filters)
                 })
+
+                disk.update({
+                    'google_cloud_logging': self.set_google_cloud_logging(
+                        'ComputeEngine', 'Disk', project_id, disk_id
+                    )
+                })
+
                 disk_data = Disk(disk, strict=False)
 
                 ##################################

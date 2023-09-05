@@ -49,6 +49,22 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         'Instance': {
             'resource_type': 'gce_instance',
             'labels_key': 'resource.labels.instance_id'
+        },
+        'Disk': {
+            'resource_type': 'gce_disk',
+            'labels_key': 'resource.labels.disk_id'
+        },
+        'InstanceGroup': {
+            'resource_type': 'gce_instance_group',
+            'labels_key': 'resource.labels.instance_group_id'
+        },
+        'InstanceTemplate': {
+            'resource_type': 'gce_instance_template',
+            'labels_key': 'resource.labels.instance_template_id'
+        },
+        'MachineImage': {
+            'resource_type': 'gce_machine_image',
+            'labels_key': 'resource.labels.machine_image_id'
         }
     },
     'CloudSQL': {

@@ -128,6 +128,13 @@ class InstanceGroupManager(GoogleCloudManager):
                 })
                 # No labels
                 _name = instance_group.get('name', '')
+
+                instance_group.update({
+                    'google_cloud_logging': self.set_google_cloud_logging(
+                        'ComputeEngine', 'InstanceGroup', project_id, instance_group_id
+                    )
+                })
+
                 instance_group_data = InstanceGroup(instance_group, strict=False)
 
                 ##################################
@@ -153,7 +160,8 @@ class InstanceGroupManager(GoogleCloudManager):
                 collected_cloud_services.append(InstanceGroupResponse({'resource': instance_group_resource}))
             except Exception as e:
                 _LOGGER.error(f'[collect_cloud_service] => {e}', exc_info=True)
-                error_response = self.generate_resource_error_response(e, 'ComputeEngine', 'InstanceGroup', instance_group_id)
+                error_response = self.generate_resource_error_response(e, 'ComputeEngine', 'InstanceGroup',
+                                                                       instance_group_id)
                 error_responses.append(error_response)
 
         _LOGGER.debug(f'** Instance Group Finished {time.time() - start_time} Seconds **')
