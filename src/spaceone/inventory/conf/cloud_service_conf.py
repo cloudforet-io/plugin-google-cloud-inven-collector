@@ -51,7 +51,12 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             'labels_key': 'resource.labels.instance_id'
         }
     },
-    'CloudSQL': {},
+    'CloudSQL': {
+        'Instance': {
+            'resource_type': 'cloudsql_database',
+            'labels_key': 'resource.labels.database_id'
+        }
+    },
     'BigQuery': {},
     'CloudStorage': {
         'Bucket': {

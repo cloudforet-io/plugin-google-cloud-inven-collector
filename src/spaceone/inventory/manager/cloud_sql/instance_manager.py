@@ -75,6 +75,13 @@ class CloudSQLManager(GoogleCloudManager):
                     'databases': self._get_databases(databases),
                     'users': self._get_users(users),
                 })
+
+                instance.update({
+                    'google_cloud_logging': self.set_google_cloud_logging(
+                        'CloudSQL', 'Instance', project_id, monitoring_resource_id
+                    )
+                })
+
                 # No labels!!
                 instance_data = Instance(instance, strict=False)
 
