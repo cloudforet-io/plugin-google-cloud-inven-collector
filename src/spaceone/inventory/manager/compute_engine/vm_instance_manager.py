@@ -203,11 +203,7 @@ class VMInstanceManager(GoogleCloudManager):
             'google_cloud_monitoring': self.set_google_cloud_monitoring(project_id,
                                                                         "compute.googleapis.com/instance",
                                                                         instance.get('id'),
-                                                                        google_cloud_filters),
-            'google_cloud_logging': self.set_google_cloud_logging(project_id,
-                                                                  'gce_instance',
-                                                                  instance.get('id'),
-                                                                  google_cloud_filters)
+                                                                        google_cloud_filters)
         })
 
         server_data['data'].update({
