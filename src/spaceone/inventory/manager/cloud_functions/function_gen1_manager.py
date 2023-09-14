@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timedelta
 import google.oauth2.service_account
 from google.cloud import storage
+from google.api_core.exceptions import NotFound
 from zipfile import ZipFile
 from zipfile import is_zipfile
 import io
@@ -10,7 +11,6 @@ import io
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
 from spaceone.inventory.connector.cloud_functions.function_gen1 import FunctionGen1Connector
-from spaceone.inventory.connector.cloud_functions.eventarc import EventarcConnector
 from spaceone.inventory.model.cloud_functions.function_gen1.cloud_service_type import CLOUD_SERVICE_TYPES, cst_function
 from spaceone.inventory.model.cloud_functions.function_gen1.cloud_service import FunctionResource, FunctionResponse
 from spaceone.inventory.model.cloud_functions.function_gen1.data import FunctionGen1
@@ -89,12 +89,21 @@ class FunctionGen1Manager(GoogleCloudManager):
 
                 if function.get('sourceUploadUrl'):
                     bucket = self._make_bucket_from_build_name(function.get('buildName'))
-                    source_location, source_code = self._get_source_location_and_code(bucket, function_id, secret_data)
 
-                    display.update({
-                        'source_location': source_location,
-                        'source_code': source_code
-                    })
+                    try:
+                        source_location, source_code = self._get_source_location_and_code(
+                            bucket, function_id, secret_data
+                        )
+
+                        display.update({
+                            'source_location': source_location,
+                            'source_code': source_code
+                        })
+                    except NotFound:
+                        _LOGGER.debug(
+                            f'[collect_cloud_service] => {bucket} not found in bucket of GCS (function_id: {function_id})'
+                        )
+                        pass
 
                 if runtime_environment_variables := function.get('environmentVariables'):
                     display.update({
@@ -115,7 +124,6 @@ class FunctionGen1Manager(GoogleCloudManager):
                         'CloudFunctions', 'Function', project_id, function_id
                     )
                 })
-                print(function)
 
                 function_data = FunctionGen1(function, strict=False)
 

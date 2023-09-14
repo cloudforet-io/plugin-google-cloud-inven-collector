@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timedelta
 import google.oauth2.service_account
 from google.cloud import storage
+from google.api_core.exceptions import NotFound
 from zipfile import ZipFile
 from zipfile import is_zipfile
 import io
@@ -96,10 +97,17 @@ class FunctionGen2Manager(GoogleCloudManager):
                     bucket = storage_source['bucket']
                     storage_object = storage_source['object']
                     source_location = self._make_source_location(bucket, storage_object)
-                    display.update({
-                        'source_location': source_location,
-                        'source_code': self._make_source_code(bucket, storage_object, secret_data),
-                    })
+
+                    try:
+                        display.update({
+                            'source_location': source_location,
+                            'source_code': self._make_source_code(bucket, storage_object, secret_data),
+                        })
+                    except NotFound:
+                        _LOGGER.debug(
+                            f'[collect_cloud_service] => {bucket} not found in bucket of GCS (function_id: {function_id})'
+                        )
+                        pass
 
                 if trigger_data := function.get('eventTrigger'):
                     trigger = self._get_event_provider_from_trigger_map(trigger_data.get('eventType'),
@@ -139,7 +147,6 @@ class FunctionGen2Manager(GoogleCloudManager):
                         'CloudFunctions', 'Function', project_id, function_id
                     )
                 })
-                print(function)
 
                 function_data = FunctionGen2(function, strict=False)
 
