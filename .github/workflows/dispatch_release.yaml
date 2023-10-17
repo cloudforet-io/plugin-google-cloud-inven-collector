@@ -3,14 +3,23 @@ name: "[Dispatch] Release"
 on:
   workflow_dispatch:
     inputs:
-      tag:
+      version:
         description: 'enter version(x.y.z)'
         required: true
-        default: v1.0.0
+        default: 1.0.0
+      container_arch:
+        type: choice
+        description: 'choose container architecture'
+        default: linux/amd64,linux/arm64
+        options:
+        - "linux/amd64"
+        - "linux/amd64,linux/arm64"
+
 
 env:
-  TAG: ${{ github.event.inputs.tag }}
+  VERSION: ${{ github.event.inputs.version }}
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  ARCH: ${{ github.event.inputs.container_arch }}
 
 jobs:
   owner_check:
@@ -25,16 +34,16 @@ jobs:
     steps:
       - name: check version format
         run: |
-          if [[ !(${{ env.TAG }} =~ ^v[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]$) ]];
+          if [[ !(${{ env.VERSION }} =~ ^v[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]$) ]];
           then
             echo "You entered an incorrect version format."
             exit 1
           fi
       - name: debugging
         run: |
-          echo "major=$(echo ${{env.TAG}} | cut -c 2- | cut -d'.' -f1)"
-          echo "minor=$(echo ${{env.TAG}} | cut -c 2- | cut -d'.' -f2)"
-          echo "patch=$(echo ${{env.TAG}} | cut -c 2- | cut -d'.' -f3)"
+          echo "major=$(echo ${{env.VERSION}} | cut -c 2- | cut -d'.' -f1)"
+          echo "minor=$(echo ${{env.VERSION}} | cut -c 2- | cut -d'.' -f2)"
+          echo "patch=$(echo ${{env.VERSION}} | cut -c 2- | cut -d'.' -f3)"
       - name: notice when job fails
         if: failure()
         uses: 8398a7/action-slack@v3.2.0
@@ -52,11 +61,11 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
       - name: update version file # That is used where the master_push actions
         run: |
-          echo ${{ env.TAG }} > src/VERSION
+          echo ${{ env.VERSION }} > src/VERSION
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "[CI/CD] release version ${{ env.TAG }}"
+          git commit -m "[CI/CD] release version ${{ env.VERSION }}"
       - name: push changes
         uses: ad-m/github-push-action@master
         with:
@@ -79,8 +88,8 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
       - name: git tagging
         run: |
-          git tag ${{ env.TAG }}
-          git push origin "${{ env.TAG }}"
+          git tag ${{ env.VERSION }}
+          git push origin "${{ env.VERSION }}"
       - name: notice when job fails
         if: failure()
         uses: 8398a7/action-slack@v3.2.0
@@ -93,29 +102,43 @@ jobs:
     needs: tagging
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: get version
-        run: |
-          echo "VERSION=$(echo ${{ env.TAG }} | cut -c 2-)" >> $GITHUB_ENV
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
       - name: get service name
         run: |
           echo "SERVICE=$(echo ${{ github.repository }} | cut -d '/' -f2)" >> $GITHUB_ENV
+          
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          
       - name: Build and push to pyengine
-        uses: docker/build-push-action@v1
+        uses: docker/build-push-action@v4
         with:
-          path: .
-          repository: pyengine/${{ env.SERVICE }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          tags: ${{ env.VERSION }}
+          context: .
+          platform: ${{ env.ARCH }}
+          push: true 
+          tags: pyengine/${{ env.SERVICE }}:${{ env.VERSION }}
+          
       - name: Build and push to spaceone
-        uses: docker/build-push-action@v1
+        uses: docker/build-push-action@v4
         with:
-          path: .
-          repository: spaceone/${{ env.SERVICE }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          tags: ${{ env.VERSION }}
+          context: .
+          platform: ${{ env.ARCH }}
+          push: true 
+          tags: spaceone/${{ env.SERVICE }}:${{ env.VERSION }}
+          
       - name: Notice when job fails
         if: failure()
         uses: 8398a7/action-slack@v3.2.0
