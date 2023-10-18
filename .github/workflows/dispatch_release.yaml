@@ -127,7 +127,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          platform: ${{ env.ARCH }}
+          platforms: ${{ env.ARCH }}
           push: true
           tags: pyengine/${{ env.SERVICE }}:${{ env.VERSION }}
 
@@ -135,7 +135,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          platform: ${{ env.ARCH }}
+          platforms: ${{ env.ARCH }}
           push: true
           tags: spaceone/${{ env.SERVICE }}:${{ env.VERSION }}
 
