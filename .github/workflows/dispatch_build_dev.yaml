@@ -61,7 +61,6 @@ jobs:
           uses: docker/build-push-action@v4
           with:
             context: .
-            platform: ${{ env.ARCH }}
             push: true 
             tags: pyengine/${{ env.SERVICE }}:${{ env.VERSION }}
             
