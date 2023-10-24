@@ -20,7 +20,7 @@ jobs:
       - name: set version with current date
         id: versioning
         run: |
-          echo "VERSION=$(cat src/VERSION | cut -c 2-).${{ env.TIME }}" >> $GITHUB_OUTPUT
+          echo "VERSION=$(sed 's/v//' < src/VERSION).${{ env.TIME }}" >> $GITHUB_OUTPUT
       - name: Notice when job fails
         if: failure()
         uses: 8398a7/action-slack@v3.2.0
