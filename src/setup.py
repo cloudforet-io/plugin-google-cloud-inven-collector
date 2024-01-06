@@ -16,33 +16,29 @@
 
 from setuptools import setup, find_packages
 
-with open('VERSION', 'r') as f:
+with open("VERSION", "r") as f:
     VERSION = f.read().strip()
     f.close()
 
 setup(
-    name='plugin-google-cloud-services',
+    name="plugin-google-cloud-services",
     version=VERSION,
-    description='Google cloud service inventory collector',
-    long_description='',
-    url='https://www.spaceone.dev/',
-    author='MEGAZONE SpaceONE Team',
-    author_email='admin@spaceone.dev',
-    license='Apache License 2.0',
+    description="Google cloud service inventory collector",
+    long_description="",
+    url="https://www.spaceone.dev/",
+    author="MEGAZONE SpaceONE Team",
+    author_email="admin@spaceone.dev",
+    license="Apache License 2.0",
     packages=find_packages(),
     install_requires=[
-        'spaceone-core',
-        'spaceone-api',
-        'spaceone-tester',
-        'schematics',
-        'google-api-python-client',
-        'MarkupSafe>=2.0.0rc2',
-        'google-cloud-storage',
-        'requests',
-        'beautifulsoup4'
+        "spaceone-api",
+        "schematics",
+        "google-api-python-client",
+        "MarkupSafe>=2.0.0rc2",
+        "google-cloud-storage",
+        "requests",
+        "beautifulsoup4",
     ],
-    package_data={
-        'spaceone': ['inventory/model/*/*/widget/*.yml']
-    },
+    package_data={"spaceone": ["inventory/model/*/*/widget/*.yml"]},
     zip_safe=False,
 )
