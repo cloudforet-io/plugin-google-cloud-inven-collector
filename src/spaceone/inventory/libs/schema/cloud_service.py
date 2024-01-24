@@ -111,12 +111,6 @@ class ErrorResourceResponse(CloudServiceResponse):
     resource = ModelType(ErrorResource, default={})
 
 
-class SkipResourceResponse(CloudServiceResponse):
-    state = StringType(default="SKIP")
-    resource_type = StringType(default="inventory.ErrorResource")
-    resource = ModelType(ErrorResource, default={})
-
-
 class VMInstanceResource(Model):
     server_type = StringType(default="VM")
     os_type = StringType(choices=("LINUX", "WINDOWS"))
