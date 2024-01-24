@@ -75,13 +75,28 @@ class GoogleCloudManager(BaseManager):
             total_resources.extend(self.collect_region())
 
         except Exception as e:
-            if (
-                isinstance(e, HttpError)
-                and e.status_code == 403
-                and e.error_details[1]["reason"] == "SERVICE_DISABLED"
-            ):
-                _LOGGER.error(f"[collect_resources] SKIP Disabled Service {e}")
-                pass
+            if isinstance(e, HttpError) and e.status_code == 403:
+                if (
+                    len(e.error_details) == 1
+                    and e.error_details[0].get("reason") == "accessNotConfigured"
+                ):
+                    _LOGGER.error(f"[collect_resources] SKIP Disabled Service {e}")
+                    pass
+                elif (
+                    len(e.error_details) == 2
+                    and e.error_details[1].get("reason") == "SERVICE_DISABLED"
+                ):
+                    _LOGGER.error(f"[collect_resources] SKIP Disabled Service {e}")
+                    pass
+                else:
+                    _LOGGER.error(f"[collect_resources] {e}", exc_info=True)
+                    error_resource_response = self.generate_error_response(
+                        e,
+                        self.cloud_service_types[0].resource.group,
+                        self.cloud_service_types[0].resource.name,
+                    )
+
+                    total_resources.append(error_resource_response)
             else:
                 _LOGGER.error(f"[collect_resources] {e}", exc_info=True)
                 error_resource_response = self.generate_error_response(
