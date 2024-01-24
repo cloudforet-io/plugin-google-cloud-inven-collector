@@ -10,7 +10,6 @@ from spaceone.inventory.libs.connector import GoogleCloudConnector
 from spaceone.inventory.libs.schema.region import RegionResource, RegionResponse
 from spaceone.inventory.libs.schema.cloud_service import (
     ErrorResourceResponse,
-    SkipResourceResponse,
 )
 from spaceone.inventory.conf.cloud_service_conf import REGION_INFO, ASSET_URL
 from googleapiclient.errors import HttpError
@@ -76,27 +75,22 @@ class GoogleCloudManager(BaseManager):
             total_resources.extend(self.collect_region())
 
         except Exception as e:
-            _LOGGER.error(f"[collect_resources] {e}", exc_info=True)
-
             if (
                 isinstance(e, HttpError)
                 and e.status_code == 403
                 and e.error_details[1]["reason"] == "SERVICE_DISABLED"
             ):
-                error_resource_response = self.generate_skip_response(
-                    e,
-                    self.cloud_service_types[0].resource.group,
-                    self.cloud_service_types[0].resource.name,
-                )
-
+                _LOGGER.error(f"[collect_resources] SKIP Disabled Service {e}")
+                pass
             else:
+                _LOGGER.error(f"[collect_resources] {e}", exc_info=True)
                 error_resource_response = self.generate_error_response(
                     e,
                     self.cloud_service_types[0].resource.group,
                     self.cloud_service_types[0].resource.name,
                 )
 
-            total_resources.append(error_resource_response)
+                total_resources.append(error_resource_response)
 
         return total_resources
 
@@ -166,18 +160,6 @@ class GoogleCloudManager(BaseManager):
             return self.get_param_in_url(resource_info.get("region", ""), "regions")
         else:
             return "global"
-
-    @staticmethod
-    def generate_skip_response(e, cloud_service_group, cloud_service_type):
-        return SkipResourceResponse(
-            {
-                "message": str(e),
-                "resource": {
-                    "cloud_service_group": cloud_service_group,
-                    "cloud_service_type": cloud_service_type,
-                },
-            }
-        )
 
     @staticmethod
     def generate_error_response(e, cloud_service_group, cloud_service_type):
