@@ -5,7 +5,7 @@ import json
 
 from bs4 import BeautifulSoup
 
-from spaceone.inventory.conf.cloud_service_conf import REGION_INFO
+from spaceone.inventory.conf.cloud_service_conf import REGION_INFO, RECOMMENDATION_MAP
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
 from spaceone.inventory.libs.schema.base import ReferenceModel
@@ -71,7 +71,10 @@ class RecommendationManager(GoogleCloudManager):
 
         secret_data = params["secret_data"]
         self.project_id = secret_data["project_id"]
-        self.recommender_map = self._create_recommendation_id_map_by_crawling()
+        self.recommender_map = RECOMMENDATION_MAP
+
+        # TODO: This is a temporary solution. We need to find a better way to get recommender_id_map
+        # self.recommender_map = self._create_recommendation_id_map_by_crawling()
 
         cloud_asset_conn: CloudAssetConnector = self.locator.get_connector(
             CloudAssetConnector, **params
