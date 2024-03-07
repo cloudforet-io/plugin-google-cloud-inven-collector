@@ -3,9 +3,13 @@ import logging
 import json
 import concurrent.futures
 
+from spaceone.inventory.connector.resource_manager.project import ProjectConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.core.service import *
-from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
+from spaceone.inventory.libs.schema.cloud_service import (
+    ErrorResourceResponse,
+    CloudServiceResponse,
+)
 from spaceone.inventory.conf.cloud_service_conf import *
 
 _LOGGER = logging.getLogger(__name__)
@@ -75,6 +79,16 @@ class CollectorService(BaseService):
                 - secret_data
                 - filter
         """
+
+        project_conn = self.locator.get_connector(ProjectConnector, **params)
+        try:
+            project_info = project_conn.get_project_info()
+            project_id = project_info["projectId"]
+            project_state = project_info["state"]
+            _LOGGER.debug(f"[collect] project => {project_id} / {project_state}")
+        except Exception as e:
+            _LOGGER.debug(f"[collect] failed to get project_info => {e}")
+            return CloudServiceResponse().to_primitive()
 
         start_time = time.time()
 
