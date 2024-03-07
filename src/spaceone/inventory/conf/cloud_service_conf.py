@@ -18,7 +18,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "DiskManager",
     ],
     "CloudSQL": ["CloudSQLManager"],
-    "BigQuery": ["SQLWorkspaceManager"],
+    # "BigQuery": ["SQLWorkspaceManager"],
     "CloudStorage": ["StorageManager"],
     "Networking": [
         "ExternalIPAddressManager",
@@ -34,7 +34,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "TopicManager",
     ],
     "CloudFunctions": ["FunctionGen2Manager", "FunctionGen1Manager"],
-    "Recommender": ["RecommendationManager"],
+    # "Recommender": ["RecommendationManager"],
 }
 
 CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
