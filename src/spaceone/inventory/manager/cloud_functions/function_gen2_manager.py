@@ -280,13 +280,13 @@ class FunctionGen2Manager(GoogleCloudManager):
     @staticmethod
     def _make_memory_allocated(memory):
         try:
-            number, unit = memory.split("Mi")
+            number, *unit = memory.split("Mi")
             return f"{number} MiB"
         except ValueError:
-            number, unit = memory.split("M")
+            number, *unit = memory.split("M")
             return f"{number} MiB"
         except Exception:
-            number, unit = memory.split("Gi")
+            number, *unit = memory.split("Gi")
             return f"{number} GiB"
 
     @staticmethod
