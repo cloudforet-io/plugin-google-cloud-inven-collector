@@ -59,8 +59,7 @@ class SQLWorkspaceManager(GoogleCloudManager):
                 # 1. Set Basic Information
                 ##################################
 
-                update_bq_dt_tables = []
-                table_schemas = []
+                updated_bq_tables = []
 
                 data_refer = data_set.get("datasetReference", {})
                 data_set_id = data_refer.get("datasetId", "")
@@ -72,10 +71,9 @@ class SQLWorkspaceManager(GoogleCloudManager):
                 exp_partition_ms = bq_dataset.get("defaultPartitionExpirationMs")
                 exp_table_ms = bq_dataset.get("defaultTableExpirationMs")
 
-                # skip if dataset id is invisible
-                # if self._get_visible_on_console(data_set_id):
-                #     bq_dt_tables = big_query_conn.list_tables(data_set_id)
-                #     update_bq_dt_tables, table_schemas = self._get_table_list_with_schema(big_query_conn, bq_dt_tables)
+                bq_tables = big_query_conn.list_tables(data_set_id)
+                if bq_tables:
+                    updated_bq_tables = self._preprocess_bigquery_tables_info(bq_tables)
 
                 labels = self.convert_labels_format(bq_dataset.get("labels", {}))
                 google_cloud_monitoring_filters = [
@@ -90,11 +88,9 @@ class SQLWorkspaceManager(GoogleCloudManager):
                     {
                         "name": data_set_id,
                         "project": project_id,
-                        "tables": update_bq_dt_tables,
-                        "table_schemas": table_schemas,
+                        "tables": updated_bq_tables,
                         "region": region,
-                        "visible_on_console": self._get_visible_on_console(data_set_id),
-                        "matching_projects": self._get_matching_project(
+                        "matching_project": self._get_matching_project(
                             dataset_project_id, projects
                         ),
                         "creationTime": self._convert_unix_timestamp(creation_time),
@@ -158,43 +154,31 @@ class SQLWorkspaceManager(GoogleCloudManager):
         matched_info = self.match_region_info(location)
         return matched_info.get("region_code") if matched_info else "global"
 
-    def _get_table_list_with_schema(
-        self, big_conn: SQLWorkspaceConnector, bq_dt_tables
-    ):
-        update_bq_dt_tables = []
-        table_schemas = []
-        for bq_dt_table in bq_dt_tables:
-            table_ref = bq_dt_table.get("tableReference")
-            table_single = big_conn.get_tables(
-                table_ref.get("datasetId"), table_ref.get("tableId")
+    def _preprocess_bigquery_tables_info(self, bq_tables):
+        preprocessed_bq_tables = []
+        for bq_table in bq_tables:
+            table_id = bq_table.get("id")
+            name = bq_table.get("tableReference", {}).get("tableId")
+            table_type = bq_table.get("type")
+            creation_time = bq_table.get("creationTime")
+            expiration_time = bq_table.get("expirationTime")
+            last_modified_time = bq_table.get("lastModifiedTime")
+
+            bq_table.update(
+                {
+                    "id": table_id,
+                    "name": name,
+                    "type": table_type,
+                    "creationTime": self._convert_unix_timestamp(creation_time),
+                    "expirationTime": self._convert_unix_timestamp(expiration_time),
+                    "lastModifiedTime": self._convert_unix_timestamp(
+                        last_modified_time
+                    ),
+                }
             )
+            preprocessed_bq_tables.append(bq_table)
 
-            if table_single is not None:
-                creation_time = table_single.get("creationTime")
-                expiration_time = table_single.get("expirationTime")
-                last_modified_time = table_single.get("lastModifiedTime")
-
-                table_single.update(
-                    {
-                        "creationTime": self._convert_unix_timestamp(creation_time),
-                        "expirationTime": self._convert_unix_timestamp(expiration_time),
-                        "lastModifiedTime": self._convert_unix_timestamp(
-                            last_modified_time
-                        ),
-                    }
-                )
-
-                _table_schemas = table_single.get("schema", {})
-                if _table_schemas != {}:
-                    fields = _table_schemas.get("fields", [])
-                    table_single.update({"schema": fields})
-                    update_bq_dt_tables.append(table_single)
-
-                    for single_schema in fields:
-                        single_schema.update({"table_id": table_ref.get("tableId")})
-                        table_schemas.append(single_schema)
-
-        return update_bq_dt_tables, table_schemas
+        return preprocessed_bq_tables
 
     @staticmethod
     def _get_matching_project(project_id, projects):
@@ -203,10 +187,6 @@ class SQLWorkspaceManager(GoogleCloudManager):
             if project_id == project.get("id"):
                 _projects.append(ProjectModel(project, strict=False))
         return _projects
-
-    @staticmethod
-    def _get_visible_on_console(dataset_id):
-        return False if dataset_id.startswith("_") else True
 
     @staticmethod
     def _convert_milliseconds_to_minutes(milliseconds):

@@ -4,7 +4,6 @@ from spaceone.inventory.model.bigquery.sql_workspace.data import *
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     TextDyField,
     DateTimeDyField,
-    EnumDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
     ItemDynamicLayout,
@@ -35,11 +34,6 @@ dataset_details_meta = ItemDynamicLayout.set_fields(
         TextDyField.data_source(
             "Default Table Expires", "data.default_table_expiration_ms_display"
         ),
-        EnumDyField.data_source(
-            "Visible on Console",
-            "data.visible_on_console",
-            default_badge={"indigo.500": ["true"], "coral.600": ["false"]},
-        ),
         DateTimeDyField.data_source("Creation Time", "data.creation_time"),
         DateTimeDyField.data_source("Last Modified Time", "data.last_modified_time"),
     ],
@@ -62,7 +56,7 @@ workspace_dataset_meta = ListDynamicLayout.set_layouts(
 
 workspace_matching_project_meta = TableDynamicLayout.set_fields(
     "Project",
-    root_path="data.matching_projects",
+    root_path="data.matching_project",
     fields=[
         TextDyField.data_source("ID", "id"),
         TextDyField.data_source("Numeric Id", "numeric_id"),
@@ -77,24 +71,11 @@ workspace_table_meta = TableDynamicLayout.set_fields(
     root_path="data.tables",
     fields=[
         TextDyField.data_source("ID", "id"),
-        TextDyField.data_source("Name", "table_reference.table_id"),
+        TextDyField.data_source("Name", "name"),
         TextDyField.data_source("Type", "type"),
-        TextDyField.data_source("Dataset", "table_reference.dataset_id"),
-        TextDyField.data_source("Number of Rows", "num_rows"),
         DateTimeDyField.data_source("Creation Time", "creation_time"),
         DateTimeDyField.data_source("Last Modified Time", "last_modified_time"),
         DateTimeDyField.data_source("Expiration Time", "expiration_time"),
-    ],
-)
-
-workspace_table_schema_meta = TableDynamicLayout.set_fields(
-    "Table Schema",
-    root_path="data.table_schemas",
-    fields=[
-        TextDyField.data_source("Table Name", "table_id"),
-        TextDyField.data_source("Column Name", "name"),
-        TextDyField.data_source("Column Type", "type"),
-        TextDyField.data_source("Column Mode", "mode"),
     ],
 )
 
@@ -112,7 +93,6 @@ big_query_workspace_meta = CloudServiceMeta.set_layouts(
     [
         workspace_dataset_meta,
         workspace_table_meta,
-        workspace_table_schema_meta,
         workspace_matching_project_meta,
         workspace_labels_meta,
     ]

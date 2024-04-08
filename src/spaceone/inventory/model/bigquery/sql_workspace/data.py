@@ -53,13 +53,6 @@ class TableReference(Model):
     table_id = StringType(deserialize_from="tableId", serialize_when_none=False)
 
 
-class TableSchemaRef(Model):
-    table_id = StringType()
-    name = StringType()
-    type = StringType()
-    mode = StringType()
-
-
 class TableSchema(Model):
     name = StringType()
     type = StringType()
@@ -77,21 +70,8 @@ class ReservationUsage(Model):
 
 class Table(Model):
     id = StringType(deserialize_from="id")
-    kind = StringType(deserialize_from="kind")
-    table_reference = ModelType(
-        TableReference, deserialize_from="tableReference", serialize_when_none=False
-    )
-    friendly_name = StringType(serialize_when_none=False)
+    name = StringType(serialize_when_none=False)
     type = StringType(serialize_when_none=False)
-    range_partitioning = ModelType(
-        RangePartitioning,
-        deserialize_from="rangePartitioning",
-        serialize_when_none=False,
-    )
-    Labels = ModelType(Labels, deserialize_from="Labels", serialize_when_none=False)
-    view = ModelType(View, serialize_when_none=False)
-    num_rows = StringType(deserialize_from="numRows", serialize_when_none=False)
-    schema = ListType(ModelType(TableSchema), default=[])
     creation_time = DateTimeType(
         deserialize_from="creationTime", serialize_when_none=False
     )
@@ -131,7 +111,7 @@ class Access(Model):
 
 
 class BigQueryWorkSpace(BaseResource):
-    matching_projects = ListType(ModelType(ProjectModel), default=[])
+    matching_project = ListType(ModelType(ProjectModel), default=[])
     dataset_reference = ModelType(
         DatasetReference, deserialize_from="datasetReference", serialize_when_none=False
     )
@@ -139,12 +119,10 @@ class BigQueryWorkSpace(BaseResource):
         deserialize_from="friendlyName", serialize_when_none=False
     )
     tables = ListType(ModelType(Table), default=[])
-    table_schemas = ListType(ModelType(TableSchemaRef), default=[])
     access = ListType(ModelType(Access), default=[])
     labels = ListType(ModelType(Labels), default=[])
     etags = StringType(serialize_when_none=False)
     location = StringType()
-    visible_on_console = BooleanType()
     default_partition_expiration_ms_display = IntType(serialize_when_none=False)
     default_table_expiration_ms_display = IntType(serialize_when_none=False)
     default_table_expiration_ms = StringType(

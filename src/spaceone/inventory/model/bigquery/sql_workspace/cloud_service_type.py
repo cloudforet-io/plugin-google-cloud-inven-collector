@@ -47,11 +47,6 @@ cst_sql_workspace._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source(
             "Default Table Expires(Minutes)", "data.default_table_expiration_ms_display"
         ),
-        EnumDyField.data_source(
-            "Visible on Console",
-            "data.visible_on_console",
-            default_badge={"indigo.500": ["true"], "coral.600": ["false"]},
-        ),
         DateTimeDyField.data_source("Creation Time", "data.creation_time"),
         DateTimeDyField.data_source("Last Modified Time", "data.last_modified_time"),
     ],
