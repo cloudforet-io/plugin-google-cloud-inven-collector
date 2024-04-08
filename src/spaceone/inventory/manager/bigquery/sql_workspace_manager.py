@@ -8,7 +8,7 @@ from spaceone.inventory.model.bigquery.sql_workspace.cloud_service import (
     BigQueryWorkSpace,
     SQLWorkSpaceResource,
     SQLWorkSpaceResponse,
-    ProjectModel,
+    # ProjectModel,
 )
 from spaceone.inventory.model.bigquery.sql_workspace.cloud_service_type import (
     CLOUD_SERVICE_TYPES,
