@@ -88,16 +88,16 @@ class DatasetReference(Model):
     project_id = StringType(deserialize_from="projectId", serialize_when_none=False)
 
 
-class ProjectModel(Model):
-    id = StringType()
-    kind = StringType()
-    numeric_id = StringType(deserialize_from="numericId")
-    project_reference = ModelType(
-        ProjectReference, deserialize_from="projectReference", serialize_when_none=False
-    )
-    friendly_name = StringType(
-        deserialize_from="friendlyName", serialize_when_none=False
-    )
+# class ProjectModel(Model):
+#     id = StringType()
+#     kind = StringType()
+#     numeric_id = StringType(deserialize_from="numericId")
+#     project_reference = ModelType(
+#         ProjectReference, deserialize_from="projectReference", serialize_when_none=False
+#     )
+#     friendly_name = StringType(
+#         deserialize_from="friendlyName", serialize_when_none=False
+#     )
 
 
 class Access(Model):
@@ -111,7 +111,7 @@ class Access(Model):
 
 
 class BigQueryWorkSpace(BaseResource):
-    matching_project = ListType(ModelType(ProjectModel), default=[])
+    # matching_project = ListType(ModelType(ProjectModel), default=[])
     dataset_reference = ModelType(
         DatasetReference, deserialize_from="datasetReference", serialize_when_none=False
     )

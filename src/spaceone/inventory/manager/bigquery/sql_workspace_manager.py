@@ -8,7 +8,7 @@ from spaceone.inventory.model.bigquery.sql_workspace.cloud_service import (
     BigQueryWorkSpace,
     SQLWorkSpaceResource,
     SQLWorkSpaceResponse,
-    ProjectModel,
+    # ProjectModel,
 )
 from spaceone.inventory.model.bigquery.sql_workspace.cloud_service_type import (
     CLOUD_SERVICE_TYPES,
@@ -51,7 +51,7 @@ class SQLWorkspaceManager(GoogleCloudManager):
             self.connector_name, **params
         )
         data_sets = big_query_conn.list_dataset()
-        projects = big_query_conn.list_projects()
+        # projects = big_query_conn.list_projects()
 
         for data_set in data_sets:
             try:
@@ -90,9 +90,9 @@ class SQLWorkspaceManager(GoogleCloudManager):
                         "project": project_id,
                         "tables": updated_bq_tables,
                         "region": region,
-                        "matching_project": self._get_matching_project(
-                            dataset_project_id, projects
-                        ),
+                        # "matching_project": self._get_matching_project(
+                        #     dataset_project_id, projects
+                        # ),
                         "creationTime": self._convert_unix_timestamp(creation_time),
                         "lastModifiedTime": self._convert_unix_timestamp(
                             last_modified_time
@@ -180,13 +180,13 @@ class SQLWorkspaceManager(GoogleCloudManager):
 
         return preprocessed_bq_tables
 
-    @staticmethod
-    def _get_matching_project(project_id, projects):
-        _projects = []
-        for project in projects:
-            if project_id == project.get("id"):
-                _projects.append(ProjectModel(project, strict=False))
-        return _projects
+    # @staticmethod
+    # def _get_matching_project(project_id, projects):
+    #     _projects = []
+    #     for project in projects:
+    #         if project_id == project.get("id"):
+    #             _projects.append(ProjectModel(project, strict=False))
+    #     return _projects
 
     @staticmethod
     def _convert_milliseconds_to_minutes(milliseconds):
