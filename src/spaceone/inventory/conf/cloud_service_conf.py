@@ -18,7 +18,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "DiskManager",
     ],
     "CloudSQL": ["CloudSQLManager"],
-    # "BigQuery": ["SQLWorkspaceManager"],
+    "BigQuery": ["SQLWorkspaceManager"],
     "CloudStorage": ["StorageManager"],
     "Networking": [
         "ExternalIPAddressManager",
