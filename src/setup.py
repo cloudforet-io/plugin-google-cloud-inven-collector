@@ -39,6 +39,11 @@ setup(
         "requests",
         "beautifulsoup4",
     ],
-    package_data={"spaceone": ["inventory/model/*/*/widget/*.yml"]},
+    package_data={
+        "spaceone": [
+            "inventory/model/*/*/widget/*.yml",
+            "inventory/metrics/**/**/*.yaml",
+        ]
+    },
     zip_safe=False,
 )
