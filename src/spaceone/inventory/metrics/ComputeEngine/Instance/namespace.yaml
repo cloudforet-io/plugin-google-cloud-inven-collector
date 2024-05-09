@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-compute-engine-instance
+namespace_id: ns-google-cloud-computeengine-instance
 name: ComputeEngine/Instance
 category: ASSET
 provider: google_cloud
