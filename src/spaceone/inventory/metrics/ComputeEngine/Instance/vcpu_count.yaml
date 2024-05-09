@@ -1,0 +1,32 @@
+---
+metric_id: metric-google-cloud-compute-engine-instance-vcpu-count
+name: vCPU Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.ComputeEngine.Instance
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: instance_type
+      name: Instance Type
+      search_key: instance_type
+    - key: data.os.os_type
+      name: OS Type
+      search_key: data.os.os_type
+    - key: data.compute.az
+      name: Availability Zone
+      search_key: data.compute.az
+  fields:
+    value:
+      key: data.hardware.core
+      operator: sum
+unit: Core
+namespace_id: ns-google-cloud-compute-engine-instance
+version: '1.0'

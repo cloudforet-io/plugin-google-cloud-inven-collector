@@ -1,10 +1,11 @@
+import os
 import time
 import logging
 import json
 import concurrent.futures
-
 from spaceone.inventory.connector.resource_manager.project import ProjectConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
+from spaceone.core import utils
 from spaceone.core.service import *
 from spaceone.inventory.libs.schema.cloud_service import (
     ErrorResourceResponse,
@@ -13,6 +14,10 @@ from spaceone.inventory.libs.schema.cloud_service import (
 from spaceone.inventory.conf.cloud_service_conf import *
 
 _LOGGER = logging.getLogger(__name__)
+
+_CURRENT_DIR = os.path.dirname(__file__)
+_BEFORE_CURRENT_DIR, _ = _CURRENT_DIR.rsplit("/", 1)
+_METRIC_DIR = os.path.join(_BEFORE_CURRENT_DIR, "metrics/")
 
 
 @authentication_handler
@@ -131,6 +136,10 @@ class CollectorService(BaseService):
                     _LOGGER.debug(error_resource_response)
                     yield error_resource_response.to_primitive()
 
+        for service in CLOUD_SERVICE_GROUP_MAP.keys():
+            for response in self.collect_metrics(service):
+                yield response
+
         _LOGGER.debug(f"TOTAL TIME : {time.time() - start_time} Seconds")
 
     def _get_target_execute_manager(self, options):
@@ -178,3 +187,44 @@ class CollectorService(BaseService):
             )
 
         return error_resource_response
+
+    def collect_metrics(self, service: str) -> dict:
+
+        if service == "Pub/Sub":
+            service = "PubSub"
+
+        for dirname in os.listdir(os.path.join(_METRIC_DIR, service)):
+            for filename in os.listdir(os.path.join(_METRIC_DIR, service, dirname)):
+                if filename.endswith(".yaml"):
+                    file_path = os.path.join(_METRIC_DIR, service, dirname, filename)
+                    info = utils.load_yaml_from_file(file_path)
+                    if filename == "namespace.yaml":
+                        yield self.make_namespace_or_metric_response(
+                            namespace=info,
+                            resource_type="inventory.Namespace",
+                        )
+                    else:
+                        yield self.make_namespace_or_metric_response(
+                            metric=info,
+                            resource_type="inventory.Metric",
+                        )
+
+    @staticmethod
+    def make_namespace_or_metric_response(
+        metric=None,
+        namespace=None,
+        resource_type: str = "inventory.Metric",
+    ) -> dict:
+
+        response = {
+            "state": "SUCCESS",
+            "resource_type": resource_type,
+            "match_rules": {},
+        }
+
+        if resource_type == "inventory.Metric" and metric is not None:
+            response["resource"] = metric
+        elif resource_type == "inventory.Namespace" and namespace is not None:
+            response["resource"] = namespace
+
+        return response
