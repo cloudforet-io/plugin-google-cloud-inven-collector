@@ -1,0 +1,7 @@
+---
+namespace_id: ns-google-cloud-pubsub-topic
+name: PubSub/Topic
+category: ASSET
+provider: google_cloud
+icon: 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/cloud_pubsub.svg'
+version: '1.0'

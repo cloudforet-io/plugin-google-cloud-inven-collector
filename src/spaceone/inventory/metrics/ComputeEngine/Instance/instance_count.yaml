@@ -1,5 +1,5 @@
 ---
-metric_id: metric-google-cloud-compute-engine-instance-count
+metric_id: metric-google-cloud-computeengine-instance-count
 name: Instance Count
 metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.ComputeEngine.Instance
@@ -31,5 +31,5 @@ query_options:
     value:
       operator: count
 unit: Count
-namespace_id: ns-google-cloud-compute-engine-instance
+namespace_id: ns-google-cloud-computeengine-instance
 version: '1.0'
