@@ -1,5 +1,5 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, DictType
+from schematics.types import ModelType, ListType, StringType, DictType, FloatType
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 from spaceone.inventory.model.cloud_functions.function_gen2.inner_data import *
@@ -35,6 +35,7 @@ class FunctionDisplay(Model):
     build_environment_variables = ListType(
         ModelType(Variable), serialize_when_none=False
     )
+    memory_size = FloatType(serialize_when_none=False)
 
 
 class FunctionGen2(BaseResource):
