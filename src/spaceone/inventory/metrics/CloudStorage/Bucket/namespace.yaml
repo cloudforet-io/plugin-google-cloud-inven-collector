@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-cloudstorage-bucket
+namespace_id: ns-gcp-cloudstorage-bucket
 name: CloudStorage/Bucket
 category: ASSET
 provider: google_cloud

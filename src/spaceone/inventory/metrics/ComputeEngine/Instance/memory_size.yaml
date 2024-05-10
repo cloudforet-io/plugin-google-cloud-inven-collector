@@ -1,5 +1,5 @@
 ---
-metric_id: metric-google-cloud-computeengine-instance-memory-size
+metric_id: metric-gcp-computeengine-instance-memory-size
 name: Memory Size
 metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.ComputeEngine.Instance
@@ -28,5 +28,5 @@ query_options:
       key: data.hardware.memory
       operator: sum
 unit: GB
-namespace_id: ns-google-cloud-computeengine-instance
+namespace_id: ns-gcp-computeengine-instance
 version: '1.0'

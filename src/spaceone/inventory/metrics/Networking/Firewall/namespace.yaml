@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-networking-firewall
+namespace_id: ns-gcp-networking-firewall
 name: Networking/Firewall
 category: ASSET
 provider: google_cloud

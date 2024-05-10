@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-networking-loadbalancing
+namespace_id: ns-gcp-networking-loadbalancing
 name: Networking/LoadBalancing
 category: ASSET
 provider: google_cloud

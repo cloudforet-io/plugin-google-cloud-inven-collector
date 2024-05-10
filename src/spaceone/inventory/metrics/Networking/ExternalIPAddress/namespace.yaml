@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-networking-externalipaddress
+namespace_id: ns-gcp-networking-eip
 name: Networking/ExternalIPAddress
 category: ASSET
 provider: google_cloud
