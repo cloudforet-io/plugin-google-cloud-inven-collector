@@ -1,0 +1,34 @@
+---
+metric_id: metric-gcp-ce-instance-disk-size
+name: Disk Size
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.ComputeEngine.Instance
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: data.compute.az
+      name: Availability Zone
+      search_key: data.compute.az
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: instance_type
+      name: Instance Type
+      search_key: instance_type
+    - key: data.os.os_type
+      name: OS Type
+      search_key: data.os.os_type
+  unwind:
+    - path: data.disks
+  fields:
+    value:
+      key: data.disks.size
+      operator: sum
+unit: BYTES
+namespace_id: ns-gcp-ce-instance
+version: '1.0'

@@ -134,6 +134,7 @@ class BigQueryWorkSpace(BaseResource):
 
     creation_time = DateTimeType(deserialize_from="creationTime")
     last_modified_time = DateTimeType(deserialize_from="lastModifiedTime")
+    stats = DictType(StringType, default={})
 
     def reference(self):
         return {

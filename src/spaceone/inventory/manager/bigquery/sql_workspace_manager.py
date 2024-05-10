@@ -110,6 +110,15 @@ class SQLWorkspaceManager(GoogleCloudManager):
                             data_set_id,
                             google_cloud_monitoring_filters,
                         ),
+                        "stats": {
+                            "table_count": len(
+                                [
+                                    table
+                                    for table in updated_bq_tables
+                                    if table["type"] == "TABLE"
+                                ]
+                            )
+                        },
                     }
                 )
                 big_query_data = BigQueryWorkSpace(bq_dataset, strict=False)
