@@ -1,0 +1,36 @@
+---
+metric_id: metric-gcp-sql-user-count
+name: User Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.CloudSQL.Instance
+query_options:
+  group_by:
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: data.display_state
+      name: Instance State
+      search_key: data.display_state
+      default: true
+    - key: data.settings.tier
+      name: Tier
+      search_key: data.settings.tier
+    - key: data.database_version
+      name: Database Version
+      search_key: data.database_version
+    - key: data.settings.data_disk_type
+      name: Data Disk Type
+      search_key: data.settings.data_disk_type
+  fields:
+    value:
+      key: data.stats.user_count
+      operator: count
+unit: Count
+namespace_id: ns-gcp-cloudsql-instance
+version: '1.0'
