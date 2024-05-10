@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-cloudfunctions-function
+namespace_id: ns-gcp-cloudfunctions-function
 name: CloudFunctions/Function
 category: ASSET
 provider: google_cloud

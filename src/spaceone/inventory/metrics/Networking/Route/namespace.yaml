@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-networking-route
+namespace_id: ns-gcp-networking-route
 name: Networking/Route
 category: ASSET
 provider: google_cloud

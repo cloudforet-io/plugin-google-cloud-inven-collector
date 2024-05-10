@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-pubsub-subscription
+namespace_id: ns-gcp-pubsub-subscription
 name: PubSub/Subscription
 category: ASSET
 provider: google_cloud

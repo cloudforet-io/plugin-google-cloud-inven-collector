@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-pubsub-schema
+namespace_id: ns-gcp-pubsub-schema
 name: PubSub/Schema
 category: ASSET
 provider: google_cloud

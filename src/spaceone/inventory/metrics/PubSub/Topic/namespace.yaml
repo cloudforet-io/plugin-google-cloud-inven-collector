@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-pubsub-topic
+namespace_id: ns-gcp-pubsub-topic
 name: PubSub/Topic
 category: ASSET
 provider: google_cloud

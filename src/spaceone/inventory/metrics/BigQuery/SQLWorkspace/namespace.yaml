@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-bigquery-sqlworkspace
+namespace_id: ns-gcp-bigquery-sqlworkspace
 name: BigQuery/SQLWorkspace
 category: ASSET
 provider: google_cloud

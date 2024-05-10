@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-pubsub-snapshot
+namespace_id: ns-gcp-pubsub-snapshot
 name: PubSub/Snapshot
 category: ASSET
 provider: google_cloud

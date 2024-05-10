@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-google-cloud-cloudsql-instance
+namespace_id: ns-gcp-cloudsql-instance
 name: CloudSQL/Instance
 category: ASSET
 provider: google_cloud
