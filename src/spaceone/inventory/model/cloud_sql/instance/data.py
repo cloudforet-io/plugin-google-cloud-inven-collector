@@ -1,11 +1,19 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, BooleanType, IntType, DateTimeType
+from schematics.types import (
+    ModelType,
+    ListType,
+    StringType,
+    BooleanType,
+    IntType,
+    DateTimeType,
+    DictType,
+)
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class SQLServerUserDetail(Model):
     disabled = BooleanType()
-    server_roles = ListType(StringType, deserialize_from='serverRoles')
+    server_roles = ListType(StringType, deserialize_from="serverRoles")
 
 
 class User(Model):
@@ -15,18 +23,20 @@ class User(Model):
     host = StringType()
     instance = StringType()
     project = StringType()
-    sql_server_user_details = ModelType(SQLServerUserDetail,
-                                        deserialize_from='sqlserverUserDetails',
-                                        serialize_when_none=False)
+    sql_server_user_details = ModelType(
+        SQLServerUserDetail,
+        deserialize_from="sqlserverUserDetails",
+        serialize_when_none=False,
+    )
 
 
 class SQLServerDatabaseDetail(Model):
-    compatibility_level = IntType(deserialize_from='compatibilityLevel')
-    recovery_model = StringType(deserialize_from='recoveryModel')
+    compatibility_level = IntType(deserialize_from="compatibilityLevel")
+    recovery_model = StringType(deserialize_from="recoveryModel")
 
 
 class Database(Model):
-    self_link = StringType(deserialize_from='selfLink')
+    self_link = StringType(deserialize_from="selfLink")
     kind = StringType()
     charset = StringType()
     collation = StringType()
@@ -34,9 +44,11 @@ class Database(Model):
     name = StringType()
     instance = StringType()
     project = StringType()
-    sql_server_database_details = ModelType(SQLServerDatabaseDetail,
-                                            deserialize_from='sqlserverDatabaseDetails',
-                                            serialize_when_none=False)
+    sql_server_database_details = ModelType(
+        SQLServerDatabaseDetail,
+        deserialize_from="sqlserverDatabaseDetails",
+        serialize_when_none=False,
+    )
 
 
 class ServerCACert(Model):
@@ -58,14 +70,22 @@ class BackupConfiguration(Model):
     start_time = StringType(deserialize_from="startTime")
     kind = StringType()
     location = StringType()
-    binary_log_enabled = BooleanType(deserialize_from="binaryLogEnabled", serialize_when_none=False)
-    replication_log_archiving_enabled = BooleanType(deserialize_from="replicationLogArchivingEnabled",
-                                                    serialize_when_none=False)
-    backup_retention_settings = ModelType(BackupRetentionSettings, deserialize_from="backupRetentionSettings")
+    binary_log_enabled = BooleanType(
+        deserialize_from="binaryLogEnabled", serialize_when_none=False
+    )
+    replication_log_archiving_enabled = BooleanType(
+        deserialize_from="replicationLogArchivingEnabled", serialize_when_none=False
+    )
+    backup_retention_settings = ModelType(
+        BackupRetentionSettings, deserialize_from="backupRetentionSettings"
+    )
     enabled = BooleanType()
-    point_in_time_recovery_enabled = BooleanType(deserialize_from="pointInTimeRecoveryEnabled",
-                                                 serialize_when_none=False)
-    transaction_log_retention_days = IntType(deserialize_from="transactionLogRetentionDays")
+    point_in_time_recovery_enabled = BooleanType(
+        deserialize_from="pointInTimeRecoveryEnabled", serialize_when_none=False
+    )
+    transaction_log_retention_days = IntType(
+        deserialize_from="transactionLogRetentionDays"
+    )
 
 
 class MaintenanceWindow(Model):
@@ -81,7 +101,9 @@ class AuthorizedNetworks(Model):
 
 
 class IPConfiguration(Model):
-    authorized_networks = ListType(ModelType(AuthorizedNetworks), deserialize_from="authorizedNetworks")
+    authorized_networks = ListType(
+        ModelType(AuthorizedNetworks), deserialize_from="authorizedNetworks"
+    )
     ipv4_enabled = BooleanType()
 
 
@@ -91,7 +113,9 @@ class LocationPreference(Model):
 
 
 class InstanceSetting(Model):
-    authorize_gae_applications = ListType(StringType, deserialize_from="authorizedGaeApplications")
+    authorize_gae_applications = ListType(
+        StringType, deserialize_from="authorizedGaeApplications"
+    )
     tier = StringType()
     kind = StringType()
     availability_type = StringType(deserialize_from="availabilityType")
@@ -99,10 +123,16 @@ class InstanceSetting(Model):
     replication_type = StringType(deserialize_from="replicationType")
     activation_policy = StringType(deserialize_from="activationPolicy")
     ip_configuration = ModelType(IPConfiguration, deserialize_from="ipConfiguration")
-    location_preference = ModelType(LocationPreference, deserialize_from="locationPreference")
+    location_preference = ModelType(
+        LocationPreference, deserialize_from="locationPreference"
+    )
     data_disk_type = StringType(deserialize_from="dataDiskType")
-    maintenance_window = ModelType(MaintenanceWindow, deserialize_from="maintenanceWindow")
-    backup_configuration = ModelType(BackupConfiguration, deserialize_from="backupConfiguration")
+    maintenance_window = ModelType(
+        MaintenanceWindow, deserialize_from="maintenanceWindow"
+    )
+    backup_configuration = ModelType(
+        BackupConfiguration, deserialize_from="backupConfiguration"
+    )
     collation = StringType()
     settings_version = StringType(deserialize_from="settingsVersion")
     storage_auto_resize_limit = StringType(deserialize_from="storageAutoResizeLimit")
@@ -117,9 +147,18 @@ class IPAddress(Model):
 
 class Instance(BaseResource):
     kind = StringType()
-    display_state = StringType(choices=('RUNNING', 'STOPPED', 'UNKNOWN', 'ON-DEMAND'))
-    state = StringType(choices=('SQL_INSTANCE_STATE_UNSPECIFIED', 'RUNNABLE', 'SUSPENDED', 'PENDING_DELETE',
-                                'PENDING_CREATE', 'MAINTENANCE', 'FAILED'))
+    display_state = StringType(choices=("RUNNING", "STOPPED", "UNKNOWN", "ON-DEMAND"))
+    state = StringType(
+        choices=(
+            "SQL_INSTANCE_STATE_UNSPECIFIED",
+            "RUNNABLE",
+            "SUSPENDED",
+            "PENDING_DELETE",
+            "PENDING_CREATE",
+            "MAINTENANCE",
+            "FAILED",
+        )
+    )
     gce_zone = StringType(deserialize_from="gceZone")
     database_version = StringType(deserialize_from="databaseVersion")
     settings = ModelType(InstanceSetting)
@@ -127,14 +166,19 @@ class Instance(BaseResource):
     ip_addresses = ListType(ModelType(IPAddress), deserialize_from="ipAddresses")
     server_ca_cert = ModelType(ServerCACert, deserialize_from="serverCaCert")
     instance_type = StringType(deserialize_from="instanceType")
-    service_account_email_address = StringType(deserialize_from="serviceAccountEmailAddress")
+    service_account_email_address = StringType(
+        deserialize_from="serviceAccountEmailAddress"
+    )
     backend_type = StringType(deserialize_from="backendType")
     databases = ListType(ModelType(Database))
     users = ListType(ModelType(User))
-    connection_name = StringType(deserialize_from="connectionName", serialize_when_none=False)
+    connection_name = StringType(
+        deserialize_from="connectionName", serialize_when_none=False
+    )
+    stats = DictType(StringType, default={})
 
     def reference(self):
         return {
             "resource_id": self.self_link,
-            "external_link": f"https://console.cloud.google.com/sql/instances/{self.name}/overview?authuser=1&project={self.project}"
+            "external_link": f"https://console.cloud.google.com/sql/instances/{self.name}/overview?authuser=1&project={self.project}",
         }
