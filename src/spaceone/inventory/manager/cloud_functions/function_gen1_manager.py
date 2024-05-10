@@ -80,6 +80,7 @@ class FunctionGen1Manager(GoogleCloudManager):
                         "memory_allocated": self._make_memory_allocated(
                             function["availableMemoryMb"]
                         ),
+                        "memory_size": float(function["availableMemoryMb"]),
                         "ingress_settings": self._make_ingress_setting_readable(
                             function["ingressSettings"]
                         ),
@@ -194,6 +195,8 @@ class FunctionGen1Manager(GoogleCloudManager):
             "python38": "Python 3.8",
             "python39": "Python 3.9",
             "python310": "Python 3.10",
+            "python311": "Python 3.11",
+            "python312": "Python 3.12",
             "ruby30": "Ruby 3.0",
             "ruby27": "Ruby 2.7",
             "ruby26": "Ruby 2.6",
