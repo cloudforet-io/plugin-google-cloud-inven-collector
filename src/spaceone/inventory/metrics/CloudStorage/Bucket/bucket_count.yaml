@@ -1,0 +1,28 @@
+---
+metric_id: metric-gcp-cs-bucket-count
+name: Bucket Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.CloudStorage.Bucket
+query_options:
+  group_by:
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: data.default_storage_class
+      name: Default Storage Class
+      search_key: data.default_storage_class
+    - key: data.public_access
+      name: Access
+      search_key: data.public_access
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-gcp-cloudstorage-bucket
+version: '1.0'

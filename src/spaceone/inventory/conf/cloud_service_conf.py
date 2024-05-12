@@ -27,7 +27,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "RouteManager",
         "VPCNetworkManager",
     ],
-    "Pub/Sub": [
+    "PubSub": [
         "SchemaManager",
         "SnapshotManager",
         "SubscriptionManager",
@@ -71,7 +71,7 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         }
     },
     "Networking": {},
-    "Pub/Sub": {
+    "PubSub": {
         "Topic": {
             "resource_type": "pubsub_topic",
             "labels_key": "resource.labels.topic_id",

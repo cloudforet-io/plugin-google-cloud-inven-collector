@@ -20,7 +20,7 @@ query_options:
   fields:
     value:
       key: data.stats.table_count
-      operator: count
+      operator: sum
 unit: Count
 namespace_id: ns-gcp-bigquery-sqlworkspace
 version: '1.0'

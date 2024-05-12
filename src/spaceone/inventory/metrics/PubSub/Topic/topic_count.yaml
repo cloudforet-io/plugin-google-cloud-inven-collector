@@ -1,0 +1,22 @@
+---
+metric_id: metric-gcp-pubsub-topic-count
+name: Topic Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.PubSub.Topic
+query_options:
+  group_by:
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-gcp-pubsub-topic
+version: '1.0'
