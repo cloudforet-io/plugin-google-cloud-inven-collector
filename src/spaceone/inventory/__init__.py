@@ -1,1 +1,1 @@
-name = 'inventory'
+name = "inventory"

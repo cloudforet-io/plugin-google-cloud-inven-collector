@@ -10,6 +10,3 @@ def get_data_from_yaml(file_path):
         dict = yaml.load(f, Loader=yaml.FullLoader)
 
     return dict
-
-
-
