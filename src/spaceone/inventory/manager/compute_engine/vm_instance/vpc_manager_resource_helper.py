@@ -8,7 +8,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class VPCManagerResourceHelper(GoogleCloudManager):
 
-    connector_name = 'VMInstanceConnector'
+    connector_name = "VMInstanceConnector"
 
     def get_vpc_info(self, instance, vpcs, subnets):
         """
@@ -36,32 +36,36 @@ class VPCManagerResourceHelper(GoogleCloudManager):
         matched_subnet = self._get_matching_subnet(instance, subnets)
         matched_vpc = self._get_matching_vpc(matched_subnet, vpcs)
 
-        vpc_data.update({
-            'vpc_id': matched_vpc.get('id', ''),
-            'vpc_name': matched_vpc.get('name', ''),
-            'description': matched_vpc.get('description', ''),
-            'self_link': matched_vpc.get('selfLink', ''),
-        })
+        vpc_data.update(
+            {
+                "vpc_id": matched_vpc.get("id", ""),
+                "vpc_name": matched_vpc.get("name", ""),
+                "description": matched_vpc.get("description", ""),
+                "self_link": matched_vpc.get("selfLink", ""),
+            }
+        )
 
-        subnet_data.update({
-            'subnet_id': matched_subnet.get('id', ''),
-            'cidr': matched_subnet.get('ipCidrRange', ''),
-            'subnet_name': matched_subnet.get('name', ''),
-            'gateway_address': matched_subnet.get('gatewayAddress', ''),
-            'vpc': vpc_data,
-            'self_link': matched_subnet.get('selfLink', '')
-        })
+        subnet_data.update(
+            {
+                "subnet_id": matched_subnet.get("id", ""),
+                "cidr": matched_subnet.get("ipCidrRange", ""),
+                "subnet_name": matched_subnet.get("name", ""),
+                "gateway_address": matched_subnet.get("gatewayAddress", ""),
+                "vpc": vpc_data,
+                "self_link": matched_subnet.get("selfLink", ""),
+            }
+        )
 
         return VPC(vpc_data, strict=False), Subnet(subnet_data, strict=False)
 
     @staticmethod
     def _get_matching_vpc(matched_subnet, vpcs) -> dict:
         matching_vpc = {}
-        network = matched_subnet.get('selfLink', None)
+        network = matched_subnet.get("selfLink", None)
         # Instance cannot be placed in multiple VPCs(Break after first matched result)
         if network is not None:
             for vpc in vpcs:
-                if network in vpc.get('subnetworks', []):
+                if network in vpc.get("subnetworks", []):
                     matching_vpc = vpc
                     break
 
@@ -72,19 +76,19 @@ class VPCManagerResourceHelper(GoogleCloudManager):
         subnet_data = {}
         subnetwork_links = []
 
-        network_interfaces = instance.get('networkInterfaces', [])
+        network_interfaces = instance.get("networkInterfaces", [])
         for network_interface in network_interfaces:
-            """ 
+            """
             Subnet Type
-            - auto subnet/custom subnet : reference selfLink is supported 
+            - auto subnet/custom subnet : reference selfLink is supported
             - legacy : reference selfLink is not supported
             """
-            subnetwork = network_interface.get('subnetwork', '')
-            if subnetwork != '':
+            subnetwork = network_interface.get("subnetwork", "")
+            if subnetwork != "":
                 subnetwork_links.append(subnetwork)
         # Need to enhanced(multiple networkInterface in multiple subnets)
         for subnet in subnets:
-            if subnet.get('selfLink', '') in subnetwork_links:
+            if subnet.get("selfLink", "") in subnetwork_links:
                 subnet_data = subnet
                 break
 
@@ -92,5 +96,9 @@ class VPCManagerResourceHelper(GoogleCloudManager):
 
     @staticmethod
     def _get_network_str(subnet):
-        network = subnet.get('network', '')
-        return network[network.find('/projects/'):len(network)] if network != '' else None
+        network = subnet.get("network", "")
+        return (
+            network[network.find("/projects/") : len(network)]
+            if network != ""
+            else None
+        )

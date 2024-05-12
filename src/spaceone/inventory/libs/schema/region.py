@@ -11,6 +11,8 @@ class RegionResource(Model):
 
 
 class RegionResponse(BaseResponse):
-    resource_type = StringType(default='inventory.Region')
-    match_rules = DictType(ListType(StringType), default={'1': ['region_code', 'provider']})
+    resource_type = StringType(default="inventory.Region")
+    match_rules = DictType(
+        ListType(StringType), default={"1": ["region_code", "provider"]}
+    )
     resource = PolyModelType(RegionResource)

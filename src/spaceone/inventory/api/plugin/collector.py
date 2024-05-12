@@ -14,26 +14,29 @@ class Collector(BaseAPI, collector_pb2_grpc.CollectorServicer):
     def init(self, request, context):
         params, metadata = self.parse_request(request, context)
 
-        with self.locator.get_service('CollectorService', metadata) as collector_svc:
+        with self.locator.get_service("CollectorService", metadata) as collector_svc:
             data = collector_svc.init(params)
-            return self.locator.get_info('PluginInfo', data)
+            return self.locator.get_info("PluginInfo", data)
 
     def verify(self, request, context):
         params, metadata = self.parse_request(request, context)
 
-        collector_svc: CollectorService = self.locator.get_service('CollectorService', metadata)
+        collector_svc: CollectorService = self.locator.get_service(
+            "CollectorService", metadata
+        )
 
         with collector_svc:
             collector_svc.verify(params)
-            return self.locator.get_info('EmptyInfo')
+            return self.locator.get_info("EmptyInfo")
 
     def collect(self, request, context):
         params, metadata = self.parse_request(request, context)
 
-        collector_svc: CollectorService = self.locator.get_service('CollectorService', metadata)
+        collector_svc: CollectorService = self.locator.get_service(
+            "CollectorService", metadata
+        )
 
         # Collector main process
         with collector_svc:
             for resource in collector_svc.collect(params):
-                yield self.locator.get_info('ResourceInfo', resource)
-
+                yield self.locator.get_info("ResourceInfo", resource)

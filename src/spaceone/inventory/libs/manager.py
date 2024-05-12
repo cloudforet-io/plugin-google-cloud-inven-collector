@@ -50,9 +50,9 @@ class GoogleCloudManager(BaseManager):
 
                 if "spaceone:icon" in _tags:
                     _icon = _tags["spaceone:icon"]
-                    _tags[
-                        "spaceone:icon"
-                    ] = f'{options["custom_asset_url"]}/{_icon.split("/")[-1]}'
+                    _tags["spaceone:icon"] = (
+                        f'{options["custom_asset_url"]}/{_icon.split("/")[-1]}'
+                    )
 
             yield cloud_service_type
 

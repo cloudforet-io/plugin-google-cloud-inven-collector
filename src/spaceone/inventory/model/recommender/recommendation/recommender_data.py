@@ -6,14 +6,31 @@ from spaceone.inventory.libs.schema.cloud_service import BaseResource
 class RedefinedInsight(Model):
     description = StringType()
     severity = StringType()
-    category = StringType(choices=(
-        'CATEGORY_UNSPECIFIED', 'COST', 'SECURITY', 'PERFORMANCE', 'MANAGEABILITY', 'SUSTAINABILITY', 'RELIABILITY'
-    ))
+    category = StringType(
+        choices=(
+            "CATEGORY_UNSPECIFIED",
+            "COST",
+            "SECURITY",
+            "PERFORMANCE",
+            "MANAGEABILITY",
+            "SUSTAINABILITY",
+            "RELIABILITY",
+        )
+    )
 
 
 class RedefinedRecommendation(Model):
     description = StringType()
-    state = StringType(choices=('STATE_UNSPECIFIED', 'ACTIVE', 'CLAIMED', 'SUCCEEDED', 'FAILED', 'DISMISSED'))
+    state = StringType(
+        choices=(
+            "STATE_UNSPECIFIED",
+            "ACTIVE",
+            "CLAIMED",
+            "SUCCEEDED",
+            "FAILED",
+            "DISMISSED",
+        )
+    )
     affected_resource = StringType()
     location = StringType()
     priority_level = StringType()
@@ -27,11 +44,19 @@ class Recommender(BaseResource):
     name = StringType()
     id = StringType()
     description = StringType()
-    state = StringType(choices=('ok', 'warning', 'error'))
+    state = StringType(choices=("ok", "warning", "error"))
     primary_priority_level = StringType()
-    category = StringType(choices=(
-        'CATEGORY_UNSPECIFIED', 'COST', 'SECURITY', 'PERFORMANCE', 'MANAGEABILITY', 'SUSTAINABILITY', 'RELIABILITY'
-    ))
+    category = StringType(
+        choices=(
+            "CATEGORY_UNSPECIFIED",
+            "COST",
+            "SECURITY",
+            "PERFORMANCE",
+            "MANAGEABILITY",
+            "SUSTAINABILITY",
+            "RELIABILITY",
+        )
+    )
     resource_count = IntType()
     cost_savings = StringType()
     recommendations = ListType(ModelType(RedefinedRecommendation), default=[])
@@ -39,5 +64,5 @@ class Recommender(BaseResource):
     def reference(self):
         return {
             "resource_id": self.id,
-            "external_link": f'https://console.cloud.google.com/home/recommendations'
+            "external_link": f"https://console.cloud.google.com/home/recommendations",
         }
