@@ -30,7 +30,7 @@ query_options:
   fields:
     value:
       key: data.stats.user_count
-      operator: count
+      operator: sum
 unit: Count
 namespace_id: ns-gcp-cloudsql-instance
 version: '1.0'

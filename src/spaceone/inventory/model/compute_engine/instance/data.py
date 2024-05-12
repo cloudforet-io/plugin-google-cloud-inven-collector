@@ -1,6 +1,17 @@
 from schematics import Model
-from schematics.types import ModelType, ListType, StringType, IntType, DateTimeType, BooleanType, FloatType, DictType
-from spaceone.inventory.libs.schema.google_cloud_monitoring import GoogleCloudMonitoringModel
+from schematics.types import (
+    ModelType,
+    ListType,
+    StringType,
+    IntType,
+    DateTimeType,
+    BooleanType,
+    FloatType,
+    DictType,
+)
+from spaceone.inventory.libs.schema.google_cloud_monitoring import (
+    GoogleCloudMonitoringModel,
+)
 from spaceone.inventory.libs.schema.google_cloud_logging import GoogleCloudLoggingModel
 
 
@@ -45,9 +56,19 @@ class Compute(Model):
     public_ip_address = StringType()
     az = StringType()
     instance_id = StringType()
-    instance_name = StringType(default='')
-    instance_state = StringType(choices=(
-        'PROVISIONING', 'STAGING', 'RUNNING', 'STOPPING', 'REPAIRING', 'SUSPENDING', 'SUSPENDED', 'TERMINATED'))
+    instance_name = StringType(default="")
+    instance_state = StringType(
+        choices=(
+            "PROVISIONING",
+            "STAGING",
+            "RUNNING",
+            "STOPPING",
+            "REPAIRING",
+            "SUSPENDING",
+            "SUSPENDED",
+            "TERMINATED",
+        )
+    )
     instance_type = StringType()
     account = StringType()
     image = StringType()
@@ -95,7 +116,7 @@ class Hardware(Model):
 
 class OS(Model):
     os_type = StringType(serialize_when_none=False)
-    details = StringType(choices=('LINUX', 'WINDOWS'), serialize_when_none=False)
+    details = StringType(choices=("LINUX", "WINDOWS"), serialize_when_none=False)
     os_distro = StringType(serialize_when_none=False)
     os_arch = StringType(serialize_when_none=False)
 
@@ -106,7 +127,10 @@ class DiskTags(Model):
     disk_name = StringType(serialize_when_none=False)
     description = StringType(serialize_when_none=False)
     zone = StringType(serialize_when_none=False)
-    disk_type = StringType(choices=('local-ssd', 'pd-balanced', 'pd-ssd', 'pd-standard'), serialize_when_none=False)
+    disk_type = StringType(
+        choices=("local-ssd", "pd-balanced", "pd-ssd", "pd-standard"),
+        serialize_when_none=False,
+    )
     encrypted = BooleanType(default=True)
     read_iops = FloatType(serialize_when_none=False)
     write_iops = FloatType(serialize_when_none=False)
@@ -125,12 +149,12 @@ class Disk(Model):
 
 # loadbalancing = load_balancer
 class LoadBalancer(Model):
-    type = StringType(choices=('HTTP', 'TCP', 'UDP'))
+    type = StringType(choices=("HTTP", "TCP", "UDP"))
     name = StringType()
     dns = StringType(default="")
     port = ListType(IntType())
     protocol = ListType(StringType())
-    scheme = StringType(choices=('EXTERNAL', 'INTERNAL'))
+    scheme = StringType(choices=("EXTERNAL", "INTERNAL"))
     tags = DictType(StringType, default={})
 
 
@@ -160,7 +184,7 @@ class SecurityGroup(Model):
     description = StringType(default="")
     direction = StringType(choices=("inbound", "outbound"))
     port = StringType(serialize_when_none=False)
-    action = StringType(choices=('allow', 'deny'))
+    action = StringType(choices=("allow", "deny"))
 
 
 # vpc
@@ -206,6 +230,8 @@ class VMInstance(Model):
     nics = ListType(ModelType(NIC))
     disks = ListType(ModelType(Disk))
     autoscaler = ModelType(AutoScaler, serialize_when_none=False)
-    google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
+    google_cloud_monitoring = ModelType(
+        GoogleCloudMonitoringModel, serialize_when_none=False
+    )
     google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)
     display = ModelType(Display, serialize_when_none=False)
