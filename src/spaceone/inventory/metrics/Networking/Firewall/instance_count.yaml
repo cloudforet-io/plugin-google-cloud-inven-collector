@@ -1,0 +1,32 @@
+---
+metric_id: metric-gcp-net-fw-instance-count
+name: Affected Instance Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Networking.Firewall
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.display.direction_display
+      name: Direction
+      search_key: data.display.direction_display
+    - key: data.display.network_display
+      name: Network
+      search_key: data.display.network_display
+    - key: data.display.action
+      name: Action
+      search_key: data.display.action
+  fields:
+    value:
+      key: data.display.affected_instance_count
+      operator: sum
+unit: Count
+namespace_id: ns-gcp-networking-firewall
+version: '1.0'

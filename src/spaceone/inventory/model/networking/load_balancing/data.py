@@ -531,6 +531,7 @@ class LoadBalancing(BaseResource):
     target_pools = ListType(ModelType(TargetPools), serialize_when_none=False)
     tags = ListType(ModelType(Labels), serialize_when_none=False)
     creation_timestamp = DateTimeType(deserialize_from="creationTimestamp")
+    affected_instance_count = IntType(serialize_when_none=False, default=0)
 
     def reference(self, refer_link):
         return {"resource_id": self.self_link, "external_link": refer_link}
