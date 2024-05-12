@@ -49,6 +49,7 @@ class FirewallDisplay(Model):
     protocols_port = ListType(StringType(), default=[])
     action = StringType(choices=("Allow", "Deny"))
     logs = StringType(choices=("On", "Off"))
+    affected_instance_count = IntType(default=0)
 
 
 class Firewall(BaseResource):

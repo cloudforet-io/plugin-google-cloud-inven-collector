@@ -79,6 +79,14 @@ class RouteManager(GoogleCloudManager):
                     }
                 )
 
+                route.update(
+                    {
+                        "affected_instance_count": len(
+                            route.get("applicable_instance", [])
+                        ),
+                    }
+                )
+
                 ##################################
                 # 2. Make Base Data
                 ##################################

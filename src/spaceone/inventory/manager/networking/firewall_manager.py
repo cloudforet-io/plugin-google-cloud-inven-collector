@@ -107,6 +107,14 @@ class FirewallManager(GoogleCloudManager):
                     }
                 )
 
+                firewall["display"].update(
+                    {
+                        "affected_instance_count": len(
+                            firewall.get("applicable_instance", [])
+                        )
+                    }
+                )
+
                 # No Labels on API
                 _name = firewall.get("data", "")
                 firewall_data = Firewall(firewall, strict=False)
