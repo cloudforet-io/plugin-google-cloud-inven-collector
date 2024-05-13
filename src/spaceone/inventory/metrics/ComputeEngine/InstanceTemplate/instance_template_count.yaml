@@ -1,0 +1,28 @@
+---
+metric_id: metric-gcp-ce-it-count
+name: InstanceTemplate Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.ComputeEngine.InstanceTemplate
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.machine_type
+      name: Machine Type
+      search_key: data.machine_type
+    - key: data.disk_display
+      name: Disk
+      search_key: data.disk_display
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-gcp-ce-instance-template
+version: '1.0'

@@ -1,0 +1,34 @@
+---
+metric_id: metric-gcp-ce-ig-count
+name: InstanceGroup Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.ComputeEngine.InstanceGroup
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.instance_group_type
+      name: Instance Group Type
+      search_key: data.instance_group_type
+    - key: state
+      name: State
+      search_key: state
+    - key: data.autoscaling_display
+      name: Autoscaling
+      search_key: data.autoscaling_display
+    - key: data.autoscaler.mode
+      name: Autoscaler Mode
+      search_key: data.autoscaler.mode
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-gcp-ce-instance-group
+version: '1.0'

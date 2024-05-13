@@ -1,0 +1,7 @@
+---
+namespace_id: ns-gcp-ce-machine-image
+name: ComputeEngine/MachineImage
+category: ASSET
+provider: google_cloud
+icon: 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Compute_Engine.svg'
+version: '1.0'
