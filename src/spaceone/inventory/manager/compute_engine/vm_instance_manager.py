@@ -90,7 +90,6 @@ class VMInstanceManager(GoogleCloudManager):
                 resource = self.get_vm_instance_resource(
                     project_id, zone_info, compute_vm, all_resources
                 )
-                print(resource.to_primitive())
                 ##################################
                 # 4. Make Collected Region Code
                 ##################################

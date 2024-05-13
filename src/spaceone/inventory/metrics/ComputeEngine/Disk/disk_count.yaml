@@ -1,0 +1,31 @@
+---
+metric_id: metric-gcp-ce-disk-count
+name: Disk Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.ComputeEngine.Disk
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.state
+      name: State
+      search_key: data.state
+    - key: data.encryption
+      name: Encryption
+      search_key: data.encryption
+    - key: data.zone
+      name: Availability Zone
+      search_key: data.zone
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-gcp-ce-disk
+version: '1.0'

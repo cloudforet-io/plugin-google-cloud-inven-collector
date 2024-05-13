@@ -25,5 +25,5 @@ query_options:
       key: data.display.affected_instance_count
       operator: sum
 unit: Count
-namespace_id: ns-gcp-networking-firewall
+namespace_id: ns-gcp-networking-route
 version: '1.0'
