@@ -26,7 +26,7 @@ query_options:
   fields:
     value:
       key: data.write_iops
-      operator: count
+      operator: sum
 unit: Count
 namespace_id: ns-gcp-ce-disk
 version: '1.0'
