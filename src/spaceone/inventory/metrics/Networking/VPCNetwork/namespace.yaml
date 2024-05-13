@@ -1,5 +1,5 @@
 ---
-namespace_id: ns-gcp-networking-vpcnetwork
+namespace_id: ns-gcp-networking-vpc
 name: Networking/VPCNetwork
 category: ASSET
 provider: google_cloud

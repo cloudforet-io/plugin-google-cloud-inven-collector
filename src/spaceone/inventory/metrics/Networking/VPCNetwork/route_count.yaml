@@ -1,0 +1,29 @@
+---
+metric_id: metric-gcp-net-vpc-route-count
+name: Route Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Networking.VPCNetwork
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.dynamic_routing_mode
+      name: Dynamic Routing Mode
+      search_key: data.dynamic_routing_mode
+    - key: data.subnet_creation_mode
+      name: Subnet Creation Mode
+      search_key: data.subnet_creation_mode
+  fields:
+    value:
+      key: data.route_data.total_number
+      operator: sum
+unit: Count
+namespace_id: ns-gcp-networking-vpc
+version: '1.0'
