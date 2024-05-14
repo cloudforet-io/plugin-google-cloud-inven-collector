@@ -54,32 +54,6 @@ workspace_dataset_meta = ListDynamicLayout.set_layouts(
 )
 
 
-# workspace_matching_project_meta = TableDynamicLayout.set_fields(
-#     "Project",
-#     root_path="data.matching_project",
-#     fields=[
-#         TextDyField.data_source("ID", "id"),
-#         TextDyField.data_source("Numeric Id", "numeric_id"),
-#         TextDyField.data_source("kind", "kind"),
-#         TextDyField.data_source("Friendly Name", "friendly_name"),
-#     ],
-# )
-
-
-workspace_table_meta = TableDynamicLayout.set_fields(
-    "Tables",
-    root_path="data.tables",
-    fields=[
-        TextDyField.data_source("ID", "id"),
-        TextDyField.data_source("Name", "name"),
-        TextDyField.data_source("Type", "type"),
-        DateTimeDyField.data_source("Creation Time", "creation_time"),
-        DateTimeDyField.data_source("Last Modified Time", "last_modified_time"),
-        DateTimeDyField.data_source("Expiration Time", "expiration_time"),
-    ],
-)
-
-
 workspace_labels_meta = TableDynamicLayout.set_fields(
     "Labels",
     root_path="data.labels",
@@ -92,8 +66,6 @@ workspace_labels_meta = TableDynamicLayout.set_fields(
 big_query_workspace_meta = CloudServiceMeta.set_layouts(
     [
         workspace_dataset_meta,
-        workspace_table_meta,
-        # workspace_matching_project_meta,
         workspace_labels_meta,
     ]
 )
