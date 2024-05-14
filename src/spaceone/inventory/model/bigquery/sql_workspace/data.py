@@ -68,21 +68,6 @@ class ReservationUsage(Model):
     slot_ms = StringType(deserialize_from="slotMs", serialize_when_none=False)
 
 
-class Table(Model):
-    id = StringType(deserialize_from="id")
-    name = StringType(serialize_when_none=False)
-    type = StringType(serialize_when_none=False)
-    creation_time = DateTimeType(
-        deserialize_from="creationTime", serialize_when_none=False
-    )
-    expiration_time = DateTimeType(
-        deserialize_from="expirationTime", serialize_when_none=False
-    )
-    last_modified_time = DateTimeType(
-        deserialize_from="lastModifiedTime", serialize_when_none=False
-    )
-
-
 class DatasetReference(Model):
     dataset_id = StringType(deserialize_from="datasetId", serialize_when_none=False)
     project_id = StringType(deserialize_from="projectId", serialize_when_none=False)
@@ -118,7 +103,6 @@ class BigQueryWorkSpace(BaseResource):
     friendly_name = StringType(
         deserialize_from="friendlyName", serialize_when_none=False
     )
-    tables = ListType(ModelType(Table), default=[])
     access = ListType(ModelType(Access), default=[])
     labels = ListType(ModelType(Labels), default=[])
     etags = StringType(serialize_when_none=False)
@@ -134,7 +118,6 @@ class BigQueryWorkSpace(BaseResource):
 
     creation_time = DateTimeType(deserialize_from="creationTime")
     last_modified_time = DateTimeType(deserialize_from="lastModifiedTime")
-    stats = DictType(StringType, default={})
 
     def reference(self):
         return {

@@ -33,33 +33,3 @@ class SQLWorkspaceConnector(GoogleCloudConnector):
         response = self.client.datasets().get(**query).execute()
 
         return response
-
-    # def list_projects(self, **query):
-    #     project_list = []
-    #     request = self.client.projects().list(**query)
-    #
-    #     while request is not None:
-    #         response = request.execute()
-    #         for project in response.get("projects", []):
-    #             project_list.append(project)
-    #         request = self.client.projects().list_next(
-    #             previous_request=request, previous_response=response
-    #         )
-    #
-    #     return project_list
-
-    def list_tables(self, dataset_id, **query):
-        table_list = []
-
-        query.update({"projectId": self.project_id, "datasetId": dataset_id})
-
-        request = self.client.tables().list(**query)
-        while request is not None:
-            response = request.execute()
-            for table in response.get("tables", []):
-                table_list.append(table)
-            request = self.client.tables().list_next(
-                previous_request=request, previous_response=response
-            )
-
-        return table_list

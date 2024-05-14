@@ -59,21 +59,14 @@ class SQLWorkspaceManager(GoogleCloudManager):
                 # 1. Set Basic Information
                 ##################################
 
-                updated_bq_tables = []
-
                 data_refer = data_set.get("datasetReference", {})
                 data_set_id = data_refer.get("datasetId", "")
-                dataset_project_id = data_refer.get("projectId")
                 bq_dataset = big_query_conn.get_dataset(data_set_id)
                 creation_time = bq_dataset.get("creationTime", "")
                 last_modified_time = bq_dataset.get("lastModifiedTime")
                 region = self._get_region(bq_dataset.get("location", ""))
                 exp_partition_ms = bq_dataset.get("defaultPartitionExpirationMs")
                 exp_table_ms = bq_dataset.get("defaultTableExpirationMs")
-
-                bq_tables = big_query_conn.list_tables(data_set_id)
-                if bq_tables:
-                    updated_bq_tables = self._preprocess_bigquery_tables_info(bq_tables)
 
                 labels = self.convert_labels_format(bq_dataset.get("labels", {}))
                 google_cloud_monitoring_filters = [
@@ -88,7 +81,6 @@ class SQLWorkspaceManager(GoogleCloudManager):
                     {
                         "name": data_set_id,
                         "project": project_id,
-                        "tables": updated_bq_tables,
                         "region": region,
                         # "matching_project": self._get_matching_project(
                         #     dataset_project_id, projects
@@ -110,15 +102,6 @@ class SQLWorkspaceManager(GoogleCloudManager):
                             data_set_id,
                             google_cloud_monitoring_filters,
                         ),
-                        "stats": {
-                            "table_count": len(
-                                [
-                                    table
-                                    for table in updated_bq_tables
-                                    if table["type"] == "TABLE"
-                                ]
-                            )
-                        },
                     }
                 )
                 big_query_data = BigQueryWorkSpace(bq_dataset, strict=False)
@@ -162,40 +145,6 @@ class SQLWorkspaceManager(GoogleCloudManager):
     def _get_region(self, location):
         matched_info = self.match_region_info(location)
         return matched_info.get("region_code") if matched_info else "global"
-
-    def _preprocess_bigquery_tables_info(self, bq_tables):
-        preprocessed_bq_tables = []
-        for bq_table in bq_tables:
-            table_id = bq_table.get("id")
-            name = bq_table.get("tableReference", {}).get("tableId")
-            table_type = bq_table.get("type")
-            creation_time = bq_table.get("creationTime")
-            expiration_time = bq_table.get("expirationTime")
-            last_modified_time = bq_table.get("lastModifiedTime")
-
-            bq_table.update(
-                {
-                    "id": table_id,
-                    "name": name,
-                    "type": table_type,
-                    "creationTime": self._convert_unix_timestamp(creation_time),
-                    "expirationTime": self._convert_unix_timestamp(expiration_time),
-                    "lastModifiedTime": self._convert_unix_timestamp(
-                        last_modified_time
-                    ),
-                }
-            )
-            preprocessed_bq_tables.append(bq_table)
-
-        return preprocessed_bq_tables
-
-    # @staticmethod
-    # def _get_matching_project(project_id, projects):
-    #     _projects = []
-    #     for project in projects:
-    #         if project_id == project.get("id"):
-    #             _projects.append(ProjectModel(project, strict=False))
-    #     return _projects
 
     @staticmethod
     def _convert_milliseconds_to_minutes(milliseconds):

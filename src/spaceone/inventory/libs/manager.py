@@ -97,6 +97,31 @@ class GoogleCloudManager(BaseManager):
                     )
 
                     total_resources.append(error_resource_response)
+            elif isinstance(e, HttpError) and e.status_code == 400:
+                if (
+                    len(e.error_details) == 1
+                    and e.error_details[0].get("reason") == "invalid"
+                    and self.cloud_service_types[0].resource.group == "BigQuery"
+                ):
+                    _LOGGER.error(f"[collect_resources] SKIP Disabled Service {e}")
+                    pass
+                elif (
+                    len(e.error_details) == 2
+                    and e.error_details[1].get("reason") == "invalid"
+                    and self.cloud_service_types[0].resource.group == "BigQuery"
+                ):
+                    _LOGGER.error(f"[collect_resources] SKIP Disabled Service {e}")
+                    pass
+                else:
+                    _LOGGER.error(f"[collect_resources] {e}", exc_info=True)
+                    error_resource_response = self.generate_error_response(
+                        e,
+                        self.cloud_service_types[0].resource.group,
+                        self.cloud_service_types[0].resource.name,
+                    )
+
+                    total_resources.append(error_resource_response)
+
             else:
                 _LOGGER.error(f"[collect_resources] {e}", exc_info=True)
                 error_resource_response = self.generate_error_response(
