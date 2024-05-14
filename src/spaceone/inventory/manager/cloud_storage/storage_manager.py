@@ -191,7 +191,6 @@ class StorageManager(GoogleCloudManager):
                 location_display = f"{location} {map_str}"
 
         else:
-            _LOGGER.debug(f"[DEBUG] location : {location}")
             region = self.match_region_info(location)
             region_name = region.get("name", "")
             location_display = f"{location} | {region_name}"

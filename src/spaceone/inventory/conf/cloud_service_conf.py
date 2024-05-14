@@ -233,6 +233,14 @@ REGION_INFO = {
             "continent": "europe",
         },
     },
+    "europe-central2": {
+        "name": "Poland (Warszawa)",
+        "tags": {
+            "latitude": "52.2296756",
+            "longitude": "21.0122287",
+            "continent": "europe",
+        },
+    },
     "northamerica-northeast1": {
         "name": "Canada, Québec (Montréal)",
         "tags": {
