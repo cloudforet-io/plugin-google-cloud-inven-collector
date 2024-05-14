@@ -80,9 +80,8 @@ class FunctionGen1Manager(GoogleCloudManager):
                         "memory_allocated": self._make_memory_allocated(
                             function["availableMemoryMb"]
                         ),
-                        "memory_size": float(function["availableMemoryMb"]),
                         "ingress_settings": self._make_ingress_setting_readable(
-                            function["ingressSettings"]
+                            function.get("ingressSettings")
                         ),
                         "vpc_connector_egress_settings": self._make_vpc_egress_readable(
                             function.get("vpc_connector_egress_settings")
@@ -229,8 +228,11 @@ class FunctionGen1Manager(GoogleCloudManager):
 
     @staticmethod
     def _make_ingress_setting_readable(ingress_settings):
-        ingress_settings = ingress_settings.replace("_", " ").lower()
-        return ingress_settings[0].upper() + ingress_settings[1:]
+        if ingress_settings:
+            ingress_settings = ingress_settings.replace("_", " ").lower()
+            return ingress_settings[0].upper() + ingress_settings[1:]
+        else:
+            return ""
 
     @staticmethod
     def _make_storage_object(function_id):

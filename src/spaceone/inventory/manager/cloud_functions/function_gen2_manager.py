@@ -115,11 +115,6 @@ class FunctionGen2Manager(GoogleCloudManager):
                         "vpc_connector_egress_settings": self._make_vpc_egress_readable(
                             function["serviceConfig"].get("vpcConnectorEgressSettings")
                         ),
-                        "memory_size": float(
-                            self._make_memory_size(
-                                function["serviceConfig"]["availableMemory"]
-                            )
-                        ),
                     }
                 )
 
@@ -295,19 +290,6 @@ class FunctionGen2Manager(GoogleCloudManager):
         except Exception:
             number, *unit = memory.split("Gi")
             return f"{number} GiB"
-
-    @staticmethod
-    def _make_memory_size(memory):
-        try:
-            number, *unit = memory.split("Mi")
-            return number
-        except ValueError:
-            number, *unit = memory.split("M")
-            return number
-        except Exception:
-            number, *unit = memory.split("Gi")
-            number = float(number * 1024)
-            return number
 
     @staticmethod
     def _make_vpc_egress_readable(egress_settings):
