@@ -35,7 +35,6 @@ class FunctionDisplay(Model):
     build_environment_variables = ListType(
         ModelType(Variable), serialize_when_none=False
     )
-    memory_size = FloatType(serialize_when_none=False)
 
 
 class FunctionGen2(BaseResource):
