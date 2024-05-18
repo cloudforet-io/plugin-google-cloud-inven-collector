@@ -136,9 +136,9 @@ class CollectorService(BaseService):
                     _LOGGER.debug(error_resource_response)
                     yield error_resource_response.to_primitive()
 
-        for service in CLOUD_SERVICE_GROUP_MAP.keys():
-            for response in self.collect_metrics(service):
-                yield response
+        # for service in CLOUD_SERVICE_GROUP_MAP.keys():
+        #     for response in self.collect_metrics(service):
+        #         yield response
 
         _LOGGER.debug(f"TOTAL TIME : {time.time() - start_time} Seconds")
 
