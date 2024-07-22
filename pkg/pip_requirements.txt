@@ -4,3 +4,4 @@ MarkupSafe>=2.0.0rc2
 google-cloud-storage
 requests
 beautifulsoup4
+grpcio

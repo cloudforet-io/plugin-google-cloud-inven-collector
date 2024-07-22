@@ -1,5 +1,5 @@
 ---
-metric_id: metric-gcp-sql-database-count
+metric_id: metric-google-cloud-sql-database-count
 name: Database Count
 metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.CloudSQL.Instance
@@ -32,5 +32,5 @@ query_options:
       key: data.stats.database_count
       operator: sum
 unit: Count
-namespace_id: ns-gcp-cloudsql-instance
-version: '1.0'
+namespace_id: ns-google-cloud-cloudsql-instance
+version: '1.1'
