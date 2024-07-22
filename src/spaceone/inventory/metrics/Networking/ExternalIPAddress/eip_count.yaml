@@ -26,9 +26,6 @@ query_options:
     - key: data.network_tier
       name: Network Tier
       search_key: data.network_tier
-#    - key: data.purpose
-#      name: Purpose
-#      search_key: data.purpose
     - key: data.ip_version_display
       name: IP Version
       search_key: data.ip_version_display
