@@ -1,5 +1,5 @@
 ---
-metric_id: metric-gcp-net-vpc-sn-count
+metric_id: metric-google-cloud-net-vpc-sn-count
 name: Subnet Count
 metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.Networking.VPCNetwork
@@ -25,5 +25,5 @@ query_options:
       key: data.subnetwork_data.total_number
       operator: sum
 unit: Count
-namespace_id: ns-gcp-networking-vpc
-version: '1.0'
+namespace_id: ns-google-cloud-networking-vpc
+version: '1.1'

@@ -1,5 +1,5 @@
 ---
-metric_id: metric-gcp-ce-it-count
+metric_id: metric-google-cloud-ce-it-count
 name: InstanceTemplate Count
 metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.ComputeEngine.InstanceTemplate
@@ -24,5 +24,5 @@ query_options:
     value:
       operator: count
 unit: Count
-namespace_id: ns-gcp-ce-instance-template
-version: '1.0'
+namespace_id: ns-google-cloud-ce-instance-template
+version: '1.1'

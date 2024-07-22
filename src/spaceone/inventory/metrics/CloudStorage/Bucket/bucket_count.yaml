@@ -1,5 +1,5 @@
 ---
-metric_id: metric-gcp-cs-bucket-count
+metric_id: metric-google-cloud-cs-bucket-count
 name: Bucket Count
 metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.CloudStorage.Bucket
@@ -24,5 +24,5 @@ query_options:
     value:
       operator: count
 unit: Count
-namespace_id: ns-gcp-cloudstorage-bucket
-version: '1.0'
+namespace_id: ns-google-cloud-cloudstorage-bucket
+version: '1.1'

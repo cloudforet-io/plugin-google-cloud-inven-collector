@@ -1,5 +1,5 @@
 ---
-metric_id: metric-gcp-cf-function-count
+metric_id: metric-google-cloud-cf-function-count
 name: Function Count
 metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.CloudFunctions.Function
@@ -14,9 +14,9 @@ query_options:
       reference:
         resource_type: inventory.Region
         reference_key: region_code
-    - key: data.state
-      name: Function State
-      search_key: data.state
+    - key: data.status
+      name: Function Status
+      search_key: data.status
       default: true
     - key: data.display.environment
       name: Environment
@@ -24,15 +24,15 @@ query_options:
     - key: data.display.trigger
       name: Trigger
       search_key: data.display.trigger
-    - key: data.service_config.ingress_settings
+    - key: data.ingress_settings
       name: Ingress Settings
-      search_key: data.service_config.ingress_settings
-    - key: data.build_config.runtime
+      search_key: data.ingress_settings
+    - key: data.runtime
       name: Runtime
-      search_key: data.build_config.runtime
+      search_key: data.runtime
   fields:
     value:
       operator: count
 unit: Count
-namespace_id: ns-gcp-cloudfunctions-function
-version: '1.0'
+namespace_id: ns-google-cloud-cloudfunctions-function
+version: '1.1'

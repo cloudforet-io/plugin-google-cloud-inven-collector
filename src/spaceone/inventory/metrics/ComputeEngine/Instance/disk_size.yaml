@@ -1,5 +1,5 @@
 ---
-metric_id: metric-gcp-ce-instance-disk-size
+metric_id: metric-google-cloud-ce-instance-disk-size
 name: Disk Size
 metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.ComputeEngine.Instance
@@ -23,12 +23,10 @@ query_options:
     - key: data.os.os_type
       name: OS Type
       search_key: data.os.os_type
-  unwind:
-    - path: data.disks
   fields:
     value:
       key: data.disks.size
       operator: sum
 unit: BYTES
-namespace_id: ns-gcp-ce-instance
-version: '1.0'
+namespace_id: ns-google-cloud-ce-instance
+version: '1.1'

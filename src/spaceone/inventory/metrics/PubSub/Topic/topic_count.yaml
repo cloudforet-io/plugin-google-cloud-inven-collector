@@ -1,5 +1,5 @@
 ---
-metric_id: metric-gcp-pubsub-topic-count
+metric_id: metric-google-cloud-pubsub-topic-count
 name: Topic Count
 metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.PubSub.Topic
@@ -18,5 +18,5 @@ query_options:
     value:
       operator: count
 unit: Count
-namespace_id: ns-gcp-pubsub-topic
-version: '1.0'
+namespace_id: ns-google-cloud-pubsub-topic
+version: '1.1'

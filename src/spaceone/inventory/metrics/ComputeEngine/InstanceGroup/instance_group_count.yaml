@@ -1,5 +1,5 @@
 ---
-metric_id: metric-gcp-ce-ig-count
+metric_id: metric-google-cloud-ce-ig-count
 name: InstanceGroup Count
 metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.ComputeEngine.InstanceGroup
@@ -30,5 +30,5 @@ query_options:
     value:
       operator: count
 unit: Count
-namespace_id: ns-gcp-ce-instance-group
-version: '1.0'
+namespace_id: ns-google-cloud-ce-instance-group
+version: '1.1'
