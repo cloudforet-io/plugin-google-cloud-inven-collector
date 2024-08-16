@@ -270,7 +270,7 @@ firewall = TableDynamicLayout.set_fields(
         TextDyField.data_source("Firewall ID", "security_group_id"),
         TextDyField.data_source("Protocol", "protocol"),
         TextDyField.data_source("Port Min.", "port_range_min"),
-        TextDyField.data_source("Port MAx.", "port_range_max"),
+        TextDyField.data_source("Port Max.", "port_range_max"),
         TextDyField.data_source("Description", "description"),
     ],
 )
