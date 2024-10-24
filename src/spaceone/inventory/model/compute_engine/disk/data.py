@@ -106,6 +106,7 @@ class Disk(BaseResource):
     read_throughput = FloatType(serialize_when_none=False)
     write_throughput = FloatType(serialize_when_none=False)
     in_used_by = ListType(StringType(), default=[])
+    in_used_by_count_display = IntType(serialize_when_none=False, default=0)
     source_image_display = StringType(serialize_when_none=False)
     source_image_id = StringType(
         deserialize_from="sourceImageId", serialize_when_none=False
