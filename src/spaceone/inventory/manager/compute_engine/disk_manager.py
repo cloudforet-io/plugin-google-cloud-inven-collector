@@ -71,13 +71,17 @@ class DiskManager(GoogleCloudManager):
                 google_cloud_monitoring_filters = [
                     {"key": "resource.labels.device_name", "value": disk.get("name")}
                 ]
+
+                in_used_by = self._get_in_used_by(disk.get("users", []))
+
                 disk.update(
                     {
                         "project": secret_data["project_id"],
                         "id": disk_id,
                         "zone": zone,
                         "region": region,
-                        "in_used_by": self._get_in_used_by(disk.get("users", [])),
+                        "in_used_by": in_used_by,
+                        "in_used_by_count_display": len(in_used_by),
                         "source_image_display": self._get_source_image_display(disk),
                         "disk_type": disk_type,
                         "snapshot_schedule": self._get_matched_snapshot_schedule_detail(
@@ -183,7 +187,7 @@ class DiskManager(GoogleCloudManager):
                             "max_retention_days_display": str(
                                 retention.get("maxRetentionDays")
                             )
-                            + " days"
+                                                          + " days"
                         }
                     )
                     policy_schedule = snapshot_schedule_policy.get("schedule", {})

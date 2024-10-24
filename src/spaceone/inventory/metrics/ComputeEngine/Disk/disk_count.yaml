@@ -23,9 +23,11 @@ query_options:
     - key: data.zone
       name: Availability Zone
       search_key: data.zone
+    - key: data.in_used_by_count_display
+      name: In Used By Count
   fields:
     value:
       operator: count
 unit: Count
 namespace_id: ns-google-cloud-ce-disk
-version: '1.1'
+version: '1.2'
