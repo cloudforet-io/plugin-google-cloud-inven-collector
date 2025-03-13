@@ -309,8 +309,7 @@ class FunctionGen2Manager(GoogleCloudManager):
     @staticmethod
     def _make_ingress_setting_readable(ingress_settings):
         if ingress_settings is None:
-            return "Unspecified
-        
+            return "Unspecified"        
         ingress_settings = ingress_settings.replace("_", " ").lower()
         return ingress_settings[0].upper() + ingress_settings[1:]
 
