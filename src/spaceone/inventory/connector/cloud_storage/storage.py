@@ -29,8 +29,11 @@ class StorageConnector(GoogleCloudConnector):
 
         return bucket_list
 
-    def list_iam_policy(self, bucket_name, **query):
+    def list_iam_policy(self, bucket_name, is_payer_bucket, **query):
         query.update({"bucket": bucket_name})
+        if is_payer_bucket:
+            query["userProject"] = self.project_id
+
         result = self.client.buckets().getIamPolicy(**query).execute()
 
         return result

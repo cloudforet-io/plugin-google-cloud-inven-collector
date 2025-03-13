@@ -65,9 +65,13 @@ class StorageManager(GoogleCloudManager):
                 bucket_id = bucket.get("id")
 
                 _name = bucket.get("name", "")
-                object_count = self._get_object_total_count(
-                    monitoring_conn, bucket_name
-                )
+                is_payer_bucket = bucket.get('billing', {}).get('requesterPays', False)
+                if is_payer_bucket:
+                    print(f"Bucket Name: {bucket_name} is Payer Bucket")
+                    
+                iam_policy = storage_conn.list_iam_policy(bucket_name, is_payer_bucket)
+                
+                object_count = self._get_object_total_count(monitoring_conn, bucket_name)
                 object_size = self._get_bucket_total_size(monitoring_conn, bucket_name)
                 iam_policy = storage_conn.list_iam_policy(bucket_name)
                 st_class = bucket.get("storageClass").lower()
@@ -403,7 +407,7 @@ class StorageManager(GoogleCloudManager):
                 response.get("points", [])[0].get("value", {}).get("int64Value", "")
             )
         else:
-            object_total_count = None
+            object_total_count = 0
 
         return object_total_count
 
@@ -419,6 +423,6 @@ class StorageManager(GoogleCloudManager):
                 response.get("points", [])[0].get("value", {}).get("doubleValue", "")
             )
         else:
-            object_total_size = None
+            object_total_size = 0
 
         return object_total_size

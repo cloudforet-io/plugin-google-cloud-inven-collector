@@ -190,6 +190,9 @@ class CollectorService(BaseService):
 
     def collect_metrics(self, service: str) -> dict:
         for dirname in os.listdir(os.path.join(_METRIC_DIR, service)):
+            full_path = os.path.join(_METRIC_DIR, service, dirname)
+            if not os.path.isdir(full_path):
+                continue
             for filename in os.listdir(os.path.join(_METRIC_DIR, service, dirname)):
                 if filename.endswith(".yaml"):
                     file_path = os.path.join(_METRIC_DIR, service, dirname, filename)
