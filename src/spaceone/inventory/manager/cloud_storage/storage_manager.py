@@ -73,7 +73,7 @@ class StorageManager(GoogleCloudManager):
                 
                 object_count = self._get_object_total_count(monitoring_conn, bucket_name)
                 object_size = self._get_bucket_total_size(monitoring_conn, bucket_name)
-                iam_policy = storage_conn.list_iam_policy(bucket_name)
+                # iam_policy = storage_conn.list_iam_policy(bucket_name)
                 st_class = bucket.get("storageClass").lower()
                 region = self.get_matching_region(bucket)
                 labels = self.convert_labels_format(bucket.get("labels", {}))
