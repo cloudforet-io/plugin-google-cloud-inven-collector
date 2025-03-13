@@ -86,6 +86,7 @@ class FunctionGen2Manager(GoogleCloudManager):
                 # 2. Make Base Data
                 ##################################
                 display = {}
+                serviceConfig = function.get("serviceConfig",{})
 
                 # main table
                 display.update(
@@ -103,17 +104,17 @@ class FunctionGen2Manager(GoogleCloudManager):
                             function["buildConfig"]["runtime"]
                         ),
                         "timeout": self._make_timeout(
-                            function["serviceConfig"]["timeoutSeconds"]
+                            serviceConfig.get("timeoutSeconds",0)
                         ),
                         "executed_function": function["buildConfig"].get("entryPoint"),
                         "memory_allocated": self._make_memory_allocated(
-                            function["serviceConfig"]["availableMemory"]
+                            serviceConfig.get("availableMemory", "0Mi")
                         ),
                         "ingress_settings": self._make_ingress_setting_readable(
-                            function["serviceConfig"].get("ingressSettings")
+                            serviceConfig.get("ingressSettings", "INGRESS_SETTINGS_UNSPECIFIED")
                         ),
                         "vpc_connector_egress_settings": self._make_vpc_egress_readable(
-                            function["serviceConfig"].get("vpcConnectorEgressSettings")
+                            serviceConfig.get("vpcConnectorEgressSettings", "")
                         ),
                     }
                 )
@@ -139,9 +140,7 @@ class FunctionGen2Manager(GoogleCloudManager):
                 else:
                     display.update({"trigger": "HTTP"})
 
-                if runtime_environment_variables := function["serviceConfig"].get(
-                    "environmentVariables", {}
-                ):
+                if runtime_environment_variables := serviceConfig.get("environmentVariables", {}):
                     display.update(
                         {
                             "runtime_environment_variables": self._dict_to_list_of_dict(
@@ -309,6 +308,9 @@ class FunctionGen2Manager(GoogleCloudManager):
 
     @staticmethod
     def _make_ingress_setting_readable(ingress_settings):
+        if ingress_settings is None:
+            return "Unspecified
+        
         ingress_settings = ingress_settings.replace("_", " ").lower()
         return ingress_settings[0].upper() + ingress_settings[1:]
 
