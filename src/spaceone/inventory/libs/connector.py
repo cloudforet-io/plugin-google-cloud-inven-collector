@@ -29,7 +29,6 @@ class GoogleCloudConnector(BaseConnector):
 
         super().__init__(*args, **kwargs)
         secret_data = kwargs.get("secret_data")
-        print(f'####: {secret_data}')
         self.project_id = secret_data.get("project_id")
         self.credentials = (
             google.oauth2.service_account.Credentials.from_service_account_info(
