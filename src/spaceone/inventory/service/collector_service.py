@@ -87,10 +87,10 @@ class CollectorService(BaseService):
 
         project_conn = self.locator.get_connector(ProjectConnector, **params)
         try:
+            # _LOGGER.debug(f"[collect] project => {project_id} / {project_state}")
             project_info = project_conn.get_project_info()
             project_id = project_info["projectId"]
             project_state = project_info["state"]
-            _LOGGER.debug(f"[collect] project => {project_id} / {project_state}")
         except Exception as e:
             _LOGGER.debug(f"[collect] failed to get project_info => {e}")
             return CloudServiceResponse().to_primitive()
