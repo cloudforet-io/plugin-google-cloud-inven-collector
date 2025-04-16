@@ -103,7 +103,7 @@ class CollectorService(BaseService):
             self.execute_managers = self._get_target_execute_manager(
                 params.get("options", {})
             )
-            _LOGGER.debug(f"[collect] execute_managers => {self.execute_managers}")
+            _LOGGER.debug(msg=f"[collect] execute_managers => {self.execute_managers}")
         except Exception as e:
             _LOGGER.error(
                 f"[collect] failed to get target execute_managers => {e}", exc_info=True
