@@ -30,51 +30,51 @@ jobs:
           author_name: Github Action Slack
 
   docker:
-      if: github.repository_owner == 'cloudforet-io'
-      needs: versioning
-      runs-on: ubuntu-latest
-      env:
-        VERSION: ${{ needs.versioning.outputs.version }}
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-          with:
-            token: ${{ secrets.PAT_TOKEN }}
-  
-        - name: get service name
-          run: |
-            echo "SERVICE=$(echo ${{ github.repository }} | cut -d '/' -f2)" >> $GITHUB_ENV
-            
-        - name: Set up QEMU
-          uses: docker/setup-qemu-action@v2
-  
-        - name: Set up Docker Buildx
-          uses: docker/setup-buildx-action@v2
-  
-        - name: Login to Docker Hub
-          uses: docker/login-action@v2
-          with:
-            username: ${{ secrets.DOCKER_USERNAME }}
-            password: ${{ secrets.DOCKER_PASSWORD }}
-            
-        - name: Build and push to pyengine
-          uses: docker/build-push-action@v4
-          with:
-            context: .
-            push: true 
-            tags: pyengine/${{ env.SERVICE }}:${{ env.VERSION }}
-            
-        - name: Notice when job fails
-          if: failure()
-          uses: 8398a7/action-slack@v3.2.0
-          with:
-            status: ${{job.status}}
-            fields: repo,workflow,job
-            author_name: Github Action Slack
+    if: github.repository_owner == 'cloudforet-io'
+    needs: versioning
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.versioning.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: get service name
+        run: |
+          echo "SERVICE=$(echo ${{ github.repository }} | cut -d '/' -f2)" >> $GITHUB_ENV
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push to pyengine
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: pyengine/${{ env.SERVICE }}:${{ env.VERSION }}
+
+      - name: Notice when job fails
+        if: failure()
+        uses: 8398a7/action-slack@v3.2.0
+        with:
+          status: ${{job.status}}
+          fields: repo,workflow,job
+          author_name: Github Action Slack
 
   scan:
-    needs: [versioning, docker]
-    runs-on: ubuntu-20.04
+    needs: [ versioning, docker ]
+    runs-on: ubuntu-latest
     env:
       VERSION: ${{ needs.versioning.outputs.version }}
     steps:
@@ -90,7 +90,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
 
@@ -102,7 +102,7 @@ jobs:
           echo "$count"
 
       - name: slack
-        if:  ${{ steps.vulnerabilities.outputs.result_count != 0 }}
+        if: ${{ steps.vulnerabilities.outputs.result_count != 0 }}
         uses: 8398a7/action-slack@v3
         with:
           status: custom
