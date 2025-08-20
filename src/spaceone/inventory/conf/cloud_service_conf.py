@@ -34,6 +34,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "TopicManager",
     ],
     "CloudFunctions": ["FunctionGen2Manager", "FunctionGen1Manager"],
+    "KubernetesEngine": ["GKEClusterV1Manager"], # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
     # "Recommender": ["RecommendationManager"],
 }
 
@@ -89,6 +90,12 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "Function": {
             "resource_type": "cloud_function",
             "labels_key": "resource.labels.function_name",
+        }
+    },
+    "KubernetesEngine": {
+        "Cluster": {
+            "resource_type": "gke_cluster",
+            "labels_key": "resource.labels.cluster_name",
         }
     },
     "Recommender": {},
