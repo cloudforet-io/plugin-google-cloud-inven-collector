@@ -1,6 +1,6 @@
 import logging
 
-from spaceone.api.inventory.plugin import collector_pb2_grpc, collector_pb2
+from spaceone.api.inventory.plugin import collector_pb2, collector_pb2_grpc
 from spaceone.core.pygrpc import BaseAPI
 from spaceone.inventory.service import CollectorService
 
@@ -40,3 +40,18 @@ class Collector(BaseAPI, collector_pb2_grpc.CollectorServicer):
         with collector_svc:
             for resource in collector_svc.collect(params):
                 yield self.locator.get_info("ResourceInfo", resource)
+
+    def get_firebase_projects(self, request, context):
+        """
+        Firebase Management API의 availableProjects 엔드포인트를 호출하여
+        사용 가능한 Firebase 프로젝트 목록을 반환합니다.
+        """
+        params, metadata = self.parse_request(request, context)
+
+        collector_svc: CollectorService = self.locator.get_service(
+            "CollectorService", metadata
+        )
+
+        with collector_svc:
+            projects = collector_svc.get_firebase_projects(params)
+            return self.locator.get_info("FirebaseProjectsInfo", projects)

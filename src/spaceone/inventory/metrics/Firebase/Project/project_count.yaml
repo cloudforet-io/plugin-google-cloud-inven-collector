@@ -1,0 +1,13 @@
+name: project_count
+unit: Count
+resource_type: inventory.CloudService
+query:
+  select:
+    - value: COUNT
+      key: project_id
+  from:
+    - Firebase/Project
+  where:
+    - key: state
+      operator: eq
+      value: ACTIVE

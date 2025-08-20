@@ -1,4 +1,4 @@
-__all__ = ["PluginInfo", "ResourceInfo"]
+__all__ = ["PluginInfo", "ResourceInfo", "FirebaseProjectsInfo"]
 
 from spaceone.api.inventory.plugin import collector_pb2
 from spaceone.core.pygrpc.message_type import *
@@ -22,3 +22,13 @@ def ResourceInfo(resource_dict):
         )
 
     return collector_pb2.ResourceInfo(**resource_dict)
+
+
+def FirebaseProjectsInfo(result):
+    """
+    Firebase 프로젝트 목록 정보를 반환합니다.
+    """
+    if "projects" in result:
+        result["projects"] = change_struct_type(result["projects"])
+
+    return collector_pb2.FirebaseProjectsInfo(**result)
