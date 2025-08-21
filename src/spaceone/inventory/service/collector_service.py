@@ -44,6 +44,10 @@ class CollectorService(BaseService):
             'LoadBalancingManager',
             'VMInstance',
             'FirebaseProjectManager'
+            'CloudRunServiceManager',
+            'CloudRunJobManager',
+            'CloudRunWorkerPoolManager',
+            'CloudRunDomainMappingManager'
         ]
         """
 
