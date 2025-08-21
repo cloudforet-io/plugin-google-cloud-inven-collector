@@ -14,6 +14,8 @@ from spaceone.inventory.connector.compute_engine.machine_image import (
 from spaceone.inventory.connector.compute_engine.disk import DiskConnector
 from spaceone.inventory.connector.compute_engine.snapshot import SnapshotConnector
 from spaceone.inventory.connector.compute_engine.vm_instance import VMInstanceConnector
+from spaceone.inventory.connector.filestore.instance_v1 import FilestoreInstanceConnector
+from spaceone.inventory.connector.filestore.instance_v1beta1 import FilestoreInstanceV1Beta1Connector
 from spaceone.inventory.connector.networking.route import RouteConnector
 from spaceone.inventory.connector.networking.external_ip_address import (
     ExternalIPAddressConnector,

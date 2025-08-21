@@ -34,6 +34,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "TopicManager",
     ],
     "CloudFunctions": ["FunctionGen2Manager", "FunctionGen1Manager"],
+    "Filestore": ["FilestoreInstanceManager"],
     # "Recommender": ["RecommendationManager"],
 }
 
@@ -89,6 +90,12 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "Function": {
             "resource_type": "cloud_function",
             "labels_key": "resource.labels.function_name",
+        }
+    },
+    "Filestore": {
+        "Instance": {
+            "resource_type": "filestore_instance",
+            "labels_key": "resource.labels.instance_id",
         }
     },
     "Recommender": {},

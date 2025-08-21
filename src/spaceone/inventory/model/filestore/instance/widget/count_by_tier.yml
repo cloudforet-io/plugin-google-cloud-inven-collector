@@ -1,0 +1,15 @@
+---
+cloud_service_group: Filestore
+cloud_service_type: Instance
+name: Count by Tier
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.tier
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: DONUT 

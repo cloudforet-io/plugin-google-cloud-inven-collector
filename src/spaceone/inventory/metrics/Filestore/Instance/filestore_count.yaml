@@ -1,0 +1,16 @@
+---
+metric_id: count-filestore-instance
+name: Filestore Instance Count
+namespace_id: ns-google-cloud-filestore-instance
+resource_type: inventory.CloudService:google_cloud.Filestore.Instance
+unit: Count
+metric_type: COUNT
+metric_groups:
+  - name: Instance
+    metrics:
+      - name: Instance Count
+        key: count
+        unit: Count
+        chart_type: VALUE
+        chart_option:
+          color: '#4CAF50' 
