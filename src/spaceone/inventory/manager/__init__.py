@@ -7,6 +7,14 @@ from spaceone.inventory.manager.cloud_functions.function_gen1_manager import (
 from spaceone.inventory.manager.cloud_functions.function_gen2_manager import (
     FunctionGen2Manager,
 )
+from spaceone.inventory.manager.cloud_run.domain_mapping_manager import (
+    CloudRunDomainMappingManager,
+)
+from spaceone.inventory.manager.cloud_run.job_manager import CloudRunJobManager
+from spaceone.inventory.manager.cloud_run.service_manager import CloudRunServiceManager
+from spaceone.inventory.manager.cloud_run.worker_pool_manager import (
+    CloudRunWorkerPoolManager,
+)
 from spaceone.inventory.manager.cloud_sql.instance_manager import CloudSQLManager
 from spaceone.inventory.manager.cloud_storage.storage_manager import StorageManager
 from spaceone.inventory.manager.compute_engine.disk_manager import DiskManager

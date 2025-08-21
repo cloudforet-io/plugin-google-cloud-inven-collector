@@ -6,6 +6,8 @@ from spaceone.inventory.connector.cloud_functions.function_gen1 import (
 from spaceone.inventory.connector.cloud_functions.function_gen2 import (
     FunctionGen2Connector,
 )
+from spaceone.inventory.connector.cloud_run.cloud_run_v1 import CloudRunV1Connector
+from spaceone.inventory.connector.cloud_run.cloud_run_v2 import CloudRunV2Connector
 from spaceone.inventory.connector.cloud_sql.instance import CloudSQLInstanceConnector
 from spaceone.inventory.connector.cloud_storage.monitoring import MonitoringConnector
 from spaceone.inventory.connector.cloud_storage.storage import StorageConnector
