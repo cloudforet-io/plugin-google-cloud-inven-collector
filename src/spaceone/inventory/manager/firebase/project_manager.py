@@ -36,9 +36,9 @@ class FirebaseProjectManager(GoogleCloudManager):
         start_time = time.time()
         collected_cloud_services = []
         error_responses = []
-        project_id = ""
 
         secret_data = params["secret_data"]
+        project_id = secret_data["project_id"]  # 프로젝트 기준으로 변경
 
         ##################################
         # 0. Gather All Related Resources
@@ -48,47 +48,47 @@ class FirebaseProjectManager(GoogleCloudManager):
             self.connector_name, **params
         )
 
-        # Firebase Management API를 통해 사용 가능한 프로젝트 목록 가져오기
+        # 프로젝트 기준으로 Firebase 정보 조회
         try:
-            available_projects = firebase_conn.list_available_projects()
+            firebase_project_info = firebase_conn.get_firebase_project_info()
+
+            # Firebase 서비스가 있는 경우에만 수집
+            if firebase_project_info.get("hasFirebaseServices", False):
+                try:
+                    # Firebase 프로젝트 데이터 파싱
+                    firebase_project = Project(firebase_project_info)
+
+                    # Cloud Service 리소스 생성
+                    firebase_project_resource = ProjectResource(
+                        {
+                            "name": firebase_project.project_id,
+                            "data": firebase_project,
+                            "reference": ReferenceModel(firebase_project.reference()),
+                            "region_code": "global",
+                            "account": project_id,  # 프로젝트 ID 사용
+                        }
+                    )
+
+                    collected_cloud_services.append(
+                        ProjectResponse({"resource": firebase_project_resource})
+                    )
+
+                except Exception as e:
+                    _LOGGER.error(
+                        f"[collect_cloud_service] Firebase Project {project_id} => {e}",
+                        exc_info=True,
+                    )
+                    error_responses.append(
+                        self.generate_error_response(e, project_id, "inventory.Error")
+                    )
+            else:
+                _LOGGER.debug(f"Project {project_id} has no Firebase services")
 
         except Exception as e:
-            _LOGGER.error(f"Failed to list available Firebase projects: {e}")
+            _LOGGER.error(f"Failed to get Firebase project info for {project_id}: {e}")
             error_responses.append(
-                self.generate_error_response(e, "", "inventory.Error")
+                self.generate_error_response(e, project_id, "inventory.Error")
             )
-            return [], error_responses
-
-        for project_data in available_projects:
-            try:
-                project_id = project_data.get("projectId", "")
-
-                # Firebase 프로젝트 데이터 파싱
-                firebase_project = Project(project_data)
-
-                # Cloud Service 리소스 생성
-                firebase_project_resource = ProjectResource(
-                    {
-                        "name": firebase_project.project_id,
-                        "data": firebase_project,
-                        "reference": ReferenceModel(firebase_project.reference()),
-                        "region_code": "global",
-                        "account": secret_data.get("project_id", ""),
-                    }
-                )
-
-                collected_cloud_services.append(
-                    ProjectResponse({"resource": firebase_project_resource})
-                )
-
-            except Exception as e:
-                _LOGGER.error(
-                    f"[collect_cloud_service] Firebase Project {project_id} => {e}",
-                    exc_info=True,
-                )
-                error_responses.append(
-                    self.generate_error_response(e, project_id, "inventory.Error")
-                )
 
         _LOGGER.debug(
             f"** Firebase Project Finished {time.time() - start_time} Seconds **"

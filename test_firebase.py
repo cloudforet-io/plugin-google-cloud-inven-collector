@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Firebase 프로젝트 목록 테스트 스크립트
+Firebase 앱 목록 테스트 스크립트
 """
 
 import json
@@ -9,9 +9,9 @@ import os
 from spaceone.inventory.connector.firebase.project import FirebaseProjectConnector
 
 
-def test_firebase_projects():
+def test_firebase_apps():
     """
-    Firebase 프로젝트 목록을 테스트합니다.
+    특정 프로젝트의 Firebase 앱 목록을 테스트합니다.
     """
 
     # 서비스 계정 키 파일 경로 (환경 변수에서 가져오거나 직접 지정)
@@ -35,31 +35,43 @@ def test_firebase_projects():
         # Firebase Project Connector 초기화
         firebase_conn = FirebaseProjectConnector(secret_data=secret_data)
 
-        print("Firebase 프로젝트 목록을 가져오는 중...")
+        print("Firebase 프로젝트 정보를 가져오는 중...")
 
-        # 사용 가능한 Firebase 프로젝트 목록 가져오기
-        available_projects = firebase_conn.list_available_projects()
+        # 특정 프로젝트의 Firebase 정보 가져오기
+        firebase_project_info = firebase_conn.get_firebase_project_info()
 
-        print(f"\n총 {len(available_projects)}개의 Firebase 프로젝트를 찾았습니다:\n")
+        print(f"\n프로젝트 ID: {firebase_project_info.get('projectId', 'N/A')}")
+        print(f"Display Name: {firebase_project_info.get('displayName', 'N/A')}")
+        print(f"Project Number: {firebase_project_info.get('projectNumber', 'N/A')}")
+        print(f"State: {firebase_project_info.get('state', 'N/A')}")
+        print(
+            f"Has Firebase Services: {firebase_project_info.get('hasFirebaseServices', False)}"
+        )
+        print(f"App Count: {firebase_project_info.get('appCount', 0)}")
 
-        for i, project in enumerate(available_projects, 1):
-            print(f"{i}. 프로젝트 ID: {project.get('projectId', 'N/A')}")
-            print(f"   Display Name: {project.get('displayName', 'N/A')}")
-            print(f"   Project Number: {project.get('projectNumber', 'N/A')}")
-            print(f"   State: {project.get('state', 'N/A')}")
+        # 플랫폼별 통계 출력
+        platform_stats = firebase_project_info.get("platformStats", {})
+        if platform_stats:
+            print("\nPlatform Statistics:")
+            for platform, count in platform_stats.items():
+                print(f"  {platform}: {count} apps")
 
-            # Resources 정보 출력
-            resources = project.get("resources", {})
-            if resources:
-                print("   Resources:")
-                for key, value in resources.items():
-                    print(f"     {key}: {value}")
+        # Firebase 앱들 출력
+        firebase_apps = firebase_project_info.get("firebaseApps", [])
+        if firebase_apps:
+            print(f"\n총 {len(firebase_apps)}개의 Firebase 앱을 찾았습니다:\n")
 
-            print()
+            for i, app in enumerate(firebase_apps, 1):
+                print(f"{i}. App Name: {app.get('displayName', 'N/A')}")
+                print(f"   Platform: {app.get('platform', 'N/A')}")
+                print(f"   App ID: {app.get('appId', 'N/A')}")
+                print(f"   Namespace: {app.get('namespace', 'N/A')}")
+                print(f"   State: {app.get('state', 'N/A')}")
+                print()
 
         # JSON 형태로도 출력
         print("JSON 형태:")
-        print(json.dumps(available_projects, indent=2, ensure_ascii=False))
+        print(json.dumps(firebase_project_info, indent=2, ensure_ascii=False))
 
     except Exception as e:
         print(f"Error: {e}")
@@ -69,4 +81,4 @@ def test_firebase_projects():
 
 
 if __name__ == "__main__":
-    test_firebase_projects()
+    test_firebase_apps()

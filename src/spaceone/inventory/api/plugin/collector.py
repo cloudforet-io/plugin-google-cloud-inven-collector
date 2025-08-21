@@ -41,10 +41,10 @@ class Collector(BaseAPI, collector_pb2_grpc.CollectorServicer):
             for resource in collector_svc.collect(params):
                 yield self.locator.get_info("ResourceInfo", resource)
 
-    def get_firebase_projects(self, request, context):
+    def get_firebase_apps(self, request, context):
         """
-        Firebase Management API의 availableProjects 엔드포인트를 호출하여
-        사용 가능한 Firebase 프로젝트 목록을 반환합니다.
+        특정 프로젝트의 Firebase 앱들을 조회합니다.
+        Firebase Management API의 searchApps 엔드포인트를 사용합니다.
         """
         params, metadata = self.parse_request(request, context)
 
@@ -53,5 +53,5 @@ class Collector(BaseAPI, collector_pb2_grpc.CollectorServicer):
         )
 
         with collector_svc:
-            projects = collector_svc.get_firebase_projects(params)
-            return self.locator.get_info("FirebaseProjectsInfo", projects)
+            apps = collector_svc.get_firebase_projects(params)
+            return self.locator.get_info("FirebaseAppsInfo", apps)

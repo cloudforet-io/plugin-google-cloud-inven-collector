@@ -427,11 +427,11 @@ Please, set authentication privilege for followings:
 #### [Firebase](https://firebase.google.com/docs/reference/firebase-management/rest)
 - #### Project
     - IAM
-        - firebase.projects.list
+        - firebase.projects.searchApps
         - firebase.projects.get
 
     - Service Endpoint
-        - https://firebase.googleapis.com/v1beta1/projects
+        - https://firebase.googleapis.com/v1beta1/projects/{parent}/searchApps
 
 ---
 
@@ -439,14 +439,16 @@ Please, set authentication privilege for followings:
 
 ### Project
 
-Firebase 프로젝트 정보를 수집합니다. Firebase Management API의 `projects` 엔드포인트를 사용하여 사용 가능한 모든 Firebase 프로젝트 목록을 가져옵니다.
+Firebase 프로젝트 정보를 수집합니다. Firebase Management API의 `searchApps` 엔드포인트를 사용하여 특정 프로젝트의 Firebase 앱들을 가져옵니다.
 
 #### 수집되는 정보:
 - Project ID
 - Display Name
 - Project Number
 - State (ACTIVE, DELETED 등)
-- Resources (Hosting Site, Realtime Database Instance, Storage Bucket 등)
+- Firebase Apps (iOS, Android, Web 앱들)
+- Platform Statistics (플랫폼별 앱 개수)
+- App Count (총 앱 개수)
 
 #### 사용 예시:
 ```bash

@@ -233,8 +233,8 @@ class CollectorService(BaseService):
     @check_required(["options", "secret_data"])
     def get_firebase_projects(self, params):
         """
-        Firebase Management API의 availableProjects 엔드포인트를 호출하여
-        사용 가능한 Firebase 프로젝트 목록을 반환합니다.
+        특정 프로젝트의 Firebase 앱들을 조회합니다.
+        Firebase Management API의 searchApps 엔드포인트를 사용합니다.
 
         Args:
             params:
@@ -242,7 +242,7 @@ class CollectorService(BaseService):
                 - secret_data
 
         Returns:
-            dict: Firebase 프로젝트 목록
+            dict: Firebase 앱 목록
         """
         try:
             from spaceone.inventory.connector.firebase.project import (
@@ -250,13 +250,14 @@ class CollectorService(BaseService):
             )
 
             firebase_conn = FirebaseProjectConnector(**params)
-            available_projects = firebase_conn.list_available_projects()
+            firebase_apps = firebase_conn.list_firebase_apps()
 
             return {
-                "projects": available_projects,
-                "total_count": len(available_projects),
+                "apps": firebase_apps,
+                "total_count": len(firebase_apps),
+                "project_id": params["secret_data"]["project_id"],
             }
 
         except Exception as e:
-            _LOGGER.error(f"Failed to get Firebase projects: {e}")
+            _LOGGER.error(f"Failed to get Firebase apps: {e}")
             raise e

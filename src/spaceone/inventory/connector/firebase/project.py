@@ -1,6 +1,5 @@
 import logging
 
-import google.auth.transport.requests
 import googleapiclient
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
@@ -32,111 +31,95 @@ class FirebaseProjectConnector(GoogleCloudConnector):
                 self.google_client_service, self.version, credentials=self.credentials
             )
 
-    def list_available_projects(self, **query):
+    def list_firebase_apps(self, **query):
         """
-        Firebase Management API의 availableProjects 엔드포인트를 호출하여
-        사용 가능한 Firebase 프로젝트 목록을 반환합니다.
+        특정 프로젝트의 Firebase 앱들을 조회합니다.
+        Firebase Management API의 searchApps 엔드포인트를 사용합니다.
 
         Args:
-            **query: 추가 쿼리 파라미터 (pageToken, pageSize, showDeleted 등)
+            **query: 추가 쿼리 파라미터
 
         Returns:
-            list: 사용 가능한 Firebase 프로젝트 목록
+            list: Firebase 앱 목록
         """
-        projects = []
-        seen_project_ids = set()
-
         try:
-            # 3. 직접 HTTP 요청으로 다양한 엔드포인트 시도
-            import requests
+            # 프로젝트 기준으로 Firebase 앱들 조회
+            parent = f"projects/{self.project_id}"
+            query.update({"parent": parent})
 
-            # Access token 가져오기
-            self.credentials.refresh(google.auth.transport.requests.Request())
-            access_token = self.credentials.token
+            apps = []
+            request = self.client.projects().searchApps(**query)
 
-            headers = {
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json",
-            }
-
-            # Firebase API 엔드포인트 시도
-            endpoints = [
-                "https://firebase.googleapis.com/v1beta1/projects",
-            ]
-
-            for url in endpoints:
-                try:
-                    response = requests.get(url, headers=headers)
-
-                    if response.status_code == 200:
-                        data = response.json()
-                        if url.endswith("projects"):
-                            results = data.get("results", [])
-                            if results:
-                                for project in results:
-                                    project_id = project.get("projectId")
-                                    if (
-                                        project_id
-                                        and project_id not in seen_project_ids
-                                    ):
-                                        projects.append(project)
-                                        seen_project_ids.add(project_id)
-                        else:
-                            # 단일 프로젝트 응답
-                            if data.get("projectId"):
-                                project_id = data.get("projectId")
-                                if project_id not in seen_project_ids:
-                                    projects.append(data)
-                                    seen_project_ids.add(project_id)
-                    elif response.status_code == 403:
-                        _LOGGER.warning(f"Permission denied for {url}")
-                    elif response.status_code == 404:
-                        _LOGGER.warning(f"Not found: {url}")
-                    else:
-                        _LOGGER.warning(
-                            f"HTTP {response.status_code} for {url}: {response.text}"
-                        )
-
-                except Exception as direct_error:
-                    _LOGGER.warning(f"Direct API call to {url} failed: {direct_error}")
-
-            # 4. Resource Manager API로 GCP 프로젝트 확인
-            try:
-                import googleapiclient.discovery
-
-                resource_manager = googleapiclient.discovery.build(
-                    "cloudresourcemanager", "v1", credentials=self.credentials
+            while request is not None:
+                response = request.execute()
+                for app in response.get("apps", []):
+                    apps.append(app)
+                request = self.client.projects().searchApps_next(
+                    previous_request=request, previous_response=response
                 )
 
-                projects_response = resource_manager.projects().list().execute()
-
-                gcp_projects = projects_response.get("projects", [])
-                for gcp_project in gcp_projects:
-                    if gcp_project.get("projectId") == self.project_id:
-                        # GCP 프로젝트를 Firebase 형식으로 변환
-                        project_id = gcp_project.get("projectId")
-                        if project_id not in seen_project_ids:
-                            firebase_project = {
-                                "projectId": project_id,
-                                "displayName": gcp_project.get("name"),
-                                "projectNumber": gcp_project.get("projectNumber"),
-                                "state": gcp_project.get("lifecycleState", "ACTIVE"),
-                                "name": f"projects/{project_id}",
-                            }
-                            projects.append(firebase_project)
-                            seen_project_ids.add(project_id)
-                            break
-
-            except Exception as rm_error:
-                _LOGGER.warning(f"Resource Manager API failed: {rm_error}")
+            return apps
 
         except Exception as e:
-            _LOGGER.error(f"All Firebase API attempts failed: {e}")
-            _LOGGER.error(f"Error type: {type(e)}")
-            _LOGGER.error(f"Error details: {str(e)}")
+            _LOGGER.error(
+                f"Failed to list Firebase apps for project {self.project_id}: {e}"
+            )
             raise e
 
-        return projects
+    def get_firebase_project_info(self, **query):
+        """
+        특정 프로젝트의 Firebase 프로젝트 정보를 조회합니다.
+        프로젝트 기준으로 Firebase 서비스 사용 여부를 확인합니다.
+
+        Args:
+            **query: 추가 쿼리 파라미터
+
+        Returns:
+            dict: Firebase 프로젝트 정보
+        """
+        try:
+            # 1. Resource Manager로 프로젝트 기본 정보 확인
+            import googleapiclient.discovery
+
+            resource_manager = googleapiclient.discovery.build(
+                "cloudresourcemanager", "v1", credentials=self.credentials
+            )
+
+            project_info = (
+                resource_manager.projects().get(projectId=self.project_id).execute()
+            )
+
+            # 2. Firebase 앱들 조회
+            firebase_apps = self.list_firebase_apps()
+
+            # 3. Firebase 프로젝트 정보 구성
+            firebase_project = {
+                "projectId": self.project_id,
+                "displayName": project_info.get("name", ""),
+                "projectNumber": project_info.get("projectNumber", ""),
+                "state": project_info.get("lifecycleState", "ACTIVE"),
+                "name": f"projects/{self.project_id}",
+                "firebaseApps": firebase_apps,
+                "appCount": len(firebase_apps),
+                "hasFirebaseServices": len(firebase_apps) > 0,
+            }
+
+            # 4. 플랫폼별 앱 통계 추가
+            platform_stats = {"IOS": 0, "ANDROID": 0, "WEB": 0}
+            for app in firebase_apps:
+                platform = app.get("platform", "PLATFORM_UNSPECIFIED")
+                if platform in platform_stats:
+                    platform_stats[platform] += 1
+
+            firebase_project["platformStats"] = platform_stats
+
+            return firebase_project
+
+        except Exception as e:
+            _LOGGER.error(
+                f"Failed to get Firebase project info for {self.project_id}: {e}"
+            )
+            raise e
 
     def get_project(self, project_id):
         """
