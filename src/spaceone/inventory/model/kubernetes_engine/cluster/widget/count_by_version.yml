@@ -1,0 +1,17 @@
+---
+cloud_service_group: KubernetesEngine
+cloud_service_type: Cluster
+name: Count by Kubernetes Version
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.current_master_version
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: COLUMN
+  name_options:
+    key: name
