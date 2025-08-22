@@ -12,3 +12,4 @@ from spaceone.inventory.model.compute_engine.snapshot import *
 from spaceone.inventory.model.cloud_storage.bucket import *
 from spaceone.inventory.model.networking.vpc_network import *
 from spaceone.inventory.model.recommender.recommendation import *
+from spaceone.inventory.model.kubernetes_engine.cluster import *

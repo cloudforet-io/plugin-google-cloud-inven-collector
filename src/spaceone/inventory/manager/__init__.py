@@ -51,3 +51,5 @@ from spaceone.inventory.manager.pub_sub.topic_manager import TopicManager
 from spaceone.inventory.manager.recommender.recommendation_manager import (
     RecommendationManager,
 )
+from spaceone.inventory.manager.kubernetes_engine.cluster_v1_manager import GKEClusterV1Manager
+from spaceone.inventory.manager.kubernetes_engine.cluster_v1beta_manager import GKEClusterV1BetaManager

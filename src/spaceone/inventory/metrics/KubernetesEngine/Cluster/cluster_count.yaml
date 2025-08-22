@@ -1,0 +1,32 @@
+---
+metric_id: metric-google-cloud-gke-cluster-count
+name: Cluster Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.KubernetesEngine.Cluster
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.cluster.status
+      name: Cluster Status
+      search_key: data.cluster.status
+      default: true
+    - key: data.cluster.release_channel
+      name: Release Channel
+      search_key: data.cluster.release_channel
+    - key: data.cluster.location
+      name: Location
+      search_key: data.cluster.location
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-gke-cluster
+version: '1.0'

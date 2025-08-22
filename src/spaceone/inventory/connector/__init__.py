@@ -45,3 +45,6 @@ from spaceone.inventory.connector.recommender.insight import InsightConnector
 from spaceone.inventory.connector.recommender.recommendation import (
     RecommendationConnector,
 )
+from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
+from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import GKEClusterV1Connector
+from spaceone.inventory.connector.kubernetes_engine.cluster_v1beta import GKEClusterV1BetaConnector
