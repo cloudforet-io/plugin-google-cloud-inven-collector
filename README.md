@@ -51,7 +51,8 @@ The following is a list of services being collected and service code information
 |5|BigQuery|bigquery|
 |6|Cloud Pub/Sub|pubsub|
 |7|Cloud Functions|cloudfunctions|
-|8|Recommender|recommender
+|8|Recommender|recommender|
+|9|Firebase|firebase
 
 If you want to know the detailed service endpoint, please check the [content details](###content-details) below.
 
@@ -90,6 +91,8 @@ If you want to know the detailed service endpoint, please check the [content det
     * [Recommender](#recommender)
         * [Recommendation](#recommendation)
         * [Insight](#insight)
+    * [Firebase](#firebase)
+        * [Project](#project)
     * [Options](#options)
       * [CloudServiceType](#cloud-service-type--specify-what-to-collect)
       * [ServiceCodeMapper](#service-code-mapper--update-service-code-in-cloud-service-type)
@@ -420,6 +423,40 @@ Please, set authentication privilege for followings:
     - Insight Service Endpoint
         - https://cloudasset.googleapis.com/v1/{parent=*/*}/assets
         - https://recommender.googleapis.com/v1/{parent=projects/*/locations/*/insightTypes/*}/insights
+
+#### [Firebase](https://firebase.google.com/docs/reference/firebase-management/rest)
+- #### Project
+    - IAM
+        - firebase.projects.searchApps
+        - firebase.projects.get
+
+    - Service Endpoint
+        - https://firebase.googleapis.com/v1beta1/projects/{parent}/searchApps
+
+---
+
+## Firebase
+
+### Project
+
+Firebase 프로젝트 정보를 수집합니다. Firebase Management API의 `searchApps` 엔드포인트를 사용하여 특정 프로젝트의 Firebase 앱들을 가져옵니다.
+
+#### 수집되는 정보:
+- Project ID
+- Display Name
+- Project Number
+- State (ACTIVE, DELETED 등)
+- Firebase Apps (iOS, Android, Web 앱들)
+- Platform Statistics (플랫폼별 앱 개수)
+- App Count (총 앱 개수)
+
+#### 사용 예시:
+```bash
+# Firebase 프로젝트만 수집
+{
+    "cloud_service_types": ["Firebase"]
+}
+```
 
 ---
 
