@@ -41,3 +41,7 @@ from spaceone.inventory.connector.recommender.recommendation import (
 from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
 from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import GKEClusterV1Connector
 from spaceone.inventory.connector.kubernetes_engine.cluster_v1beta import GKEClusterV1BetaConnector
+from spaceone.inventory.connector.app_engine.application_v1 import AppEngineApplicationV1Connector
+from spaceone.inventory.connector.app_engine.service_v1 import AppEngineServiceV1Connector
+from spaceone.inventory.connector.app_engine.version_v1 import AppEngineVersionV1Connector
+from spaceone.inventory.connector.app_engine.instance_v1 import AppEngineInstanceV1Connector

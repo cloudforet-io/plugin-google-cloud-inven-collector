@@ -1,0 +1,29 @@
+---
+metric_id: metric-google-cloud-app-engine-service-count
+name: Service Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.AppEngine.Service
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.service.serving_status
+      name: Serving Status
+      search_key: data.service.serving_status
+      default: true
+    - key: data.service.split
+      name: Traffic Split
+      search_key: data.service.split
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-app-engine-service
+version: '1.0'

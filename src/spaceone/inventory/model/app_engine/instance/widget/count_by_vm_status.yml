@@ -1,0 +1,17 @@
+---
+cloud_service_group: AppEngine
+cloud_service_type: Instance
+name: Count By VM Status
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.instance.vm_status
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: PIE
+  name_options:
+    key: name
