@@ -104,7 +104,7 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "Instance": {
             "resource_type": "filestore_instance",
             "labels_key": "resource.labels.instance_id",
-        },
+        }
     },
     "Firebase": {
         "Project": {
