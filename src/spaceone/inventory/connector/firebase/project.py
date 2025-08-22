@@ -101,7 +101,7 @@ class FirebaseProjectConnector(GoogleCloudConnector):
                 "name": f"projects/{self.project_id}",
                 "firebaseApps": firebase_apps,
                 "appCount": len(firebase_apps),
-                "hasFirebaseServices": len(firebase_apps) > 0,
+                "hasFirebaseServices": str(len(firebase_apps) > 0),
             }
 
             # 4. 플랫폼별 앱 통계 추가

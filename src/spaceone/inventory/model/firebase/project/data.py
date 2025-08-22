@@ -39,7 +39,9 @@ class Project(Model):
     name = StringType()
     firebase_apps = ListType(ModelType(FirebaseApp), deserialize_from="firebaseApps")
     app_count = IntType(deserialize_from="appCount")
-    has_firebase_services = StringType(deserialize_from="hasFirebaseServices")
+    has_firebase_services = StringType(
+        deserialize_from="hasFirebaseServices", serialize_when_none=False
+    )
     platform_stats = DictType(IntType, deserialize_from="platformStats")
 
     def reference(self):
