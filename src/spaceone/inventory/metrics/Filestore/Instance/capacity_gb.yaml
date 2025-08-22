@@ -1,0 +1,16 @@
+---
+metric_id: capacity-filestore-instance
+name: Filestore Instance Capacity
+namespace_id: ns-google-cloud-filestore-instance
+resource_type: inventory.CloudService:google_cloud.Filestore.Instance
+unit: GB
+metric_type: GAUGE
+metric_groups:
+  - name: Capacity
+    metrics:
+      - name: Total Capacity (GB)
+        key: data.stats.total_capacity_gb
+        unit: GB
+        chart_type: VALUE
+        chart_option:
+          color: '#2196F3' 

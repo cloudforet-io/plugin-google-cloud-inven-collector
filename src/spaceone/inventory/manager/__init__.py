@@ -28,6 +28,9 @@ from spaceone.inventory.manager.compute_engine.machine_image_manager import (
     MachineImageManager,
 )
 from spaceone.inventory.manager.compute_engine.snapshot_manager import SnapshotManager
+from spaceone.inventory.manager.cloud_storage.storage_manager import StorageManager
+from spaceone.inventory.manager.filestore.instance_manager import FilestoreInstanceManager
+from spaceone.inventory.manager.networking.vpc_network_manager import VPCNetworkManager
 from spaceone.inventory.manager.compute_engine.vm_instance_manager import (
     VMInstanceManager,
 )

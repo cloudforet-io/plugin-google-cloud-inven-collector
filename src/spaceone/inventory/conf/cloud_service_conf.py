@@ -34,6 +34,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "TopicManager",
     ],
     "CloudFunctions": ["FunctionGen2Manager", "FunctionGen1Manager"],
+    "Filestore": ["FilestoreInstanceManager"],
     "Firebase": ["FirebaseProjectManager"],
     "CloudRun": ["CloudRunServiceManager", "CloudRunJobManager", "CloudRunWorkerPoolManager", "CloudRunDomainMappingManager"],
     # "Recommender": ["RecommendationManager"],
@@ -93,6 +94,10 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             "labels_key": "resource.labels.function_name",
         }
     },
+    "Filestore": {
+        "Instance": {
+            "resource_type": "filestore_instance",
+            "labels_key": "resource.labels.instance_id",
     "Firebase": {
         "Project": {
             "resource_type": "firebase_project",
