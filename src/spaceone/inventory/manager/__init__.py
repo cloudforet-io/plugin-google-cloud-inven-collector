@@ -53,3 +53,7 @@ from spaceone.inventory.manager.recommender.recommendation_manager import (
 )
 from spaceone.inventory.manager.kubernetes_engine.cluster_v1_manager import GKEClusterV1Manager
 from spaceone.inventory.manager.kubernetes_engine.cluster_v1beta_manager import GKEClusterV1BetaManager
+from spaceone.inventory.manager.datastore.index_manager import DatastoreIndexManager
+from spaceone.inventory.manager.datastore.namespace_manager import (
+    DatastoreNamespaceManager,
+)

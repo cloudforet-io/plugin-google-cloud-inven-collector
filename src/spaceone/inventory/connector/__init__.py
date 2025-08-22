@@ -48,3 +48,7 @@ from spaceone.inventory.connector.recommender.recommendation import (
 from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
 from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import GKEClusterV1Connector
 from spaceone.inventory.connector.kubernetes_engine.cluster_v1beta import GKEClusterV1BetaConnector
+from spaceone.inventory.connector.datastore.index_v1 import DatastoreIndexV1Connector
+from spaceone.inventory.connector.datastore.namespace_v1 import (
+    DatastoreNamespaceV1Connector,
+)
