@@ -34,6 +34,14 @@ CLOUD_SERVICE_GROUP_MAP = {
         "TopicManager",
     ],
     "CloudFunctions": ["FunctionGen2Manager", "FunctionGen1Manager"],
+    "Filestore": ["FilestoreInstanceManager"],
+    "Firebase": ["FirebaseProjectManager"],
+    "CloudRun": [
+        "CloudRunServiceManager",
+        "CloudRunJobManager",
+        "CloudRunWorkerPoolManager",
+        "CloudRunDomainMappingManager",
+    ],
     "KubernetesEngine": ["GKEClusterV1Manager"], # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
     # "Recommender": ["RecommendationManager"],
 }
@@ -91,6 +99,36 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             "resource_type": "cloud_function",
             "labels_key": "resource.labels.function_name",
         }
+    },
+    "Filestore": {
+        "Instance": {
+            "resource_type": "filestore_instance",
+            "labels_key": "resource.labels.instance_id",
+        },
+    },
+    "Firebase": {
+        "Project": {
+            "resource_type": "firebase_project",
+            "labels_key": "resource.labels.project_id",
+        }
+    },
+    "CloudRun": {
+        "Service": {
+            "resource_type": "cloud_run_service",
+            "labels_key": "resource.labels.service_name",
+        },
+        "Job": {
+            "resource_type": "cloud_run_job",
+            "labels_key": "resource.labels.job_name",
+        },
+        "WorkerPool": {
+            "resource_type": "cloud_run_worker_pool",
+            "labels_key": "resource.labels.worker_pool_name",
+        },
+        "DomainMapping": {
+            "resource_type": "cloud_run_domain_mapping",
+            "labels_key": "resource.labels.domain_mapping_name",
+        },
     },
     "KubernetesEngine": {
         "Cluster": {
