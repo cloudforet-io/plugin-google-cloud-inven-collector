@@ -1,17 +1,18 @@
+import concurrent.futures
+import json
+import logging
 import os
 import time
-import logging
-import json
-import concurrent.futures
-from spaceone.inventory.connector.resource_manager.project import ProjectConnector
-from spaceone.inventory.libs.manager import GoogleCloudManager
+
 from spaceone.core import utils
 from spaceone.core.service import *
-from spaceone.inventory.libs.schema.cloud_service import (
-    ErrorResourceResponse,
-    CloudServiceResponse,
-)
 from spaceone.inventory.conf.cloud_service_conf import *
+from spaceone.inventory.connector.resource_manager.project import ProjectConnector
+from spaceone.inventory.libs.manager import GoogleCloudManager
+from spaceone.inventory.libs.schema.cloud_service import (
+    CloudServiceResponse,
+    ErrorResourceResponse,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,7 +42,12 @@ class CollectorService(BaseService):
             'FirewallManager',
             'RouteManager',
             'LoadBalancingManager',
-            'VMInstance'
+            'VMInstance',
+            'FirebaseProjectManager'
+            'CloudRunServiceManager',
+            'CloudRunJobManager',
+            'CloudRunWorkerPoolManager',
+            'CloudRunDomainMappingManager'
         ]
         """
 
@@ -97,7 +103,7 @@ class CollectorService(BaseService):
 
         start_time = time.time()
 
-        _LOGGER.debug(f"EXECUTOR START: Google Cloud Service")
+        _LOGGER.debug("EXECUTOR START: Google Cloud Service")
         # Get target manager to collect
         try:
             self.execute_managers = self._get_target_execute_manager(
@@ -214,7 +220,6 @@ class CollectorService(BaseService):
         namespace=None,
         resource_type: str = "inventory.Metric",
     ) -> dict:
-
         response = {
             "state": "SUCCESS",
             "resource_type": resource_type,
@@ -227,3 +232,36 @@ class CollectorService(BaseService):
             response["resource"] = namespace
 
         return response
+
+    @transaction
+    @check_required(["options", "secret_data"])
+    def get_firebase_projects(self, params):
+        """
+        특정 프로젝트의 Firebase 앱들을 조회합니다.
+        Firebase Management API의 searchApps 엔드포인트를 사용합니다.
+
+        Args:
+            params:
+                - options
+                - secret_data
+
+        Returns:
+            dict: Firebase 앱 목록
+        """
+        try:
+            from spaceone.inventory.connector.firebase.project import (
+                FirebaseProjectConnector,
+            )
+
+            firebase_conn = FirebaseProjectConnector(**params)
+            firebase_apps = firebase_conn.list_firebase_apps()
+
+            return {
+                "apps": firebase_apps,
+                "total_count": len(firebase_apps),
+                "project_id": params["secret_data"]["project_id"],
+            }
+
+        except Exception as e:
+            _LOGGER.error(f"Failed to get Firebase apps: {e}")
+            raise e

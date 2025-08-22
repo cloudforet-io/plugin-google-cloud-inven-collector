@@ -1,0 +1,19 @@
+---
+cloud_service_group: Firebase
+cloud_service_type: Project
+name: Count By Account
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: account
+        fields:
+          - name: value
+            operator: count
+  filter:
+    - key: account
+      value: true
+      operator: exists
+options:
+  chart_type: DONUT

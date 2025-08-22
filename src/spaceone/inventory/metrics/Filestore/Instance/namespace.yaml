@@ -1,0 +1,8 @@
+---
+namespace_id: ns-google-cloud-filestore-instance
+name: Filestore/Instance
+category: ASSET
+icon: 'Please add an icon for Google Cloud Filestore'
+version: '1.0'
+resource_type: inventory.CloudService:google_cloud.Filestore.Instance
+group: google_cloud 
