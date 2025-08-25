@@ -1,0 +1,38 @@
+---
+metric_id: metric-google-cloud-cloudbuild-build-count
+name: Build Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.CloudBuild.Build
+query_options:
+  group_by:
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: data.status
+      name: Status
+      search_key: data.status
+      default: true
+    - key: data.build_trigger_id
+      name: Trigger ID
+      search_key: data.build_trigger_id
+    - key: data.source.repo_source.repo_name
+      name: Repository
+      search_key: data.source.repo_source.repo_name
+    - key: data.source.repo_source.branch_name
+      name: Branch
+      search_key: data.source.repo_source.branch_name
+    - key: data.service_account
+      name: Service Account
+      search_key: data.service_account
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-cloudbuild-build
+version: "1.1"
