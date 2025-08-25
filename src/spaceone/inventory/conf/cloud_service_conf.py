@@ -36,13 +36,16 @@ CLOUD_SERVICE_GROUP_MAP = {
     "CloudFunctions": ["FunctionGen2Manager", "FunctionGen1Manager"],
     "Filestore": ["FilestoreInstanceManager"],
     "Firebase": ["FirebaseProjectManager"],
+    "Batch": ["BatchManager"],
     "CloudRun": [
         "CloudRunServiceManager",
         "CloudRunJobManager",
         "CloudRunWorkerPoolManager",
         "CloudRunDomainMappingManager",
     ],
-    "KubernetesEngine": ["GKEClusterV1Manager"], # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
+    "KubernetesEngine": [
+        "GKEClusterV1Manager"
+    ],  # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
     # "Recommender": ["RecommendationManager"],
 }
 
@@ -111,6 +114,16 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             "resource_type": "firebase_project",
             "labels_key": "resource.labels.project_id",
         }
+    },
+    "Batch": {
+        "Location": {
+            "resource_type": "batch_location",
+            "labels_key": "resource.labels.location_id",
+        },
+        "Job": {
+            "resource_type": "batch_job",
+            "labels_key": "resource.labels.job_id",
+        },
     },
     "CloudRun": {
         "Service": {
