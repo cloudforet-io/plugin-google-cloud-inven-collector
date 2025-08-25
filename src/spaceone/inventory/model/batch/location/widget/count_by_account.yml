@@ -1,7 +1,7 @@
 ---
-cloud_service_group: CloudRun
-cloud_service_type: Service
-name: Count by Project
+cloud_service_group: Batch
+cloud_service_type: Location
+name: Count By Account
 query:
   aggregate:
     - group:
@@ -11,5 +11,9 @@ query:
         fields:
           - name: value
             operator: count
+  filter:
+    - key: account
+      value: true
+      operator: exists
 options:
   chart_type: DONUT

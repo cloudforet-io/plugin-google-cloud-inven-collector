@@ -1,7 +1,7 @@
 ---
-cloud_service_group: CloudRun
-cloud_service_type: Service
-name: Count by Region
+cloud_service_group: Batch
+cloud_service_type: Location
+name: Count By Region
 query:
   aggregate:
     - group:
@@ -16,5 +16,5 @@ options:
   name_options:
     key: name
     reference:
-      resource_type: "inventory.Region"
+      resource_type: inventory.Region
       reference_key: region_code

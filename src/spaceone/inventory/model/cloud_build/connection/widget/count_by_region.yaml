@@ -1,6 +1,6 @@
 ---
-cloud_service_group: CloudRun
-cloud_service_type: Service
+cloud_service_group: CloudBuild
+cloud_service_type: connection
 name: Count by Region
 query:
   aggregate:

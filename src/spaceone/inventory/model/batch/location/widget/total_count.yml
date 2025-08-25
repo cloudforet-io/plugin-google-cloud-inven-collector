@@ -1,6 +1,6 @@
 ---
-cloud_service_group: CloudRun
-cloud_service_type: Service
+cloud_service_group: Batch
+cloud_service_type: Location
 name: Total Count
 query:
   aggregate:

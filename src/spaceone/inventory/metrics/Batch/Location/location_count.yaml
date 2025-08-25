@@ -1,0 +1,9 @@
+name: location_count
+unit: Count
+resource_type: inventory.CloudService
+query:
+  select:
+    - value: COUNT
+      key: location_id
+  from:
+    - Batch/Location
