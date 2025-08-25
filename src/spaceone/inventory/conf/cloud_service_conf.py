@@ -50,6 +50,8 @@ CLOUD_SERVICE_GROUP_MAP = {
         "CloudRunWorkerPoolManager",
         "CloudRunDomainMappingManager",
     ],
+    "KubernetesEngine": ["GKEClusterV1Manager"], # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
+    "Datastore": ["DatastoreNamespaceManager", "DatastoreIndexManager"],
     "KubernetesEngine": [
         "GKEClusterV1Manager"
     ],  # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
@@ -155,6 +157,16 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             "resource_type": "gke_cluster",
             "labels_key": "resource.labels.cluster_name",
         }
+    },
+    "Datastore": {
+        "Namespace": {
+            "resource_type": "datastore_namespace",
+            "labels_key": "resource.labels.namespace_id",
+        },
+        "Index": {
+            "resource_type": "datastore_index",
+            "labels_key": "resource.labels.index_id",
+        },
     },
     "Recommender": {},
 }
