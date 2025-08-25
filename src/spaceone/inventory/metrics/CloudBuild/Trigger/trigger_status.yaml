@@ -1,0 +1,33 @@
+---
+metric_id: metric-google-cloud-cloudbuild-trigger-status
+name: Active Trigger Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.CloudBuild.Trigger
+query_options:
+  group_by:
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: data.trigger_template.repo_name
+      name: Repository
+      search_key: data.trigger_template.repo_name
+    - key: data.github.name
+      name: GitHub Repository
+      search_key: data.github.name
+  fields:
+    value:
+      key: data.disabled
+      operator: count
+  filter:
+    - key: data.disabled
+      value: false
+      operator: eq
+unit: Count
+namespace_id: ns-google-cloud-cloudbuild-trigger
+version: "1.1"

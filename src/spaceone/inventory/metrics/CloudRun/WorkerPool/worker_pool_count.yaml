@@ -1,0 +1,25 @@
+---
+metric_id: metric-google-cloud-cloudrun-worker_pool-count
+name: WorkerPool Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.CloudRun.WorkerPool
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.status.conditions.type
+      name: Condition Type
+      search_key: data.status.conditions.type
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-cloudrun-worker_pool
+version: '1.1'
