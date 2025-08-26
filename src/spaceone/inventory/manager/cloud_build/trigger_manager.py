@@ -22,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class CloudBuildTriggerManager(GoogleCloudManager):
-    connector_name = "CloudBuildV1Connector"
+    connector_name = ["CloudBuildV1Connector", "CloudBuildV2Connector"]
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def __init__(self, *args, **kwargs):
@@ -83,24 +83,22 @@ class CloudBuildTriggerManager(GoogleCloudManager):
             locations = self.cloud_build_v2_connector.list_locations(f"projects/{project_id}")
             for location in locations:
                 location_id = location.get("locationId", "")
-                if not location_id:
-                    continue
-                    
-                try:
-                    parent = f"projects/{project_id}/locations/{location_id}"
-                    regional_triggers = self.cloud_build_v1_connector.list_location_triggers(parent)
-                    if regional_triggers:
-                        _LOGGER.debug(f"Found {len(regional_triggers)} triggers in {location_id}")
-                        for trigger in regional_triggers:
-                            try:
-                                cloud_service = self._make_cloud_build_trigger_info(trigger, project_id, location_id)
-                                collected_cloud_services.append(TriggerResponse({"resource": cloud_service}))
-                            except Exception as e:
-                                _LOGGER.error(f"Failed to process regional trigger {trigger.get('id', 'unknown')}: {str(e)}")
-                                error_response = self.generate_resource_error_response(e, self.cloud_service_group, "Trigger", trigger.get('id', 'unknown'))
-                                error_responses.append(error_response)
-                except Exception as e:
-                    _LOGGER.error(f"Failed to query triggers in location {location_id}: {str(e)}")
+                if location_id:
+                    try:
+                        parent = f"projects/{project_id}/locations/{location_id}"
+                        regional_triggers = self.cloud_build_v1_connector.list_location_triggers(parent)
+                        if regional_triggers:
+                            _LOGGER.debug(f"Found {len(regional_triggers)} triggers in {location_id}")
+                            for trigger in regional_triggers:
+                                try:
+                                    cloud_service = self._make_cloud_build_trigger_info(trigger, project_id, location_id)
+                                    collected_cloud_services.append(TriggerResponse({"resource": cloud_service}))
+                                except Exception as e:
+                                    _LOGGER.error(f"Failed to process regional trigger {trigger.get('id', 'unknown')}: {str(e)}")
+                                    error_response = self.generate_resource_error_response(e, self.cloud_service_group, "Trigger", trigger.get('id', 'unknown'))
+                                    error_responses.append(error_response)
+                    except Exception as e:
+                        _LOGGER.error(f"Failed to query triggers in location {location_id}: {str(e)}")
         except Exception as e:
             _LOGGER.error(f"Failed to query locations: {str(e)}")
 
