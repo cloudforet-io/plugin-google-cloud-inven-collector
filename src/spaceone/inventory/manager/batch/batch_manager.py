@@ -49,37 +49,47 @@ class BatchManager(GoogleCloudManager):
         )
 
         try:
-            # 1. Batch 지원 Location 목록 조회
-            batch_locations = batch_conn.list_locations()
-            _LOGGER.debug(f"Found {len(batch_locations)} Batch locations")
+            # 1. 모든 Location의 Jobs를 글로벌로 조회 (locations/- 패턴 사용)
+            all_jobs = batch_conn.list_all_jobs()
+            _LOGGER.debug(f"Found {len(all_jobs)} Batch jobs across all locations")
 
-            for location_info in batch_locations:
+            # 2. Jobs를 location별로 그룹핑
+            jobs_by_location = self._group_jobs_by_location(all_jobs)
+            _LOGGER.debug(f"Jobs grouped into {len(jobs_by_location)} locations")
+
+            # 3. 각 location별로 리소스 생성
+            for location_id, location_jobs in jobs_by_location.items():
                 try:
-                    location_data = location_info.copy()
-                    location_data["project_id"] = project_id
+                    # Jobs 데이터 처리 및 상세 정보 수집
+                    jobs, job_count = self._collect_jobs_data(
+                        batch_conn, location_jobs, params
+                    )
 
-                    # 2. 해당 Location의 Jobs 조회 및 상세 정보 수집
-                    location_id = location_data.get("locationId", "")
-                    if location_id:
-                        location_data = self._collect_jobs_data(
-                            batch_conn, location_data, params
-                        )
+                    # Location 리소스 데이터 생성
+                    batch_data = {
+                        "project_id": project_id,
+                        "name": f"projects/{project_id}/locations/{location_id}",
+                        "location_id": location_id,
+                        "display_name": f"Batch Service - {location_id}",
+                        "jobs": jobs,
+                        "job_count": job_count,
+                    }
 
-                    # 3. Location 모델 생성
-                    batch_location = Location(location_data)
+                    # Location 모델 생성
+                    batch_location = Location(batch_data)
 
-                    # 4. Cloud Service 리소스 생성
+                    # Cloud Service 리소스 생성
                     batch_location_resource = LocationResource(
                         {
-                            "name": batch_location.location_id,
+                            "name": location_id,
                             "account": project_id,
                             "data": batch_location,
                             "reference": ReferenceModel(batch_location.reference()),
-                            "region_code": batch_location.location_id,
+                            "region_code": location_id,
                         }
                     )
 
-                    # 5. Cloud Service Type 정보 추가
+                    # Cloud Service Type 정보 추가
                     collected_cloud_services.append(
                         LocationResponse(
                             {
@@ -89,59 +99,104 @@ class BatchManager(GoogleCloudManager):
                         )
                     )
 
-                    _LOGGER.debug(f"Collected Batch Location: {location_id}")
+                    _LOGGER.debug(
+                        f"Collected Batch Location: {location_id} with {job_count} jobs"
+                    )
 
                 except Exception as e:
-                    _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
+                    _LOGGER.error(
+                        f"[collect_cloud_service] location {location_id} => {e}",
+                        exc_info=True,
+                    )
                     error_responses.append(
                         self.generate_error_response(
-                            e,
-                            location_info.get("locationId", ""),
-                            "inventory.CloudService",
+                            e, location_id, "inventory.CloudService"
                         )
                     )
 
         except Exception as e:
             _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
+            error_responses.append(
+                self.generate_error_response(e, "global", "inventory.CloudService")
+            )
 
         _LOGGER.debug(f"** Batch Finished {time.time() - start_time} Seconds **")
-
         return collected_cloud_services, error_responses
 
-    def _collect_jobs_data(self, batch_conn, location_data, params):
+    def _group_jobs_by_location(self, all_jobs):
         """
-        특정 Location의 Jobs 및 관련 TaskGroups, Tasks 데이터를 수집합니다.
+        Jobs를 location별로 그룹핑합니다.
+        Job name에서 location 정보를 추출합니다.
+
+        Args:
+            all_jobs: 모든 jobs 리스트
+
+        Returns:
+            dict: {location_id: [jobs]} 형태의 딕셔너리
+        """
+        jobs_by_location = {}
+
+        for job in all_jobs:
+            job_name = job.get("name", "")
+            # Job name 형태: projects/{project}/locations/{location}/jobs/{job_id}
+            try:
+                # /locations/ 이후 /jobs/ 이전의 location_id 추출
+                location_start = job_name.find("/locations/") + len("/locations/")
+                location_end = job_name.find("/jobs/")
+
+                if (
+                    location_start > len("/locations/") - 1
+                    and location_end > location_start
+                ):
+                    location_id = job_name[location_start:location_end]
+
+                    if location_id not in jobs_by_location:
+                        jobs_by_location[location_id] = []
+                    jobs_by_location[location_id].append(job)
+                else:
+                    _LOGGER.warning(
+                        f"Could not extract location from job name: {job_name}"
+                    )
+                    # 기본 location으로 처리
+                    if "unknown" not in jobs_by_location:
+                        jobs_by_location["unknown"] = []
+                    jobs_by_location["unknown"].append(job)
+
+            except Exception as e:
+                _LOGGER.warning(f"Error parsing job name {job_name}: {e}")
+                # 기본 location으로 처리
+                if "unknown" not in jobs_by_location:
+                    jobs_by_location["unknown"] = []
+                jobs_by_location["unknown"].append(job)
+
+        return jobs_by_location
+
+    def _collect_jobs_data(self, batch_conn, all_jobs, params):
+        """
+        글로벌로 수집된 Jobs 및 관련 TaskGroups, Tasks 데이터를 처리합니다.
 
         Args:
             batch_conn: BatchConnector 인스턴스
-            location_data: Location 데이터
+            all_jobs: 모든 jobs 리스트
             params: 수집 파라미터
 
         Returns:
-            dict: Jobs 정보가 추가된 Location 데이터
+            tuple: (처리된 jobs 리스트, job 개수)
         """
-        location_id = location_data.get("locationId", "")
-
         try:
-            # Jobs 목록 조회
-            jobs = batch_conn.list_jobs(location_id)
-            _LOGGER.debug(f"Found {len(jobs)} jobs in location {location_id}")
+            _LOGGER.debug(f"Processing {len(all_jobs)} jobs")
 
             # Jobs 데이터 처리
             simplified_jobs = []
-            for job in jobs:
+            for job in all_jobs:
                 simplified_job = self._process_job_data(batch_conn, job, params)
                 simplified_jobs.append(simplified_job)
 
-            location_data["jobs"] = simplified_jobs
-            location_data["job_count"] = len(jobs)
+            return simplified_jobs, len(all_jobs)
 
         except Exception as e:
-            _LOGGER.warning(f"Failed to get jobs for location {location_id}: {e}")
-            location_data["jobs"] = []
-            location_data["job_count"] = 0
-
-        return location_data
+            _LOGGER.warning(f"Failed to process jobs data: {e}")
+            return [], 0
 
     def _process_job_data(self, batch_conn, job, params):
         """
