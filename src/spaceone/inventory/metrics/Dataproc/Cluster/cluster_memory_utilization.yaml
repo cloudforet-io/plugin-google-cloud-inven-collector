@@ -1,0 +1,25 @@
+chart_type: LINE
+labels:
+- Dataproc
+- Analytics
+- Compute
+namespace: gcp/dataproc
+options:
+  chart_type: LINE
+  legend:
+    enabled: true
+    position: bottom
+  xAxis:
+    key: time
+    name: Time
+  yAxis:
+    key: cluster_memory_utilization
+    name: Memory Utilization (%)
+query:
+  metric: dataproc_cluster_memory_utilization
+  stat: AVERAGE
+resource_type: inventory.CloudService
+tags:
+  description: Average memory utilization of the Dataproc cluster
+  icon: gcp-dataproc
+  short_description: Dataproc Cluster Memory Utilization
