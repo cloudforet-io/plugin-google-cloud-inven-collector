@@ -67,6 +67,38 @@ class BatchConnector(GoogleCloudConnector):
             return {}
 
     # ===== Jobs API =====
+    def list_all_jobs(self, **query):
+        """
+        모든 Location의 Job 목록을 글로벌로 조회합니다.
+        locations/- 패턴을 사용하여 한번에 모든 location의 jobs를 가져옵니다.
+
+        Args:
+            **query: 추가 쿼리 파라미터
+
+        Returns:
+            list: 모든 Job 목록
+        """
+        jobs = []
+        parent = f"projects/{self.project_id}/locations/-"
+        query.update({"parent": parent})
+
+        try:
+            request = self.client.projects().locations().jobs().list(**query)
+            while request is not None:
+                response = request.execute()
+                for job in response.get("jobs", []):
+                    jobs.append(job)
+                request = (
+                    self.client.projects()
+                    .locations()
+                    .jobs()
+                    .list_next(previous_request=request, previous_response=response)
+                )
+        except Exception as e:
+            _LOGGER.warning(f"Failed to list all jobs: {e}")
+
+        return jobs
+
     def list_jobs(self, location_id, **query):
         """
         특정 Location의 Job 목록을 조회합니다.
