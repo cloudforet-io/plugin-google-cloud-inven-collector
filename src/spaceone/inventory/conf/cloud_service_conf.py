@@ -37,6 +37,13 @@ CLOUD_SERVICE_GROUP_MAP = {
     "Filestore": ["FilestoreInstanceManager"],
     "Firebase": ["FirebaseProjectManager"],
     "Batch": ["BatchManager"],
+    "CloudBuild": [
+        "CloudBuildBuildManager",
+        "CloudBuildTriggerManager",
+        "CloudBuildWorkerPoolManager",
+        "CloudBuildConnectionManager",
+        "CloudBuildRepositoryManager",
+    ],
     "CloudRun": [
         "CloudRunServiceManager",
         "CloudRunJobManager",
@@ -46,6 +53,8 @@ CLOUD_SERVICE_GROUP_MAP = {
     "KubernetesEngine": [
         "GKEClusterV1Manager"
     ],  # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
+    "Datastore": ["DatastoreNamespaceManager", "DatastoreIndexManager"],
+    "Dataproc": ["DataprocClusterManager"],
     # "Recommender": ["RecommendationManager"],
 }
 
@@ -107,7 +116,7 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "Instance": {
             "resource_type": "filestore_instance",
             "labels_key": "resource.labels.instance_id",
-        },
+        }
     },
     "Firebase": {
         "Project": {
@@ -148,6 +157,22 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             "resource_type": "gke_cluster",
             "labels_key": "resource.labels.cluster_name",
         }
+    },
+    "Datastore": {
+        "Namespace": {
+            "resource_type": "datastore_namespace",
+            "labels_key": "resource.labels.namespace_id",
+        },
+        "Index": {
+            "resource_type": "datastore_index",
+            "labels_key": "resource.labels.index_id",
+        },
+    },
+    "Dataproc": {
+        "Cluster": {
+            "resource_type": "dataproc_cluster",
+            "labels_key": "resource.labels.cluster_name",
+        },
     },
     "Recommender": {},
 }

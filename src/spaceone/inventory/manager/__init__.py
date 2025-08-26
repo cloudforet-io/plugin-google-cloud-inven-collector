@@ -2,6 +2,21 @@ from spaceone.inventory.manager.batch.batch_manager import BatchManager
 from spaceone.inventory.manager.bigquery.sql_workspace_manager import (
     SQLWorkspaceManager,
 )
+from spaceone.inventory.manager.cloud_build.build_manager import (
+    CloudBuildBuildManager,
+)
+from spaceone.inventory.manager.cloud_build.connection_manager import (
+    CloudBuildConnectionManager,
+)
+from spaceone.inventory.manager.cloud_build.repository_manager import (
+    CloudBuildRepositoryManager,
+)
+from spaceone.inventory.manager.cloud_build.trigger_manager import (
+    CloudBuildTriggerManager,
+)
+from spaceone.inventory.manager.cloud_build.worker_pool_manager import (
+    CloudBuildWorkerPoolManager,
+)
 from spaceone.inventory.manager.cloud_functions.function_gen1_manager import (
     FunctionGen1Manager,
 )
@@ -57,4 +72,10 @@ from spaceone.inventory.manager.pub_sub.subscription_manager import Subscription
 from spaceone.inventory.manager.pub_sub.topic_manager import TopicManager
 from spaceone.inventory.manager.recommender.recommendation_manager import (
     RecommendationManager,
+)
+from spaceone.inventory.manager.kubernetes_engine.cluster_v1_manager import GKEClusterV1Manager
+from spaceone.inventory.manager.kubernetes_engine.cluster_v1beta_manager import GKEClusterV1BetaManager
+from spaceone.inventory.manager.datastore.index_manager import DatastoreIndexManager
+from spaceone.inventory.manager.datastore.namespace_manager import (
+    DatastoreNamespaceManager,
 )
