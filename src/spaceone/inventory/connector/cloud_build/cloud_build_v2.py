@@ -24,7 +24,12 @@ class CloudBuildV2Connector(GoogleCloudConnector):
         while request is not None:
             try:
                 response = request.execute()
-                locations.extend(response.get("locations", []))
+                raw_locations = response.get("locations", [])
+                filtered_locations = [
+                    loc for loc in raw_locations 
+                    if loc.get("locationId") != "global"
+                ]
+                locations.extend(filtered_locations)
                 request = self.client.projects().locations().list_next(request, response)
             except HttpError as e:
                 _LOGGER.error(f"Failed to list locations: {e}")
