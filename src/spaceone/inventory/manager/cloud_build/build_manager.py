@@ -22,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class CloudBuildBuildManager(GoogleCloudManager):
-    connector_name = "CloudBuildV1Connector"
+    connector_name = ["CloudBuildV1Connector", "CloudBuildV2Connector"]
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def __init__(self, *args, **kwargs):

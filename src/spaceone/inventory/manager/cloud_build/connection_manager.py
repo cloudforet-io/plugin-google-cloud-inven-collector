@@ -1,9 +1,6 @@
 import logging
 import time
 
-from spaceone.inventory.connector.cloud_build.cloud_build_v1 import (
-    CloudBuildV1Connector,
-)
 from spaceone.inventory.connector.cloud_build.cloud_build_v2 import (
     CloudBuildV2Connector,
 )
@@ -22,7 +19,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class CloudBuildConnectionManager(GoogleCloudManager):
-    connector_name = ["CloudBuildV1Connector", "CloudBuildV2Connector"]
+    connector_name = "CloudBuildV2Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def __init__(self, *args, **kwargs):
@@ -53,8 +50,7 @@ class CloudBuildConnectionManager(GoogleCloudManager):
 
         secret_data = params["secret_data"]
         project_id = secret_data["project_id"]
-        
-        self.cloud_build_v1_connector = CloudBuildV1Connector(**params)
+
         self.cloud_build_v2_connector = CloudBuildV2Connector(**params)
 
         # Location별 connections 조회

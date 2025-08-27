@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, List
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
@@ -8,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class BatchConnector(GoogleCloudConnector):
-    """통합 Batch Connector - Locations, Jobs, Tasks API를 모두 처리"""
+    """최적화된 Batch Connector - 효율적인 API 호출과 에러 처리"""
 
     google_client_service = "batch"
     version = "v1"
@@ -16,163 +17,157 @@ class BatchConnector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    # ===== Locations API =====
-    def list_locations(self, **query):
+    def list_all_jobs(self, **query) -> List[Dict]:
         """
-        Batch 서비스가 지원되는 Location 목록을 조회합니다.
+        모든 Location의 Job 목록을 글로벌로 조회합니다.
+        locations/- 패턴을 사용하여 한번에 모든 location의 jobs를 가져옵니다.
 
         Args:
             **query: 추가 쿼리 파라미터
 
         Returns:
-            list: Location 목록
+            List[Dict]: 모든 Job 목록
         """
-        locations = []
-        parent = f"projects/{self.project_id}"
-        query.update({"name": parent})
+        parent = f"projects/{self.project_id}/locations/-"
+        return self._paginated_list(
+            self.client.projects().locations().jobs().list,
+            parent=parent,
+            resource_key="jobs",
+            error_context="list all jobs",
+            **query,
+        )
+
+    def list_tasks(self, task_group_name: str, **query) -> List[Dict]:
+        """
+        TaskGroup의 Task 목록을 조회합니다.
+
+        Args:
+            task_group_name: TaskGroup의 전체 경로
+            **query: 추가 쿼리 파라미터
+
+        Returns:
+            List[Dict]: Task 목록
+        """
+        return self._paginated_list(
+            self.client.projects().locations().jobs().taskGroups().tasks().list,
+            parent=task_group_name,
+            resource_key="tasks",
+            error_context=f"list tasks for {task_group_name}",
+            **query,
+        )
+
+    def _paginated_list(
+        self, api_method, resource_key: str, error_context: str, **query
+    ) -> List[Dict]:
+        """
+        페이지네이션을 지원하는 API 호출의 공통 처리 로직
+
+        Args:
+            api_method: API 메서드 (예: client.jobs().list)
+            resource_key: 응답에서 추출할 리소스 키 (예: 'jobs', 'tasks')
+            error_context: 에러 로그에 사용할 컨텍스트
+            **query: API 쿼리 파라미터
+
+        Returns:
+            List[Dict]: 수집된 리소스 목록
+        """
+        resources = []
 
         try:
-            request = self.client.projects().locations().list(**query)
+            request = api_method(**query)
             while request is not None:
                 response = request.execute()
-                for location in response.get("locations", []):
-                    locations.append(location)
-                request = (
-                    self.client.projects()
-                    .locations()
-                    .list_next(previous_request=request, previous_response=response)
-                )
+
+                # 리소스 추가
+                page_resources = response.get(resource_key, [])
+                resources.extend(page_resources)
+
+                # 다음 페이지 요청 생성
+                request = self._get_next_request(api_method, request, response)
+
+            _LOGGER.debug(f"Successfully collected {len(resources)} {resource_key}")
+
         except Exception as e:
-            _LOGGER.warning(f"Failed to list locations: {e}")
+            _LOGGER.warning(f"Failed to {error_context}: {e}")
 
-        return locations
+        return resources
 
-    def get_location(self, name, **query):
+    def _get_next_request(self, api_method, request, response):
         """
-        특정 Location의 상세 정보를 조회합니다.
+        다음 페이지 요청을 생성합니다.
 
         Args:
-            name (str): Location의 전체 경로
-            **query: 추가 쿼리 파라미터
+            api_method: 원본 API 메서드
+            request: 현재 요청
+            response: 현재 응답
 
         Returns:
-            dict: Location 정보
+            다음 페이지 요청 또는 None
         """
-        query.update({"name": name})
-
         try:
-            return self.client.projects().locations().get(**query).execute()
-        except Exception as e:
-            _LOGGER.warning(f"Failed to get location {name}: {e}")
-            return {}
+            # client 객체에서 해당 경로의 _next 메서드 찾기
+            if "jobs" in str(api_method):
+                if "tasks" in str(api_method):
+                    # tasks API
+                    next_method = (
+                        self.client.projects()
+                        .locations()
+                        .jobs()
+                        .taskGroups()
+                        .tasks()
+                        .list_next
+                    )
+                else:
+                    # jobs API
+                    next_method = self.client.projects().locations().jobs().list_next
+            else:
+                # locations API
+                next_method = self.client.projects().locations().list_next
 
-    # ===== Jobs API =====
-    def list_jobs(self, location_id, **query):
+            return next_method(previous_request=request, previous_response=response)
+        except Exception:
+            # 다음 페이지가 없거나 에러 발생 시
+            return None
+
+    # ===== 레거시 호환성을 위한 메서드들 =====
+
+    def list_locations(self, **query) -> List[Dict]:
         """
-        특정 Location의 Job 목록을 조회합니다.
-
-        Args:
-            location_id (str): Location ID
-            **query: 추가 쿼리 파라미터
-
-        Returns:
-            list: Job 목록
+        레거시 호환성을 위한 메서드. 현재는 사용되지 않습니다.
         """
-        jobs = []
+        _LOGGER.warning("list_locations is deprecated and not used in optimized flow")
+        return []
+
+    def list_jobs(self, location_id: str, **query) -> List[Dict]:
+        """
+        레거시 호환성을 위한 메서드. list_all_jobs 사용을 권장합니다.
+        """
+        _LOGGER.warning("list_jobs is deprecated. Use list_all_jobs instead")
         parent = f"projects/{self.project_id}/locations/{location_id}"
-        query.update({"parent": parent})
+        return self._paginated_list(
+            self.client.projects().locations().jobs().list,
+            parent=parent,
+            resource_key="jobs",
+            error_context=f"list jobs for location {location_id}",
+            **query,
+        )
 
-        try:
-            request = self.client.projects().locations().jobs().list(**query)
-            while request is not None:
-                response = request.execute()
-                for job in response.get("jobs", []):
-                    jobs.append(job)
-                request = (
-                    self.client.projects()
-                    .locations()
-                    .jobs()
-                    .list_next(previous_request=request, previous_response=response)
-                )
-        except Exception as e:
-            _LOGGER.warning(f"Failed to list jobs for location {location_id}: {e}")
-
-        return jobs
-
-    def get_job(self, name, **query):
+    def get_job(self, name: str, **query) -> Dict:
         """
-        특정 Job의 상세 정보를 조회합니다.
-
-        Args:
-            name (str): Job의 전체 경로
-            **query: 추가 쿼리 파라미터
-
-        Returns:
-            dict: Job 정보
+        특정 Job의 상세 정보를 조회합니다. 현재는 사용되지 않습니다.
         """
         query.update({"name": name})
-
         try:
             return self.client.projects().locations().jobs().get(**query).execute()
         except Exception as e:
             _LOGGER.warning(f"Failed to get job {name}: {e}")
             return {}
 
-    # ===== Tasks API =====
-    def list_tasks(self, task_group_name, **query):
+    def get_task(self, name: str, **query) -> Dict:
         """
-        TaskGroup의 Task 목록을 조회합니다.
-
-        Args:
-            task_group_name (str): TaskGroup의 전체 경로
-                                  Format: projects/{project}/locations/{location}/jobs/{job}/taskGroups/{task_group}
-            **query: 추가 쿼리 파라미터 (filter, pageSize, pageToken)
-
-        Returns:
-            list: Task 목록
-        """
-        tasks = []
-        query.update({"parent": task_group_name})
-
-        try:
-            request = (
-                self.client.projects()
-                .locations()
-                .jobs()
-                .taskGroups()
-                .tasks()
-                .list(**query)
-            )
-            while request is not None:
-                response = request.execute()
-                for task in response.get("tasks", []):
-                    tasks.append(task)
-                request = (
-                    self.client.projects()
-                    .locations()
-                    .jobs()
-                    .taskGroups()
-                    .tasks()
-                    .list_next(previous_request=request, previous_response=response)
-                )
-        except Exception as e:
-            _LOGGER.warning(f"Failed to list tasks for {task_group_name}: {e}")
-
-        return tasks
-
-    def get_task(self, name, **query):
-        """
-        특정 Task의 상세 정보를 조회합니다.
-
-        Args:
-            name (str): Task의 전체 경로
-            **query: 추가 쿼리 파라미터
-
-        Returns:
-            dict: Task 정보
+        특정 Task의 상세 정보를 조회합니다. 현재는 사용되지 않습니다.
         """
         query.update({"name": name})
-
         try:
             return (
                 self.client.projects()
