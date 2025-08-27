@@ -1,0 +1,15 @@
+---
+cloud_service_group: Dataproc
+cloud_service_type: Cluster
+name: Count by Project
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.project_id
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: DONUT

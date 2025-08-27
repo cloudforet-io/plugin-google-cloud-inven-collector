@@ -36,6 +36,14 @@ CLOUD_SERVICE_GROUP_MAP = {
     "CloudFunctions": ["FunctionGen2Manager", "FunctionGen1Manager"],
     "Filestore": ["FilestoreInstanceManager"],
     "Firebase": ["FirebaseProjectManager"],
+    "Batch": ["BatchManager"],
+    "CloudBuild": [
+        "CloudBuildBuildManager",
+        "CloudBuildTriggerManager",
+        "CloudBuildWorkerPoolManager",
+        "CloudBuildConnectionManager",
+        "CloudBuildRepositoryManager",
+    ],
     "CloudRun": [
         "CloudRunServiceManager",
         "CloudRunJobManager",
@@ -49,6 +57,8 @@ CLOUD_SERVICE_GROUP_MAP = {
         "AppEngineVersionV1Manager",
         "AppEngineInstanceV1Manager"
     ],
+    "Datastore": ["DatastoreNamespaceManager", "DatastoreIndexManager"],
+    "Dataproc": ["DataprocClusterManager"],
     # "Recommender": ["RecommendationManager"],
 }
 
@@ -110,13 +120,23 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "Instance": {
             "resource_type": "filestore_instance",
             "labels_key": "resource.labels.instance_id",
-        },
+        }
     },
     "Firebase": {
         "Project": {
             "resource_type": "firebase_project",
             "labels_key": "resource.labels.project_id",
         }
+    },
+    "Batch": {
+        "Location": {
+            "resource_type": "batch_location",
+            "labels_key": "resource.labels.location_id",
+        },
+        "Job": {
+            "resource_type": "batch_job",
+            "labels_key": "resource.labels.job_id",
+        },
     },
     "CloudRun": {
         "Service": {
@@ -159,6 +179,22 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             "resource_type": "gae_app",
             "labels_key": "resource.labels.instance_id",
         }
+    },
+    "Datastore": {
+        "Namespace": {
+            "resource_type": "datastore_namespace",
+            "labels_key": "resource.labels.namespace_id",
+        },
+        "Index": {
+            "resource_type": "datastore_index",
+            "labels_key": "resource.labels.index_id",
+        },
+    },
+    "Dataproc": {
+        "Cluster": {
+            "resource_type": "dataproc_cluster",
+            "labels_key": "resource.labels.cluster_name",
+        },
     },
     "Recommender": {},
 }

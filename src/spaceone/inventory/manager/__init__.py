@@ -1,5 +1,21 @@
+from spaceone.inventory.manager.batch.batch_manager import BatchManager
 from spaceone.inventory.manager.bigquery.sql_workspace_manager import (
     SQLWorkspaceManager,
+)
+from spaceone.inventory.manager.cloud_build.build_manager import (
+    CloudBuildBuildManager,
+)
+from spaceone.inventory.manager.cloud_build.connection_manager import (
+    CloudBuildConnectionManager,
+)
+from spaceone.inventory.manager.cloud_build.repository_manager import (
+    CloudBuildRepositoryManager,
+)
+from spaceone.inventory.manager.cloud_build.trigger_manager import (
+    CloudBuildTriggerManager,
+)
+from spaceone.inventory.manager.cloud_build.worker_pool_manager import (
+    CloudBuildWorkerPoolManager,
 )
 from spaceone.inventory.manager.cloud_functions.function_gen1_manager import (
     FunctionGen1Manager,
@@ -28,13 +44,19 @@ from spaceone.inventory.manager.compute_engine.machine_image_manager import (
     MachineImageManager,
 )
 from spaceone.inventory.manager.compute_engine.snapshot_manager import SnapshotManager
-from spaceone.inventory.manager.cloud_storage.storage_manager import StorageManager
-from spaceone.inventory.manager.filestore.instance_manager import FilestoreInstanceManager
-from spaceone.inventory.manager.networking.vpc_network_manager import VPCNetworkManager
 from spaceone.inventory.manager.compute_engine.vm_instance_manager import (
     VMInstanceManager,
 )
+from spaceone.inventory.manager.filestore.instance_manager import (
+    FilestoreInstanceManager,
+)
 from spaceone.inventory.manager.firebase.project_manager import FirebaseProjectManager
+from spaceone.inventory.manager.kubernetes_engine.cluster_v1_manager import (
+    GKEClusterV1Manager,
+)
+from spaceone.inventory.manager.kubernetes_engine.cluster_v1beta_manager import (
+    GKEClusterV1BetaManager,
+)
 from spaceone.inventory.manager.networking.external_ip_address_manager import (
     ExternalIPAddressManager,
 )
@@ -57,3 +79,7 @@ from spaceone.inventory.manager.app_engine.application_v1_manager import AppEngi
 from spaceone.inventory.manager.app_engine.service_v1_manager import AppEngineServiceV1Manager
 from spaceone.inventory.manager.app_engine.version_v1_manager import AppEngineVersionV1Manager
 from spaceone.inventory.manager.app_engine.instance_v1_manager import AppEngineInstanceV1Manager
+from spaceone.inventory.manager.datastore.index_manager import DatastoreIndexManager
+from spaceone.inventory.manager.datastore.namespace_manager import (
+    DatastoreNamespaceManager,
+)

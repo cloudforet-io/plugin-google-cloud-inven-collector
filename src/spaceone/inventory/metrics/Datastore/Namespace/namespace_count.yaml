@@ -1,0 +1,28 @@
+---
+name: namespace_count
+key: datastore_namespace_count
+unit:
+  x: Count
+  y: Count
+chart_type: COLUMN
+query:
+  resource_type: inventory.CloudService
+  query:
+    aggregate:
+      - group:
+          keys:
+            - name: project_id
+              key: account
+            - name: namespace_id
+              key: data.namespace_id
+          fields:
+            - name: namespace_count
+              operator: count
+              key: cloud_service_id
+    filter:
+      - key: cloud_service_type
+        value: Namespace
+        operator: eq
+      - key: cloud_service_group
+        value: Datastore
+        operator: eq 
