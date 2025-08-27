@@ -1,0 +1,25 @@
+chart_type: LINE
+labels:
+- Dataproc
+- Analytics
+- Compute
+namespace: gcp/dataproc
+options:
+  chart_type: LINE
+  legend:
+    enabled: true
+    position: bottom
+  xAxis:
+    key: time
+    name: Time
+  yAxis:
+    key: cluster_yarn_memory
+    name: YARN Memory (GB)
+query:
+  metric: dataproc_cluster_yarn_memory
+  stat: AVERAGE
+resource_type: inventory.CloudService
+tags:
+  description: YARN available memory of the Dataproc cluster
+  icon: gcp-dataproc
+  short_description: Dataproc Cluster YARN Memory

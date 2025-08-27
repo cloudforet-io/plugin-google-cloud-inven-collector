@@ -1,0 +1,25 @@
+chart_type: LINE
+labels:
+- Dataproc
+- Analytics
+- Storage
+namespace: gcp/dataproc
+options:
+  chart_type: LINE
+  legend:
+    enabled: true
+    position: bottom
+  xAxis:
+    key: time
+    name: Time
+  yAxis:
+    key: cluster_hdfs_capacity
+    name: HDFS Capacity (GB)
+query:
+  metric: dataproc_cluster_hdfs_capacity
+  stat: AVERAGE
+resource_type: inventory.CloudService
+tags:
+  description: HDFS total capacity of the Dataproc cluster
+  icon: gcp-dataproc
+  short_description: Dataproc Cluster HDFS Capacity
