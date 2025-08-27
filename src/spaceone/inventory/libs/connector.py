@@ -1,7 +1,8 @@
+import logging
+
 import google.oauth2.service_account
 import googleapiclient
 import googleapiclient.discovery
-import logging
 
 from spaceone.core.connector import BaseConnector
 
@@ -29,15 +30,29 @@ class GoogleCloudConnector(BaseConnector):
 
         super().__init__(*args, **kwargs)
         secret_data = kwargs.get("secret_data")
+
+        if not secret_data:
+            raise ValueError("secret_data is required for GoogleCloudConnector")
+
         self.project_id = secret_data.get("project_id")
-        self.credentials = (
-            google.oauth2.service_account.Credentials.from_service_account_info(
-                secret_data
+
+        if not self.project_id:
+            raise ValueError("project_id is required in secret_data")
+
+        try:
+            self.credentials = (
+                google.oauth2.service_account.Credentials.from_service_account_info(
+                    secret_data
+                )
             )
-        )
-        self.client = googleapiclient.discovery.build(
-            self.google_client_service, self.version, credentials=self.credentials
-        )
+            self.client = googleapiclient.discovery.build(
+                self.google_client_service, self.version, credentials=self.credentials
+            )
+        except Exception as e:
+            _LOGGER.error(f"Failed to initialize Google Cloud client: {e}")
+            raise ValueError(
+                f"Invalid credentials or service configuration: {e}"
+            ) from e
 
     def verify(self, **kwargs):
         if self.client is None:

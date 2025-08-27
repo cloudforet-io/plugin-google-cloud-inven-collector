@@ -49,22 +49,28 @@ Google Cloud Dataproc은 Apache Spark, Hadoop 및 30개 이상의 오픈소스 �
 이 섹션은 현재 SpaceONE 플러그인에서 실제로 구현하고 수집하는 Dataproc 리소스의 상세 내역을 기술합니다.
 
 ### 6.1. 수집 리소스
-- **Dataproc Cluster**: Google Cloud 프로젝트 내의 모든 Dataproc 클러스터를 수집 대상으로 합니다.
+- **Dataproc Cluster**: Google Cloud 프로젝트 내의 모든 Dataproc 클러스터를 수집합니다.
+- **Workflow Template**: 모든 리전의 Dataproc 워크플로우 템플릿을 수집합니다.
+- **Autoscaling Policy**: 모든 리전의 Dataproc 자동 확장 정책을 수집합니다.
 
 ### 6.2. 핵심 수집 데이터
-- **기본 정보**: 클러스터 이름, UUID, 프로젝트 ID, 위치(리전/존), 상태(생성중, 실행중, 에러 등), 생성 시간, 라벨
-- **클러스터 구성 (Cluster Configuration)**:
-  - **GCE 클러스터 설정**: Zone, 네트워크/서브네트워크 URI, 내부 IP 전용 여부, 서비스 계정 정보
-  - **인스턴스 그룹 설정**: 마스터/워커 노드의 인스턴스 수, 머신 타입, 디스크 타입 및 크기, 이미지 URI
-  - **소프트웨어 설정**: 이미지 버전, 선택적 구성 요소(Optional Components)
-  - **스토리지 설정**: 설정 및 임시 작업을 위한 Cloud Storage 버킷 정보
-- **작업(Job) 정보**: `list_jobs` 커넥터 메서드를 통해 클러스터와 연관된 작업 목록을 조회할 수 있는 기능이 구현되어 있습니다.
+- **클러스터 (Cluster)**
+  - **기본 정보**: 클러스터 이름, UUID, 프로젝트 ID, 위치(리전/존), 상태, 생성 시간, 라벨
+  - **클러스터 구성**: GCE 클러스터 설정, 인스턴스 그룹 설정(마스터/워커), 소프트웨어 설정, 스토리지 설정 등
+  - **연관 작업 정보 (Associated Jobs)**: 각 클러스터에 연결된 최근 작업(최대 10개)의 상태, ID, 배치 정보 등을 수집하여 `jobs` 필드에 포함합니다.
+- **워크플로우 템플릿 (Workflow Template)**
+  - 템플릿 ID, 이름, 버전, 생성/수정 시간, 라벨, 배치 정보, 작업 목록 등
+- **자동 확장 정책 (Autoscaling Policy)**
+  - 정책 ID, 이름, 워커 설정, 알고리즘 등
 
 ### 6.3. 수집 메트릭
-- **클러스터 CPU 사용률 (cluster_cpu_utilization)**: 클러스터의 평균 CPU 사용률을 수집합니다.
-- **클러스터 메모리 사용률 (cluster_memory_utilization)**: 클러스터의 평균 메모리 사용률을 수집합니다.
+- **cluster_cpu_utilization**: 클러스터의 평균 CPU 사용률
+- **cluster_memory_utilization**: 클러스터의 평균 메모리 사용률
+- **cluster_hdfs_capacity**: 클러스터의 HDFS 총 용량
+- **cluster_yarn_memory**: 클러스터의 YARN 사용 가능 메모리
 
 ### 6.4. 주요 구현 기능
-- Google Cloud API를 통해 각 프로젝트의 모든 리전에 있는 Dataproc 클러스터 정보를 조회합니다.
+- Google Cloud API를 통해 각 프로젝트의 모든 리전에 있는 Dataproc 클러스터, 워크플로우 템플릿, 자동 확장 정책 정보를 조회합니다.
+- 성능 향상을 위해 API 호출 시 GCP 리전 목록을 캐싱하여 사용합니다.
 - 수집된 데이터를 SpaceONE의 Cloud Service 모델 형식에 맞게 변환합니다.
-- SpaceONE 콘솔에서 사용자가 클러스터 정보를 쉽게 파악할 수 있도록 동적 테이블 및 항목 레이아웃을 제공합니다.
+- SpaceONE 콘솔에서 사용자가 클러스터 및 관련 정보를 쉽게 파악할 수 있도록 동적 테이블 및 항목 레이아웃을 제공합니다.

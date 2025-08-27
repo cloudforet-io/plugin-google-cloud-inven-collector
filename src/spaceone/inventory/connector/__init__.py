@@ -22,8 +22,17 @@ from spaceone.inventory.connector.compute_engine.instance_template import (
 from spaceone.inventory.connector.compute_engine.machine_image import (
     MachineImageConnector,
 )
-from spaceone.inventory.connector.compute_engine.snapshot import SnapshotConnector
+from spaceone.inventory.connector.compute_engine.snapshot import (
+    SnapshotConnector as ComputeEngineSnapshotConnector,
+)
 from spaceone.inventory.connector.compute_engine.vm_instance import VMInstanceConnector
+from spaceone.inventory.connector.dataproc.cluster_connector import (
+    DataprocClusterConnector,
+)
+from spaceone.inventory.connector.datastore.index_v1 import DatastoreIndexV1Connector
+from spaceone.inventory.connector.datastore.namespace_v1 import (
+    DatastoreNamespaceV1Connector,
+)
 from spaceone.inventory.connector.filestore.instance_v1 import (
     FilestoreInstanceConnector,
 )
@@ -47,7 +56,9 @@ from spaceone.inventory.connector.networking.load_balancing import (
 from spaceone.inventory.connector.networking.route import RouteConnector
 from spaceone.inventory.connector.networking.vpc_network import VPCNetworkConnector
 from spaceone.inventory.connector.pub_sub.schema import SchemaConnector
-from spaceone.inventory.connector.pub_sub.snapshot import SnapshotConnector
+from spaceone.inventory.connector.pub_sub.snapshot import (
+    SnapshotConnector as PubSubSnapshotConnector,
+)
 from spaceone.inventory.connector.pub_sub.subscription import SubscriptionConnector
 from spaceone.inventory.connector.pub_sub.topic import TopicConnector
 from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
@@ -55,10 +66,42 @@ from spaceone.inventory.connector.recommender.insight import InsightConnector
 from spaceone.inventory.connector.recommender.recommendation import (
     RecommendationConnector,
 )
-from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
-from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import GKEClusterV1Connector
-from spaceone.inventory.connector.kubernetes_engine.cluster_v1beta import GKEClusterV1BetaConnector
-from spaceone.inventory.connector.datastore.index_v1 import DatastoreIndexV1Connector
-from spaceone.inventory.connector.datastore.namespace_v1 import (
-    DatastoreNamespaceV1Connector,
-)
+
+__all__ = [
+    "BatchConnector",
+    "SQLWorkspaceConnector",
+    "EventarcConnector",
+    "FunctionGen1Connector",
+    "FunctionGen2Connector",
+    "CloudRunV1Connector",
+    "CloudRunV2Connector",
+    "CloudSQLInstanceConnector",
+    "MonitoringConnector",
+    "StorageConnector",
+    "DiskConnector",
+    "InstanceGroupConnector",
+    "InstanceTemplateConnector",
+    "MachineImageConnector",
+    "ComputeEngineSnapshotConnector",
+    "PubSubSnapshotConnector",
+    "VMInstanceConnector",
+    "DataprocClusterConnector",
+    "DatastoreIndexV1Connector",
+    "DatastoreNamespaceV1Connector",
+    "FilestoreInstanceConnector",
+    "FilestoreInstanceV1Beta1Connector",
+    "FirebaseProjectConnector",
+    "GKEClusterV1Connector",
+    "GKEClusterV1BetaConnector",
+    "ExternalIPAddressConnector",
+    "FirewallConnector",
+    "LoadBalancingConnector",
+    "RouteConnector",
+    "VPCNetworkConnector",
+    "SchemaConnector",
+    "SubscriptionConnector",
+    "TopicConnector",
+    "CloudAssetConnector",
+    "InsightConnector",
+    "RecommendationConnector",
+]
