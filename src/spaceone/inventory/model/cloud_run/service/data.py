@@ -1,5 +1,6 @@
 from schematics import Model
 from schematics.types import (
+    BaseType,
     DateTimeType,
     DictType,
     IntType,
@@ -52,10 +53,10 @@ class Service(Model):
     conditions = ListType(ModelType(Condition), default=[])
     latest_ready_revision_name = StringType(deserialize_from="latestReadyRevisionName")
     latest_created_revision_name = StringType(deserialize_from="latestCreatedRevisionName")
-    # traffic_statuses = ListType(DictType(StringType), deserialize_from="trafficStatuses", default=[])
+    traffic_statuses = ListType(DictType(BaseType), deserialize_from="trafficStatuses", default=[])
     uri = StringType()
     etag = StringType()
-    template = DictType(StringType, default={})
+    template = DictType(BaseType, default={})
     ingress = StringType()
     revisions = ListType(ModelType(Revision), default=[])
     revision_count = IntType(default=0) 

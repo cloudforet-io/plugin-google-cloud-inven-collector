@@ -1,5 +1,11 @@
 from spaceone.inventory.connector.batch.batch_connector import BatchConnector
 from spaceone.inventory.connector.bigquery.sql_workspace import SQLWorkspaceConnector
+from spaceone.inventory.connector.cloud_build.cloud_build_v1 import (
+    CloudBuildV1Connector,
+)
+from spaceone.inventory.connector.cloud_build.cloud_build_v2 import (
+    CloudBuildV2Connector,
+)
 from spaceone.inventory.connector.cloud_functions.eventarc import EventarcConnector
 from spaceone.inventory.connector.cloud_functions.function_gen1 import (
     FunctionGen1Connector,
@@ -73,6 +79,8 @@ __all__ = [
     "EventarcConnector",
     "FunctionGen1Connector",
     "FunctionGen2Connector",
+    "CloudBuildV1Connector",
+    "CloudBuildV2Connector",
     "CloudRunV1Connector",
     "CloudRunV2Connector",
     "CloudSQLInstanceConnector",
