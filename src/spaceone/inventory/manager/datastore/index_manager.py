@@ -1,8 +1,6 @@
 import logging
 
-from spaceone.inventory.connector.datastore.index_v1 import (
-    DatastoreIndexV1Connector,
-)
+from spaceone.inventory.connector.datastore.index_v1 import DatastoreIndexV1Connector
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
 from spaceone.inventory.model.datastore.index.cloud_service import (
@@ -22,9 +20,11 @@ class DatastoreIndexManager(GoogleCloudManager):
     Google Cloud Datastore Index Manager
 
     Datastore Index 리소스를 수집하고 처리하는 매니저 클래스
-    - Index 목록 수집
+    - Index 목록 수집 (프로젝트 레벨)
     - Index 상세 정보 처리
     - 리소스 응답 생성
+
+    주의: Datastore Admin API 한계로 인해 다중 데이터베이스 지원이 제한됨
     """
 
     connector_name = "DatastoreIndexV1Connector"
@@ -55,7 +55,7 @@ class DatastoreIndexManager(GoogleCloudManager):
                 self.connector_name, **params
             )
 
-            # 모든 index 조회
+            # 모든 index 조회 (프로젝트 레벨)
             indexes = self._list_indexes()
 
             # 각 index에 대해 리소스 생성
@@ -64,11 +64,10 @@ class DatastoreIndexManager(GoogleCloudManager):
                     resource_response = self._make_index_response(index_data, params)
                     resource_responses.append(resource_response)
                 except Exception as e:
-                    _LOGGER.error(
-                        f"Failed to process index {index_data.get('indexId', 'unknown')}: {e}"
-                    )
+                    index_id = index_data.get("indexId", "unknown")
+                    _LOGGER.error(f"Failed to process index {index_id}: {e}")
                     error_response = self.generate_error_response(
-                        e, "Datastore", "Index", index_data.get("indexId", "unknown")
+                        e, "Datastore", "Index", index_id
                     )
                     error_responses.append(error_response)
 
@@ -82,7 +81,7 @@ class DatastoreIndexManager(GoogleCloudManager):
 
     def _list_indexes(self):
         """
-        Datastore의 모든 index를 조회합니다.
+        프로젝트의 모든 index를 조회합니다.
 
         Returns:
             List[dict]: index 정보 목록
@@ -90,16 +89,16 @@ class DatastoreIndexManager(GoogleCloudManager):
         indexes = []
 
         try:
-            # 모든 index 조회
-            indexes = self.index_conn.list_indexes()
+            # 모든 index 조회 (프로젝트 레벨)
+            raw_indexes = self.index_conn.list_indexes()
 
-            for index in indexes:
+            for index in raw_indexes:
                 # 각 index에 대해 추가 정보 수집
                 index_data = self._process_index_data(index)
                 if index_data:
                     indexes.append(index_data)
 
-            _LOGGER.info(f"Found {len(indexes)} indexes")
+            _LOGGER.info(f"Found {len(indexes)} total indexes")
 
         except Exception as e:
             _LOGGER.error(f"Error listing indexes: {e}")
@@ -122,24 +121,19 @@ class DatastoreIndexManager(GoogleCloudManager):
             index_id = index.get("indexId", "")
             kind = index.get("kind", "")
             ancestor = index.get("ancestor", "NONE")
-            state = index.get("state", "UNKNOWN")
-
-            # properties 정보 처리
+            state = index.get("state", "")
             properties = index.get("properties", [])
-            property_count = len(properties)
 
-            # 정렬된 속성 목록 생성
+            # Properties 분석
+            property_count = len(properties)
             sorted_properties = []
             unsorted_properties = []
 
             for prop in properties:
                 prop_name = prop.get("name", "")
                 direction = prop.get("direction", "ASCENDING")
-
-                if direction == "ASCENDING":
-                    sorted_properties.append(f"{prop_name} (ASC)")
-                elif direction == "DESCENDING":
-                    sorted_properties.append(f"{prop_name} (DESC)")
+                if direction in ["ASCENDING", "DESCENDING"]:
+                    sorted_properties.append(f"{prop_name} ({direction})")
                 else:
                     unsorted_properties.append(prop_name)
 
@@ -156,7 +150,7 @@ class DatastoreIndexManager(GoogleCloudManager):
                 "project_id": self.index_conn.project_id,
                 "display_name": f"{kind} Index ({index_id})"
                 if kind
-                else f"Index {index_id}",
+                else f"Index ({index_id})",
                 # 원본 데이터도 포함
                 "raw_data": index,
             }

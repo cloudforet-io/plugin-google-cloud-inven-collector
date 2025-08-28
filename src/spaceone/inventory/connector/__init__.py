@@ -24,6 +24,13 @@ from spaceone.inventory.connector.compute_engine.machine_image import (
 )
 from spaceone.inventory.connector.compute_engine.snapshot import SnapshotConnector
 from spaceone.inventory.connector.compute_engine.vm_instance import VMInstanceConnector
+from spaceone.inventory.connector.datastore.database_v1 import (
+    DatastoreDatabaseV1Connector,
+)
+from spaceone.inventory.connector.datastore.index_v1 import DatastoreIndexV1Connector
+from spaceone.inventory.connector.datastore.namespace_v1 import (
+    DatastoreNamespaceV1Connector,
+)
 from spaceone.inventory.connector.filestore.instance_v1 import (
     FilestoreInstanceConnector,
 )
@@ -56,9 +63,3 @@ from spaceone.inventory.connector.recommender.recommendation import (
     RecommendationConnector,
 )
 from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
-from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import GKEClusterV1Connector
-from spaceone.inventory.connector.kubernetes_engine.cluster_v1beta import GKEClusterV1BetaConnector
-from spaceone.inventory.connector.datastore.index_v1 import DatastoreIndexV1Connector
-from spaceone.inventory.connector.datastore.namespace_v1 import (
-    DatastoreNamespaceV1Connector,
-)

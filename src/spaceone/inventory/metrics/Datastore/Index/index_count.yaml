@@ -26,3 +26,11 @@ query:
       - key: cloud_service_group
         value: Datastore
         operator: eq 
+
+dimensions:
+- name: project_id
+  key: data.project_id
+- name: kind
+  key: data.kind
+- name: state
+  key: data.state 

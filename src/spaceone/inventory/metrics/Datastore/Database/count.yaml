@@ -1,0 +1,38 @@
+metric_id: datastore_database_count
+name: Database Count
+description: Number of Datastore databases by project
+resource_type: inventory.CloudService
+labels:
+  - key: provider
+    name: Provider
+  - key: cloud_service_group
+    name: Cloud Service Group
+  - key: cloud_service_type
+    name: Cloud Service Type
+  - key: project_id
+    name: Project ID
+  - key: account
+    name: Account
+query_options:
+  aggregate:
+    - group:
+        keys:
+          - key: provider
+          - key: cloud_service_group
+          - key: cloud_service_type
+          - key: project_id
+          - key: account
+        fields:
+          - key: values.database_count
+            name: database_count
+            operator: sum
+  filter:
+    - key: provider
+      value: google_cloud
+      operator: eq
+    - key: cloud_service_group
+      value: Datastore
+      operator: eq
+    - key: cloud_service_type
+      value: Database
+      operator: eq 

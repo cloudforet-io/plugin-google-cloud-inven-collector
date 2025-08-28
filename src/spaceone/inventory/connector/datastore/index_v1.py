@@ -10,7 +10,7 @@ class DatastoreIndexV1Connector(GoogleCloudConnector):
     Google Cloud Datastore Index Connector
 
     Datastore Index 관련 API 호출을 담당하는 클래스
-    - Index 목록 조회
+    - Index 목록 조회 (프로젝트 레벨)
 
     API 버전: v1
     참고: https://cloud.google.com/datastore/docs/reference/admin/rest/v1/projects.indexes/list
@@ -24,7 +24,7 @@ class DatastoreIndexV1Connector(GoogleCloudConnector):
 
     def list_indexes(self):
         """
-        Datastore 프로젝트의 모든 Index를 조회합니다.
+        프로젝트의 모든 Datastore Index를 조회합니다.
 
         API 응답 구조:
         {
@@ -45,7 +45,7 @@ class DatastoreIndexV1Connector(GoogleCloudConnector):
         }
 
         Returns:
-            list: 모든 index 목록
+            list: 프로젝트의 모든 index 목록
         """
         try:
             request = self.client.projects().indexes().list(projectId=self.project_id)

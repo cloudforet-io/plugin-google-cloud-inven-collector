@@ -56,8 +56,16 @@ class DatastoreNamespaceManager(GoogleCloudManager):
                 self.locator.get_connector(self.connector_name, **params)
             )
 
-            # 모든 namespace 조회
-            namespaces = self._list_namespaces()
+            # Database Manager를 사용하여 DATASTORE_MODE 데이터베이스 ID 목록 조회
+            from spaceone.inventory.manager.datastore.database_manager import (
+                DatastoreDatabaseManager,
+            )
+
+            database_manager = DatastoreDatabaseManager()
+            database_ids = database_manager.get_datastore_database_ids(params)
+
+            # 모든 데이터베이스의 namespace 조회
+            namespaces = self._list_namespaces_for_databases(database_ids)
 
             # 각 namespace에 대해 리소스 생성
             for namespace_data in namespaces:
@@ -86,66 +94,103 @@ class DatastoreNamespaceManager(GoogleCloudManager):
         _LOGGER.debug("** Datastore Namespace END **")
         return resource_responses, error_responses
 
+    def _list_namespaces_for_databases(self, database_ids):
+        """
+        여러 데이터베이스의 모든 namespace를 조회하고 각 namespace의 kind 목록을 포함하여 반환합니다.
+
+        Args:
+            database_ids (List[str]): 조회할 데이터베이스 ID 목록
+
+        Returns:
+            List[dict]: 모든 데이터베이스의 namespace 정보 목록
+        """
+        all_namespaces = []
+
+        try:
+            # 각 데이터베이스별로 네임스페이스 조회
+            for database_id in database_ids:
+                try:
+                    # 먼저 기본 namespace (빈 namespace) 처리
+                    default_namespace_data = self._get_namespace_data(None, database_id)
+                    if default_namespace_data:
+                        all_namespaces.append(default_namespace_data)
+
+                    # 모든 namespace 조회
+                    response = self.namespace_conn.list_namespaces(database_id)
+
+                    # API 응답에서 namespace 목록 추출
+                    namespace_ids = (
+                        self.namespace_conn.extract_namespaces_from_response(response)
+                    )
+
+                    for namespace_id in namespace_ids:
+                        namespace_data = self._get_namespace_data(
+                            namespace_id, database_id
+                        )
+                        if namespace_data:
+                            all_namespaces.append(namespace_data)
+
+                    _LOGGER.info(
+                        f"Found {len(namespace_ids) + 1} namespaces for database {database_id}"
+                    )
+
+                except Exception as e:
+                    _LOGGER.error(
+                        f"Error listing namespaces for database {database_id}: {e}"
+                    )
+                    # 에러가 발생해도 기본 namespace는 시도
+                    try:
+                        default_namespace_data = self._get_namespace_data(
+                            None, database_id
+                        )
+                        if default_namespace_data:
+                            all_namespaces.append(default_namespace_data)
+                    except Exception as default_e:
+                        _LOGGER.error(
+                            f"Error getting default namespace for database {database_id}: {default_e}"
+                        )
+                    continue
+
+            _LOGGER.info(
+                f"Found {len(all_namespaces)} total namespaces across all databases"
+            )
+
+        except Exception as e:
+            _LOGGER.error(f"Error listing namespaces for databases: {e}")
+            raise e
+
+        return all_namespaces
+
     def _list_namespaces(self):
         """
-        Datastore의 모든 namespace를 조회하고 각 namespace의 kind 목록을 포함하여 반환합니다.
+        기본 데이터베이스의 모든 namespace를 조회합니다. (하위 호환성을 위해 유지)
 
         Returns:
             List[dict]: namespace 정보 목록
         """
-        namespaces = []
+        return self._list_namespaces_for_databases(["(default)"])
 
-        try:
-            # 먼저 기본 namespace (빈 namespace) 처리
-            default_namespace_data = self._get_namespace_data(None)
-            if default_namespace_data:
-                namespaces.append(default_namespace_data)
-
-            # 모든 namespace 조회
-            response = self.namespace_conn.list_namespaces()
-
-            # API 응답에서 namespace 목록 추출
-            namespace_ids = self.namespace_conn.extract_namespaces_from_response(
-                response
-            )
-
-            for namespace_id in namespace_ids:
-                namespace_data = self._get_namespace_data(namespace_id)
-                if namespace_data:
-                    namespaces.append(namespace_data)
-
-            _LOGGER.info(f"Found {len(namespaces)} namespaces")
-
-        except Exception as e:
-            _LOGGER.error(f"Error listing namespaces: {e}")
-            # 에러가 발생해도 기본 namespace는 시도
-            try:
-                default_namespace_data = self._get_namespace_data(None)
-                if default_namespace_data:
-                    namespaces.append(default_namespace_data)
-            except Exception as default_e:
-                _LOGGER.error(f"Error getting default namespace: {default_e}")
-
-        return namespaces
-
-    def _get_namespace_data(self, namespace_id):
+    def _get_namespace_data(self, namespace_id, database_id="(default)"):
         """
-        특정 namespace의 상세 정보와 kind 목록을 조회합니다.
+        특정 데이터베이스의 특정 namespace에서 상세 정보와 kind 목록을 조회합니다.
 
         Args:
             namespace_id (str): namespace ID (None인 경우 기본 namespace)
+            database_id (str): 데이터베이스 ID (기본값: "(default)")
 
         Returns:
             dict: namespace 데이터
         """
         try:
-            kinds = self.namespace_conn.get_namespace_kinds(namespace_id)
+            kinds = self.namespace_conn.get_namespace_kinds(namespace_id, database_id)
 
             namespace_data = {
-                "namespace_id": namespace_id or "(default)",
+                "namespace_id": namespace_id
+                or "(default)",  # 기본 namespace는 (default)
                 "display_name": namespace_id or "Default Namespace",
                 "kinds": kinds,
                 "kind_count": len(kinds),
+                "database_id": database_id,  # 데이터베이스 ID 추가
                 "project_id": self.namespace_conn.project_id,
                 "created_time": datetime.utcnow().strftime(
                     "%Y-%m-%dT%H:%M:%SZ"
@@ -155,7 +200,9 @@ class DatastoreNamespaceManager(GoogleCloudManager):
             return namespace_data
 
         except Exception as e:
-            _LOGGER.error(f"Error getting namespace data for '{namespace_id}': {e}")
+            _LOGGER.error(
+                f"Error getting namespace data for '{namespace_id}' in database '{database_id}': {e}"
+            )
             return None
 
     def _make_namespace_response(self, namespace_data, params):
@@ -171,9 +218,10 @@ class DatastoreNamespaceManager(GoogleCloudManager):
         """
         namespace_id = namespace_data["namespace_id"]
         project_id = namespace_data["project_id"]
+        database_id = namespace_data.get("database_id", "(default)")
 
-        # 리소스 ID 생성
-        resource_id = f"{project_id}:{namespace_id}"
+        # 리소스 ID 생성 (프로젝트:데이터베이스:네임스페이스)
+        resource_id = f"{project_id}:{database_id}:{namespace_id}"
 
         # 리소스 데이터 생성
         namespace_data_obj = DatastoreNamespaceData(namespace_data, strict=False)
@@ -185,12 +233,7 @@ class DatastoreNamespaceManager(GoogleCloudManager):
                 "account": project_id,
                 "data": namespace_data_obj,
                 "region_code": "global",
-                "reference": ReferenceModel(
-                    {
-                        "resource_id": resource_id,
-                        "external_link": f"https://console.cloud.google.com/datastore/entities;kind=__namespace__;ns={namespace_id}/query/kind?project={project_id}",
-                    }
-                ),
+                "reference": ReferenceModel(namespace_data_obj.reference()),
             }
         )
 

@@ -53,7 +53,11 @@ CLOUD_SERVICE_GROUP_MAP = {
     "KubernetesEngine": [
         "GKEClusterV1Manager"
     ],  # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
-    "Datastore": ["DatastoreNamespaceManager", "DatastoreIndexManager"],
+    "Datastore": [
+        "DatastoreIndexManager",
+        "DatastoreDatabaseManager",
+        "DatastoreNamespaceManager",
+    ],
     "Dataproc": ["DataprocClusterManager"],
     # "Recommender": ["RecommendationManager"],
 }
@@ -159,6 +163,10 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         }
     },
     "Datastore": {
+        "Database": {
+            "resource_type": "datastore_database",
+            "labels_key": "resource.labels.database_id",
+        },
         "Namespace": {
             "resource_type": "datastore_namespace",
             "labels_key": "resource.labels.namespace_id",
