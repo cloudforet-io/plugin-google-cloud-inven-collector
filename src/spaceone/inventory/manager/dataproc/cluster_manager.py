@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from spaceone.inventory.connector.dataproc.cluster_connector import (
     DataprocClusterConnector,
@@ -32,18 +32,26 @@ class DataprocClusterManager(GoogleCloudManager):
         Dataproc 클러스터 목록을 조회합니다.
 
         Args:
-            params (dict): 커넥터에 전달할 파라미터.
+            params: 커넥터에 전달할 파라미터
+                - secret_data: Google Cloud 인증 정보
+                - options: 추가 옵션
 
         Returns:
-            list: Dataproc 클러스터 리소스의 리스트.
+            Dataproc 클러스터 리소스의 리스트
+
+        Raises:
+            Exception: 커넥터 초기화 실패 시
         """
+        if not params or "secret_data" not in params:
+            raise ValueError("secret_data is required in params")
+
         cluster_connector: DataprocClusterConnector = self.locator.get_connector(
             self.connector_name, **params
         )
 
         try:
             clusters = cluster_connector.list_clusters()
-            _LOGGER.info(f"Found {len(clusters)} Dataproc clusters")
+            _LOGGER.info(f"Successfully found {len(clusters)} Dataproc clusters")
             return clusters
         except Exception as e:
             _LOGGER.error(f"Failed to list Dataproc clusters: {e}")
@@ -108,26 +116,93 @@ class DataprocClusterManager(GoogleCloudManager):
             _LOGGER.error(f"Failed to list Dataproc jobs: {e}")
             return []
 
-    def collect_cloud_service(self, params):
+    def list_workflow_templates(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Dataproc 워크플로 템플릿 목록을 조회합니다.
+
+        Args:
+            params (dict): 커넥터에 전달할 파라미터.
+
+        Returns:
+            list: Dataproc 워크플로 템플릿 리소스의 리스트.
+        """
+        cluster_connector: DataprocClusterConnector = self.locator.get_connector(
+            self.connector_name, **params
+        )
+
+        try:
+            templates = cluster_connector.list_workflow_templates()
+            _LOGGER.info(f"Found {len(templates)} Dataproc workflow templates")
+            return templates
+        except Exception as e:
+            _LOGGER.error(f"Failed to list Dataproc workflow templates: {e}")
+            return []
+
+    def list_autoscaling_policies(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Dataproc 오토스케일링 정책 목록을 조회합니다.
+
+        Args:
+            params (dict): 커넥터에 전달할 파라미터.
+
+        Returns:
+            list: Dataproc 오토스케일링 정책 리소스의 리스트.
+        """
+        cluster_connector: DataprocClusterConnector = self.locator.get_connector(
+            self.connector_name, **params
+        )
+
+        try:
+            policies = cluster_connector.list_autoscaling_policies()
+            _LOGGER.info(f"Found {len(policies)} Dataproc autoscaling policies")
+            return policies
+        except Exception as e:
+            _LOGGER.error(f"Failed to list Dataproc autoscaling policies: {e}")
+            return []
+
+    def collect_cloud_service(
+        self, params: Dict[str, Any]
+    ) -> Tuple[List[DataprocClusterResponse], List[Dict[str, Any]]]:
         """
         Dataproc 클러스터 정보를 수집하여 Cloud Service 리소스로 변환합니다.
 
         Args:
-            params (dict): 수집 프로세스를 위한 파라미터.
+            params: 수집 프로세스를 위한 파라미터
+                - secret_data: Google Cloud 인증 정보
+                - options: 추가 수집 옵션
 
         Returns:
-            tuple: 수집된 Cloud Service 응답 리스트와 에러 응답 리스트를 담은 튜플.
+            수집된 Cloud Service 응답 리스트와 에러 응답 리스트의 튜플
+
+        Raises:
+            ValueError: 필수 파라미터가 누락된 경우
         """
         _LOGGER.debug("** Dataproc Cluster START **")
+
+        if not params or "secret_data" not in params:
+            raise ValueError("secret_data is required in params")
 
         collected_cloud_services = []
         error_responses = []
 
         secret_data = params["secret_data"]
-        project_id = secret_data["project_id"]
+        project_id = secret_data.get("project_id")
+
+        if not project_id:
+            raise ValueError("project_id is required in secret_data")
 
         # Dataproc 클러스터 목록 조회
-        clusters = self.list_clusters(params)
+        try:
+            clusters = self.list_clusters(params)
+            if not clusters:
+                _LOGGER.info("No Dataproc clusters found")
+                return collected_cloud_services, error_responses
+        except Exception as e:
+            _LOGGER.error(f"Failed to retrieve cluster list: {e}")
+            error_responses.append(
+                self.generate_error_response(e, self.cloud_service_group, "Cluster")
+            )
+            return collected_cloud_services, error_responses
 
         for cluster in clusters:
             try:
@@ -234,6 +309,43 @@ class DataprocClusterManager(GoogleCloudManager):
                 # 메트릭 정보 추가
                 if "metrics" in cluster:
                     cluster_data["metrics"] = cluster["metrics"]
+
+                # Job 정보 수집 및 추가 (기본값으로 빈 배열 설정)
+                cluster_data["jobs"] = []
+                try:
+                    # 클러스터 위치에서 리전 추출
+                    cluster_region = (
+                        location.rsplit("-", 1)[0]
+                        if location and "-" in location
+                        else location
+                    )
+                    if cluster_region:
+                        jobs = self.list_jobs(
+                            region=cluster_region,
+                            cluster_name=cluster_name,
+                            params=params,
+                        )
+                        if jobs:
+                            for job in jobs[:10]:  # 최근 10개 작업만 수집
+                                job_data = {
+                                    "reference": job.get("reference", {}),
+                                    "placement": job.get("placement", {}),
+                                    "status": job.get("status", {}),
+                                    "labels": job.get("labels", {}),
+                                    "driverOutputResourceUri": job.get(
+                                        "driverOutputResourceUri", ""
+                                    ),
+                                    "driverControlFilesUri": job.get(
+                                        "driverControlFilesUri", ""
+                                    ),
+                                    "jobUuid": job.get("jobUuid", ""),
+                                }
+                                cluster_data["jobs"].append(job_data)
+                except Exception as e:
+                    _LOGGER.warning(
+                        f"Failed to collect jobs for cluster {cluster_name}: {e}"
+                    )
+                    # jobs는 이미 빈 배열로 초기화됨
 
                 # DataprocCluster 모델 생성
                 dataproc_cluster_data = DataprocCluster(cluster_data, strict=False)

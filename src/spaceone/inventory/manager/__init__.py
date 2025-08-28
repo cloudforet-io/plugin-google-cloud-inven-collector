@@ -47,10 +47,16 @@ from spaceone.inventory.manager.compute_engine.snapshot_manager import SnapshotM
 from spaceone.inventory.manager.compute_engine.vm_instance_manager import (
     VMInstanceManager,
 )
+from spaceone.inventory.manager.dataproc.cluster_manager import DataprocClusterManager
+from spaceone.inventory.manager.datastore.index_manager import DatastoreIndexManager
+from spaceone.inventory.manager.datastore.namespace_manager import (
+    DatastoreNamespaceManager,
+)
 from spaceone.inventory.manager.filestore.instance_manager import (
     FilestoreInstanceManager,
 )
 from spaceone.inventory.manager.firebase.project_manager import FirebaseProjectManager
+from spaceone.inventory.manager.kms.keyring_manager import KMSKeyRingManager
 from spaceone.inventory.manager.kubernetes_engine.cluster_v1_manager import (
     GKEClusterV1Manager,
 )
@@ -73,13 +79,7 @@ from spaceone.inventory.manager.pub_sub.topic_manager import TopicManager
 from spaceone.inventory.manager.recommender.recommendation_manager import (
     RecommendationManager,
 )
-from spaceone.inventory.manager.kubernetes_engine.cluster_v1_manager import GKEClusterV1Manager
-from spaceone.inventory.manager.kubernetes_engine.cluster_v1beta_manager import GKEClusterV1BetaManager
 from spaceone.inventory.manager.app_engine.application_v1_manager import AppEngineApplicationV1Manager
 from spaceone.inventory.manager.app_engine.service_v1_manager import AppEngineServiceV1Manager
 from spaceone.inventory.manager.app_engine.version_v1_manager import AppEngineVersionV1Manager
 from spaceone.inventory.manager.app_engine.instance_v1_manager import AppEngineInstanceV1Manager
-from spaceone.inventory.manager.datastore.index_manager import DatastoreIndexManager
-from spaceone.inventory.manager.datastore.namespace_manager import (
-    DatastoreNamespaceManager,
-)

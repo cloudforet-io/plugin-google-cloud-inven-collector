@@ -1,7 +1,4 @@
 import logging
-from typing import Dict, List
-
-from googleapiclient.errors import HttpError
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
@@ -16,7 +13,7 @@ class CloudBuildV1Connector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def list_builds(self, **query) -> List[Dict]:
+    def list_builds(self, **query):
         builds = []
         query.update({"projectId": self.project_id})
         request = self.client.projects().builds().list(**query)
@@ -26,13 +23,13 @@ class CloudBuildV1Connector(GoogleCloudConnector):
                 response = request.execute()
                 builds.extend(response.get("builds", []))
                 request = self.client.projects().builds().list_next(request, response)
-            except HttpError as e:
+            except Exception as e:
                 _LOGGER.error(f"Failed to list builds: {e}")
                 break
                 
         return builds
 
-    def list_location_builds(self, parent: str, **query) -> List[Dict]:
+    def list_location_builds(self, parent, **query):
         builds = []
         query.update({"parent": parent})
         request = self.client.projects().locations().builds().list(**query)
@@ -42,13 +39,13 @@ class CloudBuildV1Connector(GoogleCloudConnector):
                 response = request.execute()
                 builds.extend(response.get("builds", []))
                 request = self.client.projects().locations().builds().list_next(request, response)
-            except HttpError as e:
+            except Exception as e:
                 _LOGGER.error(f"Failed to list location builds: {e}")
                 break
                 
         return builds
 
-    def list_triggers(self, **query) -> List[Dict]:
+    def list_triggers(self, **query):
         triggers = []
         query.update({"projectId": self.project_id})
         request = self.client.projects().triggers().list(**query)
@@ -58,13 +55,13 @@ class CloudBuildV1Connector(GoogleCloudConnector):
                 response = request.execute()
                 triggers.extend(response.get("triggers", []))
                 request = self.client.projects().triggers().list_next(request, response)
-            except HttpError as e:
+            except Exception as e:
                 _LOGGER.error(f"Failed to list triggers: {e}")
                 break
                 
         return triggers
 
-    def list_location_triggers(self, parent: str, **query) -> List[Dict]:
+    def list_location_triggers(self, parent, **query):
         triggers = []
         query.update({"parent": parent})
         request = self.client.projects().locations().triggers().list(**query)
@@ -74,13 +71,13 @@ class CloudBuildV1Connector(GoogleCloudConnector):
                 response = request.execute()
                 triggers.extend(response.get("triggers", []))
                 request = self.client.projects().locations().triggers().list_next(request, response)
-            except HttpError as e:
+            except Exception as e:
                 _LOGGER.error(f"Failed to list location triggers: {e}")
                 break
                 
         return triggers
 
-    def list_location_worker_pools(self, parent: str, **query) -> List[Dict]:
+    def list_location_worker_pools(self, parent, **query):
         worker_pools = []
         query.update({"parent": parent})
         request = self.client.projects().locations().workerPools().list(**query)
@@ -90,7 +87,7 @@ class CloudBuildV1Connector(GoogleCloudConnector):
                 response = request.execute()
                 worker_pools.extend(response.get("workerPools", []))
                 request = self.client.projects().locations().workerPools().list_next(request, response)
-            except HttpError as e:
+            except Exception as e:
                 _LOGGER.error(f"Failed to list worker pools: {e}")
                 break
                 

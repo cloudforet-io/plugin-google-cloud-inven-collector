@@ -22,15 +22,12 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class CloudBuildTriggerManager(GoogleCloudManager):
-    connector_name = ["CloudBuildV1Connector", "CloudBuildV2Connector"]
+    connector_name = "CloudBuildV1Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.cloud_service_group = "CloudBuild"
-        self.cloud_service_type = "Trigger"
-
     def collect_cloud_service(self, params):
+        _LOGGER.debug("** Cloud Build Trigger START **")
+        start_time = time.time()
         """
         Args:
             params:
@@ -42,112 +39,99 @@ class CloudBuildTriggerManager(GoogleCloudManager):
         Response:
             CloudServiceResponse/ErrorResourceResponse
         """
-        _LOGGER.debug(
-            f"** [{self.cloud_service_group}] {self.cloud_service_type} START **"
-        )
-
-        start_time = time.time()
 
         collected_cloud_services = []
         error_responses = []
+        trigger_id = ""
 
         secret_data = params["secret_data"]
         project_id = secret_data["project_id"]
+
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
+        cloud_build_v1_conn: CloudBuildV1Connector = self.locator.get_connector(
+            self.connector_name, **params
+        )
+        cloud_build_v2_conn: CloudBuildV2Connector = self.locator.get_connector(
+            "CloudBuildV2Connector", **params
+        )
+
+        # Get lists that relate with triggers through Google Cloud API
+        triggers = cloud_build_v1_conn.list_triggers()
         
-        self.cloud_build_v1_connector = CloudBuildV1Connector(**params)
-        self.cloud_build_v2_connector = CloudBuildV2Connector(**params)
-
-        # 1. 전역 triggers 조회 (global triggers)
+        # Get locations and regional triggers
+        regional_triggers = []
         try:
-            triggers = self.cloud_build_v1_connector.list_triggers()
-            if triggers:
-                _LOGGER.debug(f"Found {len(triggers)} global triggers")
-                for trigger in triggers:
-                    try:
-                        # Trigger location 추출
-                        trigger_location = "global"
-                        if "location" in trigger:
-                            trigger_location = trigger.get("location", "global")
-                        
-                        cloud_service = self._make_cloud_build_trigger_info(trigger, project_id, trigger_location)
-                        collected_cloud_services.append(TriggerResponse({"resource": cloud_service}))
-                    except Exception as e:
-                        _LOGGER.error(f"Failed to process trigger {trigger.get('id', 'unknown')}: {str(e)}")
-                        error_response = self.generate_resource_error_response(e, self.cloud_service_group, "Trigger", trigger.get('id', 'unknown'))
-                        error_responses.append(error_response)
-        except Exception as e:
-            _LOGGER.error(f"Failed to query global triggers: {str(e)}")
-
-        # 2. 각 리전별 triggers 조회 (regional triggers)
-        try:
-            locations = self.cloud_build_v2_connector.list_locations(f"projects/{project_id}")
+            parent = f"projects/{project_id}"
+            locations = cloud_build_v2_conn.list_locations(parent)
             for location in locations:
                 location_id = location.get("locationId", "")
                 if location_id:
                     try:
                         parent = f"projects/{project_id}/locations/{location_id}"
-                        regional_triggers = self.cloud_build_v1_connector.list_location_triggers(parent)
-                        if regional_triggers:
-                            _LOGGER.debug(f"Found {len(regional_triggers)} triggers in {location_id}")
-                            for trigger in regional_triggers:
-                                try:
-                                    cloud_service = self._make_cloud_build_trigger_info(trigger, project_id, location_id)
-                                    collected_cloud_services.append(TriggerResponse({"resource": cloud_service}))
-                                except Exception as e:
-                                    _LOGGER.error(f"Failed to process regional trigger {trigger.get('id', 'unknown')}: {str(e)}")
-                                    error_response = self.generate_resource_error_response(e, self.cloud_service_group, "Trigger", trigger.get('id', 'unknown'))
-                                    error_responses.append(error_response)
+                        location_triggers = cloud_build_v1_conn.list_location_triggers(parent)
+                        for trigger in location_triggers:
+                            trigger["_location"] = location_id
+                        regional_triggers.extend(location_triggers)
                     except Exception as e:
                         _LOGGER.error(f"Failed to query triggers in location {location_id}: {str(e)}")
+                        continue
         except Exception as e:
-            _LOGGER.error(f"Failed to query locations: {str(e)}")
+            _LOGGER.warning(f"Failed to get locations: {str(e)}")
+
+        # Combine all triggers
+        all_triggers = triggers + regional_triggers
+        for trigger in all_triggers:
+            try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
+                trigger_id = trigger.get("id")
+                trigger_name = trigger.get("name", trigger_id)
+                location_id = trigger.get("_location", "global")
+                region = GoogleCloudManager.parse_region_from_zone(location_id) if location_id != "global" else "global"
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
+                trigger.update({
+                    "project": project_id,
+                    "location": location_id,
+                    "region": region,
+                })
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
+                trigger_data = Trigger(trigger, strict=False)
+                
+                trigger_resource = TriggerResource({
+                    "name": trigger_name,
+                    "account": project_id,
+                    "region_code": location_id,
+                    "data": trigger_data,
+                    "reference": ReferenceModel({
+                        "resource_id": trigger_data.id,
+                        "external_link": f"https://console.cloud.google.com/cloud-build/triggers?project={project_id}"
+                    })
+                }, strict=False)
+
+                collected_cloud_services.append(TriggerResponse({"resource": trigger_resource}))
+
+            except Exception as e:
+                _LOGGER.error(f"Failed to process trigger {trigger_id}: {str(e)}")
+                error_response = self.generate_resource_error_response(
+                    e, "CloudBuild", "Trigger", trigger_id
+                )
+                error_responses.append(error_response)
 
         _LOGGER.debug(
-            f"** [{self.cloud_service_group}] {self.cloud_service_type} END ** "
+            f"** Cloud Build Trigger END ** "
             f"({time.time() - start_time:.2f}s)"
         )
 
         return collected_cloud_services, error_responses
 
-    def _make_cloud_build_trigger_info(self, trigger: dict, project_id: str, location_id: str) -> TriggerResource:
-        """Cloud Build Trigger 정보를 생성합니다."""
-        trigger_id = trigger.get("id", "")
-        trigger_name = trigger.get("name", trigger_id)
-        
-        formatted_trigger_data = {
-            "id": trigger.get("id"),
-            "name": trigger.get("name"),
-            "description": trigger.get("description"),
-            "tags": trigger.get("tags", []),
-            "disabled": trigger.get("disabled", False),
-            "substitutions": trigger.get("substitutions", {}),
-            "filename": trigger.get("filename"),
-            "ignoredFiles": trigger.get("ignoredFiles", []),
-            "includedFiles": trigger.get("includedFiles", []),
-            "filter": trigger.get("filter"),
-            "triggerTemplate": trigger.get("triggerTemplate", {}),
-            "github": trigger.get("github", {}),
-            "pubsubConfig": trigger.get("pubsubConfig", {}),
-            "webhookConfig": trigger.get("webhookConfig", {}),
-            "repositoryEventConfig": trigger.get("repositoryEventConfig", {}),
-            "build": trigger.get("build", {}),
-            "autodetect": trigger.get("autodetect", False),
-            "createTime": trigger.get("createTime"),
-            "serviceAccount": trigger.get("serviceAccount"),
-            "sourceToBuild": trigger.get("sourceToBuild", {}),
-            "gitFileSource": trigger.get("gitFileSource", {}),
-            "approvalConfig": trigger.get("approvalConfig", {}),
-        }
-        
-        trigger_data = Trigger(formatted_trigger_data, strict=False)
-        
-        return TriggerResource({
-            "name": trigger_name,
-            "account": project_id,
-            "region_code": location_id,
-            "data": trigger_data,
-            "reference": ReferenceModel({
-                "resource_id": trigger_data.id,
-                "external_link": f"https://console.cloud.google.com/cloud-build/triggers/edit/{trigger_data.id}?project={project_id}"
-            })
-        })
+

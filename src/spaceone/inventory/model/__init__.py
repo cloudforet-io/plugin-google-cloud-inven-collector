@@ -13,7 +13,6 @@ from spaceone.inventory.model.networking.load_balancing import *
 from spaceone.inventory.model.networking.route import *
 from spaceone.inventory.model.networking.vpc_network import *
 from spaceone.inventory.model.recommender.recommendation import *
-from spaceone.inventory.model.kubernetes_engine.cluster import *
 from spaceone.inventory.model.app_engine.application import *
 from spaceone.inventory.model.app_engine.service import *
 from spaceone.inventory.model.app_engine.version import *
