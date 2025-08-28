@@ -67,8 +67,48 @@ kms_keyring_crypto_keys_meta = TableDynamicLayout.set_fields(
         TextDyField.data_source("Primary State", "primary_state"),
         TextDyField.data_source("Protection Level", "protection_level"),
         TextDyField.data_source("Algorithm", "algorithm"),
+        TextDyField.data_source("Versions", "crypto_key_version_count"),
         DateTimeDyField.data_source("Created", "create_time"),
         DateTimeDyField.data_source("Next Rotation", "next_rotation_time"),
+    ],
+)
+
+# TAB - CryptoKey Versions Summary
+# 각 CryptoKey의 버전 개수와 주요 정보를 요약해서 표시하는 탭
+kms_keyring_crypto_key_versions_meta = TableDynamicLayout.set_fields(
+    "CryptoKey Versions Summary",
+    root_path="data.crypto_keys",
+    fields=[
+        TextDyField.data_source("CryptoKey ID", "crypto_key_id"),
+        TextDyField.data_source("Purpose", "purpose"),
+        TextDyField.data_source("Total Versions", "crypto_key_version_count"),
+        TextDyField.data_source("Primary State", "primary_state"),
+        TextDyField.data_source("Protection Level", "protection_level"),
+        TextDyField.data_source("Algorithm", "algorithm"),
+        DateTimeDyField.data_source("Created", "create_time"),
+        DateTimeDyField.data_source("Next Rotation", "next_rotation_time"),
+    ],
+)
+
+# TAB - CryptoKey Versions Detail
+# 각 CryptoKey의 버전 상세 정보를 표시하는 탭
+kms_keyring_crypto_key_versions_detail_meta = TableDynamicLayout.set_fields(
+    "CryptoKey Versions Detail",
+    root_path="data.crypto_keys.crypto_key_versions",
+    fields=[
+        TextDyField.data_source("Version ID", "version_id"),
+        TextDyField.data_source("Name", "name"),
+        TextDyField.data_source("State", "state"),
+        TextDyField.data_source("Protection Level", "protection_level"),
+        TextDyField.data_source("Algorithm", "algorithm"),
+        DateTimeDyField.data_source("Created", "create_time"),
+        DateTimeDyField.data_source("Generated", "generate_time"),
+        TextDyField.data_source("Import Job", "import_job"),
+        DateTimeDyField.data_source("Import Time", "import_time"),
+        TextDyField.data_source("Import Failure Reason", "import_failure_reason"),
+        TextDyField.data_source("Reimport Eligible", "reimport_eligible"),
+        DateTimeDyField.data_source("Destroy Time", "destroy_time"),
+        DateTimeDyField.data_source("Destroy Event Time", "destroy_event_time"),
     ],
 )
 
@@ -87,6 +127,8 @@ kms_keyring_meta = CloudServiceMeta.set_layouts(
     [
         kms_keyring_info_meta,
         kms_keyring_crypto_keys_meta,
+        kms_keyring_crypto_key_versions_meta,
+        kms_keyring_crypto_key_versions_detail_meta,
         kms_keyring_location_meta,
         kms_keyring_raw_data_meta,
     ]

@@ -21,17 +21,6 @@ class KMSKeyRingV1Connector(GoogleCloudConnector):
     google_client_service = "cloudkms"
     version = "v1"
 
-    # 일반적으로 사용되는 KMS locations (우선 검색)
-    COMMON_KMS_LOCATIONS = [
-        "global",  # 글로벌 키 관리
-        "us-central1",  # 미국 중부
-        "us-east1",  # 미국 동부
-        "us-west1",  # 미국 서부
-        "europe-west1",  # 유럽 서부
-        "asia-northeast1",  # 아시아 북동부
-        "asia-southeast1",  # 아시아 남동부
-    ]
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -125,14 +114,13 @@ class KMSKeyRingV1Connector(GoogleCloudConnector):
             _LOGGER.error(f"Error listing key rings in location {location}: {e}")
             raise e
 
-    def list_all_key_rings(self, target_locations=None, optimize_search=True):
+    def list_all_key_rings(self, target_locations=None):
         """
         모든 위치 또는 지정된 위치의 KeyRing을 조회합니다.
 
         Args:
             target_locations (list, optional): 검색할 특정 location ID 목록.
                                              None이면 모든 location 검색
-            optimize_search (bool): True이면 일반적인 location부터 우선 검색
 
         Returns:
             list: 모든 위치의 keyring 목록 (location 정보 포함)
@@ -146,12 +134,8 @@ class KMSKeyRingV1Connector(GoogleCloudConnector):
                 _LOGGER.info(
                     f"Searching KeyRings in specified locations: {search_locations}"
                 )
-            elif optimize_search:
-                # 최적화된 검색: 일반적인 location 우선, 그 다음 나머지
-                search_locations = self._get_optimized_location_list()
-                _LOGGER.info("Using optimized location search order")
             else:
-                # 모든 위치 검색 (기존 방식)
+                # 모든 위치 검색
                 location_data_list = self.list_locations()
                 search_locations = [
                     loc.get("locationId", "")
@@ -198,6 +182,38 @@ class KMSKeyRingV1Connector(GoogleCloudConnector):
         except Exception as e:
             _LOGGER.error(f"Error listing all key rings: {e}")
             raise e
+
+    def _get_common_locations_only(self):
+        """
+        일반적인 location만 반환합니다 (대폭 축소된 검색).
+
+        Returns:
+            list: 일반적인 location ID 목록만
+        """
+        try:
+            # 모든 사용 가능한 location 조회
+            all_locations_data = self.list_locations()
+            all_location_ids = [
+                loc.get("locationId", "")
+                for loc in all_locations_data
+                if loc.get("locationId")
+            ]
+
+            # 일반적인 location 중에서 실제 존재하는 것만 반환
+            common_locations = [
+                loc for loc in self.COMMON_KMS_LOCATIONS if loc in all_location_ids
+            ]
+
+            _LOGGER.info(
+                f"Using common locations only: {common_locations} (skipping {len(all_location_ids) - len(common_locations)} locations)"
+            )
+            return common_locations
+
+        except Exception as e:
+            _LOGGER.warning(
+                f"Failed to get common locations, falling back to default: {e}"
+            )
+            return ["global", "us-central1", "asia-northeast3"]  # 최소한의 기본값
 
     def _get_optimized_location_list(self):
         """
@@ -384,4 +400,89 @@ class KMSKeyRingV1Connector(GoogleCloudConnector):
         except Exception as e:
             _LOGGER.warning(f"Error listing crypto keys in keyring {keyring_name}: {e}")
             # CryptoKey 조회 실패는 warning으로 처리 (KeyRing은 있지만 CryptoKey가 없을 수 있음)
+            return []
+
+    def list_crypto_key_versions(self, crypto_key_name):
+        """
+        특정 CryptoKey의 모든 CryptoKeyVersion을 조회합니다.
+
+        API 응답 구조:
+        {
+          "cryptoKeyVersions": [
+            {
+              "name": "projects/{project_id}/locations/{location}/keyRings/{keyring}/cryptoKeys/{crypto_key}/cryptoKeyVersions/1",
+              "state": "ENABLED",
+              "protectionLevel": "SOFTWARE",
+              "algorithm": "GOOGLE_SYMMETRIC_ENCRYPTION",
+              "createTime": "2024-01-01T12:34:56.789Z",
+              "generateTime": "2024-01-01T12:34:56.789Z",
+              "destroyTime": null,
+              "destroyEventTime": null,
+              "importJob": "",
+              "importTime": null,
+              "importFailureReason": "",
+              "externalProtectionLevelOptions": {},
+              "reimportEligible": false
+            }
+          ],
+          "nextPageToken": "...",
+          "totalSize": 2
+        }
+
+        Args:
+            crypto_key_name (str): CryptoKey의 전체 이름
+                                 (예: "projects/test/locations/global/keyRings/my-keyring/cryptoKeys/my-key")
+
+        Returns:
+            list: 해당 CryptoKey의 모든 CryptoKeyVersion 목록
+        """
+        try:
+            crypto_key_versions = []
+            page_token = None
+
+            while True:
+                # API 요청 구성
+                request_params = {
+                    "parent": crypto_key_name,
+                    "pageSize": 1000,  # 최대 페이지 크기 설정
+                    "view": "FULL",  # 전체 정보 조회
+                }
+
+                if page_token:
+                    request_params["pageToken"] = page_token
+
+                # API 호출
+                request = (
+                    self.client.projects()
+                    .locations()
+                    .keyRings()
+                    .cryptoKeys()
+                    .cryptoKeyVersions()
+                    .list(**request_params)
+                )
+
+                response = request.execute()
+                _LOGGER.debug(
+                    f"CryptoKeyVersions list response for crypto key {crypto_key_name}: {response}"
+                )
+
+                # 응답에서 cryptoKeyVersions 목록 추출
+                current_versions = response.get("cryptoKeyVersions", [])
+                crypto_key_versions.extend(current_versions)
+
+                # 다음 페이지 토큰 확인
+                page_token = response.get("nextPageToken")
+                if not page_token:
+                    break
+
+            _LOGGER.info(
+                f"Retrieved {len(crypto_key_versions)} crypto key versions from crypto key {crypto_key_name}"
+            )
+            return crypto_key_versions
+
+        except Exception as e:
+            _LOGGER.warning(
+                f"Error listing crypto key versions in crypto key {crypto_key_name}: {e}"
+            )
+            # CryptoKeyVersion 조회 실패는 warning으로 처리 (CryptoKey는 있지만 Version이 없을 수 있음)
             return []

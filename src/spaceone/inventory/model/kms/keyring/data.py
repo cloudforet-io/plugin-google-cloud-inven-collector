@@ -3,13 +3,30 @@ from schematics.types import DictType, IntType, ListType, ModelType, StringType
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
-__all__ = ["CryptoKeyData", "KMSKeyRingData"]
-
 """
 KMS KeyRing Data 모델 정의
 
 Google Cloud KMS KeyRing의 상세 데이터를 표현하기 위한 schematics 모델입니다.
 """
+
+
+class CryptoKeyVersionData(Model):
+    """CryptoKey Version 정보 모델"""
+
+    name = StringType()
+    version_id = StringType()
+    state = StringType()
+    create_time = StringType()
+    generate_time = StringType()
+    protection_level = StringType()
+    algorithm = StringType()
+    import_job = StringType()
+    import_time = StringType()
+    import_failure_reason = StringType()
+    reimport_eligible = StringType()
+    destroy_time = StringType()
+    destroy_event_time = StringType()
+    raw_data = StringType(default="")
 
 
 class CryptoKeyData(Model):
@@ -25,6 +42,8 @@ class CryptoKeyData(Model):
     protection_level = StringType()
     algorithm = StringType()
     display_name = StringType()
+    crypto_key_version_count = IntType(default=0)
+    crypto_key_versions = ListType(ModelType(CryptoKeyVersionData), default=[])
     raw_data = StringType(default="")
 
 
