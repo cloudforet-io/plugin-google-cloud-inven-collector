@@ -80,3 +80,12 @@ from spaceone.inventory.manager.pub_sub.topic_manager import TopicManager
 from spaceone.inventory.manager.recommender.recommendation_manager import (
     RecommendationManager,
 )
+from spaceone.inventory.manager.storage_transfer.agent_pool_manager import (
+    StorageTransferAgentPoolManager,
+)
+from spaceone.inventory.manager.storage_transfer.transfer_job_manager import (
+    StorageTransferManager,
+)
+from spaceone.inventory.manager.storage_transfer.transfer_operation_manager import (
+    StorageTransferOperationManager,
+)

@@ -59,6 +59,11 @@ CLOUD_SERVICE_GROUP_MAP = {
         "DatastoreNamespaceManager",
     ],
     "Dataproc": ["DataprocClusterManager"],
+    "StorageTransfer": [
+        "StorageTransferAgentPoolManager",
+        "StorageTransferManager",
+        "StorageTransferOperationManager",
+    ],
     # "Recommender": ["RecommendationManager"],
 }
 
@@ -180,6 +185,20 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "Cluster": {
             "resource_type": "dataproc_cluster",
             "labels_key": "resource.labels.cluster_name",
+        },
+    },
+    "StorageTransfer": {
+        "AgentPool": {
+            "resource_type": "storage_transfer_agent_pool",
+            "labels_key": "resource.labels.pool_name",
+        },
+        "TransferJob": {
+            "resource_type": "storage_transfer_job",
+            "labels_key": "resource.labels.job_name",
+        },
+        "TransferOperation": {
+            "resource_type": "storage_transfer_operation",
+            "labels_key": "resource.labels.operation_name",
         },
     },
     "Recommender": {},

@@ -63,3 +63,6 @@ from spaceone.inventory.connector.recommender.recommendation import (
     RecommendationConnector,
 )
 from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
+from spaceone.inventory.connector.storage_transfer.transfer_job import (
+    StorageTransferConnector,
+)

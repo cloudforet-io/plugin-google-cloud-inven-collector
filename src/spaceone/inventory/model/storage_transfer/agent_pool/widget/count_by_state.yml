@@ -1,0 +1,15 @@
+---
+cloud_service_group: StorageTransfer
+cloud_service_type: AgentPool
+name: Count By State
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.state
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: DONUT 
