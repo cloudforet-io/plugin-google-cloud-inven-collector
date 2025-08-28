@@ -46,6 +46,7 @@ from spaceone.inventory.connector.filestore.instance_v1beta1 import (
     FilestoreInstanceV1Beta1Connector,
 )
 from spaceone.inventory.connector.firebase.project import FirebaseProjectConnector
+from spaceone.inventory.connector.kms.keyring_v1 import KMSKeyRingV1Connector
 from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import (
     GKEClusterV1Connector,
 )
@@ -99,6 +100,7 @@ __all__ = [
     "FilestoreInstanceConnector",
     "FilestoreInstanceV1Beta1Connector",
     "FirebaseProjectConnector",
+    "KMSKeyRingV1Connector",
     "GKEClusterV1Connector",
     "GKEClusterV1BetaConnector",
     "ExternalIPAddressConnector",

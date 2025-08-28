@@ -55,6 +55,7 @@ CLOUD_SERVICE_GROUP_MAP = {
     ],  # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
     "Datastore": ["DatastoreNamespaceManager", "DatastoreIndexManager"],
     "Dataproc": ["DataprocClusterManager"],
+    "KMS": ["KMSKeyRingManager"],
     # "Recommender": ["RecommendationManager"],
 }
 
@@ -173,6 +174,12 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             "resource_type": "dataproc_cluster",
             "labels_key": "resource.labels.cluster_name",
         },
+    },
+    "KMS": {
+        "KeyRing": {
+            "resource_type": "kms_keyring",
+            "labels_key": "resource.labels.keyring_id",
+        }
     },
     "Recommender": {},
 }
