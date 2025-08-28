@@ -1,0 +1,20 @@
+---
+cloud_service_group: Firestore
+cloud_service_type: Database
+name: Count by Region
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: region_code
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: COLUMN
+  name_options:
+    key: name
+    reference:
+      resource_type: "inventory.Region"
+      reference_key: region_code 

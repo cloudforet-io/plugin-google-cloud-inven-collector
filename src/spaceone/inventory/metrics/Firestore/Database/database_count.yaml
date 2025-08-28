@@ -1,0 +1,12 @@
+name: Database Count
+resource_type: inventory.CloudService
+query_options:
+  group_by:
+    - name: project_id
+      key: account
+    - name: location_id
+      key: data.location_id
+  fields:
+    database_count:
+      key: data.id
+      operator: count 

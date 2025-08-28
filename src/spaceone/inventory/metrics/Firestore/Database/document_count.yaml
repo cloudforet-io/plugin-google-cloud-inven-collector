@@ -1,0 +1,12 @@
+name: Document Count
+resource_type: inventory.CloudService
+query_options:
+  group_by:
+    - name: project_id
+      key: account
+    - name: database_id
+      key: data.id
+  fields:
+    document_count:
+      key: data.document_count
+      operator: sum 

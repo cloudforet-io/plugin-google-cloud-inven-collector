@@ -38,6 +38,9 @@ from spaceone.inventory.connector.filestore.instance_v1beta1 import (
     FilestoreInstanceV1Beta1Connector,
 )
 from spaceone.inventory.connector.firebase.project import FirebaseProjectConnector
+from spaceone.inventory.connector.firestore.database_v1 import (
+    FirestoreDatabaseConnector,
+)
 from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import (
     GKEClusterV1Connector,
 )
@@ -62,7 +65,6 @@ from spaceone.inventory.connector.recommender.insight import InsightConnector
 from spaceone.inventory.connector.recommender.recommendation import (
     RecommendationConnector,
 )
-from spaceone.inventory.connector.recommender.cloud_asset import CloudAssetConnector
 from spaceone.inventory.connector.storage_transfer.transfer_job import (
     StorageTransferConnector,
 )

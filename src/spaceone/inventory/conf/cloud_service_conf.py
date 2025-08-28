@@ -64,6 +64,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "StorageTransferManager",
         "StorageTransferOperationManager",
     ],
+    "Firestore": ["FirestoreManager"],
     # "Recommender": ["RecommendationManager"],
 }
 
@@ -200,6 +201,12 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             "resource_type": "storage_transfer_operation",
             "labels_key": "resource.labels.operation_name",
         },
+    },
+    "Firestore": {
+        "Database": {
+            "resource_type": "firestore_database",
+            "labels_key": "resource.labels.database_id",
+        }
     },
     "Recommender": {},
 }

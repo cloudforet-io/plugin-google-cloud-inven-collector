@@ -58,6 +58,7 @@ from spaceone.inventory.manager.filestore.instance_manager import (
     FilestoreInstanceManager,
 )
 from spaceone.inventory.manager.firebase.project_manager import FirebaseProjectManager
+from spaceone.inventory.manager.firestore.firestore_manager import FirestoreManager
 from spaceone.inventory.manager.kubernetes_engine.cluster_v1_manager import (
     GKEClusterV1Manager,
 )
