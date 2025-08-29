@@ -23,8 +23,8 @@ class FirebaseProjectConnector(GoogleCloudConnector):
             "https://www.googleapis.com/auth/cloud-platform.read-only",
         ]
 
-        # 기존 credentials에 스코프 추가
-        if hasattr(self.credentials, "with_scopes"):
+        # 기존 credentials에 스코프 추가 (credentials 속성이 있는 경우에만)
+        if hasattr(self, "credentials") and hasattr(self.credentials, "with_scopes"):
             self.credentials = self.credentials.with_scopes(firebase_scopes)
             # Firebase API 클라이언트 재생성
             self.client = googleapiclient.discovery.build(
