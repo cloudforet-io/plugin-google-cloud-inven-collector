@@ -13,6 +13,8 @@ query:
           keys:
             - name: project_id
               key: account
+            - name: database_id
+              key: data.database_id
             - name: namespace_id
               key: data.namespace_id
           fields:

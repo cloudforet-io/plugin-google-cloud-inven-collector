@@ -1,0 +1,41 @@
+metric_id: datastore_database_by_type
+name: Database Count by Type
+description: Number of Datastore databases by type (DATASTORE_MODE, FIRESTORE_NATIVE)
+resource_type: inventory.CloudService
+labels:
+  - key: provider
+    name: Provider
+  - key: cloud_service_group
+    name: Cloud Service Group
+  - key: cloud_service_type
+    name: Cloud Service Type
+  - key: project_id
+    name: Project ID
+  - key: account
+    name: Account
+  - key: data.type
+    name: Database Type
+query_options:
+  aggregate:
+    - group:
+        keys:
+          - key: provider
+          - key: cloud_service_group
+          - key: cloud_service_type
+          - key: project_id
+          - key: account
+          - key: data.type
+        fields:
+          - key: values.database_count
+            name: database_count
+            operator: sum
+  filter:
+    - key: provider
+      value: google_cloud
+      operator: eq
+    - key: cloud_service_group
+      value: Datastore
+      operator: eq
+    - key: cloud_service_type
+      value: Database
+      operator: eq 

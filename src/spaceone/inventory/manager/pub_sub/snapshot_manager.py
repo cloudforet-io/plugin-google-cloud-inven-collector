@@ -17,7 +17,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class SnapshotManager(GoogleCloudManager):
-    connector_name = "SnapshotConnector"
+    connector_name = "PubSubSnapshotConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params):
@@ -32,7 +32,7 @@ class SnapshotManager(GoogleCloudManager):
         Response:
             CloudServiceResponse/ErrorResourceResponse
         """
-        _LOGGER.debug(f"** PubSub Snapshot START **")
+        _LOGGER.debug("** PubSub Snapshot START **")
 
         start_time = time.time()
         collected_cloud_services = []

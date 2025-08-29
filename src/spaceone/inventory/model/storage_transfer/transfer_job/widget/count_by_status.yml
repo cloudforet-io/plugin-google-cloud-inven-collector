@@ -1,0 +1,15 @@
+---
+cloud_service_group: StorageTransfer
+cloud_service_type: TransferJob
+name: Count By Status
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.status
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: DONUT 

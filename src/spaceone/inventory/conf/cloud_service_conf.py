@@ -53,12 +53,26 @@ CLOUD_SERVICE_GROUP_MAP = {
     "KubernetesEngine": ["GKEClusterV1Manager"], # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
     "AppEngine": [
         "AppEngineApplicationV1Manager",
-        "AppEngineServiceV1Manager", 
+        "AppEngineServiceV1Manager",
         "AppEngineVersionV1Manager",
         "AppEngineInstanceV1Manager"
     ],
     "Datastore": ["DatastoreNamespaceManager", "DatastoreIndexManager"],
+    "KubernetesEngine": [
+        "GKEClusterV1Manager"
+    ],  # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
+    "Datastore": [
+        "DatastoreIndexManager",
+        "DatastoreDatabaseManager",
+        "DatastoreNamespaceManager",
+    ],
     "Dataproc": ["DataprocClusterManager"],
+    "StorageTransfer": [
+        "StorageTransferAgentPoolManager",
+        "StorageTransferManager",
+        "StorageTransferOperationManager",
+    ],
+    "Firestore": ["FirestoreManager"],
     "KMS": ["KMSKeyRingManager"],
     # "Recommender": ["RecommendationManager"],
 }
@@ -182,6 +196,10 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         }
     },
     "Datastore": {
+        "Database": {
+            "resource_type": "datastore_database",
+            "labels_key": "resource.labels.database_id",
+        },
         "Namespace": {
             "resource_type": "datastore_namespace",
             "labels_key": "resource.labels.namespace_id",
@@ -196,6 +214,26 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             "resource_type": "dataproc_cluster",
             "labels_key": "resource.labels.cluster_name",
         },
+    },
+    "StorageTransfer": {
+        "AgentPool": {
+            "resource_type": "storage_transfer_agent_pool",
+            "labels_key": "resource.labels.pool_name",
+        },
+        "TransferJob": {
+            "resource_type": "storage_transfer_job",
+            "labels_key": "resource.labels.job_name",
+        },
+        "TransferOperation": {
+            "resource_type": "storage_transfer_operation",
+            "labels_key": "resource.labels.operation_name",
+        },
+    },
+    "Firestore": {
+        "Database": {
+            "resource_type": "firestore_database",
+            "labels_key": "resource.labels.database_id",
+        }
     },
     "KMS": {
         "KeyRing": {

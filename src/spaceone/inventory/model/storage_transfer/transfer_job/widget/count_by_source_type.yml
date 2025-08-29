@@ -1,0 +1,15 @@
+---
+cloud_service_group: StorageTransfer
+cloud_service_type: TransferJob
+name: Count By Source Type
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.source_type
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: DONUT 

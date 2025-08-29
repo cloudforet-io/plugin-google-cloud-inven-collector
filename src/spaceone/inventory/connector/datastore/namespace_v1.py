@@ -23,83 +23,76 @@ class DatastoreNamespaceV1Connector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def run_query(self, namespace_id=None, **query):
+    def run_query(self, namespace_id=None, database_id="(default)", **query):
         """
-        Datastore runQuery API를 사용하여 Namespace별 Kind 목록을 조회합니다.
-
-        API 응답 구조:
-        {
-          "batch": {
-            "skippedResults": integer,
-            "entityResultType": enum (ResultType),
-            "entityResults": [
-              {
-                "entity": {
-                  "key": {
-                    "partitionId": {
-                      "projectId": string,
-                      "namespaceId": string
-                    },
-                    "path": [
-                      {
-                        "kind": string,
-                        "id": string,
-                        "name": string
-                      }
-                    ]
-                  }
-                }
-              }
-            ],
-            "endCursor": string,
-            "moreResults": enum (MoreResultsType)
-          }
-        }
+        특정 데이터베이스의 특정 namespace에서 Kind 목록을 조회합니다.
+        __kind__ Kind를 쿼리하여 해당 namespace의 모든 Kind를 가져옵니다.
 
         Args:
-            namespace_id (str): 조회할 namespace ID (None인 경우 기본 namespace)
+            namespace_id (str): 조회할 namespace ID
+            database_id (str): 데이터베이스 ID (기본값: "(default)")
             **query: 추가 쿼리 파라미터
 
         Returns:
-            dict: runQuery API 응답
+            dict: runQuery API 응답 (Kind 목록 포함)
         """
         try:
             # Kind 목록을 조회하기 위한 쿼리 구성
-            # __kind__ 엔티티를 조회하여 해당 namespace의 Kind 목록을 가져옴
             query_body = {
                 "query": {
                     "kind": [{"name": "__kind__"}],
-                    "projection": [{"property": {"name": "__key__"}}],
                 }
             }
 
-            # namespace가 지정된 경우 partitionId에 추가
-            if namespace_id:
-                query_body["partitionId"] = {"namespaceId": namespace_id}
-            else:
-                query_body["partitionId"] = {}
+            # API 호출 시 (default)를 빈 문자열로 변환
+            api_database_id = "" if database_id == "(default)" else database_id
+            api_namespace_id = (
+                ""
+                if namespace_id == "(default)" or namespace_id is None
+                else namespace_id
+            )
+
+            # databaseId는 항상 포함 (빈 문자열이라도)
+            query_body["databaseId"] = api_database_id
+
+            # namespaceId는 항상 partitionId에 포함 (빈 문자열이라도)
+            query_body["partitionId"] = {"namespaceId": api_namespace_id}
+
+            # Named database를 위한 routing header 설정
+            headers = {}
+            if api_database_id:  # 빈 문자열이 아닌 경우 (named database)
+                headers["x-goog-request-params"] = (
+                    f"project_id={self.project_id}&database_id={api_database_id}"
+                )
 
             request = self.client.projects().runQuery(
                 projectId=self.project_id, body=query_body, **query
             )
 
+            # 헤더가 있는 경우 추가
+            if headers:
+                request.headers.update(headers)
+
             response = request.execute()
             _LOGGER.debug(
-                f"runQuery response for namespace '{namespace_id}': {response}"
+                f"runQuery response for namespace '{namespace_id}' in database '{database_id}': {response}"
             )
 
             return response
 
         except Exception as e:
-            _LOGGER.error(f"Error running query for namespace '{namespace_id}': {e}")
+            _LOGGER.error(
+                f"Error running query for namespace '{namespace_id}' in database '{database_id}': {e}"
+            )
             raise e
 
-    def list_namespaces(self, **query):
+    def list_namespaces(self, database_id="(default)", **query):
         """
-        Datastore의 모든 namespace를 조회합니다.
+        특정 데이터베이스의 모든 namespace를 조회합니다.
         __namespace__ Kind를 쿼리하여 namespace 목록을 가져옵니다.
 
         Args:
+            database_id (str): 데이터베이스 ID (기본값: "(default)")
             **query: 추가 쿼리 파라미터
 
         Returns:
@@ -107,45 +100,68 @@ class DatastoreNamespaceV1Connector(GoogleCloudConnector):
         """
         try:
             # Namespace 목록을 조회하기 위한 쿼리 구성
-            # __namespace__ 엔티티를 조회하여 프로젝트의 모든 namespace를 가져옴
+            # __namespace__ 엔티티를 조회하여 해당 데이터베이스의 모든 namespace를 가져옴
             query_body = {
                 "query": {
                     "kind": [{"name": "__namespace__"}],
-                    "projection": [{"property": {"name": "__key__"}}],
                 },
-                "partitionId": {},
             }
+
+            # API 호출 시 (default)를 빈 문자열로 변환
+            api_database_id = "" if database_id == "(default)" else database_id
+
+            # databaseId는 항상 포함 (빈 문자열이라도)
+            query_body["databaseId"] = api_database_id
+
+            # Named database를 위한 routing header 설정
+            headers = {}
+            if api_database_id:  # 빈 문자열이 아닌 경우 (named database)
+                headers["x-goog-request-params"] = (
+                    f"project_id={self.project_id}&database_id={api_database_id}"
+                )
 
             request = self.client.projects().runQuery(
                 projectId=self.project_id, body=query_body, **query
             )
 
+            # 헤더가 있는 경우 추가
+            if headers:
+                request.headers.update(headers)
+
             response = request.execute()
-            _LOGGER.debug(f"Namespace list query response: {response}")
+            _LOGGER.debug(
+                f"Namespace list response for database '{database_id}': {response}"
+            )
 
             return response
 
         except Exception as e:
-            _LOGGER.error(f"Error listing namespaces: {e}")
+            _LOGGER.error(f"Error listing namespaces for database {database_id}: {e}")
             raise e
 
-    def get_namespace_kinds(self, namespace_id=None):
+    def get_namespace_kinds(self, namespace_id=None, database_id="(default)"):
         """
-        특정 namespace의 Kind 목록을 조회합니다.
+        특정 데이터베이스의 특정 namespace에서 Kind 목록을 조회합니다.
 
         Args:
             namespace_id (str): 조회할 namespace ID
+            database_id (str): 데이터베이스 ID (기본값: "(default)")
 
         Returns:
             list: Kind 이름 목록
         """
         try:
-            response = self.run_query(namespace_id=namespace_id)
-            kinds = []
+            response = self.run_query(
+                namespace_id=namespace_id, database_id=database_id
+            )
 
             # API 응답 구조에 따라 파싱
             if "batch" in response and "entityResults" in response["batch"]:
-                for entity_result in response["batch"]["entityResults"]:
+                entity_results = response["batch"]["entityResults"]
+
+                # __로 시작하지 않는 kind만 필터링
+                all_kinds = []
+                for entity_result in entity_results:
                     if "entity" in entity_result and "key" in entity_result["entity"]:
                         key = entity_result["entity"]["key"]
                         if "path" in key and len(key["path"]) > 0:
@@ -153,12 +169,19 @@ class DatastoreNamespaceV1Connector(GoogleCloudConnector):
                             path_element = key["path"][0]
                             kind_name = path_element.get("name", "")
                             if kind_name:
-                                kinds.append(kind_name)
+                                all_kinds.append(kind_name)
+
+                # __로 시작하지 않는 kind만 필터링 (for문 전에 처리)
+                kinds = list(filter(lambda kind: not kind.startswith("__"), all_kinds))
+            else:
+                kinds = []
 
             return kinds
 
         except Exception as e:
-            _LOGGER.error(f"Error getting kinds for namespace '{namespace_id}': {e}")
+            _LOGGER.error(
+                f"Error getting kinds for namespace '{namespace_id}' in database '{database_id}': {e}"
+            )
             raise e
 
     def extract_namespaces_from_response(self, response):
