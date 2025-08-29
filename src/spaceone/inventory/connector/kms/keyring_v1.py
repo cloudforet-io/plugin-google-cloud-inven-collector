@@ -21,6 +21,18 @@ class KMSKeyRingV1Connector(GoogleCloudConnector):
     google_client_service = "cloudkms"
     version = "v1"
 
+    # 일반적으로 사용되는 KMS location 목록 (성능 최적화를 위해)
+    COMMON_KMS_LOCATIONS = [
+        "global",
+        "us-central1",
+        "us-east1",
+        "us-west1",
+        "europe-west1",
+        "asia-northeast1",
+        "asia-northeast3",
+        "asia-southeast1",
+    ]
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
