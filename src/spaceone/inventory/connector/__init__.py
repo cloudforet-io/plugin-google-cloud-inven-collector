@@ -32,12 +32,15 @@ from spaceone.inventory.connector.compute_engine.snapshot import (
     SnapshotConnector as ComputeEngineSnapshotConnector,
 )
 from spaceone.inventory.connector.compute_engine.vm_instance import VMInstanceConnector
-from spaceone.inventory.connector.dataproc.cluster_connector import (
-    DataprocClusterConnector,
+from spaceone.inventory.connector.datastore.database_v1 import (
+    DatastoreDatabaseV1Connector,
 )
 from spaceone.inventory.connector.datastore.index_v1 import DatastoreIndexV1Connector
 from spaceone.inventory.connector.datastore.namespace_v1 import (
     DatastoreNamespaceV1Connector,
+)
+from spaceone.inventory.connector.dataproc.cluster_connector import (
+    DataprocClusterConnector,
 )
 from spaceone.inventory.connector.filestore.instance_v1 import (
     FilestoreInstanceConnector,
@@ -46,6 +49,10 @@ from spaceone.inventory.connector.filestore.instance_v1beta1 import (
     FilestoreInstanceV1Beta1Connector,
 )
 from spaceone.inventory.connector.firebase.project import FirebaseProjectConnector
+from spaceone.inventory.connector.kms.keyring_v1 import KMSKeyRingV1Connector
+from spaceone.inventory.connector.firestore.database_v1 import (
+    FirestoreDatabaseConnector,
+)
 from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import (
     GKEClusterV1Connector,
 )
@@ -72,7 +79,9 @@ from spaceone.inventory.connector.recommender.insight import InsightConnector
 from spaceone.inventory.connector.recommender.recommendation import (
     RecommendationConnector,
 )
-
+from spaceone.inventory.connector.storage_transfer.transfer_job import (
+    StorageTransferConnector,
+)
 __all__ = [
     "BatchConnector",
     "SQLWorkspaceConnector",
@@ -99,6 +108,7 @@ __all__ = [
     "FilestoreInstanceConnector",
     "FilestoreInstanceV1Beta1Connector",
     "FirebaseProjectConnector",
+    "KMSKeyRingV1Connector",
     "GKEClusterV1Connector",
     "GKEClusterV1BetaConnector",
     "ExternalIPAddressConnector",
@@ -112,4 +122,7 @@ __all__ = [
     "CloudAssetConnector",
     "InsightConnector",
     "RecommendationConnector",
+    "DatastoreDatabaseV1Connector",
+    "FirestoreDatabaseConnector",
+    "StorageTransferConnector",
 ]

@@ -1,0 +1,15 @@
+---
+cloud_service_group: Datastore
+cloud_service_type: Index
+name: Total Count
+query:
+  aggregate:
+    - group:
+        fields:
+          - name: value
+            operator: count
+options:
+  value_options:
+    key: value
+    options:
+      default: 0 

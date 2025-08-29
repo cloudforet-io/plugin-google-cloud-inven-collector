@@ -1,0 +1,15 @@
+---
+cloud_service_group: Datastore
+cloud_service_type: Index
+name: Count by State
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.state
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: DONUT 

@@ -1,0 +1,28 @@
+---
+metric_id: count_by_region
+name: Count by Region
+description: Count KeyRings by region
+resource_type: inventory.CloudService
+query_options:
+  aggregate:
+    - group:
+        keys:
+          - name: region_code
+            key: region_code
+        fields:
+          - name: value
+            key: region_code
+            operator: count
+    - sort:
+        key: region_code
+        desc: false
+  filter:
+    - key: cloud_service_group
+      value: KMS
+      operator: eq
+    - key: cloud_service_type
+      value: KeyRing
+      operator: eq
+unit:
+  name: Count
+  reference: https://cloud.google.com/kms/docs/

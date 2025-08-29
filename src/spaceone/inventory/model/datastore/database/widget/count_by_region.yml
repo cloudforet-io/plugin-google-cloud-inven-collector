@@ -1,0 +1,15 @@
+---
+cloud_service_group: Datastore
+cloud_service_type: Database
+name: Count by Region
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.location_id
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: COLUMN 

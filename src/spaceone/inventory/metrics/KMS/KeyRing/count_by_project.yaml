@@ -1,0 +1,28 @@
+---
+metric_id: count_by_project
+name: Count by Project
+description: Count KeyRings by project
+resource_type: inventory.CloudService
+query_options:
+  aggregate:
+    - group:
+        keys:
+          - name: account
+            key: account
+        fields:
+          - name: value
+            key: account
+            operator: count
+    - sort:
+        key: account
+        desc: false
+  filter:
+    - key: cloud_service_group
+      value: KMS
+      operator: eq
+    - key: cloud_service_type
+      value: KeyRing
+      operator: eq
+unit:
+  name: Count
+  reference: https://cloud.google.com/kms/docs/
