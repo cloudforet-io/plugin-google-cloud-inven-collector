@@ -1,7 +1,9 @@
 import logging
 from typing import List, Dict, Any, Tuple
 
-from spaceone.inventory.connector.app_engine.instance_v1 import AppEngineInstanceV1Connector
+from spaceone.inventory.connector.app_engine.instance_v1 import (
+    AppEngineInstanceV1Connector,
+)
 from spaceone.inventory.libs.manager import GoogleCloudManager
 
 from spaceone.inventory.model.app_engine.instance.cloud_service_type import (
@@ -23,33 +25,68 @@ _LOGGER = logging.getLogger(__name__)
 class AppEngineInstanceV1Manager(GoogleCloudManager):
     connector_name = "AppEngineInstanceV1Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
-    cloud_service_group = "App Engine"
+    cloud_service_group = "AppEngine"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def list_instances(self, service_id: str, version_id: str, params: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """App Engine 인스턴스 목록을 조회합니다 (v1 API)."""
+    def list_instances(
+        self, service_id: str, version_id: str, params: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """AppEngine 인스턴스 목록을 조회합니다 (v1 API).
+
+        Args:
+            service_id: 서비스 ID.
+            version_id: 버전 ID.
+            params: 조회에 필요한 파라미터 딕셔너리.
+
+        Returns:
+            App Engine 인스턴스 목록.
+
+        Raises:
+            Exception: App Engine API 호출 중 오류 발생 시.
+        """
         instance_connector: AppEngineInstanceV1Connector = self.locator.get_connector(
             self.connector_name, **params
         )
-        
+
         try:
             instances = instance_connector.list_instances(service_id, version_id)
-            _LOGGER.info(f"Found {len(instances)} instances for version {version_id} (v1)")
+            _LOGGER.info(
+                f"Found {len(instances)} instances for version {version_id} (v1)"
+            )
             return instances
         except Exception as e:
-            _LOGGER.error(f"Failed to list instances for version {version_id} (v1): {e}")
+            _LOGGER.error(
+                f"Failed to list instances for version {version_id} (v1): {e}"
+            )
             return []
 
-    def get_instance(self, service_id: str, version_id: str, instance_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
-        """특정 App Engine 인스턴스 정보를 조회합니다 (v1 API)."""
+    def get_instance(
+        self, service_id: str, version_id: str, instance_id: str, params: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """특정 AppEngine 인스턴스 정보를 조회합니다 (v1 API).
+
+        Args:
+            service_id: 서비스 ID.
+            version_id: 버전 ID.
+            instance_id: 인스턴스 ID.
+            params: 조회에 필요한 파라미터 딕셔너리.
+
+        Returns:
+            App Engine 인스턴스 정보 딕셔너리.
+
+        Raises:
+            Exception: App Engine API 호출 중 오류 발생 시.
+        """
         instance_connector: AppEngineInstanceV1Connector = self.locator.get_connector(
             self.connector_name, **params
         )
-        
+
         try:
-            instance = instance_connector.get_instance(service_id, version_id, instance_id)
+            instance = instance_connector.get_instance(
+                service_id, version_id, instance_id
+            )
             if instance:
                 _LOGGER.info(f"Retrieved instance {instance_id} (v1)")
             return instance or {}
@@ -58,51 +95,105 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
             return {}
 
     def list_all_instances(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """모든 App Engine 인스턴스를 조회합니다 (v1 API)."""
+        """모든 AppEngine 인스턴스를 조회합니다 (v1 API).
+
+        Args:
+            params: 조회에 필요한 파라미터 딕셔너리.
+
+        Returns:
+            모든 App Engine 인스턴스 목록.
+
+        Raises:
+            Exception: App Engine API 호출 중 오류 발생 시.
+        """
         instance_connector: AppEngineInstanceV1Connector = self.locator.get_connector(
             self.connector_name, **params
         )
-        
+
         try:
             instances = instance_connector.list_all_instances()
-            _LOGGER.info(f"Found {len(instances)} total App Engine instances (v1)")
+            _LOGGER.info(f"Found {len(instances)} total AppEngine instances (v1)")
             return instances
         except Exception as e:
-            _LOGGER.error(f"Failed to list all App Engine instances (v1): {e}")
+            _LOGGER.error(f"Failed to list all AppEngine instances (v1): {e}")
             return []
 
-    def get_instance_metrics(self, service_id: str, version_id: str, instance_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
-        """App Engine 인스턴스 메트릭을 조회합니다 (v1 API)."""
+    def get_instance_metrics(
+        self, service_id: str, version_id: str, instance_id: str, params: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """AppEngine 인스턴스 메트릭을 조회합니다 (v1 API).
+
+        Args:
+            service_id: 서비스 ID.
+            version_id: 버전 ID.
+            instance_id: 인스턴스 ID.
+            params: 조회에 필요한 파라미터 딕셔너리.
+
+        Returns:
+            인스턴스 메트릭 정보 딕셔너리.
+
+        Raises:
+            Exception: App Engine API 호출 중 오류 발생 시.
+        """
         instance_connector: AppEngineInstanceV1Connector = self.locator.get_connector(
             self.connector_name, **params
         )
-        
+
         try:
-            metrics = instance_connector.get_instance_metrics(service_id, version_id, instance_id)
+            metrics = instance_connector.get_instance_metrics(
+                service_id, version_id, instance_id
+            )
             return metrics or {}
         except Exception as e:
             _LOGGER.error(f"Failed to get metrics for instance {instance_id} (v1): {e}")
             return {}
 
-    def get_instance_details(self, service_id: str, version_id: str, instance_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
-        """App Engine 인스턴스 상세 정보를 조회합니다 (v1 API)."""
+    def get_instance_details(
+        self, service_id: str, version_id: str, instance_id: str, params: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """AppEngine 인스턴스 상세 정보를 조회합니다 (v1 API).
+
+        Args:
+            service_id: 서비스 ID.
+            version_id: 버전 ID.
+            instance_id: 인스턴스 ID.
+            params: 조회에 필요한 파라미터 딕셔너리.
+
+        Returns:
+            인스턴스 상세 정보 딕셔너리.
+
+        Raises:
+            Exception: App Engine API 호출 중 오류 발생 시.
+        """
         instance_connector: AppEngineInstanceV1Connector = self.locator.get_connector(
             self.connector_name, **params
         )
-        
+
         try:
-            details = instance_connector.get_instance_details(service_id, version_id, instance_id)
+            details = instance_connector.get_instance_details(
+                service_id, version_id, instance_id
+            )
             return details or {}
         except Exception as e:
             _LOGGER.error(f"Failed to get details for instance {instance_id} (v1): {e}")
             return {}
 
     def collect_cloud_service(
-        self, params
-    ):
-        """App Engine 인스턴스 정보를 수집합니다 (v1 API)."""
-        _LOGGER.debug(f"** App Engine Instance V1 START **")
-        
+        self, params: Dict[str, Any]
+    ) -> Tuple[List[Any], List[ErrorResourceResponse]]:
+        """AppEngine 인스턴스 정보를 수집합니다 (v1 API).
+
+        Args:
+            params: 수집에 필요한 파라미터 딕셔너리.
+
+        Returns:
+            수집된 클라우드 서비스 목록과 오류 응답 목록의 튜플.
+
+        Raises:
+            Exception: 데이터 수집 중 오류 발생 시.
+        """
+        _LOGGER.debug("** AppEngine Instance V1 START **")
+
         collected_cloud_services = []
         error_responses = []
 
@@ -111,22 +202,22 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
 
         # 모든 인스턴스를 조회
         instances = self.list_all_instances(params)
-        
+
         for instance in instances:
             try:
                 service_id = instance.get("service_id")
                 version_id = instance.get("version_id")
                 instance_id = instance.get("id")
-                
+
                 if not all([service_id, version_id, instance_id]):
                     continue
-                
-                # 인스턴스 상세 정보 조회
-                instance_details = self.get_instance_details(service_id, version_id, instance_id, params)
-                
-                # 메트릭 정보 조회
-                metrics = self.get_instance_metrics(service_id, version_id, instance_id, params)
-                
+
+                # 인스턴스 상세 정보 조회 (향후 사용 예정)
+                # instance_details = self.get_instance_details(service_id, version_id, instance_id, params)
+
+                # 메트릭 정보 조회 (향후 사용 예정)
+                # metrics = self.get_instance_metrics(service_id, version_id, instance_id, params)
+
                 # 기본 인스턴스 데이터 준비
                 instance_data = {
                     "name": str(instance.get("name", "")),
@@ -143,7 +234,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                     "createTime": instance.get("createTime"),
                     "updateTime": instance.get("updateTime"),
                 }
-                
+
                 # VM Details 추가
                 if "vmDetails" in instance:
                     vm_details = instance["vmDetails"]
@@ -153,11 +244,13 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                         "vmIp": str(vm_details.get("vmIp", "")),
                         "vmName": str(vm_details.get("vmName", "")),
                     }
-                
+
                 # App Engine Release 추가
                 if "appEngineRelease" in instance:
-                    instance_data["appEngineRelease"] = str(instance["appEngineRelease"])
-                
+                    instance_data["appEngineRelease"] = str(
+                        instance["appEngineRelease"]
+                    )
+
                 # Availability 추가
                 if "availability" in instance:
                     availability = instance["availability"]
@@ -165,7 +258,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                         "liveness": str(availability.get("liveness", "")),
                         "readiness": str(availability.get("readiness", "")),
                     }
-                
+
                 # Network 추가
                 if "network" in instance:
                     network = instance["network"]
@@ -175,7 +268,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                         "name": str(network.get("name", "")),
                         "subnetworkName": str(network.get("subnetworkName", "")),
                     }
-                
+
                 # Resources 추가
                 if "resources" in instance:
                     resources = instance["resources"]
@@ -185,39 +278,45 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                         "memoryGb": resources.get("memoryGb"),
                         "volumes": resources.get("volumes", []),
                     }
-                
+
                 # AppEngineInstance 모델 생성
-                app_engine_instance_data = AppEngineInstance(instance_data, strict=False)
-                
+                app_engine_instance_data = AppEngineInstance(
+                    instance_data, strict=False
+                )
+
                 # AppEngineInstanceResource 생성
-                instance_resource = AppEngineInstanceResource({
-                    "name": instance_data.get("name"),
-                    "data": app_engine_instance_data,
-                    "reference": {
-                        "resource_id": instance_id,
-                        "external_link": f"https://console.cloud.google.com/appengine/instances?project={project_id}&serviceId={service_id}&versionId={version_id}"
-                    },
-                    "region_code": "global",  # App Engine은 global 리소스
-                    "account": instance_data.get("projectId"),
-                })
-                
+                instance_resource = AppEngineInstanceResource(
+                    {
+                        "name": instance_data.get("name"),
+                        "data": app_engine_instance_data,
+                        "reference": {
+                            "resource_id": instance_id,
+                            "external_link": f"https://console.cloud.google.com/appengine/instances?project={project_id}&serviceId={service_id}&versionId={version_id}",
+                        },
+                        "region_code": "global",  # App Engine은 global 리소스
+                        "account": instance_data.get("projectId"),
+                    }
+                )
+
                 ##################################
                 # 4. Make Collected Region Code
                 ##################################
                 self.set_region_code("global")
 
                 # AppEngineInstanceResponse 생성
-                instance_response = AppEngineInstanceResponse({
-                    "resource": instance_resource
-                })
-                
+                instance_response = AppEngineInstanceResponse(
+                    {"resource": instance_resource}
+                )
+
                 collected_cloud_services.append(instance_response)
-                
+
             except Exception as e:
                 _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
                 error_responses.append(
-                    self.generate_error_response(e, self.cloud_service_group, "Instance")
+                    self.generate_error_response(
+                        e, self.cloud_service_group, "Instance"
+                    )
                 )
-        
-        _LOGGER.debug(f"** App Engine Instance V1 END **")
+
+        _LOGGER.debug("** AppEngine Instance V1 END **")
         return collected_cloud_services, error_responses

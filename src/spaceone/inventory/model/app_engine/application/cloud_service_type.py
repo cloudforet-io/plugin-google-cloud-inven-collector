@@ -6,8 +6,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     SearchField,
     DateTimeDyField,
     EnumDyField,
-    SizeField,
-    ListDyField,
 )
 from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, CloudServiceTypeMeta
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import (

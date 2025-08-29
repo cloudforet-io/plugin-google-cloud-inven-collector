@@ -6,8 +6,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     SearchField,
     DateTimeDyField,
     EnumDyField,
-    SizeField,
-    ListDyField,
 )
 from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, CloudServiceTypeMeta
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
@@ -29,11 +27,11 @@ total_node_count_conf = os.path.join(current_dir, "widget/total_node_count.yml")
 cst_gke_cluster = CloudServiceTypeResource()
 cst_gke_cluster.name = "Cluster"
 cst_gke_cluster.provider = "google_cloud"
-cst_gke_cluster.group = "Kubernetes Engine"
+cst_gke_cluster.group = "KubernetesEngine"
 cst_gke_cluster.service_code = "Container"
 cst_gke_cluster.is_primary = True
 cst_gke_cluster.is_major = True
-cst_gke_cluster.labels = ["Container", "Kubernetes Engine"]
+cst_gke_cluster.labels = ["Container", "KubernetesEngine"]
 cst_gke_cluster.tags = {
     "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Google_Kubernetes_Engine.svg",
 }

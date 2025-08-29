@@ -1,18 +1,10 @@
 import logging
-from datetime import datetime
-from typing import Any, Dict, List
 from schematics import Model
 from schematics.types import (
     ModelType,
     ListType,
     StringType,
-    IntType,
-    DateTimeType,
-    BooleanType,
-    FloatType,
     DictType,
-    UnionType,
-    MultiType,
 )
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
