@@ -25,12 +25,9 @@ class CloudBuildBuildManager(GoogleCloudManager):
     connector_name = "CloudBuildV1Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.cloud_service_group = "CloudBuild"
-        self.cloud_service_type = "Build"
-
     def collect_cloud_service(self, params):
+        _LOGGER.debug("** Cloud Build Build START **")
+        start_time = time.time()
         """
         Args:
             params:
@@ -42,116 +39,101 @@ class CloudBuildBuildManager(GoogleCloudManager):
         Response:
             CloudServiceResponse/ErrorResourceResponse
         """
-        _LOGGER.debug(
-            f"** [{self.cloud_service_group}] {self.cloud_service_type} START **"
-        )
-
-        start_time = time.time()
 
         collected_cloud_services = []
         error_responses = []
+        build_id = ""
 
         secret_data = params["secret_data"]
         project_id = secret_data["project_id"]
+
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
+        cloud_build_v1_conn: CloudBuildV1Connector = self.locator.get_connector(
+            self.connector_name, **params
+        )
+        cloud_build_v2_conn: CloudBuildV2Connector = self.locator.get_connector(
+            "CloudBuildV2Connector", **params
+        )
+
+        # Get lists that relate with builds through Google Cloud API
+        builds = cloud_build_v1_conn.list_builds()
         
-        self.cloud_build_v1_connector = CloudBuildV1Connector(**params)
-        self.cloud_build_v2_connector = CloudBuildV2Connector(**params)
-
-        # 1. 전역 builds 조회 (global builds)
+        # Get locations and regional builds
+        regional_builds = []
         try:
-            builds = self.cloud_build_v1_connector.list_builds()
-            if builds:
-                _LOGGER.debug(f"Found {len(builds)} global builds")
-                for build in builds:
-                    try:
-                        # Build location 추출
-                        build_location = "global"
-                        if "location" in build:
-                            build_location = build.get("location", "global")
-                        
-                        cloud_service = self._make_cloud_build_info(build, project_id, build_location)
-                        collected_cloud_services.append(BuildResponse({"resource": cloud_service}))
-                    except Exception as e:
-                        _LOGGER.error(f"Failed to process build {build.get('id', 'unknown')}: {str(e)}")
-                        error_response = self.generate_resource_error_response(e, self.cloud_service_group, "Build", build.get('id', 'unknown'))
-                        error_responses.append(error_response)
-        except Exception as e:
-            _LOGGER.error(f"Failed to query global builds: {str(e)}")
-
-        # 2. 각 리전별 builds 조회 (regional builds)
-        try:
-            locations = self.cloud_build_v2_connector.list_locations(f"projects/{project_id}")
+            parent = f"projects/{project_id}"
+            locations = cloud_build_v2_conn.list_locations(parent)
             for location in locations:
                 location_id = location.get("locationId", "")
                 if location_id:
                     try:
                         parent = f"projects/{project_id}/locations/{location_id}"
-                        regional_builds = self.cloud_build_v1_connector.list_location_builds(parent)
-                        if regional_builds:
-                            _LOGGER.debug(f"Found {len(regional_builds)} builds in {location_id}")
-                            for build in regional_builds:
-                                try:
-                                    cloud_service = self._make_cloud_build_info(build, project_id, location_id)
-                                    collected_cloud_services.append(BuildResponse({"resource": cloud_service}))
-                                except Exception as e:
-                                    _LOGGER.error(f"Failed to process regional build {build.get('id', 'unknown')}: {str(e)}")
-                                    error_response = self.generate_resource_error_response(e, self.cloud_service_group, "Build", build.get('id', 'unknown'))
-                                    error_responses.append(error_response)
+                        location_builds = cloud_build_v1_conn.list_location_builds(parent)
+                        for build in location_builds:
+                            build["_location"] = location_id
+                        regional_builds.extend(location_builds)
                     except Exception as e:
                         _LOGGER.error(f"Failed to query builds in location {location_id}: {str(e)}")
                         continue
         except Exception as e:
-            _LOGGER.error(f"Failed to query locations: {str(e)}")
+            _LOGGER.warning(f"Failed to get locations: {str(e)}")
+
+        # Combine all builds
+        all_builds = builds + regional_builds
+        _LOGGER.info(f"cloud build all_builds length: {len(all_builds)}")
+
+        for build in all_builds:
+            try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
+                build_id = build.get("id")
+                build_name = build.get("name", build_id)
+                location_id = build.get("_location", "global")
+                region = self.parse_region_from_zone(location_id) if location_id != "global" else "global"
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
+                build.update({
+                    "project": project_id,
+                    "location": location_id,
+                    "region": region,
+                })
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
+                build_data = Build(build, strict=False)
+                
+                build_resource = BuildResource({
+                    "name": build_name,
+                    "account": project_id,
+                    "region_code": location_id,
+                    "data": build_data,
+                    "reference": ReferenceModel({
+                        "resource_id": build_data.id,
+                        "external_link": f"https://console.cloud.google.com/cloud-build/builds?project={project_id}"
+                    })
+                }, strict=False)
+
+                collected_cloud_services.append(BuildResponse({"resource": build_resource}))
+
+            except Exception as e:
+                _LOGGER.error(f"Failed to process build {build_id}: {str(e)}")
+                error_response = self.generate_resource_error_response(
+                    e, "CloudBuild", "Build", build_id
+                )
+                error_responses.append(error_response)
 
         _LOGGER.debug(
-            f"** [{self.cloud_service_group}] {self.cloud_service_type} END ** "
+            f"** Cloud Build Build END ** "
             f"({time.time() - start_time:.2f}s)"
         )
 
         return collected_cloud_services, error_responses
 
-    def _make_cloud_build_info(self, build: dict, project_id: str, location_id: str) -> BuildResource:
-        """Cloud Build 정보를 생성합니다."""
-        build_id = build.get("id", "")
-        build_name = build.get("name", build_id)
-        
-        formatted_build_data = {
-            "id": build.get("id"),
-            "name": build.get("name"),
-            "status": build.get("status"),
-            "source": build.get("source", {}),
-            "steps": build.get("steps", []),
-            "results": build.get("results", {}),
-            "createTime": build.get("createTime"),
-            "startTime": build.get("startTime"),
-            "finishTime": build.get("finishTime"),
-            "timeout": build.get("timeout"),
-            "images": build.get("images", []),
-            "artifacts": build.get("artifacts", {}),
-            "logsBucket": build.get("logsBucket"),
-            "sourceProvenance": build.get("sourceProvenance", {}),
-            "buildTriggerId": build.get("buildTriggerId"),
-            "options": build.get("options", {}),
-            "logUrl": build.get("logUrl"),
-            "substitutions": build.get("substitutions", {}),
-            "tags": build.get("tags", []),
-            "timing": build.get("timing", {}),
-            "approval": build.get("approval", {}),
-            "serviceAccount": build.get("serviceAccount"),
-            "availableSecrets": build.get("availableSecrets", {}),
-            "warnings": build.get("warnings", []),
-            "failureInfo": build.get("failureInfo", {}),
-        }
-        
-        build_data = Build(formatted_build_data, strict=False)
-        
-        return BuildResource({
-            "name": build_name,
-            "account": project_id,
-            "region_code": location_id,
-            "data": build_data,
-            "reference": ReferenceModel({
-                "resource_id": build_data.id,
-                "external_link": f"https://console.cloud.google.com/cloud-build/builds/{build_data.id}?project={project_id}"
-            })
-        })
+

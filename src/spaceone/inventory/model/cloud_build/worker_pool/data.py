@@ -1,6 +1,6 @@
 from schematics import Model
 from schematics.types import (
-    DateTimeType,
+    BaseType,
     DictType,
     StringType,
 )
@@ -11,9 +11,9 @@ class WorkerPool(Model):
     display_name = StringType(deserialize_from="displayName")
     uid = StringType()
     annotations = DictType(StringType, default={})
-    create_time = DateTimeType(deserialize_from="createTime")
-    update_time = DateTimeType(deserialize_from="updateTime")
-    delete_time = DateTimeType(deserialize_from="deleteTime")
+    create_time = StringType(deserialize_from="createTime")
+    update_time = StringType(deserialize_from="updateTime")
+    delete_time = StringType(deserialize_from="deleteTime")
     state = StringType()
-    private_pool_v1_config = DictType(StringType, deserialize_from="privatePoolV1Config", default={})
+    private_pool_v1_config = DictType(BaseType, deserialize_from="privatePoolV1Config", default={})
     etag = StringType()

@@ -18,17 +18,12 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class CloudRunServiceManager(GoogleCloudManager):
-    connector_name = ["CloudRunV1Connector", "CloudRunV2Connector"]
+    connector_name = "CloudRunV2Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.cloud_service_group = "CloudRun"
-        self.cloud_service_type = "Service"
-        self.cloud_run_v1_connector = None
-        self.cloud_run_v2_connector = None
-
     def collect_cloud_service(self, params):
+        _LOGGER.debug("** Cloud Run Service START **")
+        start_time = time.time()
         """
         Args:
             params:
@@ -40,124 +35,104 @@ class CloudRunServiceManager(GoogleCloudManager):
         Response:
             CloudServiceResponse/ErrorResourceResponse
         """
-        _LOGGER.debug(
-            f"** [{self.cloud_service_group}] {self.cloud_service_type} START **"
-        )
-        start_time = time.time()
-        
+
         collected_cloud_services = []
         error_responses = []
+        service_id = ""
 
         secret_data = params["secret_data"]
         project_id = secret_data["project_id"]
-        
-        self.cloud_run_v1_connector = CloudRunV1Connector(**params)
-        self.cloud_run_v2_connector = CloudRunV2Connector(**params)
 
-        # Cloud Run v1 API를 사용하여 location 목록 조회
-        locations = self.cloud_run_v1_connector.list_locations()
-        location_ids = [location.get('locationId') for location in locations if location.get('locationId')]
-        
-        # 각 location에서 Cloud Run Services 조회
-        for location_id in location_ids:
-            parent = f"projects/{project_id}/locations/{location_id}"
-            
-            try:                
-                # Cloud Run v2 Services 조회
-                services = self.cloud_run_v2_connector.list_services(parent)
-                if services:
-                    _LOGGER.debug(f"Found {len(services)} services in {location_id}")
-                    for service in services:
-                        try:
-                            # 각 Service의 Revisions 조회
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
+        cloud_run_v1_conn: CloudRunV1Connector = self.locator.get_connector(
+            "CloudRunV1Connector", **params
+        )
+        cloud_run_v2_conn: CloudRunV2Connector = self.locator.get_connector(
+            self.connector_name, **params
+        )
+
+        # Get lists that relate with services through Google Cloud API
+        all_services = []
+        try:
+            locations = cloud_run_v1_conn.list_locations()
+            for location in locations:
+                location_id = location.get("locationId", "")
+                # Cloud Run v2 doesn't support global location
+                if location_id and location_id != "global":
+                    try:
+                        parent = f"projects/{project_id}/locations/{location_id}"
+                        services = cloud_run_v2_conn.list_services(parent)
+                        for service in services:
+                            service["_location"] = location_id
+                            # Get revisions for each service
                             service_name = service.get("name")
                             if service_name:
-                                revisions = self.cloud_run_v2_connector.list_revisions(service_name)
-                                service["revisions"] = revisions
-                                service["revision_count"] = len(revisions)
-                            
-                            cloud_service = self._make_cloud_run_service_info(service, project_id, location_id)
-                            collected_cloud_services.append(ServiceResponse({"resource": cloud_service}))
-                        except Exception as e:
-                            _LOGGER.error(f"Failed to process service {service.get('name', 'unknown')}: {str(e)}")
-                            error_response = self.generate_resource_error_response(e, self.cloud_service_group, "Service", service.get('name', 'unknown'))
-                            error_responses.append(error_response)
-                        
+                                try:
+                                    revisions = cloud_run_v2_conn.list_revisions(service_name)
+                                    service["revisions"] = revisions
+                                    service["revision_count"] = len(revisions)
+                                except Exception as e:
+                                    _LOGGER.warning(f"Failed to get revisions for service {service_name}: {str(e)}")
+                                    service["revisions"] = []
+                                    service["revision_count"] = 0
+                        all_services.extend(services)
+                    except Exception as e:
+                        _LOGGER.debug(f"Failed to query services in location {location_id}: {str(e)}")
+                        continue
+        except Exception as e:
+            _LOGGER.warning(f"Failed to get locations: {str(e)}")
+
+        for service in all_services:
+            try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
+                service_id = service.get("name", "")
+                service_name = self.get_param_in_url(service_id, "services") if service_id else ""
+                location_id = service.get("_location", "")
+                region = self.parse_region_from_zone(location_id) if location_id else ""
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
+                service.update({
+                    "project": project_id,
+                    "location": location_id,
+                    "region": region,
+                })
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
+                service_data = Service(service, strict=False)
+                
+                service_resource = ServiceResource({
+                    "name": service_name,
+                    "account": project_id,
+                    "region_code": location_id,
+                    "data": service_data,
+                    "reference": ReferenceModel({
+                        "resource_id": service_data.name,
+                        "external_link": f"https://console.cloud.google.com/run/detail/{location_id}/{service_name}?project={project_id}"
+                    })
+                }, strict=False)
+
+                collected_cloud_services.append(ServiceResponse({"resource": service_resource}))
+
             except Exception as e:
-                # 특정 location에서 API 호출이 실패해도 다른 location은 계속 확인
-                _LOGGER.debug(f"Failed to query {location_id}: {str(e)}")
-                continue
+                _LOGGER.error(f"Failed to process service {service_id}: {str(e)}")
+                error_response = self.generate_resource_error_response(
+                    e, "CloudRun", "Service", service_id
+                )
+                error_responses.append(error_response)
 
         _LOGGER.debug(
-            f"** [{self.cloud_service_group}] {self.cloud_service_type} END ** "
+            f"** Cloud Run Service END ** "
             f"({time.time() - start_time:.2f}s)"
         )
 
         return collected_cloud_services, error_responses
-
-    def _make_cloud_run_service_info(self, service: dict, project_id: str, location_id: str) -> ServiceResource:
-        """Cloud Run Service 정보를 생성합니다."""
-        service_name = service.get("name", "")
-        
-        if "/" in service_name:
-            service_short_name = service_name.split("/")[-1]
-        else:
-            service_short_name = service_name
-        
-        formatted_service_data = {
-            "name": service.get("name"),
-            "uid": service.get("uid"),
-            "generation": service.get("generation"),
-            "labels": service.get("labels", {}),
-            "annotations": service.get("annotations", {}),
-            "createTime": service.get("createTime"),
-            "updateTime": service.get("updateTime"),
-            "deleteTime": service.get("deleteTime"),
-            "expireTime": service.get("expireTime"),
-            "creator": service.get("creator"),
-            "lastModifier": service.get("lastModifier"),
-            "client": service.get("client"),
-            "ingress": service.get("ingress"),
-            "launchStage": service.get("launchStage"),
-            # "template": service.get("template", {}),
-            "traffic": service.get("traffic", []),
-            "urls": service.get("urls", []),
-            "observedGeneration": service.get("observedGeneration"),
-            "terminalCondition": service.get("terminalCondition"),
-            "conditions": service.get("conditions", []),
-            "latestReadyRevisionName": service.get("latestReadyRevisionName"),
-            "latestCreatedRevisionName": service.get("latestCreatedRevisionName"),
-            # "trafficStatuses": service.get("trafficStatuses", []),
-            "uri": service.get("uri"),
-            "etag": service.get("etag"),
-            "revisions": [
-                {
-                    "name": revision.get("name"),
-                    "uid": revision.get("uid"),
-                    "service": revision.get("service"),
-                    "generation": revision.get("generation"),
-                    "createTime": revision.get("createTime"),
-                    "updateTime": revision.get("updateTime"),
-                    "conditions": revision.get("conditions", []),
-                }
-                for revision in service.get("revisions", [])
-            ],
-            "revision_count": len(service.get("revisions", [])),
-        }
-        
-        service_data = Service(formatted_service_data, strict=False)
-        
-        return ServiceResource({
-            "name": service_short_name,
-            "account": project_id,
-            "region_code": location_id,
-            "data": service_data,
-            "reference": ReferenceModel({
-                "resource_id": service_data.uid,
-                "external_link": f"https://console.cloud.google.com/run/detail/{service_data.name}"
-            })
-        })
-
-
-
 

@@ -14,65 +14,114 @@ class CloudRunV2Connector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def list_services(self, parent: str) -> list:
-        try:
-            request = self.client.projects().locations().services().list(parent=parent)
-            response = request.execute()
-            return response.get('services', [])
-        except Exception as e:
-            _LOGGER.error(f"Failed to list Cloud Run services: {str(e)}")
-            return []
+    def list_services(self, parent, **query):
+        services = []
+        query.update({"parent": parent})
+        request = self.client.projects().locations().services().list(**query)
+        
+        while request is not None:
+            try:
+                response = request.execute()
+                services.extend(response.get("services", []))
+                request = self.client.projects().locations().services().list_next(request, response)
+            except Exception as e:
+                _LOGGER.error(f"Failed to list services: {e}")
+                break
+                
+        return services
 
-    def list_revisions(self, parent: str) -> list:
-        try:
-            request = self.client.projects().locations().services().revisions().list(parent=parent)
-            response = request.execute()
-            return response.get('revisions', [])
-        except Exception as e:
-            _LOGGER.error(f"Failed to list Cloud Run revisions: {str(e)}")
-            return []
+    def list_revisions(self, parent, **query):
+        revisions = []
+        query.update({"parent": parent})
+        request = self.client.projects().locations().services().revisions().list(**query)
+        
+        while request is not None:
+            try:
+                response = request.execute()
+                revisions.extend(response.get("revisions", []))
+                request = self.client.projects().locations().services().revisions().list_next(request, response)
+            except Exception as e:
+                _LOGGER.error(f"Failed to list revisions: {e}")
+                break
+                
+        return revisions
 
-    def list_jobs(self, parent: str) -> list:
-        try:
-            request = self.client.projects().locations().jobs().list(parent=parent)
-            response = request.execute()
-            return response.get('jobs', [])
-        except Exception as e:
-            _LOGGER.error(f"Failed to list Cloud Run jobs: {str(e)}")
-            return []
+    def list_jobs(self, parent, **query):
+        jobs = []
+        query.update({"parent": parent})
+        request = self.client.projects().locations().jobs().list(**query)
+        
+        while request is not None:
+            try:
+                response = request.execute()
+                jobs.extend(response.get("jobs", []))
+                request = self.client.projects().locations().jobs().list_next(request, response)
+            except Exception as e:
+                _LOGGER.error(f"Failed to list jobs: {e}")
+                break
+                
+        return jobs
 
-    def list_executions(self, parent: str) -> list:
-        try:
-            request = self.client.projects().locations().jobs().executions().list(parent=parent)
-            response = request.execute()
-            return response.get('executions', [])
-        except Exception as e:
-            _LOGGER.error(f"Failed to list Cloud Run executions: {str(e)}")
-            return []
+    def list_executions(self, parent, **query):
+        executions = []
+        query.update({"parent": parent})
+        request = self.client.projects().locations().jobs().executions().list(**query)
+        
+        while request is not None:
+            try:
+                response = request.execute()
+                executions.extend(response.get("executions", []))
+                request = self.client.projects().locations().jobs().executions().list_next(request, response)
+            except Exception as e:
+                _LOGGER.error(f"Failed to list executions: {e}")
+                break
+                
+        return executions
 
-    def list_tasks(self, parent: str) -> list:
-        try:
-            request = self.client.projects().locations().jobs().executions().tasks().list(parent=parent)
-            response = request.execute()
-            return response.get('tasks', [])
-        except Exception as e:
-            _LOGGER.error(f"Failed to list Cloud Run tasks: {str(e)}")
-            return []
+    def list_tasks(self, parent, **query):
+        tasks = []
+        query.update({"parent": parent})
+        request = self.client.projects().locations().jobs().executions().tasks().list(**query)
+        
+        while request is not None:
+            try:
+                response = request.execute()
+                tasks.extend(response.get("tasks", []))
+                request = self.client.projects().locations().jobs().executions().tasks().list_next(request, response)
+            except Exception as e:
+                _LOGGER.error(f"Failed to list tasks: {e}")
+                break
+                
+        return tasks
 
-    def list_worker_pools(self, parent: str) -> list:
-        try:
-            request = self.client.projects().locations().workerPools().list(parent=parent)
-            response = request.execute()
-            return response.get('workerPools', [])
-        except Exception as e:
-            _LOGGER.error(f"Failed to list Cloud Run worker pools: {str(e)}")
-            return []
+    def list_worker_pools(self, parent, **query):
+        worker_pools = []
+        query.update({"parent": parent})
+        request = self.client.projects().locations().workerPools().list(**query)
+        
+        while request is not None:
+            try:
+                response = request.execute()
+                worker_pools.extend(response.get("workerPools", []))
+                request = self.client.projects().locations().workerPools().list_next(request, response)
+            except Exception as e:
+                _LOGGER.error(f"Failed to list worker pools: {e}")
+                break
+                
+        return worker_pools
 
-    def list_worker_pool_revisions(self, parent: str) -> list:
-        try:
-            request = self.client.projects().locations().workerPools().revisions().list(parent=parent)
-            response = request.execute()
-            return response.get('revisions', [])
-        except Exception as e:
-            _LOGGER.error(f"Failed to list Cloud Run worker pool revisions: {str(e)}")
-            return []
+    def list_worker_pool_revisions(self, parent, **query):
+        revisions = []
+        query.update({"parent": parent})
+        request = self.client.projects().locations().workerPools().revisions().list(**query)
+        
+        while request is not None:
+            try:
+                response = request.execute()
+                revisions.extend(response.get("revisions", []))
+                request = self.client.projects().locations().workerPools().revisions().list_next(request, response)
+            except Exception as e:
+                _LOGGER.error(f"Failed to list worker pool revisions: {e}")
+                break
+                
+        return revisions

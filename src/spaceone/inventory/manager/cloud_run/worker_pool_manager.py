@@ -18,17 +18,12 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class CloudRunWorkerPoolManager(GoogleCloudManager):
-    connector_name = ["CloudRunV1Connector", "CloudRunV2Connector"]
+    connector_name = "CloudRunV2Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.cloud_service_group = "CloudRun"
-        self.cloud_service_type = "WorkerPool"
-        self.cloud_run_v1_connector = None
-        self.cloud_run_v2_connector = None
-
     def collect_cloud_service(self, params):
+        _LOGGER.debug("** Cloud Run WorkerPool START **")
+        start_time = time.time()
         """
         Args:
             params:
@@ -40,114 +35,103 @@ class CloudRunWorkerPoolManager(GoogleCloudManager):
         Response:
             CloudServiceResponse/ErrorResourceResponse
         """
-        _LOGGER.debug(
-            f"** [{self.cloud_service_group}] {self.cloud_service_type} START **"
-        )
-
-        start_time = time.time()
 
         collected_cloud_services = []
         error_responses = []
+        worker_pool_id = ""
 
         secret_data = params["secret_data"]
         project_id = secret_data["project_id"]
-        
-        self.cloud_run_v1_connector = CloudRunV1Connector(**params)
-        self.cloud_run_v2_connector = CloudRunV2Connector(**params)
 
-        # Cloud Run v1 API를 사용하여 location 목록 조회
-        locations = self.cloud_run_v1_connector.list_locations()
-        location_ids = [location.get('locationId') for location in locations if location.get('locationId')]
-        
-        # 각 location에서 Cloud Run Worker Pools 조회
-        for location_id in location_ids:
-            parent = f"projects/{project_id}/locations/{location_id}"
-            
-            try:                
-                # Cloud Run Worker Pools 조회
-                worker_pools = self.cloud_run_v2_connector.list_worker_pools(parent)
-                if worker_pools:
-                    _LOGGER.debug(f"Found {len(worker_pools)} worker pools in {location_id}")
-                    for worker_pool in worker_pools:
-                        try:
-                            # 각 Worker Pool의 Revisions 정보도 조회
+        ##################################
+        # 0. Gather All Related Resources
+        # List all information through connector
+        ##################################
+        cloud_run_v1_conn: CloudRunV1Connector = self.locator.get_connector(
+            "CloudRunV1Connector", **params
+        )
+        cloud_run_v2_conn: CloudRunV2Connector = self.locator.get_connector(
+            self.connector_name, **params
+        )
+
+        # Get lists that relate with worker pools through Google Cloud API
+        all_worker_pools = []
+        try:
+            locations = cloud_run_v1_conn.list_locations()
+            for location in locations:
+                location_id = location.get("locationId", "")
+                # Cloud Run v2 doesn't support global location
+                if location_id and location_id != "global":
+                    try:
+                        parent = f"projects/{project_id}/locations/{location_id}"
+                        worker_pools = cloud_run_v2_conn.list_worker_pools(parent)
+                        for worker_pool in worker_pools:
+                            worker_pool["_location"] = location_id
+                            # Get revisions for each worker pool
                             worker_pool_name = worker_pool.get("name")
                             if worker_pool_name:
-                                revisions = self.cloud_run_v2_connector.list_worker_pool_revisions(worker_pool_name)
-                                worker_pool["revisions"] = revisions
-                                worker_pool["revision_count"] = len(revisions)
-                            
-                            cloud_service = self._make_cloud_run_worker_pool_info(worker_pool, project_id, location_id)
-                            collected_cloud_services.append(WorkerPoolResponse({"resource": cloud_service}))
-                        except Exception as e:
-                            _LOGGER.error(f"Failed to process worker pool {worker_pool.get('name', 'unknown')}: {str(e)}")
-                            error_response = self.generate_resource_error_response(e, self.cloud_service_group, "WorkerPool", worker_pool.get('name', 'unknown'))
-                            error_responses.append(error_response)
-                        
+                                try:
+                                    revisions = cloud_run_v2_conn.list_worker_pool_revisions(worker_pool_name)
+                                    worker_pool["revisions"] = revisions
+                                    worker_pool["revision_count"] = len(revisions)
+                                except Exception as e:
+                                    _LOGGER.warning(f"Failed to get revisions for worker pool {worker_pool_name}: {str(e)}")
+                                    worker_pool["revisions"] = []
+                                    worker_pool["revision_count"] = 0
+                        all_worker_pools.extend(worker_pools)
+                    except Exception as e:
+                        _LOGGER.debug(f"Failed to query worker pools in location {location_id}: {str(e)}")
+                        continue
+        except Exception as e:
+            _LOGGER.warning(f"Failed to get locations: {str(e)}")
+
+        for worker_pool in all_worker_pools:
+            try:
+                ##################################
+                # 1. Set Basic Information
+                ##################################
+                worker_pool_id = worker_pool.get("name", "")
+                worker_pool_name = self.get_param_in_url(worker_pool_id, "workerPools") if worker_pool_id else ""
+                location_id = worker_pool.get("_location", "")
+                region = self.parse_region_from_zone(location_id) if location_id else ""
+
+                ##################################
+                # 2. Make Base Data
+                ##################################
+                worker_pool.update({
+                    "project": project_id,
+                    "location": location_id,
+                    "region": region,
+                })
+
+                ##################################
+                # 3. Make Return Resource
+                ##################################
+                worker_pool_data = WorkerPool(worker_pool, strict=False)
+                
+                worker_pool_resource = WorkerPoolResource({
+                    "name": worker_pool_name,
+                    "account": project_id,
+                    "region_code": location_id,
+                    "data": worker_pool_data,
+                    "reference": ReferenceModel({
+                        "resource_id": worker_pool_data.name,
+                        "external_link": f"https://console.cloud.google.com/run/worker-pools/details/{location_id}/{worker_pool_name}?project={project_id}"
+                    })
+                }, strict=False)
+
+                collected_cloud_services.append(WorkerPoolResponse({"resource": worker_pool_resource}))
+
             except Exception as e:
-                # 특정 location에서 API 호출이 실패해도 다른 location은 계속 확인
-                _LOGGER.debug(f"Failed to query {location_id}: {str(e)}")
-                continue
+                _LOGGER.error(f"Failed to process worker pool {worker_pool_id}: {str(e)}")
+                error_response = self.generate_resource_error_response(
+                    e, "CloudRun", "WorkerPool", worker_pool_id
+                )
+                error_responses.append(error_response)
 
         _LOGGER.debug(
-            f"** [{self.cloud_service_group}] {self.cloud_service_type} END ** "
+            f"** Cloud Run WorkerPool END ** "
             f"({time.time() - start_time:.2f}s)"
         )
 
         return collected_cloud_services, error_responses
-
-    def _make_cloud_run_worker_pool_info(self, worker_pool: dict, project_id: str, location_id: str) -> WorkerPoolResource:
-        """Cloud Run Worker Pool 정보를 생성합니다."""
-        worker_pool_name = worker_pool.get("name", "")
-
-        if "/" in worker_pool_name:
-            worker_pool_short_name = worker_pool_name.split("/")[-1]
-        else:
-            worker_pool_short_name = worker_pool_name
-        
-        formatted_worker_pool_data = {
-            "name": worker_pool.get("name"),
-            "uid": worker_pool.get("uid"),
-            "generation": worker_pool.get("generation"),
-            "labels": worker_pool.get("labels", {}),
-            "annotations": worker_pool.get("annotations", {}),
-            "createTime": worker_pool.get("createTime"),
-            "updateTime": worker_pool.get("updateTime"),
-            "deleteTime": worker_pool.get("deleteTime"),
-            "expireTime": worker_pool.get("expireTime"),
-            "creator": worker_pool.get("creator"),
-            "lastModifier": worker_pool.get("lastModifier"),
-            "client": worker_pool.get("client"),
-            "launchStage": worker_pool.get("launchStage"),
-            # "template": worker_pool.get("template", {}),
-            "observedGeneration": worker_pool.get("observedGeneration"),
-            "terminalCondition": worker_pool.get("terminalCondition"),
-            "conditions": worker_pool.get("conditions", []),
-            "etag": worker_pool.get("etag"),
-            "revisions": [ 
-                {
-                    "name": revision.get("name"),
-                    "uid": revision.get("uid"),
-                    "service": revision.get("service"),
-                    "generation": revision.get("generation"),
-                    "createTime": revision.get("createTime"),
-                    "updateTime": revision.get("updateTime"),
-                    "conditions": revision.get("conditions", []),
-                }
-                for revision in worker_pool.get("revisions", [])
-            ],
-            "revision_count": worker_pool.get("revision_count", 0),
-        }
-        
-        worker_pool_data = WorkerPool(formatted_worker_pool_data, strict=False)
-        
-        return WorkerPoolResource({
-            "name": worker_pool_short_name,
-            "account": project_id,
-            "region_code": location_id,
-            "data": worker_pool_data,
-            "reference": ReferenceModel({
-                "resource_id": worker_pool_data.uid,
-                "external_link": f"https://console.cloud.google.com/run/worker-pools/details/{worker_pool_data.name}"
-            })
-        })

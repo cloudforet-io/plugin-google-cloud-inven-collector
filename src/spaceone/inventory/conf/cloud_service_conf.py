@@ -65,6 +65,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "StorageTransferOperationManager",
     ],
     "Firestore": ["FirestoreManager"],
+    "KMS": ["KMSKeyRingManager"],
     # "Recommender": ["RecommendationManager"],
 }
 
@@ -206,6 +207,12 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "Database": {
             "resource_type": "firestore_database",
             "labels_key": "resource.labels.database_id",
+        }
+    },
+    "KMS": {
+        "KeyRing": {
+            "resource_type": "kms_keyring",
+            "labels_key": "resource.labels.keyring_id",
         }
     },
     "Recommender": {},

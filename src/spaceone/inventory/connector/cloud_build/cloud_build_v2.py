@@ -1,7 +1,4 @@
 import logging
-from typing import Dict, List
-
-from googleapiclient.errors import HttpError
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
@@ -16,7 +13,7 @@ class CloudBuildV2Connector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def list_locations(self, parent: str, **query) -> List[Dict]:
+    def list_locations(self, parent, **query):
         locations = []
         query.update({"name": parent})
         request = self.client.projects().locations().list(**query)
@@ -24,15 +21,21 @@ class CloudBuildV2Connector(GoogleCloudConnector):
         while request is not None:
             try:
                 response = request.execute()
-                locations.extend(response.get("locations", []))
+                raw_locations = response.get("locations", [])
+                # global 위치는 제외
+                filtered_locations = [
+                    loc for loc in raw_locations 
+                    if loc.get("locationId") != "global"
+                ]
+                locations.extend(filtered_locations)
                 request = self.client.projects().locations().list_next(request, response)
-            except HttpError as e:
+            except Exception as e:
                 _LOGGER.error(f"Failed to list locations: {e}")
                 break
                 
         return locations
 
-    def list_connections(self, parent: str, **query) -> List[Dict]:
+    def list_connections(self, parent, **query):
         connections = []
         query.update({"parent": parent})
         request = self.client.projects().locations().connections().list(**query)
@@ -42,13 +45,13 @@ class CloudBuildV2Connector(GoogleCloudConnector):
                 response = request.execute()
                 connections.extend(response.get("connections", []))
                 request = self.client.projects().locations().connections().list_next(request, response)
-            except HttpError as e:
+            except Exception as e:
                 _LOGGER.error(f"Failed to list connections: {e}")
                 break
                 
         return connections
 
-    def list_repositories(self, parent: str, **query) -> List[Dict]:
+    def list_repositories(self, parent, **query):
         repositories = []
         query.update({"parent": parent})
         request = self.client.projects().locations().connections().repositories().list(**query)
@@ -58,7 +61,7 @@ class CloudBuildV2Connector(GoogleCloudConnector):
                 response = request.execute()
                 repositories.extend(response.get("repositories", []))
                 request = self.client.projects().locations().connections().repositories().list_next(request, response)
-            except HttpError as e:
+            except Exception as e:
                 _LOGGER.error(f"Failed to list repositories: {e}")
                 break
                 

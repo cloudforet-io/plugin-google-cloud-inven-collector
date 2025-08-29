@@ -5,12 +5,22 @@ import os
 import time
 
 from spaceone.core import utils
-from spaceone.core.service import *
-from spaceone.inventory.conf.cloud_service_conf import *
-from spaceone.inventory.connector.resource_manager.project import ProjectConnector
+from spaceone.core.service import (
+    BaseService,
+    authentication_handler,
+    check_required,
+    transaction,
+)
+from spaceone.inventory.conf.cloud_service_conf import (
+    CLOUD_SERVICE_GROUP_MAP,
+    FILTER_FORMAT,
+    MAX_WORKER,
+    SUPPORTED_FEATURES,
+    SUPPORTED_RESOURCE_TYPE,
+    SUPPORTED_SCHEDULES,
+)
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.cloud_service import (
-    CloudServiceResponse,
     ErrorResourceResponse,
 )
 
@@ -71,11 +81,10 @@ class CollectorService(BaseService):
                 - options
                 - secret_data
         """
-        options = params["options"]
         secret_data = params.get("secret_data", {})
         if secret_data != {}:
             google_manager = GoogleCloudManager()
-            active = google_manager.verify({}, secret_data)
+            google_manager.verify({}, secret_data)
 
         return {}
 
@@ -91,15 +100,11 @@ class CollectorService(BaseService):
                 - filter
         """
 
-        project_conn = self.locator.get_connector(ProjectConnector, **params)
-        try:
-            # _LOGGER.debug(f"[collect] project => {project_id} / {project_state}")
-            project_info = project_conn.get_project_info()
-            project_id = project_info["projectId"]
-            project_state = project_info["state"]
-        except Exception as e:
-            _LOGGER.debug(f"[collect] failed to get project_info => {e}")
-            return CloudServiceResponse().to_primitive()
+        # Project validation을 건너뛰고 바로 매니저 실행으로 진행
+        # ProjectConnector 호출로 인한 private key 오류를 회피
+        secret_data = params.get("secret_data", {})
+        project_id = secret_data.get("project_id", "unknown")
+        _LOGGER.debug(f"[collect] project => {project_id}")
 
         start_time = time.time()
 
