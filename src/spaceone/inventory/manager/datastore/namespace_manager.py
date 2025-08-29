@@ -110,12 +110,7 @@ class DatastoreNamespaceManager(GoogleCloudManager):
             # 각 데이터베이스별로 네임스페이스 조회
             for database_id in database_ids:
                 try:
-                    # 먼저 기본 namespace (빈 namespace) 처리
-                    default_namespace_data = self._get_namespace_data(None, database_id)
-                    if default_namespace_data:
-                        all_namespaces.append(default_namespace_data)
-
-                    # 모든 namespace 조회
+                    # 모든 namespace 목록 조회
                     response = self.namespace_conn.list_namespaces(database_id)
 
                     # API 응답에서 namespace 목록 추출
@@ -123,6 +118,12 @@ class DatastoreNamespaceManager(GoogleCloudManager):
                         self.namespace_conn.extract_namespaces_from_response(response)
                     )
 
+                    # 기본 namespace (빈 namespace) 처리
+                    default_namespace_data = self._get_namespace_data(None, database_id)
+                    if default_namespace_data:
+                        all_namespaces.append(default_namespace_data)
+
+                    # 각 namespace별로 상세 정보 조회
                     for namespace_id in namespace_ids:
                         namespace_data = self._get_namespace_data(
                             namespace_id, database_id
@@ -216,12 +217,7 @@ class DatastoreNamespaceManager(GoogleCloudManager):
         Returns:
             DatastoreNamespaceResponse: namespace 리소스 응답
         """
-        namespace_id = namespace_data["namespace_id"]
         project_id = namespace_data["project_id"]
-        database_id = namespace_data.get("database_id", "(default)")
-
-        # 리소스 ID 생성 (프로젝트:데이터베이스:네임스페이스)
-        resource_id = f"{project_id}:{database_id}:{namespace_id}"
 
         # 리소스 데이터 생성
         namespace_data_obj = DatastoreNamespaceData(namespace_data, strict=False)
