@@ -25,7 +25,8 @@ class FilestoreInstanceV1Beta1Connector(GoogleCloudConnector):
         Google Cloud Filestore v1beta1 API를 사용합니다.
 
         Args:
-            instance_name (str): 인스턴스 이름 (projects/{project}/locations/{location}/instances/{instance})
+            instance_name (str): 인스턴스 이름
+                (projects/{project}/locations/{location}/instances/{instance})
             **query: 추가 쿼리 파라미터
 
         Returns:

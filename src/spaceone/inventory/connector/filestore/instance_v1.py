@@ -24,7 +24,8 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
     def list_instances(self, **query):
         """
         Filestore 인스턴스 목록을 조회합니다.
-        Google Cloud Filestore API의 locations/- 와일드카드를 사용하여 모든 리전의 인스턴스를 한 번에 조회합니다.
+        Google Cloud Filestore API의 locations/- 와일드카드를 사용하여
+        모든 리전의 인스턴스를 한 번에 조회합니다.
 
         Args:
             **query: 추가 쿼리 파라미터 (location, filter 등)
@@ -34,8 +35,10 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
         """
         try:
             # 모든 리전의 Filestore 인스턴스를 한 번에 조회
-            # API 문서: https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances/list
-            # "To retrieve instance information for all locations, use "-" for the {location} value."
+            # API 문서:
+            # https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances/list
+            # "To retrieve instance information for all locations,
+            # use "-" for the {location} value."
             instances = []
 
             request = (
@@ -55,7 +58,8 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
                 if "instances" in response:
                     for instance in response["instances"]:
                         # 인스턴스 이름에서 리전 정보 추출
-                        # 예: projects/my-project/locations/us-central1/instances/my-instance
+                        # 예: projects/my-project/locations/us-central1/
+                        # instances/my-instance
                         location = self._extract_location_from_instance_name(
                             instance.get("name", "")
                         )
@@ -85,7 +89,8 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
         Google Cloud Filestore v1 API를 사용합니다.
 
         Args:
-            instance_name (str): 인스턴스 이름 (projects/{project}/locations/{location}/instances/{instance})
+            instance_name (str): 인스턴스 이름
+                (projects/{project}/locations/{location}/instances/{instance})
             **query: 추가 쿼리 파라미터
 
         Returns:
@@ -128,7 +133,8 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
         인스턴스 이름에서 리전 정보를 추출합니다.
 
         Args:
-            instance_name (str): 인스턴스 이름 (projects/{project}/locations/{location}/instances/{instance})
+            instance_name (str): 인스턴스 이름
+                (projects/{project}/locations/{location}/instances/{instance})
 
         Returns:
             str: 리전 정보

@@ -1,4 +1,3 @@
-##### 확인 후 수정 필요 #####
 import os
 
 from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
@@ -35,7 +34,7 @@ cst_filestore_instance.is_primary = True
 cst_filestore_instance.is_major = True
 cst_filestore_instance.labels = ["Storage", "FileSystem"]
 cst_filestore_instance.tags = {
-    "spaceone:icon": f"{ASSET_URL}/FileStore.svg",  # TODO: Need to add specific Filestore icon in the future
+    "spaceone:icon": f"{ASSET_URL}/FileStore.svg",  # TODO: Add specific icon
     "spaceone:display_name": "Filestore",
 }
 
