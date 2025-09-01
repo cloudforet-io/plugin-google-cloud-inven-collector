@@ -1,0 +1,17 @@
+---
+cloud_service_group: AppEngine
+cloud_service_type: Application
+name: Count By Account
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: account
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: COLUMN
+  name_options:
+    key: name

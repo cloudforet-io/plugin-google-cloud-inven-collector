@@ -18,16 +18,18 @@ class CloudRunV1Connector(GoogleCloudConnector):
         locations = []
         query.update({"name": f"projects/{self.project_id}"})
         request = self.client.projects().locations().list(**query)
-        
+
         while request is not None:
             try:
                 response = request.execute()
                 locations.extend(response.get("locations", []))
-                request = self.client.projects().locations().list_next(request, response)
+                request = (
+                    self.client.projects().locations().list_next(request, response)
+                )
             except Exception as e:
                 _LOGGER.error(f"Failed to list locations: {e}")
                 break
-                
+
         return locations
 
     def list_domain_mappings(self, parent, **query):
@@ -36,7 +38,9 @@ class CloudRunV1Connector(GoogleCloudConnector):
 
         while True:
             try:
-                response = self.client.namespaces().domainmappings().list(**query).execute()
+                response = (
+                    self.client.namespaces().domainmappings().list(**query).execute()
+                )
                 domain_mappings.extend(response.get("items", []))
 
                 continue_token = response.get("metadata", {}).get("continue")

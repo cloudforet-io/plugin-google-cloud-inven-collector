@@ -46,7 +46,9 @@ class RepositoryResource(CloudBuildResource):
     cloud_service_type = StringType(default="Repository")
     data = ModelType(Repository)
     _metadata = ModelType(
-        CloudServiceMeta, default=cloud_build_repository_meta, serialized_name="metadata"
+        CloudServiceMeta,
+        default=cloud_build_repository_meta,
+        serialized_name="metadata",
     )
 
 

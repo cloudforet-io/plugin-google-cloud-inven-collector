@@ -1,6 +1,6 @@
 import os
 
-from spaceone.inventory.libs.common_parser import *
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
@@ -62,9 +62,15 @@ cst_connection._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Name", key="data.name"),
         SearchField.set(name="UID", key="data.uid"),
         SearchField.set(name="Disabled", key="data.disabled", data_type="boolean"),
-        SearchField.set(name="Reconciling", key="data.reconciling", data_type="boolean"),
-        SearchField.set(name="Create Time", key="data.create_time", data_type="datetime"),
-        SearchField.set(name="Update Time", key="data.update_time", data_type="datetime"),
+        SearchField.set(
+            name="Reconciling", key="data.reconciling", data_type="boolean"
+        ),
+        SearchField.set(
+            name="Create Time", key="data.create_time", data_type="datetime"
+        ),
+        SearchField.set(
+            name="Update Time", key="data.update_time", data_type="datetime"
+        ),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

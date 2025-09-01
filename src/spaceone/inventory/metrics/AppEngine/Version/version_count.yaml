@@ -1,0 +1,32 @@
+---
+metric_id: metric-google-cloud-app-engine-version-total-count
+name: Version Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.AppEngine.Version
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.version.serving_status
+      name: Serving Status
+      search_key: data.version.serving_status
+      default: true
+    - key: data.version.runtime
+      name: Runtime
+      search_key: data.version.runtime
+    - key: data.version.environment
+      name: Environment
+      search_key: data.version.environment
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-app-engine-version
+version: '1.0'

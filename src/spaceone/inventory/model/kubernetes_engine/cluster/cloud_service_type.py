@@ -1,24 +1,37 @@
 import os
 
+from spaceone.inventory.libs.common_parser import *
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     TextDyField,
     SearchField,
     DateTimeDyField,
     EnumDyField,
-    SizeField,
-    ListDyField,
 )
 from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, CloudServiceTypeMeta
+from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
+    CardWidget,
+    ChartWidget,
+)
+from spaceone.inventory.conf.cloud_service_conf import *
+
+current_dir = os.path.abspath(os.path.dirname(__file__))
+
+total_count_conf = os.path.join(current_dir, "widget/total_count.yml")
+count_by_region_conf = os.path.join(current_dir, "widget/count_by_region.yml")
+count_by_account_conf = os.path.join(current_dir, "widget/count_by_account.yml")
+count_by_status_conf = os.path.join(current_dir, "widget/count_by_status.yml")
+count_by_version_conf = os.path.join(current_dir, "widget/count_by_version.yml")
+total_node_count_conf = os.path.join(current_dir, "widget/total_node_count.yml")
 
 # GKE Cluster (unified for v1 and v1beta)
 cst_gke_cluster = CloudServiceTypeResource()
 cst_gke_cluster.name = "Cluster"
 cst_gke_cluster.provider = "google_cloud"
-cst_gke_cluster.group = "Kubernetes Engine"
+cst_gke_cluster.group = "KubernetesEngine"
 cst_gke_cluster.service_code = "Container"
 cst_gke_cluster.is_primary = True
 cst_gke_cluster.is_major = True
-cst_gke_cluster.labels = ["Container", "Kubernetes Engine"]
+cst_gke_cluster.labels = ["Container", "KubernetesEngine"]
 cst_gke_cluster.tags = {
     "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Google_Kubernetes_Engine.svg",
 }
@@ -59,6 +72,14 @@ cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Fleet Info", key="data.fleet_info"),
         SearchField.set(name="Membership Info", key="data.membership_info"),
     ],
+    widget=[
+        CardWidget.set(**get_data_from_yaml(total_count_conf)),
+        CardWidget.set(**get_data_from_yaml(total_node_count_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_region_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_account_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_status_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_version_conf)),
+    ]
 )
 
 # Export unified version

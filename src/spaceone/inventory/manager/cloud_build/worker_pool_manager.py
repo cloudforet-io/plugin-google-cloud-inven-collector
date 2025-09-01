@@ -68,64 +68,84 @@ class CloudBuildWorkerPoolManager(GoogleCloudManager):
                 if location_id:
                     try:
                         parent = f"projects/{project_id}/locations/{location_id}"
-                        worker_pools = cloud_build_v1_conn.list_location_worker_pools(parent)
+                        worker_pools = cloud_build_v1_conn.list_location_worker_pools(
+                            parent
+                        )
                         for worker_pool in worker_pools:
                             worker_pool["_location"] = location_id
                         all_worker_pools.extend(worker_pools)
                     except Exception as e:
-                        _LOGGER.debug(f"Failed to query worker pools in location {location_id}: {str(e)}")
+                        _LOGGER.debug(
+                            f"Failed to query worker pools in location {location_id}: {str(e)}"
+                        )
                         continue
         except Exception as e:
             _LOGGER.warning(f"Failed to get locations: {str(e)}")
 
-        _LOGGER.info(f"cloud worker pool all_worker_pools length: {len(all_worker_pools)}")
+        _LOGGER.info(
+            f"cloud worker pool all_worker_pools length: {len(all_worker_pools)}"
+        )
         for worker_pool in all_worker_pools:
             try:
                 ##################################
                 # 1. Set Basic Information
                 ##################################
                 worker_pool_id = worker_pool.get("name", "")
-                worker_pool_name = self.get_param_in_url(worker_pool_id, "workerPools") if worker_pool_id else ""
+                worker_pool_name = (
+                    self.get_param_in_url(worker_pool_id, "workerPools")
+                    if worker_pool_id
+                    else ""
+                )
                 location_id = worker_pool.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                worker_pool.update({
-                    "project": project_id,
-                    "location": location_id,
-                    "region": region,
-                })
+                worker_pool.update(
+                    {
+                        "project": project_id,
+                        "location": location_id,
+                        "region": region,
+                    }
+                )
 
                 ##################################
                 # 3. Make Return Resource
                 ##################################
                 worker_pool_data = WorkerPool(worker_pool, strict=False)
-                
-                worker_pool_resource = WorkerPoolResource({
-                    "name": worker_pool_name,
-                    "account": project_id,
-                    "region_code": location_id,
-                    "data": worker_pool_data,
-                    "reference": ReferenceModel({
-                        "resource_id": worker_pool_data.name,
-                        "external_link": f"https://console.cloud.google.com/cloud-build/worker-pools?project={project_id}"
-                    })
-                }, strict=False)
 
-                collected_cloud_services.append(WorkerPoolResponse({"resource": worker_pool_resource}))
+                worker_pool_resource = WorkerPoolResource(
+                    {
+                        "name": worker_pool_name,
+                        "account": project_id,
+                        "region_code": location_id,
+                        "data": worker_pool_data,
+                        "reference": ReferenceModel(
+                            {
+                                "resource_id": worker_pool_data.name,
+                                "external_link": f"https://console.cloud.google.com/cloud-build/worker-pools?project={project_id}",
+                            }
+                        ),
+                    },
+                    strict=False,
+                )
+
+                collected_cloud_services.append(
+                    WorkerPoolResponse({"resource": worker_pool_resource})
+                )
 
             except Exception as e:
-                _LOGGER.error(f"Failed to process worker pool {worker_pool_id}: {str(e)}")
+                _LOGGER.error(
+                    f"Failed to process worker pool {worker_pool_id}: {str(e)}"
+                )
                 error_response = self.generate_resource_error_response(
                     e, "CloudBuild", "WorkerPool", worker_pool_id
                 )
                 error_responses.append(error_response)
 
         _LOGGER.debug(
-            f"** Cloud Build WorkerPool END ** "
-            f"({time.time() - start_time:.2f}s)"
+            f"** Cloud Build WorkerPool END ** ({time.time() - start_time:.2f}s)"
         )
 
         return collected_cloud_services, error_responses

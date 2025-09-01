@@ -46,7 +46,9 @@ class ConnectionResource(CloudBuildResource):
     cloud_service_type = StringType(default="Connection")
     data = ModelType(Connection)
     _metadata = ModelType(
-        CloudServiceMeta, default=cloud_build_connection_meta, serialized_name="metadata"
+        CloudServiceMeta,
+        default=cloud_build_connection_meta,
+        serialized_name="metadata",
     )
 
 

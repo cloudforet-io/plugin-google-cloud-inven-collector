@@ -27,7 +27,9 @@ domain_mapping_overview = ItemDynamicLayout.set_fields(
         TextDyField.data_source("Namespace", "data.metadata.namespace"),
         TextDyField.data_source("UID", "data.metadata.uid"),
         TextDyField.data_source("Cluster Name", "data.metadata.cluster_name"),
-        DateTimeDyField.data_source("Creation Timestamp", "data.metadata.creation_timestamp"),
+        DateTimeDyField.data_source(
+            "Creation Timestamp", "data.metadata.creation_timestamp"
+        ),
     ],
 )
 
@@ -44,13 +46,18 @@ domain_mapping_spec = ItemDynamicLayout.set_fields(
 domain_mapping_status = ItemDynamicLayout.set_fields(
     "Domain Mapping Status",
     fields=[
-        TextDyField.data_source("Observed Generation", "data.status.observed_generation"),
+        TextDyField.data_source(
+            "Observed Generation", "data.status.observed_generation"
+        ),
         TextDyField.data_source("URL", "data.status.url"),
         TextDyField.data_source("Condition Type", "data.status.conditions.type"),
         TextDyField.data_source("Condition Status", "data.status.conditions.status"),
         TextDyField.data_source("Condition Reason", "data.status.conditions.reason"),
         TextDyField.data_source("Condition Message", "data.status.conditions.message"),
-        DateTimeDyField.data_source("Condition Last Transition Time", "data.status.conditions.last_transition_time"),
+        DateTimeDyField.data_source(
+            "Condition Last Transition Time",
+            "data.status.conditions.last_transition_time",
+        ),
     ],
 )
 
@@ -71,7 +78,9 @@ class DomainMappingResource(CloudRunResource):
     cloud_service_type = StringType(default="DomainMapping")
     data = ModelType(DomainMapping)
     _metadata = ModelType(
-        CloudServiceMeta, default=cloud_run_domain_mapping_meta, serialized_name="metadata"
+        CloudServiceMeta,
+        default=cloud_run_domain_mapping_meta,
+        serialized_name="metadata",
     )
 
 
