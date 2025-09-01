@@ -1,6 +1,6 @@
 import os
 
-from spaceone.inventory.libs.common_parser import *
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
@@ -48,8 +48,12 @@ cst_repository._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Remote URI", key="data.remote_uri"),
         SearchField.set(name="UID", key="data.uid"),
         SearchField.set(name="Webhook ID", key="data.webhook_id"),
-        SearchField.set(name="Create Time", key="data.create_time", data_type="datetime"),
-        SearchField.set(name="Update Time", key="data.update_time", data_type="datetime"),
+        SearchField.set(
+            name="Create Time", key="data.create_time", data_type="datetime"
+        ),
+        SearchField.set(
+            name="Update Time", key="data.update_time", data_type="datetime"
+        ),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

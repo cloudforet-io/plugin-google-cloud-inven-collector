@@ -42,3 +42,7 @@ from .firestore.firestore_manager import FirestoreManager
 from .storage_transfer.agent_pool_manager import StorageTransferAgentPoolManager
 from .storage_transfer.transfer_job_manager import StorageTransferManager
 from .storage_transfer.transfer_operation_manager import StorageTransferOperationManager
+from .app_engine.application_v1_manager import AppEngineApplicationV1Manager
+from .app_engine.service_v1_manager import AppEngineServiceV1Manager
+from .app_engine.version_v1_manager import AppEngineVersionV1Manager
+from .app_engine.instance_v1_manager import AppEngineInstanceV1Manager

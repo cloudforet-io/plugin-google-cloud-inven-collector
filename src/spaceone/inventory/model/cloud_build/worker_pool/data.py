@@ -15,5 +15,7 @@ class WorkerPool(Model):
     update_time = StringType(deserialize_from="updateTime")
     delete_time = StringType(deserialize_from="deleteTime")
     state = StringType()
-    private_pool_v1_config = DictType(BaseType, deserialize_from="privatePoolV1Config", default={})
+    private_pool_v1_config = DictType(
+        BaseType, deserialize_from="privatePoolV1Config", default={}
+    )
     etag = StringType()

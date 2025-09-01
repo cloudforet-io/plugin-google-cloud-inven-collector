@@ -42,7 +42,8 @@ class FilestoreInstanceManager(GoogleCloudManager):
         Google Cloud API의 날짜 형식을 SpaceONE에서 사용하는 형식으로 변환합니다.
 
         Args:
-            google_cloud_datetime (str): Google Cloud API 날짜 형식 (예: 2025-08-18T06:13:54.868444486Z)
+            google_cloud_datetime (str): Google Cloud API 날짜 형식
+                (예: 2025-08-18T06:13:54.868444486Z)
 
         Returns:
             str: 변환된 날짜 형식 (예: 2025-08-18T06:13:54Z)
@@ -57,7 +58,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
 
             # 초 단위까지로 변환
             return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             _LOGGER.warning(f"Failed to convert datetime {google_cloud_datetime}: {e}")
             return google_cloud_datetime
 
@@ -235,12 +236,14 @@ class FilestoreInstanceManager(GoogleCloudManager):
             except Exception as e:
                 if "ListShares operation is not supported" in str(e):
                     _LOGGER.info(
-                        f"ListShares operation is not supported for Enterprise instance {instance_id}. "
-                        "This may be due to region limitations or instance state."
+                        f"ListShares operation is not supported for Enterprise "
+                        f"instance {instance_id}. This may be due to region "
+                        "limitations or instance state."
                     )
                 else:
                     _LOGGER.warning(
-                        f"Failed to collect detailed shares for Enterprise instance {instance_id}: {e}"
+                        f"Failed to collect detailed shares for Enterprise "
+                        f"instance {instance_id}: {e}"
                     )
 
         ##################################
@@ -256,7 +259,8 @@ class FilestoreInstanceManager(GoogleCloudManager):
 
             for snapshot in instance_snapshots:
                 # 스냅샷 이름에서 파일 공유 정보 추출
-                # 예: projects/my-project/locations/us-central1/instances/my-instance/fileShares/my-share/snapshots/my-snapshot
+                # 예: projects/my-project/locations/us-central1/instances/my-instance/
+                # fileShares/my-share/snapshots/my-snapshot
                 snapshot_name = snapshot.get("name", "")
                 source_file_share = self._extract_file_share_from_snapshot_name(
                     snapshot_name
@@ -298,7 +302,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
             "file_shares": file_share_info,
             "detailed_shares": detailed_shares,  # v1beta1 API에서 조회한 상세 정보
             "snapshots": snapshots,
-            "labels": label_list,
+            "labels": labels,
             "create_time": self._convert_google_cloud_datetime(
                 instance.get("createTime", "")
             ),
@@ -350,7 +354,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
             _LOGGER.error(
                 f"Failed to create FilestoreInstanceResource for {instance_id}: {e}"
             )
-            raise
+            raise e from e
 
     def _extract_file_share_from_snapshot_name(self, snapshot_name):
         """
@@ -363,7 +367,8 @@ class FilestoreInstanceManager(GoogleCloudManager):
             str: 파일 공유 이름
         """
         try:
-            # 예: projects/my-project/locations/us-central1/instances/my-instance/fileShares/my-share/snapshots/my-snapshot
+            # 예: projects/my-project/locations/us-central1/instances/my-instance/
+            # fileShares/my-share/snapshots/my-snapshot
             parts = snapshot_name.split("/")
             if len(parts) >= 10 and parts[6] == "fileShares":
                 return parts[7]

@@ -1,0 +1,17 @@
+---
+cloud_service_group: AppEngine
+cloud_service_type: Instance
+name: Total CPU Usage
+query:
+  aggregate:
+    - group:
+        fields:
+          - name: value
+            operator: sum
+            key: data.instance.cpu_usage
+options:
+  value_options:
+    key: value
+    type: percentage
+    options:
+      default: 0

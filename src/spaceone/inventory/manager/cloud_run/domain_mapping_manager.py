@@ -53,11 +53,15 @@ class CloudRunDomainMappingManager(GoogleCloudManager):
         # Get lists that relate with domain mappings through Google Cloud API
         # Domain mappings are global resources in Cloud Run v1
         try:
-            domain_mappings = cloud_run_v1_conn.list_domain_mappings(f"namespaces/{project_id}")
+            domain_mappings = cloud_run_v1_conn.list_domain_mappings(
+                f"namespaces/{project_id}"
+            )
         except Exception as e:
-            _LOGGER.warning(f"Failed to get domain mappings for project {project_id}: {str(e)}")
+            _LOGGER.warning(
+                f"Failed to get domain mappings for project {project_id}: {str(e)}"
+            )
             domain_mappings = []
-        
+
         for domain_mapping in domain_mappings:
             try:
                 ##################################
@@ -71,40 +75,52 @@ class CloudRunDomainMappingManager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                domain_mapping.update({
-                    "project": project_id,
-                    "location": location_id,
-                    "region": region,
-                })
+                domain_mapping.update(
+                    {
+                        "project": project_id,
+                        "location": location_id,
+                        "region": region,
+                    }
+                )
 
                 ##################################
                 # 3. Make Return Resource
                 ##################################
                 domain_mapping_data = DomainMapping(domain_mapping, strict=False)
-                
-                domain_mapping_resource = DomainMappingResource({
-                    "name": domain_mapping_name,
-                    "account": project_id,
-                    "region_code": location_id,
-                    "data": domain_mapping_data,
-                    "reference": ReferenceModel({
-                        "resource_id": domain_mapping_data.metadata.uid if domain_mapping_data.metadata else domain_mapping_name,
-                        "external_link": f"https://console.cloud.google.com/run/domains/details/{domain_mapping_name}?project={project_id}"
-                    })
-                }, strict=False)
 
-                collected_cloud_services.append(DomainMappingResponse({"resource": domain_mapping_resource}))
+                domain_mapping_resource = DomainMappingResource(
+                    {
+                        "name": domain_mapping_name,
+                        "account": project_id,
+                        "region_code": location_id,
+                        "data": domain_mapping_data,
+                        "reference": ReferenceModel(
+                            {
+                                "resource_id": domain_mapping_data.metadata.uid
+                                if domain_mapping_data.metadata
+                                else domain_mapping_name,
+                                "external_link": f"https://console.cloud.google.com/run/domains/details/{domain_mapping_name}?project={project_id}",
+                            }
+                        ),
+                    },
+                    strict=False,
+                )
+
+                collected_cloud_services.append(
+                    DomainMappingResponse({"resource": domain_mapping_resource})
+                )
 
             except Exception as e:
-                _LOGGER.error(f"Failed to process domain mapping {domain_mapping_id}: {str(e)}")
+                _LOGGER.error(
+                    f"Failed to process domain mapping {domain_mapping_id}: {str(e)}"
+                )
                 error_response = self.generate_resource_error_response(
                     e, "CloudRun", "DomainMapping", domain_mapping_id
                 )
                 error_responses.append(error_response)
 
         _LOGGER.debug(
-            f"** Cloud Run DomainMapping END ** "
-            f"({time.time() - start_time:.2f}s)"
+            f"** Cloud Run DomainMapping END ** ({time.time() - start_time:.2f}s)"
         )
 
         return collected_cloud_services, error_responses

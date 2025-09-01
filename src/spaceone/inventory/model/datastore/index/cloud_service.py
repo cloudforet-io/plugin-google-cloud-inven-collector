@@ -24,7 +24,7 @@ CLOUD SERVICE RESOURCE
 datastore_index_details = ItemDynamicLayout.set_fields(
     "Index Details",
     fields=[
-        TextDyField.data_source("Index ID", "data.indexId"),
+        TextDyField.data_source("Index ID", "data.index_id"),
         TextDyField.data_source("Kind", "data.kind"),
         TextDyField.data_source("Ancestor", "data.ancestor"),
         EnumDyField.data_source(

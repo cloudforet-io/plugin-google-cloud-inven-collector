@@ -1,13 +1,20 @@
 from schematics import Model
 from schematics.types import (
-    ListType,
-    StringType,
-    PolyModelType,
-    DictType,
-    ModelType,
-    FloatType,
     DateTimeType,
+    DictType,
+    FloatType,
+    ListType,
+    ModelType,
+    PolyModelType,
+    StringType,
 )
+
+from spaceone.inventory.libs.schema.google_cloud_logging import GoogleCloudLoggingModel
+from spaceone.inventory.libs.schema.google_cloud_monitoring import (
+    GoogleCloudMonitoringModel,
+)
+from spaceone.inventory.libs.schema.region import RegionResource
+from spaceone.inventory.model.compute_engine.instance.data import NIC, Disk, VMInstance
 
 from .base import (
     BaseMetaData,
@@ -16,12 +23,6 @@ from .base import (
     MetaDataViewSubData,
     ReferenceModel,
 )
-from spaceone.inventory.model.compute_engine.instance.data import VMInstance, NIC, Disk
-from spaceone.inventory.libs.schema.region import RegionResource
-from spaceone.inventory.libs.schema.google_cloud_monitoring import (
-    GoogleCloudMonitoringModel,
-)
-from spaceone.inventory.libs.schema.google_cloud_logging import GoogleCloudLoggingModel
 
 
 class Labels(Model):
@@ -109,6 +110,56 @@ class ErrorResourceResponse(CloudServiceResponse):
     state = StringType(default="FAILURE")
     resource_type = StringType(default="inventory.ErrorResource")
     resource = ModelType(ErrorResource, default={})
+
+    @classmethod
+    def create_with_logging(
+        cls,
+        error_message: str = "",
+        error_code: str = "UNKNOWN_ERROR",
+        resource_type: str = "inventory.ErrorResource",
+        additional_data: dict = None,
+    ) -> "ErrorResourceResponse":
+        """
+        로깅과 함께 ErrorResourceResponse 인스턴스를 생성합니다.
+
+        Args:
+            error_message: 에러 메시지
+            error_code: 에러 코드
+            resource_type: 리소스 타입
+            additional_data: 추가 데이터
+
+        Returns:
+            ErrorResourceResponse 인스턴스
+        """
+        import logging
+
+        _error_logger = logging.getLogger(__name__)
+
+        # 에러 로깅
+        _error_logger.error(
+            f"Response state: FAILURE, resource_type: {resource_type}, "
+            f"error_code: {error_code}, message: {error_message}"
+        )
+
+        # 에러 리소스 데이터 생성
+        error_resource_data = {
+            "provider": "google_cloud",
+            "account": "",
+            "error_message": error_message,
+        }
+
+        if additional_data:
+            error_resource_data.update(additional_data)
+
+        error_resource = ErrorResource(error_resource_data)
+
+        return cls(
+            {
+                "state": "FAILURE",
+                "resource_type": resource_type,
+                "resource": error_resource,
+            }
+        )
 
 
 class VMInstanceResource(Model):

@@ -47,7 +47,9 @@ class WorkerPoolResource(CloudBuildResource):
     cloud_service_type = StringType(default="WorkerPool")
     data = ModelType(WorkerPool)
     _metadata = ModelType(
-        CloudServiceMeta, default=cloud_build_worker_pool_meta, serialized_name="metadata"
+        CloudServiceMeta,
+        default=cloud_build_worker_pool_meta,
+        serialized_name="metadata",
     )
 
 

@@ -20,7 +20,7 @@ class IndexProperty(Model):
 class DatastoreIndexData(BaseResource):
     """Datastore Index 데이터 모델"""
 
-    indexId = StringType()
+    index_id = StringType()
     kind = StringType()
     ancestor = StringType()
     state = StringType()
@@ -34,6 +34,6 @@ class DatastoreIndexData(BaseResource):
 
     def reference(self):
         return {
-            "resource_id": f"{self.project_id}:{self.indexId}",
+            "resource_id": f"{self.project_id}:{self.index_id}",
             "external_link": f"https://console.cloud.google.com/datastore/indexes?project={self.project_id}",
         }

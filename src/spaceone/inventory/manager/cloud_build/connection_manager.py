@@ -67,7 +67,9 @@ class CloudBuildConnectionManager(GoogleCloudManager):
                             connection["_location"] = location_id
                         all_connections.extend(connections)
                     except Exception as e:
-                        _LOGGER.debug(f"Failed to query connections in location {location_id}: {str(e)}")
+                        _LOGGER.debug(
+                            f"Failed to query connections in location {location_id}: {str(e)}"
+                        )
                         continue
         except Exception as e:
             _LOGGER.warning(f"Failed to get locations: {str(e)}")
@@ -79,36 +81,49 @@ class CloudBuildConnectionManager(GoogleCloudManager):
                 # 1. Set Basic Information
                 ##################################
                 connection_id = connection.get("name", "")
-                connection_name = self.get_param_in_url(connection_id, "connections") if connection_id else ""
+                connection_name = (
+                    self.get_param_in_url(connection_id, "connections")
+                    if connection_id
+                    else ""
+                )
                 location_id = connection.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                connection.update({
-                    "project": project_id,
-                    "location": location_id,
-                    "region": region,
-                })
+                connection.update(
+                    {
+                        "project": project_id,
+                        "location": location_id,
+                        "region": region,
+                    }
+                )
 
                 ##################################
                 # 3. Make Return Resource
                 ##################################
                 connection_data = Connection(connection, strict=False)
-                
-                connection_resource = ConnectionResource({
-                    "name": connection_name,
-                    "account": project_id,
-                    "region_code": location_id,
-                    "data": connection_data,
-                    "reference": ReferenceModel({
-                        "resource_id": connection_data.name,
-                        "external_link": f"https://console.cloud.google.com/cloud-build/repositories/2nd-gen?project={project_id}"
-                    })
-                }, strict=False)
 
-                collected_cloud_services.append(ConnectionResponse({"resource": connection_resource}))
+                connection_resource = ConnectionResource(
+                    {
+                        "name": connection_name,
+                        "account": project_id,
+                        "region_code": location_id,
+                        "data": connection_data,
+                        "reference": ReferenceModel(
+                            {
+                                "resource_id": connection_data.name,
+                                "external_link": f"https://console.cloud.google.com/cloud-build/repositories/2nd-gen?project={project_id}",
+                            }
+                        ),
+                    },
+                    strict=False,
+                )
+
+                collected_cloud_services.append(
+                    ConnectionResponse({"resource": connection_resource})
+                )
 
             except Exception as e:
                 _LOGGER.error(f"Failed to process connection {connection_id}: {str(e)}")
@@ -118,8 +133,7 @@ class CloudBuildConnectionManager(GoogleCloudManager):
                 error_responses.append(error_response)
 
         _LOGGER.debug(
-            f"** Cloud Build Connection END ** "
-            f"({time.time() - start_time:.2f}s)"
+            f"** Cloud Build Connection END ** ({time.time() - start_time:.2f}s)"
         )
 
         return collected_cloud_services, error_responses

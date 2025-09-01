@@ -188,7 +188,6 @@ class DatastoreDatabaseManager(GoogleCloudManager):
         Returns:
             DatastoreDatabaseResponse: database 리소스 응답
         """
-        database_name = database_data["name"]
         project_id = database_data["project_id"]
 
         # 리소스 데이터 생성

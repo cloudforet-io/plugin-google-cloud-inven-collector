@@ -79,7 +79,7 @@ class FilestoreInstanceData(BaseResource):
     snapshots = ListType(ModelType(Snapshot))
 
     # 라벨 정보
-    labels = ListType(StringType)
+    labels = DictType(StringType)
 
     # 시간 정보
     create_time = StringType()

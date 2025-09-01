@@ -60,7 +60,7 @@ class CloudBuildBuildManager(GoogleCloudManager):
 
         # Get lists that relate with builds through Google Cloud API
         builds = cloud_build_v1_conn.list_builds()
-        
+
         # Get locations and regional builds
         regional_builds = []
         try:
@@ -71,12 +71,16 @@ class CloudBuildBuildManager(GoogleCloudManager):
                 if location_id:
                     try:
                         parent = f"projects/{project_id}/locations/{location_id}"
-                        location_builds = cloud_build_v1_conn.list_location_builds(parent)
+                        location_builds = cloud_build_v1_conn.list_location_builds(
+                            parent
+                        )
                         for build in location_builds:
                             build["_location"] = location_id
                         regional_builds.extend(location_builds)
                     except Exception as e:
-                        _LOGGER.error(f"Failed to query builds in location {location_id}: {str(e)}")
+                        _LOGGER.error(
+                            f"Failed to query builds in location {location_id}: {str(e)}"
+                        )
                         continue
         except Exception as e:
             _LOGGER.warning(f"Failed to get locations: {str(e)}")
@@ -93,34 +97,47 @@ class CloudBuildBuildManager(GoogleCloudManager):
                 build_id = build.get("id")
                 build_name = build.get("name", build_id)
                 location_id = build.get("_location", "global")
-                region = self.parse_region_from_zone(location_id) if location_id != "global" else "global"
+                region = (
+                    self.parse_region_from_zone(location_id)
+                    if location_id != "global"
+                    else "global"
+                )
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                build.update({
-                    "project": project_id,
-                    "location": location_id,
-                    "region": region,
-                })
+                build.update(
+                    {
+                        "project": project_id,
+                        "location": location_id,
+                        "region": region,
+                    }
+                )
 
                 ##################################
                 # 3. Make Return Resource
                 ##################################
                 build_data = Build(build, strict=False)
-                
-                build_resource = BuildResource({
-                    "name": build_name,
-                    "account": project_id,
-                    "region_code": location_id,
-                    "data": build_data,
-                    "reference": ReferenceModel({
-                        "resource_id": build_data.id,
-                        "external_link": f"https://console.cloud.google.com/cloud-build/builds?project={project_id}"
-                    })
-                }, strict=False)
 
-                collected_cloud_services.append(BuildResponse({"resource": build_resource}))
+                build_resource = BuildResource(
+                    {
+                        "name": build_name,
+                        "account": project_id,
+                        "region_code": location_id,
+                        "data": build_data,
+                        "reference": ReferenceModel(
+                            {
+                                "resource_id": build_data.id,
+                                "external_link": f"https://console.cloud.google.com/cloud-build/builds?project={project_id}",
+                            }
+                        ),
+                    },
+                    strict=False,
+                )
+
+                collected_cloud_services.append(
+                    BuildResponse({"resource": build_resource})
+                )
 
             except Exception as e:
                 _LOGGER.error(f"Failed to process build {build_id}: {str(e)}")
@@ -129,11 +146,6 @@ class CloudBuildBuildManager(GoogleCloudManager):
                 )
                 error_responses.append(error_response)
 
-        _LOGGER.debug(
-            f"** Cloud Build Build END ** "
-            f"({time.time() - start_time:.2f}s)"
-        )
+        _LOGGER.debug(f"** Cloud Build Build END ** ({time.time() - start_time:.2f}s)")
 
         return collected_cloud_services, error_responses
-
-

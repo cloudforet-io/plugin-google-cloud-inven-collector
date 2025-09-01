@@ -1,6 +1,6 @@
 import os
 
-from spaceone.inventory.libs.common_parser import *
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
@@ -60,7 +60,9 @@ cst_trigger._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Description", key="data.description"),
         SearchField.set(name="Disabled", key="data.disabled", data_type="boolean"),
         SearchField.set(name="Service Account", key="data.service_account"),
-        SearchField.set(name="Create Time", key="data.create_time", data_type="datetime"),
+        SearchField.set(
+            name="Create Time", key="data.create_time", data_type="datetime"
+        ),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

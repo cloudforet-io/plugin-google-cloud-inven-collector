@@ -45,7 +45,7 @@ cst_index.tags = {
 # 메타데이터 설정
 cst_index._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Index ID", "data.indexId"),
+        TextDyField.data_source("Index ID", "data.index_id"),
         TextDyField.data_source("Kind", "data.kind"),
         TextDyField.data_source("Ancestor", "data.ancestor"),
         EnumDyField.data_source(
@@ -62,7 +62,7 @@ cst_index._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Property Count", "data.property_count"),
     ],
     search=[
-        SearchField.set(name="Index ID", key="data.indexId"),
+        SearchField.set(name="Index ID", key="data.index_id"),
         SearchField.set(name="Kind", key="data.kind"),
         SearchField.set(name="State", key="data.state"),
         SearchField.set(name="Ancestor", key="data.ancestor"),

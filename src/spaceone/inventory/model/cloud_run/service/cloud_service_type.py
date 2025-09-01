@@ -1,7 +1,6 @@
 import os
 
-from spaceone.inventory.conf.cloud_service_conf import *
-from spaceone.inventory.libs.common_parser import *
+from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
@@ -46,7 +45,9 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Location", "data.metadata.location"),
         TextDyField.data_source("Project", "data.metadata.project"),
         TextDyField.data_source("URL", "data.status.url"),
-        TextDyField.data_source("Latest Ready Revision", "data.status.latest_ready_revision_name"),
+        TextDyField.data_source(
+            "Latest Ready Revision", "data.status.latest_ready_revision_name"
+        ),
         TextDyField.data_source("Revision Count", "data.revision_count"),
     ],
     search=[
@@ -67,5 +68,3 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
 CLOUD_SERVICE_TYPES = [
     CloudServiceTypeResponse({"resource": cst_service}),
 ]
-
-
