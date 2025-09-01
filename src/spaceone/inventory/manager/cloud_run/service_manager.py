@@ -71,16 +71,22 @@ class CloudRunServiceManager(GoogleCloudManager):
                             service_name = service.get("name")
                             if service_name:
                                 try:
-                                    revisions = cloud_run_v2_conn.list_revisions(service_name)
+                                    revisions = cloud_run_v2_conn.list_revisions(
+                                        service_name
+                                    )
                                     service["revisions"] = revisions
                                     service["revision_count"] = len(revisions)
                                 except Exception as e:
-                                    _LOGGER.warning(f"Failed to get revisions for service {service_name}: {str(e)}")
+                                    _LOGGER.warning(
+                                        f"Failed to get revisions for service {service_name}: {str(e)}"
+                                    )
                                     service["revisions"] = []
                                     service["revision_count"] = 0
                         all_services.extend(services)
                     except Exception as e:
-                        _LOGGER.debug(f"Failed to query services in location {location_id}: {str(e)}")
+                        _LOGGER.debug(
+                            f"Failed to query services in location {location_id}: {str(e)}"
+                        )
                         continue
         except Exception as e:
             _LOGGER.warning(f"Failed to get locations: {str(e)}")
@@ -91,36 +97,47 @@ class CloudRunServiceManager(GoogleCloudManager):
                 # 1. Set Basic Information
                 ##################################
                 service_id = service.get("name", "")
-                service_name = self.get_param_in_url(service_id, "services") if service_id else ""
+                service_name = (
+                    self.get_param_in_url(service_id, "services") if service_id else ""
+                )
                 location_id = service.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                service.update({
-                    "project": project_id,
-                    "location": location_id,
-                    "region": region,
-                })
+                service.update(
+                    {
+                        "project": project_id,
+                        "location": location_id,
+                        "region": region,
+                    }
+                )
 
                 ##################################
                 # 3. Make Return Resource
                 ##################################
                 service_data = Service(service, strict=False)
-                
-                service_resource = ServiceResource({
-                    "name": service_name,
-                    "account": project_id,
-                    "region_code": location_id,
-                    "data": service_data,
-                    "reference": ReferenceModel({
-                        "resource_id": service_data.name,
-                        "external_link": f"https://console.cloud.google.com/run/detail/{location_id}/{service_name}?project={project_id}"
-                    })
-                }, strict=False)
 
-                collected_cloud_services.append(ServiceResponse({"resource": service_resource}))
+                service_resource = ServiceResource(
+                    {
+                        "name": service_name,
+                        "account": project_id,
+                        "region_code": location_id,
+                        "data": service_data,
+                        "reference": ReferenceModel(
+                            {
+                                "resource_id": service_data.name,
+                                "external_link": f"https://console.cloud.google.com/run/detail/{location_id}/{service_name}?project={project_id}",
+                            }
+                        ),
+                    },
+                    strict=False,
+                )
+
+                collected_cloud_services.append(
+                    ServiceResponse({"resource": service_resource})
+                )
 
             except Exception as e:
                 _LOGGER.error(f"Failed to process service {service_id}: {str(e)}")
@@ -129,10 +146,6 @@ class CloudRunServiceManager(GoogleCloudManager):
                 )
                 error_responses.append(error_response)
 
-        _LOGGER.debug(
-            f"** Cloud Run Service END ** "
-            f"({time.time() - start_time:.2f}s)"
-        )
+        _LOGGER.debug(f"** Cloud Run Service END ** ({time.time() - start_time:.2f}s)")
 
         return collected_cloud_services, error_responses
-

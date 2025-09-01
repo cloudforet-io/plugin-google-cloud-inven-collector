@@ -1,6 +1,6 @@
 import os
 
-from spaceone.inventory.libs.common_parser import *
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,

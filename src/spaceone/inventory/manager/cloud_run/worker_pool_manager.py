@@ -71,16 +71,24 @@ class CloudRunWorkerPoolManager(GoogleCloudManager):
                             worker_pool_name = worker_pool.get("name")
                             if worker_pool_name:
                                 try:
-                                    revisions = cloud_run_v2_conn.list_worker_pool_revisions(worker_pool_name)
+                                    revisions = (
+                                        cloud_run_v2_conn.list_worker_pool_revisions(
+                                            worker_pool_name
+                                        )
+                                    )
                                     worker_pool["revisions"] = revisions
                                     worker_pool["revision_count"] = len(revisions)
                                 except Exception as e:
-                                    _LOGGER.warning(f"Failed to get revisions for worker pool {worker_pool_name}: {str(e)}")
+                                    _LOGGER.warning(
+                                        f"Failed to get revisions for worker pool {worker_pool_name}: {str(e)}"
+                                    )
                                     worker_pool["revisions"] = []
                                     worker_pool["revision_count"] = 0
                         all_worker_pools.extend(worker_pools)
                     except Exception as e:
-                        _LOGGER.debug(f"Failed to query worker pools in location {location_id}: {str(e)}")
+                        _LOGGER.debug(
+                            f"Failed to query worker pools in location {location_id}: {str(e)}"
+                        )
                         continue
         except Exception as e:
             _LOGGER.warning(f"Failed to get locations: {str(e)}")
@@ -91,47 +99,61 @@ class CloudRunWorkerPoolManager(GoogleCloudManager):
                 # 1. Set Basic Information
                 ##################################
                 worker_pool_id = worker_pool.get("name", "")
-                worker_pool_name = self.get_param_in_url(worker_pool_id, "workerPools") if worker_pool_id else ""
+                worker_pool_name = (
+                    self.get_param_in_url(worker_pool_id, "workerPools")
+                    if worker_pool_id
+                    else ""
+                )
                 location_id = worker_pool.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                worker_pool.update({
-                    "project": project_id,
-                    "location": location_id,
-                    "region": region,
-                })
+                worker_pool.update(
+                    {
+                        "project": project_id,
+                        "location": location_id,
+                        "region": region,
+                    }
+                )
 
                 ##################################
                 # 3. Make Return Resource
                 ##################################
                 worker_pool_data = WorkerPool(worker_pool, strict=False)
-                
-                worker_pool_resource = WorkerPoolResource({
-                    "name": worker_pool_name,
-                    "account": project_id,
-                    "region_code": location_id,
-                    "data": worker_pool_data,
-                    "reference": ReferenceModel({
-                        "resource_id": worker_pool_data.name,
-                        "external_link": f"https://console.cloud.google.com/run/worker-pools/details/{location_id}/{worker_pool_name}?project={project_id}"
-                    })
-                }, strict=False)
 
-                collected_cloud_services.append(WorkerPoolResponse({"resource": worker_pool_resource}))
+                worker_pool_resource = WorkerPoolResource(
+                    {
+                        "name": worker_pool_name,
+                        "account": project_id,
+                        "region_code": location_id,
+                        "data": worker_pool_data,
+                        "reference": ReferenceModel(
+                            {
+                                "resource_id": worker_pool_data.name,
+                                "external_link": f"https://console.cloud.google.com/run/worker-pools/details/{location_id}/{worker_pool_name}?project={project_id}",
+                            }
+                        ),
+                    },
+                    strict=False,
+                )
+
+                collected_cloud_services.append(
+                    WorkerPoolResponse({"resource": worker_pool_resource})
+                )
 
             except Exception as e:
-                _LOGGER.error(f"Failed to process worker pool {worker_pool_id}: {str(e)}")
+                _LOGGER.error(
+                    f"Failed to process worker pool {worker_pool_id}: {str(e)}"
+                )
                 error_response = self.generate_resource_error_response(
                     e, "CloudRun", "WorkerPool", worker_pool_id
                 )
                 error_responses.append(error_response)
 
         _LOGGER.debug(
-            f"** Cloud Run WorkerPool END ** "
-            f"({time.time() - start_time:.2f}s)"
+            f"** Cloud Run WorkerPool END ** ({time.time() - start_time:.2f}s)"
         )
 
         return collected_cloud_services, error_responses

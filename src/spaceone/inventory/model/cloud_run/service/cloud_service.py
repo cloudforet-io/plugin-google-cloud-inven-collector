@@ -39,8 +39,12 @@ service_overview = ItemDynamicLayout.set_fields(
 service_status = ItemDynamicLayout.set_fields(
     "Status & Conditions",
     fields=[
-        TextDyField.data_source("Latest Ready Revision", "data.latest_ready_revision_name"),
-        TextDyField.data_source("Latest Created Revision", "data.latest_created_revision_name"),
+        TextDyField.data_source(
+            "Latest Ready Revision", "data.latest_ready_revision_name"
+        ),
+        TextDyField.data_source(
+            "Latest Created Revision", "data.latest_created_revision_name"
+        ),
         TextDyField.data_source("Revision Count", "data.revision_count"),
         TextDyField.data_source("Observed Generation", "data.observed_generation"),
         ListDyField.data_source(
