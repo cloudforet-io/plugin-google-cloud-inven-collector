@@ -64,7 +64,7 @@ class DatastoreIndexManager(GoogleCloudManager):
                     resource_response = self._make_index_response(index_data, params)
                     resource_responses.append(resource_response)
                 except Exception as e:
-                    index_id = index_data.get("indexId", "unknown")
+                    index_id = index_data.get("index_id", "unknown")
                     _LOGGER.error(f"Failed to process index {index_id}: {e}")
                     error_response = self.generate_error_response(
                         e, "Datastore", "Index", index_id
@@ -139,7 +139,7 @@ class DatastoreIndexManager(GoogleCloudManager):
 
             # 처리된 데이터 구성
             processed_data = {
-                "indexId": index_id,
+                "index_id": index_id,
                 "kind": kind,
                 "ancestor": ancestor,
                 "state": state,
@@ -172,7 +172,7 @@ class DatastoreIndexManager(GoogleCloudManager):
         Returns:
             DatastoreIndexResponse: index 리소스 응답
         """
-        index_id = index_data["indexId"]
+        index_id = index_data["index_id"]
         project_id = index_data["project_id"]
 
         # 리소스 ID 생성
