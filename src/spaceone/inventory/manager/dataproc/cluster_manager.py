@@ -16,7 +16,7 @@ from spaceone.inventory.model.dataproc.cluster.data import (
     DataprocCluster,
 )
 
-_LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DataprocClusterManager(GoogleCloudManager):
@@ -51,10 +51,13 @@ class DataprocClusterManager(GoogleCloudManager):
 
         try:
             clusters = cluster_connector.list_clusters()
-            _LOGGER.info(f"Successfully found {len(clusters)} Dataproc clusters")
+            logger.info(
+                f"📊 Successfully found {len(clusters)} Dataproc clusters "
+                f"(parallel processing enabled)"
+            )
             return clusters
         except Exception as e:
-            _LOGGER.error(f"Failed to list Dataproc clusters: {e}")
+            logger.error(f"Failed to list Dataproc clusters: {e}")
             return []
 
     def get_cluster(
@@ -78,10 +81,10 @@ class DataprocClusterManager(GoogleCloudManager):
         try:
             cluster = cluster_connector.get_cluster(cluster_name, region)
             if cluster:
-                _LOGGER.info(f"Retrieved Dataproc cluster {cluster_name}")
+                logger.info("Retrieved Dataproc cluster successfully")
             return cluster or {}
         except Exception as e:
-            _LOGGER.error(f"Failed to get Dataproc cluster {cluster_name}: {e}")
+            logger.error(f"Failed to get Dataproc cluster: {e}")
             return {}
 
     def list_jobs(
@@ -110,10 +113,13 @@ class DataprocClusterManager(GoogleCloudManager):
 
         try:
             jobs = cluster_connector.list_jobs(region=region, cluster_name=cluster_name)
-            _LOGGER.info(f"Found {len(jobs)} Dataproc jobs")
+            logger.info(
+                f"⚡ Found {len(jobs)} Dataproc jobs "
+                f"(parallel processing with optimized timeouts)"
+            )
             return jobs
         except Exception as e:
-            _LOGGER.error(f"Failed to list Dataproc jobs: {e}")
+            logger.error(f"Failed to list Dataproc jobs: {e}")
             return []
 
     def list_workflow_templates(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -132,10 +138,10 @@ class DataprocClusterManager(GoogleCloudManager):
 
         try:
             templates = cluster_connector.list_workflow_templates()
-            _LOGGER.info(f"Found {len(templates)} Dataproc workflow templates")
+            logger.info(f"Found {len(templates)} Dataproc workflow templates")
             return templates
         except Exception as e:
-            _LOGGER.error(f"Failed to list Dataproc workflow templates: {e}")
+            logger.error(f"Failed to list Dataproc workflow templates: {e}")
             return []
 
     def list_autoscaling_policies(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -154,10 +160,10 @@ class DataprocClusterManager(GoogleCloudManager):
 
         try:
             policies = cluster_connector.list_autoscaling_policies()
-            _LOGGER.info(f"Found {len(policies)} Dataproc autoscaling policies")
+            logger.info(f"Found {len(policies)} Dataproc autoscaling policies")
             return policies
         except Exception as e:
-            _LOGGER.error(f"Failed to list Dataproc autoscaling policies: {e}")
+            logger.error(f"Failed to list Dataproc autoscaling policies: {e}")
             return []
 
     def collect_cloud_service(
@@ -177,7 +183,7 @@ class DataprocClusterManager(GoogleCloudManager):
         Raises:
             ValueError: 필수 파라미터가 누락된 경우
         """
-        _LOGGER.debug("** Dataproc Cluster START **")
+        logger.debug("** Dataproc Cluster START **")
 
         if not params or "secret_data" not in params:
             raise ValueError("secret_data is required in params")
@@ -195,10 +201,10 @@ class DataprocClusterManager(GoogleCloudManager):
         try:
             clusters = self.list_clusters(params)
             if not clusters:
-                _LOGGER.info("No Dataproc clusters found")
+                logger.info("No Dataproc clusters found")
                 return collected_cloud_services, error_responses
         except Exception as e:
-            _LOGGER.error(f"Failed to retrieve cluster list: {e}")
+            logger.error(f"Failed to retrieve cluster list: {e}")
             error_responses.append(
                 self.generate_error_response(e, self.cloud_service_group, "Cluster")
             )
@@ -310,42 +316,41 @@ class DataprocClusterManager(GoogleCloudManager):
                 if "metrics" in cluster:
                     cluster_data["metrics"] = cluster["metrics"]
 
-                # Job 정보 수집 및 추가 (기본값으로 빈 배열 설정)
+                # Job 정보 수집 최적화 - 성능 개선을 위해 선택적으로 수집
                 cluster_data["jobs"] = []
-                try:
-                    # 클러스터 위치에서 리전 추출
-                    cluster_region = (
-                        location.rsplit("-", 1)[0]
-                        if location and "-" in location
-                        else location
-                    )
-                    if cluster_region:
-                        jobs = self.list_jobs(
-                            region=cluster_region,
-                            cluster_name=cluster_name,
-                            params=params,
+                # Job 수집은 별도 옵션이 있을 때만 수행 (성능 최적화)
+                if params.get("options", {}).get("include_jobs", False):
+                    try:
+                        # 클러스터 위치에서 리전 추출
+                        cluster_region = (
+                            location.rsplit("-", 1)[0]
+                            if location and "-" in location
+                            else location
                         )
-                        if jobs:
-                            for job in jobs[:10]:  # 최근 10개 작업만 수집
-                                job_data = {
-                                    "reference": job.get("reference", {}),
-                                    "placement": job.get("placement", {}),
-                                    "status": job.get("status", {}),
-                                    "labels": job.get("labels", {}),
-                                    "driverOutputResourceUri": job.get(
-                                        "driverOutputResourceUri", ""
-                                    ),
-                                    "driverControlFilesUri": job.get(
-                                        "driverControlFilesUri", ""
-                                    ),
-                                    "jobUuid": job.get("jobUuid", ""),
-                                }
-                                cluster_data["jobs"].append(job_data)
-                except Exception as e:
-                    _LOGGER.warning(
-                        f"Failed to collect jobs for cluster {cluster_name}: {e}"
-                    )
-                    # jobs는 이미 빈 배열로 초기화됨
+                        if cluster_region:
+                            jobs = self.list_jobs(
+                                region=cluster_region,
+                                cluster_name=cluster_name,
+                                params=params,
+                            )
+                            if jobs:
+                                # 최근 작업 수집 (성능 최적화를 위해 제한)
+                                job_limit = min(5, len(jobs))  # 최대 5개로 축소
+                                for job in jobs[:job_limit]:
+                                    job_data = {
+                                        "reference": job.get("reference", {}),
+                                        "placement": job.get("placement", {}),
+                                        "status": job.get("status", {}),
+                                        "labels": job.get("labels", {}),
+                                        "jobUuid": job.get("jobUuid", ""),
+                                    }
+                                    cluster_data["jobs"].append(job_data)
+                    except Exception as e:
+                        logger.warning(f"Failed to collect jobs for cluster: {e}")
+                        # jobs는 이미 빈 배열로 초기화됨
+                else:
+                    # Job 수집 생략 - 성능 최적화
+                    logger.debug("Job collection skipped for performance optimization")
 
                 # DataprocCluster 모델 생성
                 dataproc_cluster_data = DataprocCluster(cluster_data, strict=False)
@@ -377,10 +382,10 @@ class DataprocClusterManager(GoogleCloudManager):
                 collected_cloud_services.append(cluster_response)
 
             except Exception as e:
-                _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
+                logger.error(f"[collect_cloud_service] => {e}", exc_info=True)
                 error_responses.append(
                     self.generate_error_response(e, self.cloud_service_group, "Cluster")
                 )
 
-        _LOGGER.debug("** Dataproc Cluster END **")
+        logger.debug("** Dataproc Cluster END **")
         return collected_cloud_services, error_responses

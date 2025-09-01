@@ -134,3 +134,5 @@ dmypy.json
 test_cloudservice_api.py
 
 .idea
+
+reports/
