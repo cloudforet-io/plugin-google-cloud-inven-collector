@@ -17,11 +17,14 @@ class Condition(Model):
     last_transition_time = DateTimeType(deserialize_from="lastTransitionTime")
     severity = StringType()
     revision_reason = StringType(deserialize_from="revisionReason")
+
+
 class TrafficTarget(Model):
     type = StringType()  # TrafficTargetAllocationType enum
     revision = StringType()
     percent = IntType()
     tag = StringType()
+
 
 class Revision(Model):
     name = StringType()
@@ -31,6 +34,7 @@ class Revision(Model):
     create_time = DateTimeType(deserialize_from="createTime")
     update_time = DateTimeType(deserialize_from="updateTime")
     conditions = ListType(ModelType(Condition), default=[])
+
 
 class Service(Model):
     name = StringType()
@@ -52,13 +56,15 @@ class Service(Model):
     terminal_condition = ModelType(Condition, deserialize_from="terminalCondition")
     conditions = ListType(ModelType(Condition), default=[])
     latest_ready_revision_name = StringType(deserialize_from="latestReadyRevisionName")
-    latest_created_revision_name = StringType(deserialize_from="latestCreatedRevisionName")
-    traffic_statuses = ListType(DictType(BaseType), deserialize_from="trafficStatuses", default=[])
+    latest_created_revision_name = StringType(
+        deserialize_from="latestCreatedRevisionName"
+    )
+    traffic_statuses = ListType(
+        DictType(BaseType), deserialize_from="trafficStatuses", default=[]
+    )
     uri = StringType()
     etag = StringType()
     template = DictType(BaseType, default={})
     ingress = StringType()
     revisions = ListType(ModelType(Revision), default=[])
-    revision_count = IntType(default=0) 
-
-
+    revision_count = IntType(default=0)

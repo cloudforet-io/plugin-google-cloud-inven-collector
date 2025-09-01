@@ -1,7 +1,7 @@
 import os
 
-from spaceone.inventory.conf.cloud_service_conf import *
-from spaceone.inventory.libs.common_parser import *
+from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
@@ -67,5 +67,3 @@ cst_domain_mapping._metadata = CloudServiceTypeMeta.set_meta(
 CLOUD_SERVICE_TYPES = [
     CloudServiceTypeResponse({"resource": cst_domain_mapping}),
 ]
-
-

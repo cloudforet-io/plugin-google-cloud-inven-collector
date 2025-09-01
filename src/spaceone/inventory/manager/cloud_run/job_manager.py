@@ -70,28 +70,38 @@ class CloudRunJobManager(GoogleCloudManager):
                             job_name = job.get("name")
                             if job_name:
                                 try:
-                                    executions = cloud_run_v2_conn.list_executions(job_name)
+                                    executions = cloud_run_v2_conn.list_executions(
+                                        job_name
+                                    )
                                     # Get tasks for each execution
                                     for execution in executions:
                                         execution_name = execution.get("name")
                                         if execution_name:
                                             try:
-                                                tasks = cloud_run_v2_conn.list_tasks(execution_name)
+                                                tasks = cloud_run_v2_conn.list_tasks(
+                                                    execution_name
+                                                )
                                                 execution["tasks"] = tasks
                                                 execution["task_count"] = len(tasks)
                                             except Exception as e:
-                                                _LOGGER.warning(f"Failed to get tasks for execution {execution_name}: {str(e)}")
+                                                _LOGGER.warning(
+                                                    f"Failed to get tasks for execution {execution_name}: {str(e)}"
+                                                )
                                                 execution["tasks"] = []
                                                 execution["task_count"] = 0
                                     job["executions"] = executions
                                     job["execution_count"] = len(executions)
                                 except Exception as e:
-                                    _LOGGER.warning(f"Failed to get executions for job {job_name}: {str(e)}")
+                                    _LOGGER.warning(
+                                        f"Failed to get executions for job {job_name}: {str(e)}"
+                                    )
                                     job["executions"] = []
                                     job["execution_count"] = 0
                         all_jobs.extend(jobs)
                     except Exception as e:
-                        _LOGGER.debug(f"Failed to query jobs in location {location_id}: {str(e)}")
+                        _LOGGER.debug(
+                            f"Failed to query jobs in location {location_id}: {str(e)}"
+                        )
                         continue
         except Exception as e:
             _LOGGER.warning(f"Failed to get locations: {str(e)}")
@@ -109,28 +119,36 @@ class CloudRunJobManager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                job.update({
-                    "project": project_id,
-                    "location": location_id,
-                    "region": region,
-                })
+                job.update(
+                    {
+                        "project": project_id,
+                        "location": location_id,
+                        "region": region,
+                    }
+                )
 
                 ##################################
                 # 3. Make Return Resource
                 ##################################
                 from spaceone.inventory.model.cloud_run.job.data import Job
+
                 job_data = Job(job, strict=False)
-                
-                job_resource = JobResource({
-                    "name": job_name,
-                    "account": project_id,
-                    "region_code": location_id,
-                    "data": job_data,
-                    "reference": ReferenceModel({
-                        "resource_id": job_data.name,
-                        "external_link": f"https://console.cloud.google.com/run/jobs/details/{location_id}/{job_name}?project={project_id}"
-                    })
-                }, strict=False)
+
+                job_resource = JobResource(
+                    {
+                        "name": job_name,
+                        "account": project_id,
+                        "region_code": location_id,
+                        "data": job_data,
+                        "reference": ReferenceModel(
+                            {
+                                "resource_id": job_data.name,
+                                "external_link": f"https://console.cloud.google.com/run/jobs/details/{location_id}/{job_name}?project={project_id}",
+                            }
+                        ),
+                    },
+                    strict=False,
+                )
 
                 collected_cloud_services.append(JobResponse({"resource": job_resource}))
 
@@ -141,9 +159,6 @@ class CloudRunJobManager(GoogleCloudManager):
                 )
                 error_responses.append(error_response)
 
-        _LOGGER.debug(
-            f"** Cloud Run Job END ** "
-            f"({time.time() - start_time:.2f}s)"
-        )
+        _LOGGER.debug(f"** Cloud Run Job END ** ({time.time() - start_time:.2f}s)")
 
         return collected_cloud_services, error_responses

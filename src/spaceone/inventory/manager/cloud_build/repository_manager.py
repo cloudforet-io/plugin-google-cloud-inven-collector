@@ -63,21 +63,29 @@ class CloudBuildRepositoryManager(GoogleCloudManager):
                     try:
                         parent = f"projects/{project_id}/locations/{location_id}"
                         connections = cloud_build_v2_conn.list_connections(parent)
-                        
+
                         for connection in connections:
                             connection_name = connection.get("name", "")
                             if connection_name:
                                 try:
-                                    repositories = cloud_build_v2_conn.list_repositories(connection_name)
+                                    repositories = (
+                                        cloud_build_v2_conn.list_repositories(
+                                            connection_name
+                                        )
+                                    )
                                     for repository in repositories:
                                         repository["_location"] = location_id
                                         repository["_connection"] = connection_name
                                     all_repositories.extend(repositories)
                                 except Exception as e:
-                                    _LOGGER.debug(f"Failed to query repositories in connection {connection_name}: {str(e)}")
+                                    _LOGGER.debug(
+                                        f"Failed to query repositories in connection {connection_name}: {str(e)}"
+                                    )
                                     continue
                     except Exception as e:
-                        _LOGGER.debug(f"Failed to query connections in location {location_id}: {str(e)}")
+                        _LOGGER.debug(
+                            f"Failed to query connections in location {location_id}: {str(e)}"
+                        )
                         continue
         except Exception as e:
             _LOGGER.warning(f"Failed to get locations: {str(e)}")
@@ -89,36 +97,49 @@ class CloudBuildRepositoryManager(GoogleCloudManager):
                 # 1. Set Basic Information
                 ##################################
                 repository_id = repository.get("name", "")
-                repository_name = self.get_param_in_url(repository_id, "repositories") if repository_id else ""
+                repository_name = (
+                    self.get_param_in_url(repository_id, "repositories")
+                    if repository_id
+                    else ""
+                )
                 location_id = repository.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                repository.update({
-                    "project": project_id,
-                    "location": location_id,
-                    "region": region,
-                })
+                repository.update(
+                    {
+                        "project": project_id,
+                        "location": location_id,
+                        "region": region,
+                    }
+                )
 
                 ##################################
                 # 3. Make Return Resource
                 ##################################
                 repository_data = Repository(repository, strict=False)
-                
-                repository_resource = RepositoryResource({
-                    "name": repository_name,
-                    "account": project_id,
-                    "region_code": location_id,
-                    "data": repository_data,
-                    "reference": ReferenceModel({
-                        "resource_id": repository_data.name,
-                        "external_link": f"https://console.cloud.google.com/cloud-build/repositories/2nd-gen?project={project_id}"
-                    })
-                }, strict=False)
 
-                collected_cloud_services.append(RepositoryResponse({"resource": repository_resource}))
+                repository_resource = RepositoryResource(
+                    {
+                        "name": repository_name,
+                        "account": project_id,
+                        "region_code": location_id,
+                        "data": repository_data,
+                        "reference": ReferenceModel(
+                            {
+                                "resource_id": repository_data.name,
+                                "external_link": f"https://console.cloud.google.com/cloud-build/repositories/2nd-gen?project={project_id}",
+                            }
+                        ),
+                    },
+                    strict=False,
+                )
+
+                collected_cloud_services.append(
+                    RepositoryResponse({"resource": repository_resource})
+                )
 
             except Exception as e:
                 _LOGGER.error(f"Failed to process repository {repository_id}: {str(e)}")
@@ -128,8 +149,7 @@ class CloudBuildRepositoryManager(GoogleCloudManager):
                 error_responses.append(error_response)
 
         _LOGGER.debug(
-            f"** Cloud Build Repository END ** "
-            f"({time.time() - start_time:.2f}s)"
+            f"** Cloud Build Repository END ** ({time.time() - start_time:.2f}s)"
         )
 
         return collected_cloud_services, error_responses

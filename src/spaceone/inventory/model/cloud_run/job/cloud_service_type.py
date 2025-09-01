@@ -1,7 +1,7 @@
 import os
 
-from spaceone.inventory.conf.cloud_service_conf import *
-from spaceone.inventory.libs.common_parser import *
+from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
@@ -50,7 +50,9 @@ cst_job._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Location", "data.metadata.location"),
         TextDyField.data_source("Project", "data.metadata.project"),
         TextDyField.data_source("Execution Count", "data.execution_count"),
-        TextDyField.data_source("Latest Created Execution", "data.latestCreatedExecution"),
+        TextDyField.data_source(
+            "Latest Created Execution", "data.latestCreatedExecution"
+        ),
     ],
     search=[
         SearchField.set(name="Job Name", key="data.metadata.name"),
@@ -69,5 +71,3 @@ cst_job._metadata = CloudServiceTypeMeta.set_meta(
 CLOUD_SERVICE_TYPES = [
     CloudServiceTypeResponse({"resource": cst_job}),
 ]
-
-

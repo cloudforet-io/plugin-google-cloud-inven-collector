@@ -60,7 +60,7 @@ class CloudBuildTriggerManager(GoogleCloudManager):
 
         # Get lists that relate with triggers through Google Cloud API
         triggers = cloud_build_v1_conn.list_triggers()
-        
+
         # Get locations and regional triggers
         regional_triggers = []
         try:
@@ -71,12 +71,16 @@ class CloudBuildTriggerManager(GoogleCloudManager):
                 if location_id:
                     try:
                         parent = f"projects/{project_id}/locations/{location_id}"
-                        location_triggers = cloud_build_v1_conn.list_location_triggers(parent)
+                        location_triggers = cloud_build_v1_conn.list_location_triggers(
+                            parent
+                        )
                         for trigger in location_triggers:
                             trigger["_location"] = location_id
                         regional_triggers.extend(location_triggers)
                     except Exception as e:
-                        _LOGGER.error(f"Failed to query triggers in location {location_id}: {str(e)}")
+                        _LOGGER.error(
+                            f"Failed to query triggers in location {location_id}: {str(e)}"
+                        )
                         continue
         except Exception as e:
             _LOGGER.warning(f"Failed to get locations: {str(e)}")
@@ -91,34 +95,47 @@ class CloudBuildTriggerManager(GoogleCloudManager):
                 trigger_id = trigger.get("id")
                 trigger_name = trigger.get("name", trigger_id)
                 location_id = trigger.get("_location", "global")
-                region = GoogleCloudManager.parse_region_from_zone(location_id) if location_id != "global" else "global"
+                region = (
+                    GoogleCloudManager.parse_region_from_zone(location_id)
+                    if location_id != "global"
+                    else "global"
+                )
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                trigger.update({
-                    "project": project_id,
-                    "location": location_id,
-                    "region": region,
-                })
+                trigger.update(
+                    {
+                        "project": project_id,
+                        "location": location_id,
+                        "region": region,
+                    }
+                )
 
                 ##################################
                 # 3. Make Return Resource
                 ##################################
                 trigger_data = Trigger(trigger, strict=False)
-                
-                trigger_resource = TriggerResource({
-                    "name": trigger_name,
-                    "account": project_id,
-                    "region_code": location_id,
-                    "data": trigger_data,
-                    "reference": ReferenceModel({
-                        "resource_id": trigger_data.id,
-                        "external_link": f"https://console.cloud.google.com/cloud-build/triggers?project={project_id}"
-                    })
-                }, strict=False)
 
-                collected_cloud_services.append(TriggerResponse({"resource": trigger_resource}))
+                trigger_resource = TriggerResource(
+                    {
+                        "name": trigger_name,
+                        "account": project_id,
+                        "region_code": location_id,
+                        "data": trigger_data,
+                        "reference": ReferenceModel(
+                            {
+                                "resource_id": trigger_data.id,
+                                "external_link": f"https://console.cloud.google.com/cloud-build/triggers?project={project_id}",
+                            }
+                        ),
+                    },
+                    strict=False,
+                )
+
+                collected_cloud_services.append(
+                    TriggerResponse({"resource": trigger_resource})
+                )
 
             except Exception as e:
                 _LOGGER.error(f"Failed to process trigger {trigger_id}: {str(e)}")
@@ -128,10 +145,7 @@ class CloudBuildTriggerManager(GoogleCloudManager):
                 error_responses.append(error_response)
 
         _LOGGER.debug(
-            f"** Cloud Build Trigger END ** "
-            f"({time.time() - start_time:.2f}s)"
+            f"** Cloud Build Trigger END ** ({time.time() - start_time:.2f}s)"
         )
 
         return collected_cloud_services, error_responses
-
-

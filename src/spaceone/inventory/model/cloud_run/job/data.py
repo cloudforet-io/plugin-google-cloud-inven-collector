@@ -61,4 +61,6 @@ class Job(Model):
     etag = StringType()
     executions = ListType(ModelType(Execution), default=[])
     execution_count = IntType(default=0)
-    latest_created_execution = ModelType(LatestCreatedExecution, deserialize_from="latestCreatedExecution")
+    latest_created_execution = ModelType(
+        LatestCreatedExecution, deserialize_from="latestCreatedExecution"
+    )

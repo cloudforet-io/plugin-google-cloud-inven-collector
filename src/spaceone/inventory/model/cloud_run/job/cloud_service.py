@@ -44,10 +44,19 @@ job_status = ItemDynamicLayout.set_fields(
     "Status & Conditions",
     fields=[
         TextDyField.data_source("Execution Count", "data.execution_count"),
-        TextDyField.data_source("Latest Created Execution", "data.latest_created_execution.name"),
-        DateTimeDyField.data_source("Latest Execution Create Time", "data.latest_created_execution.create_time"),
-        DateTimeDyField.data_source("Latest Execution Completion Time", "data.latest_created_execution.completion_time"),
-        TextDyField.data_source("Latest Execution Status", "data.latest_created_execution.completion_status"),
+        TextDyField.data_source(
+            "Latest Created Execution", "data.latest_created_execution.name"
+        ),
+        DateTimeDyField.data_source(
+            "Latest Execution Create Time", "data.latest_created_execution.create_time"
+        ),
+        DateTimeDyField.data_source(
+            "Latest Execution Completion Time",
+            "data.latest_created_execution.completion_time",
+        ),
+        TextDyField.data_source(
+            "Latest Execution Status", "data.latest_created_execution.completion_status"
+        ),
         ListDyField.data_source(
             "Conditions",
             "data.conditions",
