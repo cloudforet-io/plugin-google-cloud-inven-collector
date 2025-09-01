@@ -1,4 +1,4 @@
-MAX_WORKER = 20
+MAX_WORKER = 2
 SUPPORTED_RESOURCE_TYPE = [
     "inventory.CloudService",
     "inventory.CloudServiceType",
@@ -50,12 +50,14 @@ CLOUD_SERVICE_GROUP_MAP = {
         "CloudRunWorkerPoolManager",
         "CloudRunDomainMappingManager",
     ],
-    "KubernetesEngine": ["GKEClusterV1Manager"], # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
+    "KubernetesEngine": [
+        "GKEClusterV1Manager"
+    ],  # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
     "AppEngine": [
         "AppEngineApplicationV1Manager",
         "AppEngineServiceV1Manager",
         "AppEngineVersionV1Manager",
-        "AppEngineInstanceV1Manager"
+        "AppEngineInstanceV1Manager",
     ],
     "Datastore": ["DatastoreNamespaceManager", "DatastoreIndexManager"],
     "KubernetesEngine": [
@@ -193,7 +195,7 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "Instance": {
             "resource_type": "gae_app",
             "labels_key": "resource.labels.instance_id",
-        }
+        },
     },
     "Datastore": {
         "Database": {

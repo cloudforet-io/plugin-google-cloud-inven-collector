@@ -7,8 +7,8 @@
 프로젝트 생성 가이드는 [Google Cloud Documentation](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)을 참고하십시오.
 
 
-<img src="./GUIDE-img/overview(h2)-1.png" width="80%" height="80%">
-<img src="./GUIDE-img/overview(h2)-2.png" width="80%" height="80%">
+<img src="../GUIDE-img/overview(h2)-1.png" width="80%" height="80%">
+<img src="../GUIDE-img/overview(h2)-2.png" width="80%" height="80%">
 
 본 설정 가이드는 위에서 언급한 2가지 설정 정보들이 무엇을 의미하고, 어디서 획득하는지 자세히 알아보도록 하겠습니다.
 
@@ -71,12 +71,12 @@ Google API의 인증 방식의 상세한 설명은 [Google Cloud Documentation](
 (1-1) [Google Cloud 로그인](https://cloud.google.com/gcp/?hl=en) > [IAM 콘솔](https://console.cloud.google.com/projectselector2/iam-admin/iam?supportedpurview=organizationId,folder,project&orgonly=true) 이동 후 프로젝트를 클릭합니다.  
 (1-2) [IAM 및 관리자 > 서비스 계정] 메뉴에서 [서비스 계정 만들기]를 클릭합니다.
 
-<img src="./GUIDE-img/create-gcp-service-account(h2)-1.png" width="80%" height="80%">
+<img src="../GUIDE-img/create-gcp-service-account(h2)-1.png" width="80%" height="80%">
 
 (1-3) 서비스 계정 세부 정보를 입력합니다.  
 (1-4) [만들고 계속하기] 버튼을 클릭합니다.
 
-<img src="./GUIDE-img/create-gcp-service-account(h2)-2.png" width="80%" height="80%">
+<img src="../GUIDE-img/create-gcp-service-account(h2)-2.png" width="80%" height="80%">
 
 <br>
 <br>
@@ -132,20 +132,20 @@ Storage 뷰어를 default 롤로 지원하지 않아 Custom 롤을 생성해야 
 
 (2-1) [IAM 및 관리자 > 역할] 메뉴로 이동 후 [역할 만들기] 버튼을 클릭합니다.
 
-<img src="./GUIDE-img/add-role(h2)-1.png" width="80%" height="80%">
+<img src="../GUIDE-img/add-role(h2)-1.png" width="80%" height="80%">
 
 (2-2) 권한을 검색하여 역할을 생성하는 과정입니다.  
 (2-3) [제목]에 값을 입력 후 [권한 추가] 버튼을 클릭합니다.
 
-<img src="./GUIDE-img/add-role(h2)-2.png" width="80%" height="80%">
+<img src="../GUIDE-img/add-role(h2)-2.png" width="80%" height="80%">
 
 (2-4) 위의 테이블에 있는 [Name]에 해당하는 값을 [필터] 검색창에 검색하여 권한을 추가 합니다.
 
-<img src="./GUIDE-img/add-role(h2)-3.png" width="80%" height="80%">
+<img src="../GUIDE-img/add-role(h2)-3.png" width="80%" height="80%">
 
 (2-5) 추가된 권한을 확인 후 [만들기] 버튼을 클릭하여 역할 생성을 완료합니다.
 
-<img src="./GUIDE-img/add-role(h2)-4.png" width="80%" height="80%">
+<img src="../GUIDE-img/add-role(h2)-4.png" width="80%" height="80%">
 
 <br>
 <br>
@@ -158,7 +158,7 @@ Storage 뷰어를 default 롤로 지원하지 않아 Custom 롤을 생성해야 
 
 (2-6) 서비스 계정에 부여할 권한을 선택합니다.  
 (2-7) [역할 선택]을 클릭하여 커스텀을 선택해 기 생성한 롤을 추가 해줍니다.
-<img src="./GUIDE-img/add-role-to-service-account.png" width="80%" height="80%">
+<img src="../GUIDE-img/add-role-to-service-account.png" width="80%" height="80%">
 
 (2-8) [다른 역할 추가] 버튼을 클릭하여 검색창에 필요한 롤을 9개를 추가합니다.
 * Custom Role (1개)
@@ -173,12 +173,12 @@ Storage 뷰어를 default 롤로 지원하지 않아 Custom 롤을 생성해야 
   * 추천자 뷰어
   * 환경 및 스토리지 객체 뷰어
 
-<img src="./GUIDE-img/create-role(h2)-2.png" width="80%" height="80%">
+<img src="../GUIDE-img/create-role(h2)-2.png" width="80%" height="80%">
 
 (2-9) [계속] 버튼을 클릭합니다.
 
 (2-10) [완료] 버튼을 클릭하여 역할 생성을 마무리합니다.
-<img src="./GUIDE-img/create-role(h2)-3.png" width="80%" height="80%">
+<img src="../GUIDE-img/create-role(h2)-3.png" width="80%" height="80%">
 
 > 💡 위 과정은 Custom Role 생성과 Service Account 생성 후 필요한 롤을 추가하는 과정입니다.  
 > Custom Role 생성은 (2-1 ~ 2-5)를 참고하시고, 나머지는 가이드 순서에 맞게 진행하시면 되겠습니다.
@@ -193,15 +193,15 @@ Storage 뷰어를 default 롤로 지원하지 않아 Custom 롤을 생성해야 
 
 (3-1) [IAM 및 관리자 > 서비스 계정] 메뉴에서 서비스 계정 이메일을 클릭합니다.
 
-<img src="./GUIDE-img/create-key(h2)-1.png" width="80%" height="80%">
+<img src="../GUIDE-img/create-key(h2)-1.png" width="80%" height="80%">
 
 (3-2) [키] 탭 메뉴를 클릭합니다.  
 (3-3) [키 추가 > 새 키 만들기] 버튼을 클릭합니다.
 
-<img src="./GUIDE-img/create-key(h2)-2.png" width="80%" height="80%">
+<img src="../GUIDE-img/create-key(h2)-2.png" width="80%" height="80%">
 
 (3-4) 키 유형 중 JSON 방식을 클릭한 후 [만들기] 버튼을 클릭합니다.
-<img src="./GUIDE-img/create-key(h2)-3.png" width="80%" height="80%">
+<img src="../GUIDE-img/create-key(h2)-3.png" width="80%" height="80%">
 
 (3-5) 로컬 컴퓨터에 비공개 키가 JSON 파일로 저장됩니다.  
 다운로드 받은 JSON 파일에는 클라우드포레에서 서비스 계정 등록 시 필요한 설정 정보가 존재합니다.
@@ -221,11 +221,11 @@ Storage 뷰어를 default 롤로 지원하지 않아 Custom 롤을 생성해야 
 (4-2) [Google Cloud 대시보드](https://console.cloud.google.com/home?_ga=2.4664371.1206556632.1657625937-1313572510.1657024428&_gac=1.117051380.1657701814.CjwKCAjw2rmWBhB4EiwAiJ0mtYsa93F_vckP4cRoTJMHvwj00MwAj6_vLe5zPC-rnTr5BHU_1YebSRoCY6MQAvD_BwE)로 이동합니다.  
 (4-3) 프로젝트를 선택 후 [열기] 버튼을 클릭합니다.
 
-<img src="./GUIDE-img/create-service-account(h2)-1.png" width="80%" height="80%">
+<img src="../GUIDE-img/create-service-account(h2)-1.png" width="80%" height="80%">
 
 (4-4) [프로젝트 번호]에서 **[Project ID]** 를 확인 할 수 있습니다.
 
-<img src="./GUIDE-img/create-service-account(h2)-2.png" width="50%" height="50%">
+<img src="../GUIDE-img/create-service-account(h2)-2.png" width="50%" height="50%">
 
 (4-5) 클라우드포레 서비스 계정 추가 시 **Project ID** 필드에 Google Cloud의 프로젝트 번호를 입력해 주십시오.
 
@@ -247,14 +247,14 @@ Storage 뷰어를 default 롤로 지원하지 않아 Custom 롤을 생성해야 
 (4-7) 설정 정보를 직접 입력하는 방식입니다.  
 다운로드받은 JSON 파일의 내용 중 각각의 설정 정보에 해당하는 값을 복사 후 붙여넣기 합니다.
 
-<img src="./GUIDE-img/create-service-account(h2)-3.png" width="80%" height="80%">
+<img src="../GUIDE-img/create-service-account(h2)-3.png" width="80%" height="80%">
 
 (4-8) JSON으로 설정 정보를 입력하는 방식입니다.  
 다운로드받은 JSON 파일의 내용을 복사 후 붙여넣기 합니다.
 
 (4-9) [저장] 버튼을 클릭합니다.
 
-<img src="./GUIDE-img/create-service-account(h2)-4.png" width="80%" height="80%">
+<img src="../GUIDE-img/create-service-account(h2)-4.png" width="80%" height="80%">
 
 이제 클라우드포레의 서비스 계정 등록이 완료되었습니다.  
 클라우드포레의 **컬렉터 플러그인** 생성 방법은 [[클라우드포레의 사용자 가이드]](https://spaceone.org/ko/docs/guides/asset-inventory/collector/)를 참고하십시오.

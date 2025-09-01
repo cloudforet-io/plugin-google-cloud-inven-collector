@@ -1,6 +1,16 @@
-# Google Cloud KMS: KeyRing 및 CryptoKey 목록 조회 API 가이드
+# Google Cloud KMS KeyRing 플러그인
 
-이 문서는 Google Cloud Key Management Service(KMS)의 API를 사용하여 KeyRing, CryptoKey 및 CryptoKeyVersion 목록을 조회하는 방법을 안내합니다.
+이 문서는 Google Cloud Key Management Service (KMS)의 KeyRing 리소스를 수집하는 플러그인에 대한 설명입니다.
+
+## 개요
+
+Google Cloud KMS KeyRing 플러그인은 SpaceONE Inventory Collector의 일부로, Google Cloud의 모든 위치에 있는 KeyRing 정보를 수집합니다.
+
+### 주요 기능
+
+- **전체 위치 스캔**: 모든 Google Cloud 지역의 KeyRing을 자동으로 검색
+- **상세 정보 수집**: KeyRing 메타데이터 및 위치 정보 포함
+- **실시간 모니터링**: 생성 시간, 위치별 분류 등 상세 정보 제공
 
 ## 🚀 KMS Location 검색 옵션
 
@@ -403,4 +413,4 @@ curl "https://cloudkms.googleapis.com/v1/projects/YOUR_PROJECT_ID/locations/YOUR
 - [KMS REST API v1 참조](https://cloud.google.com/kms/docs/reference/rest/v1)
 - [IAM 및 KMS 권한](https://cloud.google.com/kms/docs/iam)
 - [정렬 및 필터링 가이드](https://cloud.google.com/kms/docs/sorting-and-filtering)
-- [SpaceONE KMS 플러그인 가이드](../GUIDE.md)
+- [SpaceONE KMS 플러그인 가이드](../../guide/README.md)
