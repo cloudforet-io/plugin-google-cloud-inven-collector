@@ -1,4 +1,3 @@
-import concurrent.futures
 import json
 import logging
 import os
@@ -14,7 +13,6 @@ from spaceone.core.service import (
 from spaceone.inventory.conf.cloud_service_conf import (
     CLOUD_SERVICE_GROUP_MAP,
     FILTER_FORMAT,
-    MAX_WORKER,
     SUPPORTED_FEATURES,
     SUPPORTED_RESOURCE_TYPE,
     SUPPORTED_SCHEDULES,
@@ -132,28 +130,22 @@ class CollectorService(BaseService):
             )
             yield error_resource_response.to_primitive()
 
-        # Execute manager
-        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKER) as executor:
-            future_executors = []
-            for execute_manager in self.execute_managers:
+        # Execute manager (순차 처리)
+        for execute_manager in self.execute_managers:
+            try:
                 _manager = self.locator.get_manager(execute_manager)
-                future_executors.append(
-                    executor.submit(_manager.collect_resources, params)
+                for result in _manager.collect_resources(params):
+                    yield result.to_primitive()
+            except Exception as e:
+                _LOGGER.error(
+                    f"[collect] failed to yield result from {execute_manager} => {e}",
+                    exc_info=True,
                 )
-
-            for future in concurrent.futures.as_completed(future_executors):
-                try:
-                    for result in future.result():
-                        yield result.to_primitive()
-                except Exception as e:
-                    _LOGGER.error(
-                        f"[collect] failed to yield result => {e}", exc_info=True
-                    )
-                    error_resource_response = self.generate_error_response(
-                        e, "", "inventory.Error"
-                    )
-                    _LOGGER.debug(error_resource_response)
-                    yield error_resource_response.to_primitive()
+                error_resource_response = self.generate_error_response(
+                    e, "", "inventory.Error"
+                )
+                _LOGGER.debug(error_resource_response)
+                yield error_resource_response.to_primitive()
 
         for service in CLOUD_SERVICE_GROUP_MAP.keys():
             for response in self.collect_metrics(service):

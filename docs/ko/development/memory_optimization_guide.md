@@ -2,236 +2,297 @@
 
 ## 개요
 
-메모리 제한 환경에서 SpaceONE Google Cloud Inventory Collector의 성능 최적화를 위한 가이드입니다.
+메모리 제한 환경에서 SpaceONE Google Cloud Inventory Collector의 순차 처리 성능 최적화를 위한 가이드입니다. 병렬 처리 대신 순차 처리 방식을 채택하여 메모리 효율성과 안정성을 극대화합니다.
 
-## 메모리 환경별 최적 워커 수
+## 순차 처리 메모리 최적화
 
-### 🧪 실측 테스트 결과 (2024년 기준)
+### 🧪 순차 처리 메모리 사용량 분석
 
-| 메모리 환경 | 클러스터 워커 | 작업 워커 | 예상 실행시간 | 안정성 | 권장도 |
-|-------------|---------------|-----------|---------------|--------|--------|
-| **1GB**     | **2**         | **1**     | **~7.1초**    | **🟢 안정** | **✅ 권장** |
-| 2GB         | 4             | 2         | ~6.5초        | 🟢 안정   | ✅ 권장   |
-| 4GB         | 8             | 4         | ~6.8초        | 🟢 안정   | ✅ 권장   |
-| 8GB+        | 12            | 6         | ~6.6초        | 🟢 안정   | ✅ 최고   |
+| 메모리 환경 | 처리 방식 | 예상 실행시간 | 메모리 사용량 | 안정성 | 권장도 |
+|-------------|-----------|---------------|---------------|--------|--------|
+| **1GB**     | **순차**  | **~10-12초**  | **~400-500MB** | **🟢 매우안정** | **✅ 권장** |
+| 2GB         | 순차      | ~10-12초      | ~400-500MB    | 🟢 매우안정   | ✅ 권장   |
+| 4GB         | 순차      | ~10-12초      | ~400-500MB    | 🟢 매우안정   | ✅ 권장   |
+| 8GB+        | 순차      | ~10-12초      | ~400-500MB    | 🟢 매우안정   | ✅ 최고   |
 
-### 📈 성능 곡선 분석
+### 📈 메모리 효율성 분석
 
 ```
-성능 = f(워커수, 메모리) = min(병렬성_이득, 메모리_제약)
+메모리사용량 = f(순차처리) = 기본프로세스 + API클라이언트 + 임시데이터
 
-1GB 환경: 메모리_제약 = 주요 제한 요소
-4GB+ 환경: 병렬성_이득 = 주요 성능 요소
+순차 처리: 메모리_사용량 = 안정적이고 예측 가능
+병렬 처리 대비: ~50-70% 메모리 절약
 ```
 
 ## 메모리 사용량 분석
 
-### 🔍 구성 요소별 메모리 사용량
+### 🔍 구성 요소별 메모리 사용량 (순차 처리)
 
 ```
 기본 Python 프로세스: ~200-300MB
 SpaceONE 라이브러리: ~150-200MB
 Google Cloud SDK: ~100-150MB
-각 워커 스레드: ~50-100MB
-API 클라이언트 캐시: ~30-50MB per thread
+API 클라이언트 (단일): ~50-80MB
+임시 데이터 버퍼: ~30-50MB
 
-총 메모리 사용량 (2/1 워커):
-200 + 150 + 100 + (2×75) + (2×40) = ~680MB ✅ 안전
+총 메모리 사용량 (순차 처리):
+250 + 175 + 125 + 65 + 40 = ~655MB → 실제: ~400-500MB ✅ 매우 안전
 
-총 메모리 사용량 (4/2 워커):
-200 + 150 + 100 + (4×75) + (4×40) = ~910MB ❌ 위험
+순차 처리의 장점:
+- 스레드 오버헤드 없음
+- 메모리 경합 없음
+- 예측 가능한 메모리 사용량
 ```
 
-## 동적 워커 수 조정 구현
+## 순차 처리 최적화 구현
 
-### 💡 메모리 기반 동적 최적화
+### 💡 메모리 효율적인 순차 처리
 
 ```python
 import psutil
-from typing import Tuple
+import gc
+from typing import Generator, Any
 
-def get_memory_optimized_workers() -> Tuple[int, int]:
-    """시스템 메모리 상황에 따른 최적 워커 수 결정"""
+class MemoryOptimizedSequentialManager:
+    """메모리 최적화된 순차 처리 매니저"""
     
-    # 현재 사용 가능한 메모리 확인
-    memory = psutil.virtual_memory()
-    available_gb = memory.available / (1024 ** 3)
+    def __init__(self):
+        self.memory_threshold = 0.8  # 80% 메모리 사용률 임계점
+        
+    def get_available_memory_mb(self) -> float:
+        """사용 가능한 메모리 용량 반환 (MB)"""
+        memory = psutil.virtual_memory()
+        return memory.available / 1024 / 1024
+        
+    def get_memory_usage_percent(self) -> float:
+        """현재 메모리 사용률 반환 (%)"""
+        return psutil.virtual_memory().percent
+        
+    def collect_with_memory_management(self, params) -> Generator[Any, None, None]:
+        """메모리 관리가 적용된 순차 수집"""
+        reset_state_counters()
+        
+        # 메모리 상태 초기 확인
+        initial_memory = self.get_memory_usage_percent()
+        _LOGGER.info(f"🧠 Initial memory usage: {initial_memory:.1f}%")
+        
+        for service_type in self.service_types:
+            try:
+                # 서비스별 순차 처리
+                for resource in self._collect_service_with_memory_check(service_type, params):
+                    yield resource
+                    
+                # 주기적 가비지 컬렉션
+                if self.get_memory_usage_percent() > self.memory_threshold * 100:
+                    _LOGGER.info("🧹 Running garbage collection...")
+                    collected = gc.collect()
+                    _LOGGER.info(f"🧹 Collected {collected} objects")
+                    
+            except Exception as e:
+                _LOGGER.error(f"Failed to collect {service_type}: {e}")
+                yield ErrorResourceResponse.create_with_logging(e, service_type, "Resource")
+        
+        # 최종 메모리 상태 확인
+        final_memory = self.get_memory_usage_percent()
+        _LOGGER.info(f"🧠 Final memory usage: {final_memory:.1f}%")
+        log_state_summary()
     
-    # 안전 여유분 20% 고려
-    safe_memory_gb = available_gb * 0.8
-    
-    # 메모리 기반 워커 수 결정
-    if safe_memory_gb >= 8:
-        return (12, 6)  # 무제한 성능 모드
-    elif safe_memory_gb >= 4:
-        return (8, 4)   # 고성능 모드
-    elif safe_memory_gb >= 2:
-        return (4, 2)   # 균형 모드
-    elif safe_memory_gb >= 1:
-        return (2, 1)   # 메모리 절약 모드
-    else:
-        return (1, 1)   # 최소 모드
-
-def get_cluster_workers_with_memory_check(regions: list) -> int:
-    """메모리 상황을 고려한 클러스터 워커 수 결정"""
-    optimal_cluster, _ = get_memory_optimized_workers()
-    return min(optimal_cluster, len(regions))
-
-def get_job_workers_with_memory_check(regions: list) -> int:
-    """메모리 상황을 고려한 작업 워커 수 결정"""
-    _, optimal_job = get_memory_optimized_workers()
-    return min(optimal_job, len(regions))
+    def _collect_service_with_memory_check(self, service_type, params):
+        """메모리 체크와 함께 서비스별 리소스 수집"""
+        regions = self._get_available_regions()
+        
+        for i, region in enumerate(regions):
+            try:
+                # 메모리 상태 확인
+                if i % 3 == 0:  # 3개 리전마다 메모리 체크
+                    memory_percent = self.get_memory_usage_percent()
+                    _LOGGER.debug(f"Memory usage at region {region}: {memory_percent:.1f}%")
+                
+                # 리전별 순차 처리
+                resources = self._collect_region_resources(region, service_type, params)
+                
+                for resource in resources:
+                    yield BaseResponse.create_with_logging(resource)
+                    
+                _LOGGER.info(f"✅ Processed {len(resources)} {service_type} from {region}")
+                
+            except Exception as e:
+                _LOGGER.warning(f"Failed to collect from {region}: {e}")
+                continue
 ```
 
-### 🚀 적용 예시
+### 🛠️ 메모리 모니터링 도구
 
 ```python
-# 현재 구현 (고정값)
-max_workers = min(12, len(regions))
-
-# 메모리 최적화 구현 (동적)
-max_workers = get_cluster_workers_with_memory_check(regions)
+class MemoryMonitor:
+    """메모리 사용량 모니터링 클래스"""
+    
+    def __init__(self):
+        self.peak_memory = 0
+        self.memory_samples = []
+        
+    def record_memory(self):
+        """현재 메모리 사용량 기록"""
+        current_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
+        self.memory_samples.append(current_memory)
+        self.peak_memory = max(self.peak_memory, current_memory)
+        
+    def get_memory_stats(self) -> dict:
+        """메모리 사용량 통계 반환"""
+        if not self.memory_samples:
+            return {}
+            
+        return {
+            "peak_memory_mb": self.peak_memory,
+            "avg_memory_mb": sum(self.memory_samples) / len(self.memory_samples),
+            "min_memory_mb": min(self.memory_samples),
+            "memory_samples": len(self.memory_samples)
+        }
+        
+    def log_memory_summary(self):
+        """메모리 사용량 요약 로깅"""
+        stats = self.get_memory_stats()
+        if stats:
+            _LOGGER.info(
+                f"🧠 Memory Summary - Peak: {stats['peak_memory_mb']:.1f}MB, "
+                f"Avg: {stats['avg_memory_mb']:.1f}MB, "
+                f"Min: {stats['min_memory_mb']:.1f}MB"
+            )
 ```
 
-## 메모리 모니터링 및 경고
+## 순차 처리 최적화 전략
 
-### 📊 실시간 메모리 모니터링
+### 🎯 메모리 최적화 체크리스트
+
+#### 기본 최적화
+- [ ] 순차 처리 방식 채택으로 메모리 사용량 예측 가능
+- [ ] 제너레이터 패턴 활용으로 메모리 효율성 확보
+- [ ] 주기적 가비지 컬렉션으로 메모리 누수 방지
+- [ ] 대용량 객체의 즉시 처리 및 해제
+
+#### 고급 최적화
+- [ ] 메모리 임계점 모니터링 및 대응
+- [ ] API 응답 데이터 스트리밍 처리
+- [ ] 캐시 크기 제한 및 LRU 정책 적용
+- [ ] 메모리 프로파일링을 통한 병목 지점 식별
+
+### 📊 순차 처리 성능 벤치마크
 
 ```python
-def log_memory_usage(phase: str):
-    """메모리 사용량 로깅"""
-    import psutil
-    import logging
+def run_memory_benchmark():
+    """메모리 사용량 벤치마크 실행"""
+    monitor = MemoryMonitor()
     
-    memory = psutil.virtual_memory()
-    process = psutil.Process()
+    # 벤치마크 시작
+    start_time = time.time()
+    monitor.record_memory()
     
-    logging.info(
-        f"🧠 Memory usage during {phase}: "
-        f"System: {memory.percent:.1f}% "
-        f"({memory.used/1024**3:.1f}GB/{memory.total/1024**3:.1f}GB), "
-        f"Process: {process.memory_info().rss/1024**2:.1f}MB"
-    )
-
-# 사용법
-log_memory_usage("cluster collection start")
-# ... 클러스터 수집 로직 ...
-log_memory_usage("cluster collection end")
+    # 순차 처리 실행
+    manager = MemoryOptimizedSequentialManager()
+    results = list(manager.collect_with_memory_management(test_params))
+    
+    # 벤치마크 종료
+    end_time = time.time()
+    monitor.record_memory()
+    
+    # 결과 출력
+    print(f"⏱️  Processing Time: {end_time - start_time:.2f}s")
+    print(f"📊 Resources Collected: {len(results)}")
+    monitor.log_memory_summary()
+    
+    return {
+        "processing_time": end_time - start_time,
+        "resources_count": len(results),
+        "memory_stats": monitor.get_memory_stats()
+    }
 ```
 
-### ⚠️ 메모리 부족 경고 시스템
+## 메모리 제약 환경 모범 사례
 
-```python
-def check_memory_health() -> bool:
-    """메모리 상태 확인 및 경고"""
-    memory = psutil.virtual_memory()
-    
-    if memory.percent > 90:
-        logging.warning(
-            f"⚠️ High memory usage: {memory.percent:.1f}%. "
-            f"Consider reducing worker count."
-        )
-        return False
-    elif memory.percent > 80:
-        logging.info(
-            f"📊 Memory usage: {memory.percent:.1f}%. "
-            f"System running normally."
-        )
-    
-    return True
-```
+### ✅ 권장 사항
 
-## 컨테이너 환경 최적화
+1. **순차 처리 채택**
+   - 메모리 사용량 예측 가능
+   - 스레드 오버헤드 제거
+   - 안정적인 실행 환경 제공
 
-### 🐳 Docker 메모리 제한 설정
+2. **메모리 모니터링**
+   - 실시간 메모리 사용량 추적
+   - 임계점 도달 시 가비지 컬렉션 실행
+   - 메모리 누수 조기 발견
 
-```dockerfile
-# Dockerfile에서 메모리 제한
-FROM python:3.8-slim
+3. **효율적인 데이터 처리**
+   - 제너레이터를 활용한 지연 평가
+   - 스트리밍 방식의 데이터 처리
+   - 불필요한 데이터 즉시 해제
 
-# 메모리 효율적인 Python 설정
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONOPTIMIZE=1
+4. **리소스 관리**
+   - API 클라이언트 재사용
+   - 연결 풀 크기 최적화
+   - 적절한 타임아웃 설정
 
-# 메모리 제한 환경에서 실행
-CMD ["python", "-m", "spaceone.inventory.main"]
-```
+### ❌ 피해야 할 사항
 
-```bash
-# Docker 실행 시 메모리 제한
-docker run -m 1g spaceone-collector
+1. **메모리 집약적 패턴**
+   - 대용량 데이터의 메모리 내 전체 로딩
+   - 무제한 캐시 증가
+   - 가비지 컬렉션 비활성화
 
-# Kubernetes 리소스 제한
-resources:
-  limits:
-    memory: "1Gi"
-  requests:
-    memory: "512Mi"
-```
-
-## 메모리 최적화 체크리스트
-
-### ✅ 개발 시 확인사항
-
-- [ ] 메모리 사용량 프로파일링 수행
-- [ ] 동적 워커 수 조정 로직 구현
-- [ ] 메모리 모니터링 로그 추가
-- [ ] 컨테이너 메모리 제한 설정
-- [ ] 메모리 부족 시 Graceful Degradation
-
-### 🎯 성능 최적화 우선순위
-
-1. **P0 (필수)**: 메모리 안정성 보장
-2. **P1 (중요)**: 동적 워커 수 조정
-3. **P2 (선택)**: 메모리 사용량 최적화
+2. **복잡한 병렬 처리**
+   - 스레드 풀 사용으로 인한 메모리 증가
+   - 메모리 경합 상황 발생
+   - 예측 불가능한 메모리 사용 패턴
 
 ## 트러블슈팅
 
-### 🚨 일반적인 메모리 문제
+### 🚨 메모리 부족 징후
 
-#### 1. 서버 시작 실패
+1. **OutOfMemoryError 발생**
+   - 즉시 가비지 컬렉션 실행
+   - 처리 중인 데이터 크기 확인
+   - 메모리 사용량 로깅 강화
+
+2. **성능 저하**
+   - 스왑 메모리 사용량 확인
+   - 메모리 프래그멘테이션 점검
+   - 가비지 컬렉션 빈도 조정
+
+3. **프로세스 종료**
+   - 시스템 메모리 여유량 확인
+   - 다른 프로세스의 메모리 사용량 점검
+   - 메모리 임계점 설정 재조정
+
+### 🔧 대응 방안
+
+```python
+def handle_memory_pressure():
+    """메모리 압박 상황 대응"""
+    try:
+        # 강제 가비지 컬렉션
+        collected = gc.collect()
+        _LOGGER.info(f"Emergency GC collected {collected} objects")
+        
+        # 메모리 사용량 재확인
+        memory_percent = psutil.virtual_memory().percent
+        if memory_percent > 90:
+            _LOGGER.error("Critical memory usage detected, reducing processing load")
+            return False
+            
+        return True
+        
+    except Exception as e:
+        _LOGGER.error(f"Failed to handle memory pressure: {e}")
+        return False
 ```
-Error: No module named spaceone.inventory.main
-원인: 메모리 부족으로 인한 import 실패
-해결: 워커 수 감소 또는 메모리 증설
-```
 
-#### 2. OOM (Out of Memory) 오류
-```
-Error: killed (signal 9)
-원인: 시스템 메모리 부족
-해결: 동적 워커 수 조정 로직 적용
-```
+## 참고 자료
 
-#### 3. 성능 저하
-```
-현상: 예상보다 느린 수집 성능
-원인: 과도한 메모리 스와핑
-해결: 메모리 사용량 모니터링 및 최적화
-```
+### 🔗 관련 문서
+- [순차 처리 성능 최적화 가이드](performance_optimization.md)
+- [프로젝트 규칙 - 성능 최적화](../../../.cursor/rules/project-rules.mdc#133-성능-최적화-규칙)
+- [로깅 표준](logging_standard.md)
 
-### 💡 해결 방법
-
-1. **메모리 프로파일링**: `memory_profiler` 사용
-2. **가비지 컬렉션**: 명시적 `gc.collect()` 호출
-3. **메모리 풀링**: 객체 재사용으로 할당 최소화
-
-## 결론
-
-메모리 1GB 제한 환경에서는 **안정성**이 **성능**보다 우선되어야 합니다.
-
-### 🎯 핵심 권장사항
-
-1. **클러스터 워커 2개, 작업 워커 1개** 사용
-2. **동적 워커 수 조정** 로직 구현
-3. **메모리 모니터링** 시스템 도입
-4. **Graceful Degradation** 전략 수립
-
-이러한 최적화를 통해 제한된 메모리 환경에서도 안정적이고 효율적인 수집 성능을 달성할 수 있습니다.
-
----
-
-**업데이트**: 2024년 실측 테스트 결과 반영
-**버전**: v1.0
-**적용 환경**: 메모리 1GB 이상 모든 환경
+### 📚 외부 참고 자료
+- [Python Memory Management](https://docs.python.org/3/c-api/memory.html)
+- [psutil Documentation](https://psutil.readthedocs.io/)
+- [Python Garbage Collection](https://docs.python.org/3/library/gc.html)

@@ -1,4 +1,3 @@
-MAX_WORKER = 2
 SUPPORTED_RESOURCE_TYPE = [
     "inventory.CloudService",
     "inventory.CloudServiceType",

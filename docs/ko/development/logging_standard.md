@@ -225,7 +225,7 @@ class DataprocClusterManager(BaseManager):
         connector.set_secret_data(secret_data)
         
         try:
-            # 리전별 병렬 수집
+            # 리전별 순차 수집
             regions = connector.list_regions()
             logger.debug(f"Found {len(regions)} regions for Dataproc collection")
             
@@ -247,7 +247,7 @@ class DataprocClusterManager(BaseManager):
 
 - Google Cloud API 호출
 - 외부 API 응답 처리
-- 병렬 처리 및 스레드 안전성
+- 순차 처리 및 안정성
 - 네트워크 오류 및 재시도 로직
 
 ```python
@@ -255,7 +255,7 @@ import logging
 import time
 import socket
 import ssl
-from concurrent.futures import ThreadPoolExecutor, as_completed
+# 순차 처리 방식으로 변경됨 - ThreadPoolExecutor 사용 안 함
 from googleapiclient.errors import HttpError
 from spaceone.core.connector import BaseConnector
 
@@ -263,13 +263,13 @@ logger = logging.getLogger(__name__)
 
 class DataprocClusterConnector(BaseConnector):
     def list_clusters(self, **query):
-        """병렬 처리를 통한 모든 리전의 클러스터 조회"""
+        """순차 처리를 통한 모든 리전의 클러스터 조회"""
         if query.get("region"):
             # 특정 리전 조회
             return self._list_single_region_clusters(query["region"], **query)
         else:
             # 모든 리전 병렬 조회
-            return self._list_clusters_parallel(**query)
+            return self._list_clusters_sequential(**query)
     
     def _list_clusters_parallel(self, **query):
         """병렬 처리를 통해 모든 리전의 클러스터를 조회합니다."""
@@ -356,14 +356,14 @@ class DataprocClusterConnector(BaseConnector):
         return []
 ```
 
-### 4. 병렬 처리 로깅 패턴 (v2.0) - 고성능 최적화
+### 4. 순차 처리 로깅 패턴 (v3.0) - 안정성 최적화
 
-새로운 고성능 병렬 처리 시스템에서는 최적화된 워커 수(클러스터 12개, 작업 6개), 차등 타임아웃, 처리 성능 등을 상세히 로깅합니다:
+순차 처리 시스템에서는 메모리 효율성과 안정성을 우선시하며, 각 단계별 처리 상태를 상세히 로깅합니다:
 
 ```python
 import logging
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+# 순차 처리 방식으로 변경됨 - ThreadPoolExecutor 사용 안 함
 
 logger = logging.getLogger(__name__)
 
