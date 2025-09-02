@@ -50,8 +50,9 @@ CLOUD_SERVICE_GROUP_MAP = {
         "CloudRunDomainMappingManager",
     ],
     "KubernetesEngine": [
-        "GKEClusterV1Manager"
-    ],  # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
+        "GKEClusterV1Manager",
+        "GKENodePoolV1Manager"
+    ],
     "AppEngine": [
         "AppEngineApplicationV1Manager",
         "AppEngineServiceV1Manager",
@@ -59,9 +60,6 @@ CLOUD_SERVICE_GROUP_MAP = {
         "AppEngineInstanceV1Manager",
     ],
     "Datastore": ["DatastoreNamespaceManager", "DatastoreIndexManager"],
-    "KubernetesEngine": [
-        "GKEClusterV1Manager"
-    ],  # "GKEClusterV1Manager", "GKEClusterV1BetaManager"
     "Datastore": [
         "DatastoreIndexManager",
         "DatastoreDatabaseManager",
@@ -176,6 +174,10 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "Cluster": {
             "resource_type": "gke_cluster",
             "labels_key": "resource.labels.cluster_name",
+        },
+        "NodePool": {
+            "resource_type": "gke_nodepool",
+            "labels_key": "resource.labels.nodepool_name",
         }
     },
     "AppEngine": {

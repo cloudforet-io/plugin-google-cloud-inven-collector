@@ -54,37 +54,14 @@ class GKEClusterV1Manager(GoogleCloudManager):
             _LOGGER.error(f"Failed to list GKE clusters (v1): {e}")
             return []
 
-    def list_node_pools(
-        self, cluster_name: str, location: str, params: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
-        """특정 클러스터의 노드풀 목록을 조회합니다 (v1 API).
-
-        Args:
-            cluster_name: 클러스터 이름.
-            location: 클러스터 위치.
-            params: 조회에 필요한 파라미터 딕셔너리.
-
-        Returns:
-            노드풀 목록.
-
-        Raises:
-            Exception: GKE API 호출 중 오류 발생 시.
-        """
-        cluster_connector: GKEClusterV1Connector = self.locator.get_connector(
-            self.connector_name, **params
-        )
-
-        try:
-            node_pools = cluster_connector.list_node_pools(cluster_name, location)
-            _LOGGER.info(
-                f"Found {len(node_pools)} node pools for cluster {cluster_name} (v1)"
-            )
-            return node_pools
-        except Exception as e:
-            _LOGGER.error(
-                f"Failed to list node pools for cluster {cluster_name} (v1): {e}"
-            )
-            return []
+    # 노드풀 관련 기능은 별도의 NodePoolManager에서 처리
+    # def list_node_pools(self, cluster_name: str, location: str, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+    #     """GKE 노드풀 목록을 조회합니다 (v1 API).
+    #     
+    #     이 메서드는 제거되었습니다. 노드풀 정보는 GKENodePoolManager를 사용하세요.
+    #     """
+    #     _LOGGER.warning("list_node_pools method is deprecated. Use GKENodePoolManager instead.")
+    #     return []
 
     def get_cluster(
         self, name: str, location: str, params: Dict[str, Any]
@@ -165,12 +142,9 @@ class GKEClusterV1Manager(GoogleCloudManager):
 
         for cluster in clusters:
             try:
-                # 클러스터별 노드풀 정보 조회
+                # 노드풀 정보는 별도의 NodePoolManager에서 처리
+                # 클러스터 정보만 수집
                 node_pools = []
-                if cluster.get("name") and cluster.get("location"):
-                    node_pools = self.list_node_pools(
-                        cluster["name"], cluster["location"], params
-                    )
 
                 # 기본 클러스터 데이터 준비
                 cluster_data = {

@@ -1,10 +1,11 @@
-"""KubernetesEngine Node Group Manager (v1 API)."""
+
+"""KubernetesEngine Node Group Manager (v1beta1 API)."""
 
 import logging
 from typing import List, Dict, Any, Tuple
 
-from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import (
-    GKEClusterV1Connector,
+from spaceone.inventory.connector.kubernetes_engine.cluster_v1beta import (
+    GKEClusterV1BetaConnector,
 )
 from spaceone.inventory.libs.manager import GoogleCloudManager
 
@@ -24,29 +25,30 @@ from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 _LOGGER = logging.getLogger(__name__)
 
 
-class GKENodeGroupV1Manager(GoogleCloudManager):
-    """GKE Node Group Manager (v1 API)."""
+class GKENodePoolV1BetaManager(GoogleCloudManager):
+    """GKE Node Pool Manager (v1beta1 API)."""
 
-    connector_name = "GKEClusterV1Connector"
+    connector_name = "GKEClusterV1BetaConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
     cloud_service_group = "KubernetesEngine"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.api_version = "v1beta1"
 
-    def list_node_groups(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """GKE 노드 그룹 목록을 조회합니다 (v1 API).
+    def list_node_pools(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """GKE 노드풀 목록을 조회합니다 (v1beta1 API).
 
         Args:
             params: 조회에 필요한 파라미터 딕셔너리.
 
         Returns:
-            GKE 노드 그룹 목록.
+            GKE 노드풀 목록.
 
         Raises:
             Exception: GKE API 호출 중 오류 발생 시.
         """
-        cluster_connector: GKEClusterV1Connector = self.locator.get_connector(
+        cluster_connector: GKEClusterV1BetaConnector = self.locator.get_connector(
             self.connector_name, **params
         )
 
@@ -75,16 +77,16 @@ class GKENodeGroupV1Manager(GoogleCloudManager):
                             f"Failed to get node pools for cluster {cluster_name}: {e}"
                         )
 
-            _LOGGER.info(f"Found {len(all_node_groups)} GKE node groups (v1)")
+            _LOGGER.info(f"Found {len(all_node_groups)} GKE node pools (v1beta1)")
             return all_node_groups
         except Exception as e:
-            _LOGGER.error(f"Failed to list GKE node groups (v1): {e}")
+            _LOGGER.error(f"Failed to list GKE node pools (v1beta1): {e}")
             return []
 
-    def get_node_group(
+    def get_node_pool(
         self, cluster_name: str, location: str, node_pool_name: str, params: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """특정 GKE 노드 그룹 정보를 조회합니다 (v1 API).
+        """특정 GKE 노드풀 정보를 조회합니다 (v1beta1 API).
 
         Args:
             cluster_name: 클러스터 이름.
@@ -93,12 +95,12 @@ class GKENodeGroupV1Manager(GoogleCloudManager):
             params: 조회에 필요한 파라미터 딕셔너리.
 
         Returns:
-            GKE 노드 그룹 정보 딕셔너리.
+            GKE 노드풀 정보 딕셔너리.
 
         Raises:
             Exception: GKE API 호출 중 오류 발생 시.
         """
-        cluster_connector: GKEClusterV1Connector = self.locator.get_connector(
+        cluster_connector: GKEClusterV1BetaConnector = self.locator.get_connector(
             self.connector_name, **params
         )
 
@@ -108,46 +110,94 @@ class GKENodeGroupV1Manager(GoogleCloudManager):
                 if node_pool.get("name") == node_pool_name:
                     node_pool["clusterName"] = cluster_name
                     node_pool["clusterLocation"] = location
-                    _LOGGER.info(f"Retrieved node group {node_pool_name} (v1)")
+                    _LOGGER.info(f"Retrieved node pool {node_pool_name} (v1beta1)")
                     return node_pool
             return {}
         except Exception as e:
-            _LOGGER.error(f"Failed to get node group {node_pool_name} (v1): {e}")
+            _LOGGER.error(f"Failed to get node pool {node_pool_name} (v1beta1): {e}")
             return {}
 
-    def list_node_group_operations(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """GKE 노드 그룹 작업 목록을 조회합니다 (v1 API).
+    def list_node_pool_operations(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """GKE 노드풀 작업 목록을 조회합니다 (v1beta1 API).
 
         Args:
             params: 조회에 필요한 파라미터 딕셔너리.
 
         Returns:
-            GKE 노드 그룹 작업 목록.
+            GKE 노드풀 작업 목록.
 
         Raises:
             Exception: GKE API 호출 중 오류 발생 시.
         """
-        cluster_connector: GKEClusterV1Connector = self.locator.get_connector(
+        cluster_connector: GKEClusterV1BetaConnector = self.locator.get_connector(
             self.connector_name, **params
         )
 
         try:
             operations = cluster_connector.list_operations()
-            # 노드 그룹 관련 작업만 필터링
-            node_group_operations = [
+            # 노드풀 관련 작업만 필터링
+            node_pool_operations = [
                 op for op in operations 
                 if op.get("operationType") and "nodepool" in op.get("operationType", "").lower()
             ]
-            _LOGGER.info(f"Found {len(node_group_operations)} GKE node group operations (v1)")
-            return node_group_operations
+            _LOGGER.info(f"Found {len(node_pool_operations)} GKE node pool operations (v1beta1)")
+            return node_pool_operations
         except Exception as e:
-            _LOGGER.error(f"Failed to list GKE node group operations (v1): {e}")
+            _LOGGER.error(f"Failed to list GKE node pool operations (v1beta1): {e}")
             return []
 
-    def get_node_group_metrics(
+    def list_fleets(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """GKE Fleet 목록을 조회합니다 (v1beta1 API).
+
+        Args:
+            params: 조회에 필요한 파라미터 딕셔너리.
+
+        Returns:
+            GKE Fleet 목록.
+
+        Raises:
+            Exception: GKE API 호출 중 오류 발생 시.
+        """
+        cluster_connector: GKEClusterV1BetaConnector = self.locator.get_connector(
+            self.connector_name, **params
+        )
+
+        try:
+            fleets = cluster_connector.list_fleets()
+            _LOGGER.info(f"Found {len(fleets)} GKE fleets (v1beta1)")
+            return fleets
+        except Exception as e:
+            _LOGGER.error(f"Failed to list GKE fleets (v1beta1): {e}")
+            return []
+
+    def list_memberships(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """GKE Membership 목록을 조회합니다 (v1beta1 API).
+
+        Args:
+            params: 조회에 필요한 파라미터 딕셔너리.
+
+        Returns:
+            GKE Membership 목록.
+
+        Raises:
+            Exception: GKE API 호출 중 오류 발생 시.
+        """
+        cluster_connector: GKEClusterV1BetaConnector = self.locator.get_connector(
+            self.connector_name, **params
+        )
+
+        try:
+            memberships = cluster_connector.list_memberships()
+            _LOGGER.info(f"Found {len(memberships)} GKE memberships (v1beta1)")
+            return memberships
+        except Exception as e:
+            _LOGGER.error(f"Failed to list GKE memberships (v1beta1): {e}")
+            return []
+
+    def get_node_pool_metrics(
         self, cluster_name: str, location: str, node_pool_name: str, params: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """GKE 노드 그룹 메트릭을 조회합니다 (v1 API).
+        """GKE 노드풀 메트릭을 조회합니다 (v1beta1 API).
 
         Args:
             cluster_name: 클러스터 이름.
@@ -170,16 +220,16 @@ class GKENodeGroupV1Manager(GoogleCloudManager):
                 "disk_usage": "0.0",
                 "node_count": "0",
             }
-            _LOGGER.info(f"Retrieved metrics for node group {node_pool_name} (v1)")
+            _LOGGER.info(f"Retrieved metrics for node pool {node_pool_name} (v1beta1)")
             return metrics
         except Exception as e:
-            _LOGGER.error(f"Failed to get metrics for node group {node_pool_name} (v1): {e}")
+            _LOGGER.error(f"Failed to get metrics for node pool {node_pool_name} (v1beta1): {e}")
             return {}
 
     def collect_cloud_service(
         self, params: Dict[str, Any]
     ) -> Tuple[List[Any], List[ErrorResourceResponse]]:
-        """GKE 노드 그룹 정보를 수집합니다 (v1 API).
+        """GKE 노드 그룹 정보를 수집합니다 (v1beta1 API).
 
         Args:
             params: 수집에 필요한 파라미터 딕셔너리.
@@ -190,7 +240,7 @@ class GKENodeGroupV1Manager(GoogleCloudManager):
         Raises:
             Exception: 데이터 수집 중 오류 발생 시.
         """
-        _LOGGER.debug("** GKE Node Group V1 START **")
+        _LOGGER.debug("** GKE Node Group V1Beta START **")
 
         collected_cloud_services = []
         error_responses = []
@@ -198,7 +248,7 @@ class GKENodeGroupV1Manager(GoogleCloudManager):
         # secret_data = params["secret_data"]  # 향후 사용 예정
 
         # GKE 노드 그룹 목록 조회
-        node_groups = self.list_node_groups(params)
+        node_groups = self.list_node_pools(params)
 
         for node_group in node_groups:
             try:
@@ -211,9 +261,27 @@ class GKENodeGroupV1Manager(GoogleCloudManager):
                     continue
 
                 # 메트릭 정보 조회
-                metrics = self.get_node_group_metrics(
+                metrics = self.get_node_pool_metrics(
                     cluster_name, location, node_pool_name, params
                 )
+
+                # Fleet 및 Membership 정보 조회 (v1beta1 전용)
+                fleet_info = None
+                membership_info = None
+
+                try:
+                    fleets = self.list_fleets(params)
+                    if fleets:
+                        fleet_info = fleets[0]  # 첫 번째 fleet 정보 사용
+                except Exception as e:
+                    _LOGGER.debug(f"Failed to get fleet info: {e}")
+
+                try:
+                    memberships = self.list_memberships(params)
+                    if memberships:
+                        membership_info = memberships[0]  # 첫 번째 membership 정보 사용
+                except Exception as e:
+                    _LOGGER.debug(f"Failed to get membership info: {e}")
 
                 # 기본 노드 그룹 데이터 준비
                 node_group_data = {
@@ -226,7 +294,7 @@ class GKENodeGroupV1Manager(GoogleCloudManager):
                     "initialNodeCount": str(node_group.get("initialNodeCount", "")),
                     "createTime": node_group.get("createTime"),
                     "updateTime": node_group.get("updateTime"),
-                    "api_version": "v1",
+                    "api_version": "v1beta1",
                 }
 
                 # config 정보 추가
@@ -268,6 +336,21 @@ class GKENodeGroupV1Manager(GoogleCloudManager):
                 if metrics:
                     node_group_data["metrics"] = metrics
 
+                # v1beta1 전용 정보 추가
+                if fleet_info:
+                    node_group_data["fleetInfo"] = {
+                        "name": str(fleet_info.get("name", "")),
+                        "displayName": str(fleet_info.get("displayName", "")),
+                        "state": str(fleet_info.get("state", {})),
+                    }
+
+                if membership_info:
+                    node_group_data["membershipInfo"] = {
+                        "name": str(membership_info.get("name", "")),
+                        "endpoint": membership_info.get("endpoint", {}),
+                        "state": str(membership_info.get("state", {})),
+                    }
+
                 # GKENodeGroup 모델 생성
                 gke_node_group_data = GKENodeGroup(node_group_data, strict=False)
 
@@ -303,5 +386,5 @@ class GKENodeGroupV1Manager(GoogleCloudManager):
                     self.generate_error_response(e, self.cloud_service_group, "NodeGroup")
                 )
 
-        _LOGGER.debug("** GKE Node Group V1 END **")
+        _LOGGER.debug("** GKE Node Group V1Beta END **")
         return collected_cloud_services, error_responses

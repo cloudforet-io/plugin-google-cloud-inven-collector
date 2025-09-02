@@ -28,6 +28,8 @@ from .firebase.project_manager import FirebaseProjectManager
 from .kms.keyring_manager import KMSKeyRingManager
 from .kubernetes_engine.cluster_v1_manager import GKEClusterV1Manager
 from .kubernetes_engine.cluster_v1beta_manager import GKEClusterV1BetaManager
+from .kubernetes_engine.node_pool_v1_manager import GKENodePoolV1Manager
+from .kubernetes_engine.node_pool_v1beta_manager import GKENodePoolV1BetaManager
 from .networking.external_ip_address_manager import ExternalIPAddressManager
 from .networking.firewall_manager import FirewallManager
 from .networking.load_balancing_manager import LoadBalancingManager

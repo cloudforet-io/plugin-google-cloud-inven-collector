@@ -77,35 +77,6 @@ class GKEClusterV1BetaConnector(GoogleCloudConnector):
             _LOGGER.error(f"Failed to get GKE cluster {name} (v1beta1): {e}")
             return None
 
-    def list_node_pools(self, cluster_name, location, **query):
-        """
-        GKE 노드풀 목록을 조회합니다 (v1beta1 API).
-        """
-        node_pool_list = []
-        query.update({
-            "parent": f"projects/{self.project_id}/locations/{location}/clusters/{cluster_name}"
-        })
-        
-        try:
-            request = self.client.projects().locations().clusters().nodePools().list(**query)
-            while request is not None:
-                response = request.execute()
-                if "nodePools" in response:
-                    node_pool_list.extend(response.get("nodePools", []))
-                
-                # 페이지네이션 처리 - list_next가 있는지 확인
-                try:
-                    request = self.client.projects().locations().clusters().nodePools().list_next(
-                        previous_request=request, previous_response=response
-                    )
-                except AttributeError:
-                    # list_next가 없는 경우 첫 페이지만 처리
-                    break
-        except Exception as e:
-            _LOGGER.error(f"Failed to list node pools for cluster {cluster_name} (v1beta1): {e}")
-            
-        return node_pool_list
-
     def list_operations(self, **query):
         """
         GKE 작업 목록을 조회합니다 (v1beta1 API).
