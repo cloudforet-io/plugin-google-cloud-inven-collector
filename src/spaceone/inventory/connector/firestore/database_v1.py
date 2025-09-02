@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
@@ -245,5 +246,94 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
         except Exception as e:
             _LOGGER.error(
                 f"Failed to list collections with documents using Admin SDK for parent '{parent}': {e}"
+            )
+            return []
+
+    def list_backup_schedules(self, database_name: str, **query) -> List[dict]:
+        """데이터베이스의 백업 스케줄 목록을 조회합니다.
+
+        Args:
+            database_name: 데이터베이스 이름 (projects/{project}/databases/{database} 형식)
+            **query: 추가 쿼리 파라미터
+
+        Returns:
+            List[dict]: 백업 스케줄 목록
+        """
+        backup_schedules = []
+
+        try:
+            query.update({"parent": database_name})
+
+            request = self.client.projects().databases().backupSchedules().list(**query)
+
+            while request is not None:
+                response = request.execute()
+                backup_schedules.extend(response.get("backupSchedules", []))
+
+                # 페이지네이션 처리
+                try:
+                    request = (
+                        self.client.projects()
+                        .databases()
+                        .backupSchedules()
+                        .list_next(previous_request=request, previous_response=response)
+                    )
+                except AttributeError:
+                    # list_next가 없는 경우 첫 페이지만 처리
+                    break
+
+            _LOGGER.debug(
+                f"Retrieved {len(backup_schedules)} backup schedules for {database_name}"
+            )
+            return backup_schedules
+
+        except Exception as e:
+            _LOGGER.error(f"Failed to list backup schedules for {database_name}: {e}")
+            return []
+
+    def list_all_backups(self, **query) -> List[dict]:
+        """프로젝트의 모든 위치에서 백업 목록을 조회합니다.
+
+        location='-'를 사용하여 모든 위치의 백업을 한 번에 효율적으로 조회합니다.
+
+        Args:
+            **query: 추가 쿼리 파라미터
+
+        Returns:
+            List[dict]: 모든 위치의 백업 목록
+        """
+        backups = []
+
+        try:
+            # location='-'를 사용하여 모든 위치의 백업을 한 번에 조회
+            parent = f"projects/{self.project_id}/locations/-"
+            query.update({"parent": parent})
+
+            request = self.client.projects().locations().backups().list(**query)
+
+            while request is not None:
+                response = request.execute()
+                backups.extend(response.get("backups", []))
+
+                # 페이지네이션 처리
+                try:
+                    request = (
+                        self.client.projects()
+                        .locations()
+                        .backups()
+                        .list_next(previous_request=request, previous_response=response)
+                    )
+                except AttributeError:
+                    # list_next가 없는 경우 첫 페이지만 처리
+                    break
+
+            _LOGGER.info(
+                f"Retrieved {len(backups)} backups from all locations for project {self.project_id}"
+            )
+            return backups
+
+        except Exception as e:
+            _LOGGER.error(
+                f"Failed to list backups from all locations for project {self.project_id}: {e}"
             )
             return []
