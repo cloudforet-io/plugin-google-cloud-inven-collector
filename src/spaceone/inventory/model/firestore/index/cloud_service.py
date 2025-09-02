@@ -7,7 +7,6 @@ from spaceone.inventory.libs.schema.cloud_service import (
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     EnumDyField,
-    ListDyField,
     TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout
@@ -50,20 +49,7 @@ index_meta = CloudServiceMeta.set_layouts(
                         "red.500": ["ERROR"],
                     },
                 ),
-                ListDyField.data_source(
-                    "Fields",
-                    "data.fields",
-                    default_layout={
-                        "type": "table",
-                        "options": {
-                            "fields": [
-                                {"key": "field_path", "name": "Field Path"},
-                                {"key": "order", "name": "Order"},
-                                {"key": "array_config", "name": "Array Config"},
-                            ]
-                        },
-                    },
-                ),
+                TextDyField.data_source("Fields Summary", "data.fields_summary"),
             ],
         ),
     ]
