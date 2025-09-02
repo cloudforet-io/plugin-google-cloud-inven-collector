@@ -201,17 +201,38 @@ class FirestoreManager(GoogleCloudManager):
                 # 문서 정보 변환
                 document_infos = []
                 for doc in documents:
-                    doc_id = self._extract_document_id(doc.get("name", ""))
-                    document_info = DocumentInfo(
-                        {
-                            "id": doc_id,
-                            "name": doc.get("name", ""),
-                            "fields": doc.get("fields", {}),
-                            "create_time": doc.get("createTime", ""),
-                            "update_time": doc.get("updateTime", ""),
-                        }
-                    )
-                    document_infos.append(document_info)
+                    try:
+                        doc_id = self._extract_document_id(doc.get("name", ""))
+
+                        # 복잡한 fields 구조를 문자열 요약으로 변환
+                        raw_fields = doc.get("fields", {})
+                        fields_summary = (
+                            ", ".join(
+                                [
+                                    f"{k}: {type(v).__name__}"
+                                    for k, v in raw_fields.items()
+                                ]
+                            )
+                            if raw_fields
+                            else "No fields"
+                        )
+
+                        # DocumentInfo 객체로 복원하되 에러 처리 추가
+                        document_info = DocumentInfo(
+                            {
+                                "id": doc_id,
+                                "name": doc.get("name", ""),
+                                "fields_summary": fields_summary,
+                                "create_time": doc.get("createTime", ""),
+                                "update_time": doc.get("updateTime", ""),
+                            }
+                        )
+                        document_infos.append(document_info)
+                    except Exception as doc_error:
+                        _LOGGER.warning(
+                            f"Failed to process document {doc.get('name', 'unknown')}: {doc_error}"
+                        )
+                        continue
 
                 # 컬렉션 데이터 생성
                 collection_data = FirestoreCollection(
@@ -253,20 +274,18 @@ class FirestoreManager(GoogleCloudManager):
         parent_document_path: str,
         depth_level: int,
     ) -> List[dict]:
-        """모든 컬렉션을 재귀적으로 수집"""
+        """모든 컬렉션을 재귀적으로 수집 (최적화: 중복 호출 제거)"""
         all_collections = []
 
         try:
-            # 컬렉션 ID 목록 조회
-            collection_ids = connector.list_collection_ids(
+            # 🎯 최적화: 컬렉션 ID + 문서들을 한 번에 조회 (중복 호출 제거)
+            collections_with_docs = connector.list_collections_with_documents(
                 database_name, parent_document_path
             )
 
-            for collection_id in collection_ids:
-                # 컬렉션의 문서들 조회
-                documents = connector.list_documents(
-                    database_name, collection_id, parent_document_path
-                )
+            for collection_info in collections_with_docs:
+                collection_id = collection_info["collection_id"]
+                documents = collection_info["documents"]
 
                 # 컬렉션 경로 생성
                 if parent_document_path:
@@ -274,14 +293,14 @@ class FirestoreManager(GoogleCloudManager):
                 else:
                     collection_path = collection_id
 
-                collection_info = {
+                collection_data = {
                     "id": collection_id,
                     "path": collection_path,
                     "documents": documents,
                     "depth_level": depth_level,
                     "parent_document_path": parent_document_path,
                 }
-                all_collections.append(collection_info)
+                all_collections.append(collection_data)
 
                 # 각 문서에 대해 하위 컬렉션 확인 (재귀)
                 for document in documents:
@@ -326,6 +345,21 @@ class FirestoreManager(GoogleCloudManager):
                 if not filtered_fields:
                     continue
 
+                # 필드를 문자열 요약으로 변환 (더 단순한 스키마용)
+                field_strings = []
+                for field in filtered_fields:
+                    field_path = field.get("fieldPath", "")
+                    order = field.get("order", "")
+                    if field_path:
+                        field_string = (
+                            f"{field_path} ({order})" if order else field_path
+                        )
+                        field_strings.append(field_string)
+
+                fields_summary = (
+                    ", ".join(field_strings) if field_strings else "No fields"
+                )
+
                 # 컬렉션 그룹 추출
                 collection_group = ""
                 index_name = index.get("name", "")
@@ -343,7 +377,7 @@ class FirestoreManager(GoogleCloudManager):
                         "api_scope": index.get("apiScope", ""),
                         "state": index.get("state", ""),
                         "density": index.get("density", ""),
-                        "fields": filtered_fields,  # 필터링된 필드 사용
+                        "fields_summary": fields_summary,  # 필터링된 필드 사용
                         "collection_group": collection_group,
                     }
                 )

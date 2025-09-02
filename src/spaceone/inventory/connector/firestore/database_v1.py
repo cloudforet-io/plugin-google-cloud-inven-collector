@@ -12,19 +12,38 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._admin_client = None
+        self._database_clients = {}  # 데이터베이스별 클라이언트 캐시
 
-    def _get_admin_client(self):
-        """Firestore Admin SDK 클라이언트를 lazy loading으로 초기화합니다."""
-        if self._admin_client is None:
+    def _get_admin_client(self, database_id="(default)"):
+        """Firestore Admin SDK 클라이언트를 lazy loading으로 초기화합니다.
+
+        Args:
+            database_id: 데이터베이스 ID (기본값: "(default)")
+
+        Returns:
+            Admin SDK 클라이언트 (데이터베이스별 캐시됨)
+        """
+        # 데이터베이스별 클라이언트 캐싱
+        if database_id not in self._database_clients:
             try:
                 from google.cloud import firestore
 
-                # 동일한 credentials를 사용하여 Admin SDK 클라이언트 생성
-                self._admin_client = firestore.Client(
-                    project=self.project_id, credentials=self.credentials
-                )
-                _LOGGER.debug("Firestore Admin SDK client initialized")
+                # 데이터베이스별 클라이언트 생성
+                if database_id == "(default)":
+                    # 기본 데이터베이스 클라이언트
+                    client = firestore.Client(
+                        project=self.project_id, credentials=self.credentials
+                    )
+                else:
+                    # 특정 데이터베이스 클라이언트
+                    client = firestore.Client(
+                        project=self.project_id,
+                        database=database_id,
+                        credentials=self.credentials,
+                    )
+
+                self._database_clients[database_id] = client
+
             except ImportError:
                 _LOGGER.error(
                     "google-cloud-firestore library not found. "
@@ -32,9 +51,12 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                 )
                 raise
             except Exception as e:
-                _LOGGER.error(f"Failed to initialize Firestore Admin SDK client: {e}")
+                _LOGGER.error(
+                    f"Failed to initialize Firestore Admin SDK client for {database_id}: {e}"
+                )
                 raise
-        return self._admin_client
+
+        return self._database_clients[database_id]
 
     def list_databases(self, **query):
         """Firestore 데이터베이스 목록을 조회합니다.
@@ -69,143 +91,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                 break
 
         return database_list
-
-    def list_root_collections_with_admin_sdk(self, database_name):
-        """Admin SDK를 사용하여 최상위 컬렉션 목록을 조회합니다.
-
-        Args:
-            database_name: 데이터베이스 이름 (예: projects/PROJECT/databases/DB_ID)
-
-        Returns:
-            List[str]: 최상위 컬렉션 ID 목록
-        """
-        try:
-            admin_client = self._get_admin_client()
-
-            # 데이터베이스 이름에서 database_id 추출
-            if "/databases/" in database_name:
-                database_id = database_name.split("/databases/")[-1]
-            else:
-                database_id = database_name
-
-            # (default) 데이터베이스가 아닌 경우 database_id 지정
-            if database_id != "(default)":
-                # Admin SDK에서 특정 데이터베이스 지정 (v2.11.0+)
-                try:
-                    from google.cloud import firestore
-
-                    admin_client = firestore.Client(
-                        project=self.project_id,
-                        database=database_id,
-                        credentials=self.credentials,
-                    )
-                except Exception as e:
-                    _LOGGER.warning(f"Failed to connect to database {database_id}: {e}")
-                    return []
-
-            # 최상위 컬렉션 조회
-            collections = admin_client.collections()
-            collection_ids = [collection.id for collection in collections]
-
-            _LOGGER.debug(
-                f"Found {len(collection_ids)} root collections: {collection_ids}"
-            )
-            return collection_ids
-
-        except Exception as e:
-            _LOGGER.warning(f"Failed to list root collections with Admin SDK: {e}")
-            return []
-
-    def list_collection_ids(self, database_name, parent="", **query):
-        """지정된 부모 경로의 컬렉션 ID 목록을 조회합니다.
-
-        Args:
-            database_name: 데이터베이스 이름
-            parent: 부모 문서 경로 (빈 문자열이면 최상위)
-            **query: 추가 쿼리 파라미터
-
-        Returns:
-            List[str]: 컬렉션 ID 목록
-        """
-        # 최상위 컬렉션의 경우 Admin SDK 사용
-        if not parent:
-            _LOGGER.debug("Using Admin SDK for root collections")
-            return self.list_root_collections_with_admin_sdk(database_name)
-
-        # 문서 하위 컬렉션의 경우 REST API 사용
-        _LOGGER.debug(f"Using REST API for subcollections under: {parent}")
-        collection_ids = []
-        parent_path = f"{database_name}/documents/{parent}"
-
-        # 페이징을 위한 body 파라미터 설정
-        body = {}
-        if "pageSize" in query:
-            body["pageSize"] = query.pop("pageSize")
-
-        page_token = None
-
-        while True:
-            if page_token:
-                body["pageToken"] = page_token
-
-            # API 호출 시 parent는 URL 파라미터, 나머지는 body에 포함
-            request = (
-                self.client.projects()
-                .databases()
-                .documents()
-                .listCollectionIds(parent=parent_path, body=body)
-            )
-
-            try:
-                response = request.execute()
-                collection_ids.extend(response.get("collectionIds", []))
-
-                # 다음 페이지 토큰 확인
-                page_token = response.get("nextPageToken")
-                if not page_token:
-                    break  # 더 이상 페이지가 없으면 종료
-
-            except Exception as e:
-                _LOGGER.error(
-                    f"Failed to list collection IDs for parent '{parent}': {e}"
-                )
-                break
-
-        return collection_ids
-
-    def list_documents(self, database_name, collection_id, parent="", **query):
-        """지정된 컬렉션의 문서 목록을 조회합니다.
-
-        Args:
-            database_name: 데이터베이스 이름
-            collection_id: 컬렉션 ID
-            parent: 부모 문서 경로
-            **query: 추가 쿼리 파라미터
-
-        Returns:
-            List[dict]: 문서 목록
-        """
-        documents = []
-        collection_path = (
-            f"{database_name}/documents/{parent}/{collection_id}"
-            if parent
-            else f"{database_name}/documents/{collection_id}"
-        )
-
-        query.update({"parent": collection_path})
-
-        request = self.client.projects().databases().documents().list(**query)
-        while request is not None:
-            response = request.execute()
-            documents.extend(response.get("documents", []))
-            request = (
-                self.client.projects()
-                .databases()
-                .documents()
-                .list_next(previous_request=request, previous_response=response)
-            )
-
-        return documents
 
     def list_indexes(self, database_name, **query):
         """데이터베이스의 인덱스 목록을 조회합니다.
@@ -246,3 +131,119 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                 break
 
         return indexes
+
+    def list_collections_with_documents(self, database_name, parent="", **query):
+        """컬렉션 ID와 각 컬렉션의 문서들을 한 번에 조회합니다. (최적화된 통합 메서드)
+
+        이 메서드는 기존 list_collection_ids + list_documents의 중복 호출을 방지하여
+        동일한 parent에 대한 admin_client.document() 호출을 최적화합니다.
+
+        Args:
+            database_name: 데이터베이스 이름
+            parent: 부모 문서 경로 (빈 문자열이면 최상위)
+            **query: 추가 쿼리 파라미터
+
+        Returns:
+            List[dict]: 컬렉션 정보와 문서들을 포함한 딕셔너리 목록
+            [
+                {
+                    "collection_id": str,
+                    "documents": List[dict],
+                }
+            ]
+        """
+        try:
+            # 데이터베이스 ID 추출
+            database_id = "(default)"
+            if "/databases/" in database_name:
+                database_id = database_name.split("/databases/")[-1]
+
+            # 🎯 최적화: 데이터베이스별 캐시된 클라이언트 사용
+            admin_client = self._get_admin_client(database_id)
+
+            collections_with_docs = []
+            page_size = query.get("pageSize", 100)
+
+            if not parent:
+                # 최상위 컬렉션들 처리
+                collections = admin_client.collections()
+
+                for collection in collections:
+                    collection_id = collection.id
+
+                    # 해당 컬렉션의 문서들 조회
+                    documents = []
+                    try:
+                        docs_stream = collection.limit(page_size).stream()
+                        for doc in docs_stream:
+                            doc_dict = {
+                                "name": doc.reference.path,
+                                "fields": doc.to_dict(),
+                                "createTime": doc.create_time.isoformat()
+                                if doc.create_time
+                                else None,
+                                "updateTime": doc.update_time.isoformat()
+                                if doc.update_time
+                                else None,
+                            }
+                            documents.append(doc_dict)
+                    except Exception as e:
+                        _LOGGER.warning(
+                            f"Failed to get documents for collection {collection_id}: {e}"
+                        )
+
+                    collections_with_docs.append(
+                        {
+                            "collection_id": collection_id,
+                            "documents": documents,
+                        }
+                    )
+
+            else:
+                # 하위 컬렉션들 처리 (단일 document() 호출로 최적화)
+                parent_doc_ref = admin_client.document(parent)  # 한 번만 호출!
+
+                # 하위 컬렉션들 조회
+                subcollections = parent_doc_ref.collections()
+
+                for collection in subcollections:
+                    collection_id = collection.id
+
+                    # 해당 컬렉션의 문서들 조회 (이미 얻은 collection 참조 사용)
+                    documents = []
+                    try:
+                        docs_stream = collection.limit(page_size).stream()
+                        for doc in docs_stream:
+                            doc_dict = {
+                                "name": doc.reference.path,
+                                "fields": doc.to_dict(),
+                                "createTime": doc.create_time.isoformat()
+                                if doc.create_time
+                                else None,
+                                "updateTime": doc.update_time.isoformat()
+                                if doc.update_time
+                                else None,
+                            }
+                            documents.append(doc_dict)
+                    except Exception as e:
+                        _LOGGER.warning(
+                            f"Failed to get documents for subcollection {collection_id}: {e}"
+                        )
+
+                    collections_with_docs.append(
+                        {
+                            "collection_id": collection_id,
+                            "documents": documents,
+                        }
+                    )
+
+            _LOGGER.debug(
+                f"Retrieved {len(collections_with_docs)} collections with documents"
+            )
+            return collections_with_docs
+
+        except Exception as e:
+            _LOGGER.error(
+                f"Failed to list collections with documents using Admin SDK for parent '{parent}': {e}"
+            )
+            return []

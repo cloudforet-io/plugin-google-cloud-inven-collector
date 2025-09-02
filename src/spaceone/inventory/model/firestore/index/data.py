@@ -1,5 +1,5 @@
 from schematics import Model
-from schematics.types import DictType, ListType, StringType
+from schematics.types import StringType
 
 __all__ = ["FirestoreIndex"]
 
@@ -16,8 +16,8 @@ class FirestoreIndex(Model):
     state = StringType(choices=["CREATING", "READY", "ERROR"])
     density = StringType()  # SPARSE_ALL, DENSE_ALL 등
 
-    # 인덱스 구성 (GCP 내부 필드 제외)
-    fields = ListType(DictType(StringType))
+    # 인덱스 구성 (GCP 내부 필드 제외) - 문자열로 단순화
+    fields_summary = StringType()  # 필드 정보를 문자열로 요약
 
     # 메타데이터
     collection_group = StringType()  # 인덱스가 적용되는 컬렉션 그룹
