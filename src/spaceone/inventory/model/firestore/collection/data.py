@@ -1,5 +1,5 @@
 from schematics import Model
-from schematics.types import DictType, IntType, ListType, ModelType, StringType
+from schematics.types import IntType, ListType, ModelType, StringType
 
 __all__ = ["FirestoreCollection", "DocumentInfo"]
 
@@ -9,7 +9,7 @@ class DocumentInfo(Model):
 
     id = StringType(required=True)
     name = StringType()  # 전체 문서 경로
-    fields = DictType(DictType(StringType))  # 문서의 필드 정보
+    fields_summary = StringType()  # 문서 필드 정보를 문자열로 요약
     create_time = StringType()
     update_time = StringType()
 
@@ -21,8 +21,8 @@ class FirestoreCollection(Model):
     project_id = StringType(required=True)
     collection_path = StringType(required=True)  # 컬렉션 전체 경로
 
-    # 포함된 문서들
-    documents = ListType(ModelType(DocumentInfo), default=[])
+    # 포함된 문서들 - ModelType 패턴으로 복원하되 serialize_when_none=False 추가
+    documents = ListType(ModelType(DocumentInfo), default=[], serialize_when_none=False)
     document_count = IntType(default=0)
 
     # 메타데이터

@@ -42,7 +42,7 @@ collection_meta = CloudServiceMeta.set_layouts(
                                 {"key": "id", "name": "Document ID"},
                                 {"key": "create_time", "name": "Created"},
                                 {"key": "update_time", "name": "Updated"},
-                                {"key": "fields", "name": "Fields"},
+                                {"key": "fields_summary", "name": "Fields Summary"},
                             ]
                         },
                     },
