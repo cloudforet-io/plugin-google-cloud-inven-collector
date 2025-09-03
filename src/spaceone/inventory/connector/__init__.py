@@ -90,7 +90,7 @@ from spaceone.inventory.connector.app_engine.service_v1 import AppEngineServiceV
 from spaceone.inventory.connector.app_engine.version_v1 import AppEngineVersionV1Connector
 from spaceone.inventory.connector.app_engine.instance_v1 import AppEngineInstanceV1Connector
 
-from spaceone.inventory.connector.storage_transfer.transfer_job import (
+from spaceone.inventory.connector.storage_transfer.storage_transfer_v1 import (
     StorageTransferConnector,
 )
 __all__ = [

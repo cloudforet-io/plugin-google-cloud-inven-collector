@@ -243,7 +243,7 @@ SpaceONE 인벤토리 플랫폼에서 Google Cloud Storage Transfer Service 리�
 src/spaceone/inventory/
 ├── connector/storage_transfer/
 │   ├── __init__.py
-│   └── transfer_job.py             # Google Cloud Storage Transfer API 연동
+│   └── storage_transfer_v1.py             # Google Cloud Storage Transfer API 연동
 ├── manager/storage_transfer/
 │   ├── __init__.py
 │   ├── transfer_job_manager.py     # 전송 작업 비즈니스 로직
