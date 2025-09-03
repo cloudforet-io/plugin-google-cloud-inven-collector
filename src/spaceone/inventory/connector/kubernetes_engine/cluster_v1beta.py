@@ -77,6 +77,35 @@ class GKEClusterV1BetaConnector(GoogleCloudConnector):
             _LOGGER.error(f"Failed to get GKE cluster {name} (v1beta1): {e}")
             return None
 
+    def list_node_pools(self, cluster_name, location, **query):
+        """
+        특정 클러스터의 노드풀 목록을 조회합니다 (v1beta1 API).
+        """
+        node_pool_list = []
+        query.update({
+            "parent": f"projects/{self.project_id}/locations/{location}/clusters/{cluster_name}"
+        })
+        
+        try:
+            request = self.client.projects().locations().clusters().nodePools().list(**query)
+            while request is not None:
+                response = request.execute()
+                if "nodePools" in response:
+                    node_pool_list.extend(response.get("nodePools", []))
+                
+                # 페이지네이션 처리 - list_next가 있는지 확인
+                try:
+                    request = self.client.projects().locations().clusters().nodePools().list_next(
+                        previous_request=request, previous_response=response
+                    )
+                except AttributeError:
+                    # list_next가 없는 경우 첫 페이지만 처리
+                    break
+        except Exception as e:
+            _LOGGER.error(f"Failed to list node pools for cluster {cluster_name} (v1beta1): {e}")
+            
+        return node_pool_list
+
     def list_operations(self, **query):
         """
         GKE 작업 목록을 조회합니다 (v1beta1 API).
@@ -131,21 +160,24 @@ class GKEClusterV1BetaConnector(GoogleCloudConnector):
         query.update({"parent": f"projects/{self.project_id}/locations/-"})
         
         try:
-            # v1beta1에서 Fleet API 사용 가능
-            request = self.client.projects().locations().fleets().list(**query)
-            while request is not None:
-                response = request.execute()
-                if "fleets" in response:
-                    fleet_list.extend(response.get("fleets", []))
-                
-                # 페이지네이션 처리 - list_next가 있는지 확인
-                try:
-                    request = self.client.projects().locations().fleets().list_next(
-                        previous_request=request, previous_response=response
-                    )
-                except AttributeError:
-                    # list_next가 없는 경우 첫 페이지만 처리
-                    break
+            # v1beta1에서 Fleet API 사용 가능한지 확인
+            if hasattr(self.client.projects().locations(), 'fleets'):
+                request = self.client.projects().locations().fleets().list(**query)
+                while request is not None:
+                    response = request.execute()
+                    if "fleets" in response:
+                        fleet_list.extend(response.get("fleets", []))
+                    
+                    # 페이지네이션 처리 - list_next가 있는지 확인
+                    try:
+                        request = self.client.projects().locations().fleets().list_next(
+                            previous_request=request, previous_response=response
+                        )
+                    except AttributeError:
+                        # list_next가 없는 경우 첫 페이지만 처리
+                        break
+            else:
+                _LOGGER.debug("Fleet API not available in this v1beta1 version")
         except Exception as e:
             _LOGGER.error(f"Failed to list GKE fleets (v1beta1): {e}")
             
@@ -159,21 +191,24 @@ class GKEClusterV1BetaConnector(GoogleCloudConnector):
         query.update({"parent": f"projects/{self.project_id}/locations/-"})
         
         try:
-            # v1beta1에서 Membership API 사용 가능
-            request = self.client.projects().locations().memberships().list(**query)
-            while request is not None:
-                response = request.execute()
-                if "memberships" in response:
-                    membership_list.extend(response.get("memberships", []))
-                
-                # 페이지네이션 처리 - list_next가 있는지 확인
-                try:
-                    request = self.client.projects().locations().memberships().list_next(
-                        previous_request=request, previous_response=response
-                    )
-                except AttributeError:
-                    # list_next가 없는 경우 첫 페이지만 처리
-                    break
+            # v1beta1에서 Membership API 사용 가능한지 확인
+            if hasattr(self.client.projects().locations(), 'memberships'):
+                request = self.client.projects().locations().memberships().list(**query)
+                while request is not None:
+                    response = request.execute()
+                    if "memberships" in response:
+                        membership_list.extend(response.get("memberships", []))
+                    
+                    # 페이지네이션 처리 - list_next가 있는지 확인
+                    try:
+                        request = self.client.projects().locations().memberships().list_next(
+                            previous_request=request, previous_response=response
+                        )
+                    except AttributeError:
+                        # list_next가 없는 경우 첫 페이지만 처리
+                        break
+            else:
+                _LOGGER.debug("Membership API not available in this v1beta1 version")
         except Exception as e:
             _LOGGER.error(f"Failed to list GKE memberships (v1beta1): {e}")
             

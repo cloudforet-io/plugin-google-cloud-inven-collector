@@ -6,6 +6,17 @@ Google Cloud Kubernetes Engine (GKE)는 Google Cloud에서 관리형 Kubernetes 
 
 ## 아키텍처
 
+### 매니저 구조
+```
+Kubernetes Engine Managers
+├── Cluster Managers (클러스터 매니저)
+│   ├── cluster_v1_manager.py          # v1 API 클러스터 전용
+│   └── cluster_v1beta_manager.py      # v1beta1 API 클러스터 전용
+├── Node Pool Managers (노드풀 매니저)
+│   ├── node_pool_v1_manager.py        # v1 API 노드풀/노드 전용
+│   └── node_pool_v1beta_manager.py    # v1beta1 API 노드풀/노드 전용
+```
+
 ### 커넥터 구조
 ```
 Kubernetes Engine Connectors
@@ -58,6 +69,7 @@ GKE Cluster
   - 이미지 타입
   - 자동 스케일링 설정
   - 업그레이드 정책
+  - **노드 정보 (새로 추가됨)**
 
 #### 3. Node Level
 - **리소스**: `container.googleapis.com/Node`
@@ -69,6 +81,7 @@ GKE Cluster
   - CPU 및 메모리 할당량
   - 디스크 정보
   - 라벨 및 테인트
+  - **내부/외부 IP 주소 (새로 추가됨)**
 
 #### 4. Node Group Level
 - **리소스**: `container.googleapis.com/NodeGroup`
@@ -85,61 +98,69 @@ GKE Cluster
 - **v1**: 현재 안정 버전, 프로덕션 환경 권장
 - **v1beta**: 베타 기능 테스트용, 하위 호환성 지원
 
-### 커넥터별 API 버전
+### 매니저별 API 버전
 ```python
-# 클러스터 커넥터
-from spaceone.inventory.connector.kubernetes_engine import GKEClusterV1Connector, GKEClusterV1BetaConnector
+# 클러스터 매니저
+from spaceone.inventory.manager.kubernetes_engine.cluster_v1_manager import GKEClusterV1Manager
+from spaceone.inventory.manager.kubernetes_engine.cluster_v1beta_manager import GKEClusterV1BetaManager
 
-# 노드풀 커넥터  
-from spaceone.inventory.connector.kubernetes_engine import GKENodePoolV1Connector, GKENodePoolV1BetaConnector
+# 노드풀 매니저  
+from spaceone.inventory.manager.kubernetes_engine.node_pool_v1_manager import GKENodePoolV1Manager
+from spaceone.inventory.manager.kubernetes_engine.node_pool_v1beta_manager import GKENodePoolV1BetaManager
 
-# API 버전별 선택
-if api_version == "v1":
-    cluster_connector = GKEClusterV1Connector()
-    node_pool_connector = GKENodePoolV1Connector()
-else:
-    cluster_connector = GKEClusterV1BetaConnector()
-    node_pool_connector = GKENodePoolV1BetaConnector()
+# 커넥터
+from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import GKEClusterV1Connector
+from spaceone.inventory.connector.kubernetes_engine.cluster_v1beta import GKEClusterV1BetaConnector
+from spaceone.inventory.connector.kubernetes_engine.node_pool_v1 import GKENodePoolV1Connector
+from spaceone.inventory.connector.kubernetes_engine.node_pool_v1beta import GKENodePoolV1BetaConnector
 ```
 
 ## 리소스 수집 프로세스
 
 ### 1. 초기화 단계
 ```python
-def initialize(self, options: dict) -> None:
-    """GKE 수집기 초기화"""
-    self.project_id = options.get("project_id")
-    self.location = options.get("location", "us-central1")
-    self.api_version = options.get("api_version", "v1")
-    self.client = self._create_client()
+def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    self.api_version = "v1"
+    self.connector_name = "GKENodePoolV1Connector"
+    self.cloud_service_group = "KubernetesEngine"
 ```
 
 ### 2. 수집 단계
 ```python
-def collect(self) -> List[dict]:
-    """GKE 리소스 수집"""
-    resources = []
+def collect_cloud_service(self, params: Dict[str, Any]) -> Tuple[List[Any], List[ErrorResourceResponse]]:
+    """GKE 노드 그룹 정보를 수집합니다 (v1 API)"""
     
-    # 1. 클러스터 목록 수집
-    clusters = self._collect_clusters()
-    resources.extend(clusters)
+    # 1. GKE 노드 그룹 목록 조회
+    node_groups = self.list_node_pools(params)
     
-    # 2. 각 클러스터의 노드 풀 수집
-    for cluster in clusters:
-        node_pools = self._collect_node_pools(cluster["name"])
-        resources.extend(node_pools)
+    for node_group in node_groups:
+        # 2. 메트릭 정보 조회
+        metrics = self.get_node_pool_metrics(
+            cluster_name, location, node_pool_name, params
+        )
         
-        # 3. 각 노드 풀의 노드 수집
-        for node_pool in node_pools:
-            nodes = self._collect_nodes(cluster["name"], node_pool["name"])
-            resources.extend(nodes)
-    
-    # 4. 노드 그룹 수집 (v1beta API)
-    if self.api_version == "v1beta":
-        node_groups = self._collect_node_groups()
-        resources.extend(node_groups)
-    
-    return resources
+        # 3. 노드 정보 조회 (새로 추가됨)
+        nodes = self.get_node_pool_nodes(
+            cluster_name, location, node_pool_name, params
+        )
+        
+        # 4. 노드 정보를 노드 그룹 데이터에 추가
+        if nodes:
+            node_group_data["nodes"] = []
+            for node in nodes:
+                node_info = {
+                    "name": str(node.get("name", "")),
+                    "status": str(node.get("status", "")),
+                    "machineType": str(node.get("machineType", "")),
+                    "zone": str(node.get("zone", "")),
+                    "internalIP": str(node.get("internalIP", "")),
+                    "externalIP": str(node.get("externalIP", "")),
+                    "createTime": node.get("createTime"),
+                    "labels": node.get("labels", {}),
+                    "taints": node.get("taints", []),
+                }
+                node_group_data["nodes"].append(node_info)
 ```
 
 ### 3. 메타데이터 처리
@@ -485,6 +506,20 @@ Error 408: Request timeout
 - 모든 API 호출 로깅
 - 비정상 접근 패턴 감지
 - 정기적인 보안 감사
+
+## 최신 업데이트 (2024년 9월)
+
+### NodePool 정보 수집 기능 추가
+- **노드 정보 수집**: 각 노드 풀의 개별 노드 정보를 상세하게 수집
+- **노드 메타데이터**: 노드 이름, 상태, 머신 타입, IP 주소, 라벨, 테인트 등
+- **향상된 로깅**: 수집 과정의 상세한 로그 및 에러 처리 개선
+- **에러 처리 강화**: 개별 리소스 수집 실패 시에도 전체 프로세스 계속 진행
+
+### 구현된 매니저 및 커넥터
+- `GKENodePoolV1Manager`: v1 API 노드 풀 및 노드 정보 수집
+- `GKENodePoolV1BetaManager`: v1beta1 API 노드 풀 및 노드 정보 수집
+- `GKENodePoolV1Connector`: v1 API 노드 풀 API 호출
+- `GKENodePoolV1BetaConnector`: v1beta1 API 노드 풀 API 호출
 
 ## 참고 자료
 

@@ -28,19 +28,25 @@ class GKENodePoolV1Connector(GoogleCloudConnector):
             - ...
         """
         self.project_id = secret_data.get("project_id")
-        credentials = (
+        self.secret_data = secret_data  # secret_data를 인스턴스 변수로 저장
+        self.credentials = (
             google.oauth2.service_account.Credentials.from_service_account_info(
                 secret_data
             )
         )
         self.client = googleapiclient.discovery.build(
-            "container", "v1", credentials=credentials
+            "container", "v1", credentials=self.credentials
         )
 
     def list_node_pools(self, cluster_name, location, **query):
         """
         GKE 노드풀 목록을 조회합니다 (v1 API).
         """
+        # secret_data가 없으면 get_connect 호출
+        if not hasattr(self, 'secret_data'):
+            _LOGGER.warning("secret_data not found, cannot list node pools")
+            return []
+            
         node_pool_list = []
         query.update({
             "parent": f"projects/{self.project_id}/locations/{location}/clusters/{cluster_name}"
@@ -70,6 +76,11 @@ class GKENodePoolV1Connector(GoogleCloudConnector):
         """
         특정 GKE 노드풀 정보를 조회합니다 (v1 API).
         """
+        # secret_data가 없으면 get_connect 호출
+        if not hasattr(self, 'secret_data'):
+            _LOGGER.warning("secret_data not found, cannot get node pool")
+            return None
+            
         try:
             request = self.client.projects().locations().clusters().nodePools().get(
                 name=f"projects/{self.project_id}/locations/{location}/clusters/{cluster_name}/nodePools/{node_pool_name}"
@@ -77,46 +88,4 @@ class GKENodePoolV1Connector(GoogleCloudConnector):
             return request.execute()
         except Exception as e:
             _LOGGER.error(f"Failed to get GKE node pool {node_pool_name} (v1): {e}")
-            return None
-
-    def list_nodes(self, cluster_name, location, node_pool_name, **query):
-        """
-        GKE 노드 목록을 조회합니다 (v1 API).
-        """
-        node_list = []
-        query.update({
-            "parent": f"projects/{self.project_id}/locations/{location}/clusters/{cluster_name}/nodePools/{node_pool_name}"
-        })
-        
-        try:
-            request = self.client.projects().locations().clusters().nodePools().nodes().list(**query)
-            while request is not None:
-                response = request.execute()
-                if "nodes" in response:
-                    node_list.extend(response.get("nodes", []))
-                
-                # 페이지네이션 처리 - list_next가 있는지 확인
-                try:
-                    request = self.client.projects().locations().clusters().nodePools().nodes().list_next(
-                        previous_request=request, previous_response=response
-                    )
-                except AttributeError:
-                    # list_next가 없는 경우 첫 페이지만 처리
-                    break
-        except Exception as e:
-            _LOGGER.error(f"Failed to list nodes for node pool {node_pool_name} (v1): {e}")
-            
-        return node_list
-
-    def get_node(self, cluster_name, location, node_pool_name, node_name):
-        """
-        특정 GKE 노드 정보를 조회합니다 (v1 API).
-        """
-        try:
-            request = self.client.projects().locations().clusters().nodePools().nodes().get(
-                name=f"projects/{self.project_id}/locations/{location}/clusters/{cluster_name}/nodePools/{node_pool_name}/nodes/{node_name}"
-            )
-            return request.execute()
-        except Exception as e:
-            _LOGGER.error(f"Failed to get GKE node {node_name} (v1): {e}")
             return None

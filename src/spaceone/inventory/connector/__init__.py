@@ -59,6 +59,12 @@ from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import (
 from spaceone.inventory.connector.kubernetes_engine.cluster_v1beta import (
     GKEClusterV1BetaConnector,
 )
+from spaceone.inventory.connector.kubernetes_engine.node_pool_v1 import (
+    GKENodePoolV1Connector,
+)
+from spaceone.inventory.connector.kubernetes_engine.node_pool_v1beta import (
+    GKENodePoolV1BetaConnector,
+)
 from spaceone.inventory.connector.networking.external_ip_address import (
     ExternalIPAddressConnector,
 )
@@ -116,6 +122,8 @@ __all__ = [
     "KMSKeyRingV1Connector",
     "GKEClusterV1Connector",
     "GKEClusterV1BetaConnector",
+    "GKENodePoolV1Connector",
+    "GKENodePoolV1BetaConnector",
     "ExternalIPAddressConnector",
     "FirewallConnector",
     "LoadBalancingConnector",
