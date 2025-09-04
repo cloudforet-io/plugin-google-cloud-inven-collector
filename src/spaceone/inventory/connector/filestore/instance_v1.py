@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, List
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
@@ -7,12 +8,11 @@ _LOGGER = logging.getLogger(__name__)
 
 class FilestoreInstanceConnector(GoogleCloudConnector):
     """
-    Google Cloud Filestore Instance Connector
+    Google Cloud Filestore Instance Connector (v1 API)
 
     Filestore 인스턴스 관련 API 호출을 담당하는 클래스
-    - 인스턴스 목록 조회
-    - 인스턴스 상세 정보 조회
-    - 인스턴스 상태 확인
+    - 인스턴스 목록 조회 (v1 API)
+    - 인스턴스 스냅샷 조회 (v1 API)
     """
 
     google_client_service = "file"
@@ -21,17 +21,17 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def list_instances(self, **query):
+    def list_instances(self, **query) -> List[Dict[str, Any]]:
         """
         Filestore 인스턴스 목록을 조회합니다.
-        Google Cloud Filestore API의 locations/- 와일드카드를 사용하여
+        Google Cloud Filestore v1 API의 locations/- 와일드카드를 사용하여
         모든 리전의 인스턴스를 한 번에 조회합니다.
 
         Args:
             **query: 추가 쿼리 파라미터 (location, filter 등)
 
         Returns:
-            list: Filestore 인스턴스 목록
+            Filestore 인스턴스 목록
         """
         try:
             # 모든 리전의 Filestore 인스턴스를 한 번에 조회
@@ -74,27 +74,26 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
                     .list_next(previous_request=request, previous_response=response)
                 )
 
-            _LOGGER.debug(
-                f"Found {len(instances)} Filestore instances across all locations"
-            )
             return instances
 
         except Exception as e:
             _LOGGER.error(f"Error listing Filestore instances: {e}")
-            return []
+            raise e from e
 
-    def list_snapshots_for_instance(self, instance_name, **query):
+    def list_snapshots_for_instance(
+        self, instance_name: str, **query
+    ) -> List[Dict[str, Any]]:
         """
         특정 인스턴스의 스냅샷 목록을 조회합니다.
         Google Cloud Filestore v1 API를 사용합니다.
 
         Args:
-            instance_name (str): 인스턴스 이름
+            instance_name: 인스턴스 이름
                 (projects/{project}/locations/{location}/instances/{instance})
             **query: 추가 쿼리 파라미터
 
         Returns:
-            list: 스냅샷 목록
+            스냅샷 목록
         """
         try:
             snapshots = []
@@ -126,18 +125,18 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
 
         except Exception as e:
             _LOGGER.error(f"Error listing snapshots for instance {instance_name}: {e}")
-            return []
+            raise e from e
 
-    def _extract_location_from_instance_name(self, instance_name):
+    def _extract_location_from_instance_name(self, instance_name: str) -> str:
         """
         인스턴스 이름에서 리전 정보를 추출합니다.
 
         Args:
-            instance_name (str): 인스턴스 이름
+            instance_name: 인스턴스 이름
                 (projects/{project}/locations/{location}/instances/{instance})
 
         Returns:
-            str: 리전 정보
+            리전 정보
         """
         try:
             # 예: projects/my-project/locations/us-central1/instances/my-instance

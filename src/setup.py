@@ -14,7 +14,7 @@
 #   limitations under the License.
 
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open("VERSION", "r") as f:
     VERSION = f.read().strip()
@@ -44,7 +44,11 @@ setup(
     package_data={
         "spaceone": [
             "inventory/model/*/*/widget/*.yml",
+            "inventory/model/*/*/widget/*.yaml",
+            "inventory/model/*/*/*/widget/*.yml",
+            "inventory/model/*/*/*/widget/*.yaml",
             "inventory/metrics/**/**/*.yaml",
+            "inventory/metrics/**/**/*.yml",
         ]
     },
     zip_safe=False,
