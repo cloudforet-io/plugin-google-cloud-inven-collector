@@ -48,6 +48,7 @@ setup(
             "inventory/model/*/*/*/widget/*.yml",
             "inventory/model/*/*/*/widget/*.yaml",
             "inventory/metrics/**/**/*.yaml",
+            "inventory/metrics/**/**/*.yml",
         ]
     },
     zip_safe=False,
