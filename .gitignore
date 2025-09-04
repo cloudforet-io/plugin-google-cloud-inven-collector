@@ -9,9 +9,6 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
-# Exception: Allow cloud_build build folders
-!src/spaceone/inventory/model/cloud_build/build/
-!src/spaceone/inventory/metrics/CloudBuild/Build/
 develop-eggs/
 dist/
 downloads/

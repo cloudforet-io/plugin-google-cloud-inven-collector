@@ -35,7 +35,7 @@ class CloudRunV2Connector(GoogleCloudConnector):
 
         return services
 
-    def list_revisions(self, parent, **query):
+    def list_service_revisions(self, parent, **query):
         revisions = []
         query.update({"parent": parent})
         request = (
@@ -80,7 +80,7 @@ class CloudRunV2Connector(GoogleCloudConnector):
 
         return jobs
 
-    def list_executions(self, parent, **query):
+    def list_job_executions(self, parent, **query):
         executions = []
         query.update({"parent": parent})
         request = self.client.projects().locations().jobs().executions().list(**query)
@@ -102,7 +102,7 @@ class CloudRunV2Connector(GoogleCloudConnector):
 
         return executions
 
-    def list_tasks(self, parent, **query):
+    def list_execution_tasks(self, parent, **query):
         tasks = []
         query.update({"parent": parent})
         request = (
@@ -171,3 +171,21 @@ class CloudRunV2Connector(GoogleCloudConnector):
                 break
 
         return revisions
+
+    def list_operations(self, parent, **query):
+        """V2 API에서 operations 조회"""
+        operations = []
+        query.update({"name": parent})
+        try:
+            request = self.client.projects().locations().operations().list(**query)
+            while request is not None:
+                response = request.execute()
+                raw_operations = response.get("operations", [])
+                operations.extend(raw_operations)
+                request = self.client.projects().locations().operations().list_next(
+                    request, response
+                )
+        except Exception as e:
+            _LOGGER.debug(f"Operations API not available in v2: {e}")
+            return []
+        return operations
