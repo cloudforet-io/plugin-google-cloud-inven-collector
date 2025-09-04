@@ -73,7 +73,7 @@ class FilestoreInstanceData(BaseResource):
 
     # 파일 공유 정보
     file_shares = ListType(ModelType(FileShare))
-    detailed_shares = ListType(ModelType(DetailedShare))
+    detailed_shares = ListType(ModelType(DetailedShare), serialize_when_none=False)
 
     # 스냅샷 정보
     snapshots = ListType(ModelType(Snapshot))

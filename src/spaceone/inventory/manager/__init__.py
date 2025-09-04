@@ -23,7 +23,8 @@ from .dataproc.cluster_manager import DataprocClusterManager
 from .datastore.database_manager import DatastoreDatabaseManager
 from .datastore.index_manager import DatastoreIndexManager
 from .datastore.namespace_manager import DatastoreNamespaceManager
-from .filestore.instance_manager import FilestoreInstanceManager
+from .filestore.instance_v1_manager import FilestoreInstanceManager
+from .filestore.instance_v1beta1_manager import FilestoreInstanceV1Beta1Manager
 from .firebase.project_manager import FirebaseProjectManager
 from .kms.keyring_manager import KMSKeyRingManager
 from .kubernetes_engine.cluster_v1_manager import GKEClusterV1Manager
