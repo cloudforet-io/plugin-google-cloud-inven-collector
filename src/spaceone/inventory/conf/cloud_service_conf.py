@@ -37,21 +37,27 @@ CLOUD_SERVICE_GROUP_MAP = {
     "Firebase": ["FirebaseProjectManager"],
     "Batch": ["BatchManager"],
     "CloudBuild": [
-        "CloudBuildBuildManager",
-        "CloudBuildTriggerManager",
-        "CloudBuildWorkerPoolManager",
-        "CloudBuildConnectionManager",
-        "CloudBuildRepositoryManager",
+        "CloudBuildBuildV1Manager",
+        "CloudBuildTriggerV1Manager",
+        "CloudBuildWorkerPoolV1Manager",
+        "CloudBuildConnectionV2Manager",
+        "CloudBuildRepositoryV2Manager",
     ],
     "CloudRun": [
-        "CloudRunServiceManager",
-        "CloudRunJobManager",
-        "CloudRunWorkerPoolManager",
-        "CloudRunDomainMappingManager",
+        # "CloudRunServiceV1Manager",
+        # "CloudRunJobV1Manager",
+        # "CloudRunWorkerPoolV1Manager",
+        "CloudRunDomainMappingV1Manager",
+        "CloudRunRouteV1Manager",
+        "CloudRunConfigurationV1Manager",
+        "CloudRunServiceV2Manager", 
+        "CloudRunJobV2Manager",
+        "CloudRunWorkerPoolV2Manager",
+        # "CloudRunOperationV2Manager",
     ],
     "KubernetesEngine": [
-        "GKEClusterV1BeataManager",
-        "GKENodePoolVBeta1Manager"
+        "GKEClusterV1Manager",
+        "GKENodePoolV1Manager"
     ],
     "AppEngine": [
         "AppEngineApplicationV1Manager",

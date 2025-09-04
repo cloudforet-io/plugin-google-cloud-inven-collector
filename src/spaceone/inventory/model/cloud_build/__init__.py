@@ -1,4 +1,4 @@
-from spaceone.inventory.model.cloud_build.build import (
+from spaceone.inventory.model.cloud_build.cloud_build import (
     CLOUD_SERVICE_TYPES as BUILD_CLOUD_SERVICE_TYPES,
 )
 from spaceone.inventory.model.cloud_build.connection import (
