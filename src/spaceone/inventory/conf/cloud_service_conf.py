@@ -65,7 +65,6 @@ CLOUD_SERVICE_GROUP_MAP = {
         "AppEngineVersionV1Manager",
         "AppEngineInstanceV1Manager",
     ],
-    "Datastore": ["DatastoreNamespaceManager", "DatastoreIndexManager"],
     "Datastore": [
         "DatastoreIndexManager",
         "DatastoreDatabaseManager",
