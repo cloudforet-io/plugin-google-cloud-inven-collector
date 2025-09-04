@@ -1,25 +1,23 @@
-chart_type: LINE
-labels:
-- Dataproc
-- Analytics
-- Storage
-namespace: gcp/dataproc
-options:
-  chart_type: LINE
-  legend:
-    enabled: true
-    position: bottom
-  xAxis:
-    key: time
-    name: Time
-  yAxis:
-    key: cluster_hdfs_capacity
-    name: HDFS Capacity (GB)
-query:
-  metric: dataproc_cluster_hdfs_capacity
-  stat: AVERAGE
-resource_type: inventory.CloudService
-tags:
-  description: HDFS total capacity of the Dataproc cluster
-  icon: gcp-dataproc
-  short_description: Dataproc Cluster HDFS Capacity
+---
+metric_id: metric-google-cloud-dataproc-cluster-hdfs-capacity
+name: Cluster HDFS Capacity
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Dataproc.Cluster
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+  fields:
+    value:
+      operator: average
+      key: cluster_hdfs_capacity
+unit: GB
+namespace_id: ns-google-cloud-dataproc-cluster
+version: '1.1'

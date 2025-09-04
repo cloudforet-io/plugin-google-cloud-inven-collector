@@ -1,25 +1,23 @@
-chart_type: LINE
-labels:
-- Dataproc
-- Analytics
-- Compute
-namespace: gcp/dataproc
-options:
-  chart_type: LINE
-  legend:
-    enabled: true
-    position: bottom
-  xAxis:
-    key: time
-    name: Time
-  yAxis:
-    key: cluster_yarn_memory
-    name: YARN Memory (GB)
-query:
-  metric: dataproc_cluster_yarn_memory
-  stat: AVERAGE
-resource_type: inventory.CloudService
-tags:
-  description: YARN available memory of the Dataproc cluster
-  icon: gcp-dataproc
-  short_description: Dataproc Cluster YARN Memory
+---
+metric_id: metric-google-cloud-dataproc-cluster-yarn-memory
+name: Cluster YARN Memory
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Dataproc.Cluster
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+  fields:
+    value:
+      operator: average
+      key: cluster_yarn_memory
+unit: GB
+namespace_id: ns-google-cloud-dataproc-cluster
+version: '1.1'
