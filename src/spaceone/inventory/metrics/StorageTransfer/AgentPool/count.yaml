@@ -1,0 +1,26 @@
+---
+metric_id: metric-google-cloud-storage-transfer-agent-pool-count
+name: Agent Pool Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.StorageTransfer.AgentPool
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.state
+      name: State
+      search_key: data.state
+      default: true
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-storage-transfer-agent-pool
+version: '1.1' 
