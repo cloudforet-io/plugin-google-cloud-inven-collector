@@ -54,9 +54,18 @@ class FilestoreInstanceV1Beta1Manager(GoogleCloudManager):
             if not google_cloud_datetime:
                 return ""
 
-            # Google Cloud API 날짜 형식 파싱 (나노초 포함)
-            # 예: 2025-08-18T06:13:54.868444486Z
-            dt = datetime.fromisoformat(google_cloud_datetime.replace("Z", "+00:00"))
+            # 나노초를 마이크로초로 자르기 (소수점 이하 6자리까지만)
+            processed_datetime = google_cloud_datetime
+            if "." in processed_datetime and "Z" in processed_datetime:
+                parts = processed_datetime.split(".")
+                if len(parts) == 2:
+                    # 마이크로초(6자리)까지만 유지하고 나머지 나노초 제거
+                    microseconds = parts[1].replace("Z", "")[:6]
+                    processed_datetime = f"{parts[0]}.{microseconds}Z"
+
+            # Google Cloud API 날짜 형식 파싱 (Z를 +00:00으로 변경)
+            # 예: 2025-08-18T06:13:54.868444Z
+            dt = datetime.fromisoformat(processed_datetime.replace("Z", "+00:00"))
 
             # 초 단위까지로 변환
             return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
