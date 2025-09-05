@@ -1,6 +1,7 @@
 ---
 metric_id: count_by_project
 name: Count by Project
+metric_type: GAUGE
 description: Count KeyRings by project
 resource_type: inventory.CloudService
 query_options:

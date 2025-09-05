@@ -1,6 +1,7 @@
 ---
 metric_id: count_by_region
 name: Count by Region
+metric_type: GAUGE
 description: Count KeyRings by region
 resource_type: inventory.CloudService
 query_options:
