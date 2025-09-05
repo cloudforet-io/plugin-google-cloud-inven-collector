@@ -26,7 +26,7 @@ Transfer Job (Simplified)
 transfer_job_configuration_meta = ItemDynamicLayout.set_fields(
     "Configuration",
     fields=[
-        TextDyField.data_source("Job Name", "name"),
+        TextDyField.data_source("Job Name", "data.name"),
         TextDyField.data_source("Project ID", "data.project_id"),
         TextDyField.data_source("Description", "data.description"),
         EnumDyField.data_source(

@@ -122,12 +122,7 @@ class StorageTransferOperationManager(GoogleCloudManager):
                     # 5. Make Resource Response Object
                     ##################################
                     collected_cloud_services.append(
-                        TransferOperationResponse(
-                            {
-                                "resource_type": "inventory.CloudService",
-                                "resource": operation_resource,
-                            }
-                        )
+                        TransferOperationResponse({"resource": operation_resource})
                     )
 
                 except Exception as e:
