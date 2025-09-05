@@ -1,36 +1,29 @@
 ---
-name: index_count
-key: datastore_index_count
-unit:
-  x: Count
-  y: Count
-chart_type: COLUMN
-query:
-  resource_type: inventory.CloudService
-  query:
-    aggregate:
-      - group:
-          keys:
-            - name: project_id
-              key: account
-            - name: kind
-              key: data.kind
-          fields:
-            - name: index_count
-              operator: count
-              key: cloud_service_id
-    filter:
-      - key: cloud_service_type
-        value: Index
-        operator: eq
-      - key: cloud_service_group
-        value: Datastore
-        operator: eq 
-
-dimensions:
-- name: project_id
-  key: data.project_id
-- name: kind
-  key: data.kind
-- name: state
-  key: data.state 
+metric_id: metric-google-cloud-datastore-index-count
+name: Index Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Datastore.Index
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.kind
+      name: Kind
+      search_key: data.kind
+      default: true
+    - key: data.state
+      name: State
+      search_key: data.state
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-datastore-index
+version: '1.1' 

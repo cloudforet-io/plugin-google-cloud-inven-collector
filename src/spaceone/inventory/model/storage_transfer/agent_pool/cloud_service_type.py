@@ -31,7 +31,7 @@ cst_agent_pool.is_primary = False
 cst_agent_pool.is_major = False
 cst_agent_pool.labels = ["Storage", "Transfer", "Agent"]
 cst_agent_pool.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Storage_Transfer_Service.svg",  # TODO: Need to add specific Storage Transfer icon in the future
+    "spaceone:icon": f"{ASSET_URL}/Storage-Transfer.svg",
 }
 
 cst_agent_pool._metadata = CloudServiceTypeMeta.set_meta(

@@ -1,30 +1,29 @@
 ---
-name: namespace_count
-key: datastore_namespace_count
-unit:
-  x: Count
-  y: Count
-chart_type: COLUMN
-query:
-  resource_type: inventory.CloudService
-  query:
-    aggregate:
-      - group:
-          keys:
-            - name: project_id
-              key: account
-            - name: database_id
-              key: data.database_id
-            - name: namespace_id
-              key: data.namespace_id
-          fields:
-            - name: namespace_count
-              operator: count
-              key: cloud_service_id
-    filter:
-      - key: cloud_service_type
-        value: Namespace
-        operator: eq
-      - key: cloud_service_group
-        value: Datastore
-        operator: eq 
+metric_id: metric-google-cloud-datastore-namespace-count
+name: Namespace Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Datastore.Namespace
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.database_id
+      name: Database ID
+      search_key: data.database_id
+      default: true
+    - key: data.namespace_id
+      name: Namespace ID
+      search_key: data.namespace_id
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-datastore-namespace
+version: '1.1' 

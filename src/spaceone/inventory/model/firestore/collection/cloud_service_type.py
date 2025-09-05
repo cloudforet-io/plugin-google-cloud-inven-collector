@@ -23,7 +23,7 @@ cst_collection.is_primary = False
 cst_collection.is_major = True
 cst_collection.labels = ["Database", "NoSQL"]
 cst_collection.tags = {
-    "spaceone:icon": f"{ASSET_URL}/firestore.svg",  # TODO: Need to add specific Firestore icon in the future
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Firestore.svg",
 }
 
 cst_collection._metadata = CloudServiceTypeMeta.set_meta(

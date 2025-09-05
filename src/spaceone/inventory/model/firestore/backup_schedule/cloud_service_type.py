@@ -36,7 +36,7 @@ cst_backup_schedule.is_primary = False
 cst_backup_schedule.is_major = False
 cst_backup_schedule.labels = ["NoSQL", "Database", "Backup"]
 cst_backup_schedule.tags = {
-    "spaceone:icon": f"{ASSET_URL}/firestore.svg",
+    "spaceone:icon": f"{ASSET_URL}/Firestore.svg",
 }
 
 cst_backup_schedule._metadata = CloudServiceTypeMeta.set_meta(

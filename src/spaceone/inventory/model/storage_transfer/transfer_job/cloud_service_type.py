@@ -34,7 +34,7 @@ cst_transfer_job.is_primary = True
 cst_transfer_job.is_major = True
 cst_transfer_job.labels = ["Storage", "Transfer", "Migration"]
 cst_transfer_job.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Storage_Transfer_Service.svg",  # TODO: Need to add specific Storage Transfer icon in the future
+    "spaceone:icon": f"{ASSET_URL}/Storage-Transfer.svg",
 }
 
 cst_transfer_job._metadata = CloudServiceTypeMeta.set_meta(

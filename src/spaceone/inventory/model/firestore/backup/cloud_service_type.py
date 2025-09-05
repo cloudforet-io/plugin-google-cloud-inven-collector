@@ -37,7 +37,7 @@ cst_backup.is_primary = False
 cst_backup.is_major = True
 cst_backup.labels = ["NoSQL", "Database", "Backup"]
 cst_backup.tags = {
-    "spaceone:icon": f"{ASSET_URL}/firestore.svg",
+    "spaceone:icon": f"{ASSET_URL}/Firestore.svg",
 }
 
 cst_backup._metadata = CloudServiceTypeMeta.set_meta(
