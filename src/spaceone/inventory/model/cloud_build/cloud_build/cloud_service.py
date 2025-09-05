@@ -24,7 +24,6 @@ build_overview = ItemDynamicLayout.set_fields(
     "Build Overview",
     fields=[
         TextDyField.data_source("ID", "data.id"),
-        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("Status", "data.status"),
         TextDyField.data_source("Build Trigger ID", "data.build_trigger_id"),
         TextDyField.data_source("Service Account", "data.service_account"),
@@ -50,11 +49,11 @@ build_config = ItemDynamicLayout.set_fields(
 build_steps = TableDynamicLayout.set_fields(
     "Build Steps",
     fields=[
-        TextDyField.data_source("Name", "data.steps.name"),
+        TextDyField.data_source("Step Name", "data.steps.name"),
         TextDyField.data_source("Args", "data.steps.args"),
         TextDyField.data_source("Env", "data.steps.env"),
         TextDyField.data_source("Dir", "data.steps.dir"),
-        TextDyField.data_source("ID", "data.steps.id"),
+        TextDyField.data_source("Step ID", "data.steps.id"),
         TextDyField.data_source("Wait For", "data.steps.waitFor"),
         TextDyField.data_source("Entrypoint", "data.steps.entrypoint"),
         TextDyField.data_source("Secret Env", "data.steps.secretEnv"),
