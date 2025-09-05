@@ -27,8 +27,8 @@ cst_agent_pool.name = "AgentPool"
 cst_agent_pool.provider = "google_cloud"
 cst_agent_pool.group = "StorageTransfer"
 cst_agent_pool.service_code = "Storage Transfer Service"
-cst_agent_pool.is_primary = False
-cst_agent_pool.is_major = False
+cst_agent_pool.is_primary = True
+cst_agent_pool.is_major = True
 cst_agent_pool.labels = ["Storage", "Transfer", "Agent"]
 cst_agent_pool.tags = {
     "spaceone:icon": f"{ASSET_URL}/Storage-Transfer.svg",

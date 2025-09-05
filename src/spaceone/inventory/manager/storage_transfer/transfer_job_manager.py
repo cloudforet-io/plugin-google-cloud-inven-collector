@@ -138,12 +138,7 @@ class StorageTransferManager(GoogleCloudManager):
                     # 5. Make Resource Response Object
                     ##################################
                     collected_cloud_services.append(
-                        TransferJobResponse(
-                            {
-                                "resource_type": "inventory.CloudService",
-                                "resource": transfer_job_resource,
-                            }
-                        )
+                        TransferJobResponse({"resource": transfer_job_resource})
                     )
 
                 except Exception as e:

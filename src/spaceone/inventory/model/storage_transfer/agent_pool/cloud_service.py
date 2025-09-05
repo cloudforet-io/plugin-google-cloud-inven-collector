@@ -25,7 +25,7 @@ Agent Pool
 agent_pool_configuration_meta = ItemDynamicLayout.set_fields(
     "Configuration",
     fields=[
-        TextDyField.data_source("Pool Name", "name"),
+        TextDyField.data_source("Pool Name", "data.name"),
         TextDyField.data_source("Display Name", "data.display_name"),
         TextDyField.data_source("Project ID", "data.project_id"),
         EnumDyField.data_source(

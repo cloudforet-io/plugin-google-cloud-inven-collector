@@ -27,7 +27,7 @@ Transfer Operation
 operation_configuration_meta = ItemDynamicLayout.set_fields(
     "Configuration",
     fields=[
-        TextDyField.data_source("Operation Name", "name"),
+        TextDyField.data_source("Operation Name", "data.name"),
         TextDyField.data_source("Transfer Job", "data.transfer_job_name"),
         TextDyField.data_source("Project ID", "data.project_id"),
         EnumDyField.data_source(

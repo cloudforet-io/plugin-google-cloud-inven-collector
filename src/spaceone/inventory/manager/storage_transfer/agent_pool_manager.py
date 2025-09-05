@@ -110,12 +110,7 @@ class StorageTransferAgentPoolManager(GoogleCloudManager):
                     # 5. Make Resource Response Object
                     ##################################
                     collected_cloud_services.append(
-                        AgentPoolResponse(
-                            {
-                                "resource_type": "inventory.CloudService",
-                                "resource": agent_pool_resource,
-                            }
-                        )
+                        AgentPoolResponse({"resource": agent_pool_resource})
                     )
 
                 except Exception as e:
