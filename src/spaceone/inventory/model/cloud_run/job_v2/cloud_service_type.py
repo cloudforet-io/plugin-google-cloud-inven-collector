@@ -32,7 +32,7 @@ cst_job.labels = ["Serverless"]
 cst_job.is_primary = True
 cst_job.is_major = True
 cst_job.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Cloud_Run.svg",
+    "spaceone:icon": f"{ASSET_URL}/Cloud-Run.svg",
 }
 
 cst_job._metadata = CloudServiceTypeMeta.set_meta(

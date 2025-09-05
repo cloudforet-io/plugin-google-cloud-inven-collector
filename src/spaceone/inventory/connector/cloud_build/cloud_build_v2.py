@@ -31,7 +31,7 @@ class CloudBuildV2Connector(GoogleCloudConnector):
                     self.client.projects().locations().list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list locations: {e}")
+                _LOGGER.warning(f"Failed to list locations: {e}")
                 break
 
         return locations
@@ -52,7 +52,7 @@ class CloudBuildV2Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list connections: {e}")
+                _LOGGER.warning(f"Failed to list connections: {e}")
                 break
 
         return connections
@@ -80,7 +80,7 @@ class CloudBuildV2Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list repositories: {e}")
+                _LOGGER.warning(f"Failed to list repositories: {e}")
                 break
 
         return repositories

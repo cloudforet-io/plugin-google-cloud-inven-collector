@@ -31,7 +31,7 @@ class CloudRunV1Connector(GoogleCloudConnector):
                 else:
                     break
             except Exception as e:
-                _LOGGER.error(f"Failed to list domain mappings: {e}")
+                _LOGGER.warning(f"Failed to list domain mappings: {e}")
                 break
 
         return domain_mappings
@@ -52,7 +52,7 @@ class CloudRunV1Connector(GoogleCloudConnector):
                 else:
                     break
             except Exception as e:
-                _LOGGER.debug(f"Services API not available in v1: {e}")
+                _LOGGER.warning(f"Failed to list services: {e}")
                 break
                 
         return services
@@ -73,7 +73,7 @@ class CloudRunV1Connector(GoogleCloudConnector):
                 else:
                     break
             except Exception as e:
-                _LOGGER.debug(f"Jobs API not available in v1: {e}")
+                _LOGGER.warning(f"Failed to list jobs: {e}")
                 break
                 
         return jobs
@@ -94,7 +94,7 @@ class CloudRunV1Connector(GoogleCloudConnector):
                 else:
                     break
             except Exception as e:
-                _LOGGER.debug(f"Revisions API not available in v1: {e}")
+                _LOGGER.warning(f"Failed to list revisions: {e}")
                 break
                 
         return revisions
@@ -115,7 +115,7 @@ class CloudRunV1Connector(GoogleCloudConnector):
                 else:
                     break
             except Exception as e:
-                _LOGGER.debug(f"Executions API not available in v1: {e}")
+                _LOGGER.warning(f"Failed to list executions: {e}")
                 break
                 
         return executions
@@ -136,7 +136,7 @@ class CloudRunV1Connector(GoogleCloudConnector):
                 else:
                     break
             except Exception as e:
-                _LOGGER.debug(f"Tasks API not available in v1: {e}")
+                _LOGGER.warning(f"Failed to list tasks: {e}")
                 break
                 
         return tasks
@@ -157,7 +157,7 @@ class CloudRunV1Connector(GoogleCloudConnector):
                 else:
                     break
             except Exception as e:
-                _LOGGER.debug(f"Routes API not available in v1: {e}")
+                _LOGGER.warning(f"Failed to list routes: {e}")
                 break
                 
         return routes
@@ -178,7 +178,7 @@ class CloudRunV1Connector(GoogleCloudConnector):
                 else:
                     break
             except Exception as e:
-                _LOGGER.debug(f"Configurations API not available in v1: {e}")
+                _LOGGER.warning(f"Failed to list configurations: {e}")
                 break
                 
         return configurations
@@ -199,7 +199,7 @@ class CloudRunV1Connector(GoogleCloudConnector):
                 else:
                     break
             except Exception as e:
-                _LOGGER.debug(f"WorkerPools API not available in v1: {e}")
+                _LOGGER.warning(f"Failed to list worker pools: {e}")
                 break
                 
         return worker_pools

@@ -32,7 +32,7 @@ cst_domain_mapping.labels = ["Serverless"]
 cst_domain_mapping.is_primary = True
 cst_domain_mapping.is_major = True
 cst_domain_mapping.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Cloud_Run.svg",
+    "spaceone:icon": f"{ASSET_URL}/Cloud-Run.svg",
 }
 
 cst_domain_mapping._metadata = CloudServiceTypeMeta.set_meta(

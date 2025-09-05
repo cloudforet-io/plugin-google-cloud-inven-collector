@@ -24,7 +24,7 @@ class CloudBuildV1Connector(GoogleCloudConnector):
                 builds.extend(response.get("builds", []))
                 request = self.client.projects().builds().list_next(request, response)
             except Exception as e:
-                _LOGGER.error(f"Failed to list builds: {e}")
+                _LOGGER.warning(f"Failed to list builds: {e}")
                 break
 
         return builds
@@ -45,7 +45,7 @@ class CloudBuildV1Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list location builds: {e}")
+                _LOGGER.warning(f"Failed to list location builds: {e}")
                 break
 
         return builds
@@ -61,7 +61,7 @@ class CloudBuildV1Connector(GoogleCloudConnector):
                 triggers.extend(response.get("triggers", []))
                 request = self.client.projects().triggers().list_next(request, response)
             except Exception as e:
-                _LOGGER.error(f"Failed to list triggers: {e}")
+                _LOGGER.warning(f"Failed to list triggers: {e}")
                 break
 
         return triggers
@@ -82,7 +82,7 @@ class CloudBuildV1Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list location triggers: {e}")
+                _LOGGER.warning(f"Failed to list location triggers: {e}")
                 break
 
         return triggers
@@ -103,7 +103,7 @@ class CloudBuildV1Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list worker pools: {e}")
+                _LOGGER.warning(f"Failed to list worker pools: {e}")
                 break
 
         return worker_pools

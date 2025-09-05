@@ -32,7 +32,7 @@ cst_worker_pool.labels = ["Serverless"]
 cst_worker_pool.is_primary = True
 cst_worker_pool.is_major = True
 cst_worker_pool.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Cloud_Run.svg",
+    "spaceone:icon": f"{ASSET_URL}/Cloud-Run.svg",
 }
 
 cst_worker_pool._metadata = CloudServiceTypeMeta.set_meta(

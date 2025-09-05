@@ -32,7 +32,7 @@ cst_worker_pool.is_primary = True
 cst_worker_pool.is_major = True
 cst_worker_pool.labels = ["Compute", "Developer Tools"]
 cst_worker_pool.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud_Build.svg",
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud-Build.svg",
 }
 
 cst_worker_pool._metadata = CloudServiceTypeMeta.set_meta(

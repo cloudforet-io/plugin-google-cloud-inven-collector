@@ -19,7 +19,7 @@ cst_operation.labels = ["Serverless"]
 cst_operation.is_primary = False
 cst_operation.is_major = False
 cst_operation.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Cloud_Run.svg",
+    "spaceone:icon": f"{ASSET_URL}/Cloud-Run.svg",
 }
 
 cst_operation._metadata = CloudServiceTypeMeta.set_meta(

@@ -33,7 +33,7 @@ cst_trigger.is_primary = True
 cst_trigger.is_major = True
 cst_trigger.labels = ["Compute", "Developer Tools"]
 cst_trigger.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud_Build.svg",
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud-Build.svg",
 }
 
 cst_trigger._metadata = CloudServiceTypeMeta.set_meta(
