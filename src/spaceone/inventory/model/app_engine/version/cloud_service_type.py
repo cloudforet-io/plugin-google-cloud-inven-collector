@@ -31,13 +31,13 @@ cst_app_engine_version.is_primary = False
 cst_app_engine_version.is_major = False
 cst_app_engine_version.labels = ["Compute", "AppEngine"]
 cst_app_engine_version.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Google_App_Engine.svg",
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/App_Engine.svg",
 }
 
 cst_app_engine_version._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source("Name", "data.name"),
-        TextDyField.data_source("Project ID", "data.project_id"),
+        TextDyField.data_source("Project", "data.project_id"),
         TextDyField.data_source("Service ID", "data.service_id"),
         TextDyField.data_source("Version ID", "data.version_id"),
         EnumDyField.data_source("Serving Status", "data.serving_status", default_state={
@@ -54,15 +54,16 @@ cst_app_engine_version._metadata = CloudServiceTypeMeta.set_meta(
         DateTimeDyField.data_source("Updated", "data.update_time"),
     ],
     search=[
-        SearchField.set(name="Version Name", key="data.name"),
+        SearchField.set(name="Name", key="data.name"),
         SearchField.set(name="Version ID", key="data.version_id"),
         SearchField.set(name="Service ID", key="data.service_id"),
-        SearchField.set(name="Project ID", key="data.project_id"),
+        SearchField.set(name="Project", key="data.project_id"),
         SearchField.set(name="Serving Status", key="data.serving_status"),
         SearchField.set(name="Runtime", key="data.runtime"),
         SearchField.set(name="Environment", key="data.environment"),
         SearchField.set(name="Instance Count", key="data.instance_count"),
         SearchField.set(name="Created", key="data.create_time", data_type="datetime"),
+        SearchField.set(name="Updated", key="data.update_time", data_type="datetime"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

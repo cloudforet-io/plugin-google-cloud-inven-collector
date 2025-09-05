@@ -1,0 +1,17 @@
+---
+cloud_service_group: KubernetesEngine
+cloud_service_type: NodePool
+name: Count by Status
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.status
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: PIE
+  name_options:
+    key: name

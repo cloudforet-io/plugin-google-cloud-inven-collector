@@ -1,0 +1,17 @@
+---
+cloud_service_group: KubernetesEngine
+cloud_service_type: NodePool
+name: Count by Machine Type
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.config.machine_type
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: PIE
+  name_options:
+    key: name

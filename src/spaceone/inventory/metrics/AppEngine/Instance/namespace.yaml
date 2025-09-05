@@ -1,0 +1,8 @@
+---
+namespace_id: ns-google-cloud-appengine-instance
+name: AppEngine/Instance
+category: ASSET
+icon: 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/App_Engine.svg'
+version: '1.1'
+resource_type: inventory.CloudService:google_cloud.AppEngine.Instance
+group: google_cloud

@@ -1,0 +1,16 @@
+---
+cloud_service_group: KubernetesEngine
+cloud_service_type: NodePool
+name: Total Node Count
+query:
+  aggregate:
+    - group:
+        fields:
+          - name: value
+            key: data.initial_node_count
+            operator: sum
+options:
+  value_options:
+    key: value
+    options:
+      default: 0
