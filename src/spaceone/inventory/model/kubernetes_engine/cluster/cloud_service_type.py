@@ -29,7 +29,7 @@ cst_gke_cluster = CloudServiceTypeResource()
 cst_gke_cluster.name = "Cluster"
 cst_gke_cluster.provider = "google_cloud"
 cst_gke_cluster.group = "KubernetesEngine"
-cst_gke_cluster.service_code = "Container"
+cst_gke_cluster.service_code = "KubernetesEngine"
 cst_gke_cluster.is_primary = True
 cst_gke_cluster.is_major = True
 cst_gke_cluster.labels = ["Container", "KubernetesEngine"]
@@ -39,7 +39,6 @@ cst_gke_cluster.tags = {
 
 cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("Location", "data.location"),
         EnumDyField.data_source("Status", "data.status", default_state={
             "safe": ["RUNNING"],

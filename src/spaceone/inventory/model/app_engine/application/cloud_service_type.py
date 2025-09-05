@@ -37,8 +37,6 @@ cst_app_engine_application.tags = {
 
 cst_app_engine_application._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Name", "data.name"),
-        TextDyField.data_source("Project", "data.project_id"),
         TextDyField.data_source("Location", "data.location_id"),
         EnumDyField.data_source("Serving Status", "data.serving_status", default_state={
             "safe": ["SERVING"],

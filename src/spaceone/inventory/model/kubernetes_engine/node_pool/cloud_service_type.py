@@ -39,7 +39,6 @@ cst_gke_node_pool.tags = {
 
 cst_gke_node_pool._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("Cluster Name", "data.cluster_name"),
         TextDyField.data_source("Location", "data.location"),
         TextDyField.data_source("Project", "data.project_id"),

@@ -36,8 +36,6 @@ cst_app_engine_version.tags = {
 
 cst_app_engine_version._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Name", "data.name"),
-        TextDyField.data_source("Project", "data.project_id"),
         TextDyField.data_source("Service ID", "data.service_id"),
         TextDyField.data_source("Version ID", "data.version_id"),
         EnumDyField.data_source("Serving Status", "data.serving_status", default_state={
