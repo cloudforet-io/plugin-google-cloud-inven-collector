@@ -38,7 +38,7 @@ cst_index.is_primary = False
 cst_index.is_major = True
 cst_index.resource_type = "inventory.CloudService"
 cst_index.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Cloud_Datastore.svg",  # TODO: Need to add specific Datastore icon in the future
+    "spaceone:icon": f"{ASSET_URL}/Datastore.svg",
     "spaceone:display_name": "Datastore Index",
 }
 

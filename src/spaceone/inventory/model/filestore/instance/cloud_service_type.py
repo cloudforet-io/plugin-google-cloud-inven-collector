@@ -34,7 +34,7 @@ cst_filestore_instance.is_primary = True
 cst_filestore_instance.is_major = True
 cst_filestore_instance.labels = ["Storage", "FileSystem"]
 cst_filestore_instance.tags = {
-    "spaceone:icon": f"{ASSET_URL}/FileStore.svg",  # TODO: Add specific icon
+    "spaceone:icon": f"{ASSET_URL}/Filestore.svg",
     "spaceone:display_name": "Filestore",
 }
 

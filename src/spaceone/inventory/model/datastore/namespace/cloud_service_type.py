@@ -37,7 +37,7 @@ cst_namespace.is_primary = False
 cst_namespace.is_major = True
 cst_namespace.resource_type = "inventory.CloudService"
 cst_namespace.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Cloud_Datastore.svg",  # TODO: Need to add specific Datastore icon in the future
+    "spaceone:icon": f"{ASSET_URL}/Datastore.svg",
 }
 
 # 메타데이터 설정

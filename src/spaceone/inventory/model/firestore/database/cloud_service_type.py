@@ -36,7 +36,7 @@ cst_database.is_primary = True
 cst_database.is_major = True
 cst_database.labels = ["Database", "NoSQL"]
 cst_database.tags = {
-    "spaceone:icon": f"{ASSET_URL}/firestore.svg",  # TODO: Need to add specific Firestore icon in the future
+    "spaceone:icon": f"{ASSET_URL}/Firestore.svg",
 }
 
 cst_database._metadata = CloudServiceTypeMeta.set_meta(
