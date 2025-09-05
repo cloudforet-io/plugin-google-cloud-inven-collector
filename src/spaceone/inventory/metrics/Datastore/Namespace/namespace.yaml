@@ -3,6 +3,6 @@ namespace_id: ns-google-cloud-datastore-namespace
 name: Datastore/Namespace
 category: ASSET
 icon: 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud_Datastore.svg'
-version: '1.1'
+version: '1.0'
 resource_type: inventory.CloudService:google_cloud.Datastore.Namespace
 group: google_cloud 

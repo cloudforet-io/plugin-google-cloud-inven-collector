@@ -1,30 +1,12 @@
----
-metric_id: metric-google-cloud-firestore-document-count
 name: Document Count
-metric_type: GAUGE
-resource_type: inventory.CloudService:google_cloud.Firestore.Database
+resource_type: inventory.CloudService
 query_options:
   group_by:
-    - key: region_code
-      name: Region
-      search_key: region_code
-      reference:
-        resource_type: inventory.Region
-        reference_key: region_code
-    - key: account
-      name: Project ID
-      search_key: account
-    - key: data.id
-      name: Database ID
-      search_key: data.id
-      default: true
-    - key: data.location_id
-      name: Location
-      search_key: data.location_id
+    - name: project_id
+      key: account
+    - name: database_id
+      key: data.id
   fields:
-    value:
+    document_count:
       key: data.document_count
-      operator: sum
-unit: Count
-namespace_id: ns-google-cloud-firestore-database
-version: '1.1' 
+      operator: sum 
