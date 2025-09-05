@@ -37,24 +37,6 @@ kms_keyring_info_meta = ItemDynamicLayout.set_fields(
     ],
 )
 
-# TAB - Location Details
-# KeyRing이 속한 Location의 상세 정보를 표시하는 탭
-kms_keyring_location_meta = ItemDynamicLayout.set_fields(
-    "Location Details",
-    fields=[
-        TextDyField.data_source("Location Path", "data.full_location_path"),
-        TextDyField.data_source("Display Name", "data.location_display_name"),
-        ListDyField.data_source(
-            "Location Labels",
-            "data.location_labels",
-            default_badge={
-                "type": "secondary",
-                "delimiter": " : ",
-            },
-        ),
-    ],
-)
-
 # TAB - CryptoKeys
 # KeyRing 내부의 CryptoKey 목록을 표시하는 탭
 kms_keyring_crypto_keys_meta = TableDynamicLayout.set_fields(
