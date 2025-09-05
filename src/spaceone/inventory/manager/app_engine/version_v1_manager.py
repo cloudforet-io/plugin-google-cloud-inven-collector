@@ -17,6 +17,7 @@ from spaceone.inventory.model.app_engine.version.cloud_service import (
 from spaceone.inventory.model.app_engine.version.data import (
     AppEngineVersion,
 )
+from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_datetime
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 
 _LOGGER = logging.getLogger(__name__)
@@ -211,8 +212,8 @@ class AppEngineVersionV1Manager(GoogleCloudManager):
                         "servingStatus": str(version.get("servingStatus", "")),
                         "runtime": str(version.get("runtime", "")),
                         "environment": str(version.get("environment", "")),
-                        "createTime": version.get("createTime"),
-                        "updateTime": version.get("updateTime"),
+                        "createTime": convert_datetime(version.get("createTime")),
+                        "updateTime": convert_datetime(version.get("updateTime")),
                         "instance_count": str(len(instances)),
                         "memory_usage": str(metrics.get("memory_usage", 0)),
                         "cpu_usage": str(metrics.get("cpu_usage", 0)),

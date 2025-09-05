@@ -60,7 +60,7 @@ class GKEClusterV1Connector(GoogleCloudConnector):
                     # list_next가 없는 경우 첫 페이지만 처리
                     break
         except Exception as e:
-            _LOGGER.error(f"Failed to list GKE clusters (v1): {e}")
+            _LOGGER.warning(f"Failed to list GKE clusters (v1): {e}")
             
         return cluster_list
 
@@ -74,7 +74,7 @@ class GKEClusterV1Connector(GoogleCloudConnector):
             )
             return request.execute()
         except Exception as e:
-            _LOGGER.error(f"Failed to get GKE cluster {name} (v1): {e}")
+            _LOGGER.warning(f"Failed to get GKE cluster {name} (v1): {e}")
             return None
 
     def list_node_pools(self, cluster_name, location, **query):
@@ -102,7 +102,7 @@ class GKEClusterV1Connector(GoogleCloudConnector):
                     # list_next가 없는 경우 첫 페이지만 처리
                     break
         except Exception as e:
-            _LOGGER.error(f"Failed to list node pools for cluster {cluster_name} (v1): {e}")
+            _LOGGER.warning(f"Failed to list node pools for cluster {cluster_name} (v1): {e}")
             
         return node_pool_list
 
@@ -129,7 +129,7 @@ class GKEClusterV1Connector(GoogleCloudConnector):
                     # list_next가 없는 경우 첫 페이지만 처리
                     break
         except Exception as e:
-            _LOGGER.error(f"Failed to list GKE operations (v1): {e}")
+            _LOGGER.warning(f"Failed to list GKE operations (v1): {e}")
             
         return operation_list
 
@@ -149,6 +149,6 @@ class GKEClusterV1Connector(GoogleCloudConnector):
             if cluster_info and "workloadPolicyConfig" in cluster_info:
                 workload_list.append(cluster_info["workloadPolicyConfig"])
         except Exception as e:
-            _LOGGER.error(f"Failed to list workloads for cluster {cluster_name} (v1): {e}")
+            _LOGGER.warning(f"Failed to list workloads for cluster {cluster_name} (v1): {e}")
             
         return workload_list

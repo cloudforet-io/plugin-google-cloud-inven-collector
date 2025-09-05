@@ -17,6 +17,7 @@ from spaceone.inventory.model.app_engine.instance.cloud_service import (
 from spaceone.inventory.model.app_engine.instance.data import (
     AppEngineInstance,
 )
+from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_datetime
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 
 _LOGGER = logging.getLogger(__name__)
@@ -231,8 +232,8 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                     "requestCount": instance.get("requestCount"),
                     "memoryUsage": instance.get("memoryUsage"),
                     "cpuUsage": instance.get("cpuUsage"),
-                    "createTime": instance.get("createTime"),
-                    "updateTime": instance.get("updateTime"),
+                    "createTime": convert_datetime(instance.get("createTime")),
+                    "updateTime": convert_datetime(instance.get("updateTime")),
                 }
 
                 # VM Details 추가

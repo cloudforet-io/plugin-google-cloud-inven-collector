@@ -1,0 +1,17 @@
+---
+cloud_service_group: KubernetesEngine
+cloud_service_type: NodePool
+name: Count by Account
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: account
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: COLUMN
+  name_options:
+    key: name

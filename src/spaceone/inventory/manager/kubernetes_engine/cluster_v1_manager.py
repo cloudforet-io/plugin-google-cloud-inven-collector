@@ -16,6 +16,7 @@ from spaceone.inventory.model.kubernetes_engine.cluster.cloud_service import (
 )
 from spaceone.inventory.model.kubernetes_engine.cluster.data import (
     GKECluster,
+    convert_datetime,
 )
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 
@@ -158,8 +159,8 @@ class GKEClusterV1Manager(GoogleCloudManager):
                     ),
                     "currentNodeVersion": str(cluster.get("currentNodeVersion", "")),
                     "currentNodeCount": str(cluster.get("currentNodeCount", "")),
-                    "createTime": cluster.get("createTime"),
-                    "updateTime": cluster.get("updateTime"),
+                    "createTime": convert_datetime(cluster.get("createTime")),
+                    "updateTime": convert_datetime(cluster.get("updateTime")),
                     "resourceLabels": {
                         k: str(v) for k, v in cluster.get("resourceLabels", {}).items()
                     },

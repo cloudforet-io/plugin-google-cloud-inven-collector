@@ -47,20 +47,7 @@ gke_cluster = ItemDynamicLayout.set_fields(
     ],
 )
 
-node_pools = TableDynamicLayout.set_fields(
-    "Node Pools",
-    root_path="data.node_pools",
-    fields=[
-        TextDyField.data_source("Name", "name"),
-        TextDyField.data_source("Version", "version"),
-        TextDyField.data_source("Machine Type", "config.machine_type"),
-        TextDyField.data_source("Disk Size GB", "config.disk_size_gb"),
-        TextDyField.data_source("Disk Type", "config.disk_type"),
-        TextDyField.data_source("Image Type", "config.image_type"),
-        TextDyField.data_source("Node Count", "config.node_count"),
-        TextDyField.data_source("Status", "status"),
-    ],
-)
+# Node Pools 정보는 별도 NodePool 서비스로 분리됨
 
 network_config = ItemDynamicLayout.set_fields(
     "Network Configuration",
@@ -116,7 +103,7 @@ labels = TableDynamicLayout.set_fields(
 )
 
 gke_cluster_meta = CloudServiceMeta.set_layouts(
-    [gke_cluster, node_pools, network_config, addons_config, labels]
+    [gke_cluster, network_config, addons_config, labels]
 )
 
 
