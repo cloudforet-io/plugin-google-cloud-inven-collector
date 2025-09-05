@@ -1,5 +1,5 @@
 import os
-
+from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.common_parser import *
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     TextDyField,
@@ -31,7 +31,7 @@ cst_app_engine_version.is_primary = False
 cst_app_engine_version.is_major = False
 cst_app_engine_version.labels = ["Compute", "AppEngine"]
 cst_app_engine_version.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/App-Engine.svg",
+    "spaceone:icon": f"{ASSET_URL}/App-Engine.svg",
 }
 
 cst_app_engine_version._metadata = CloudServiceTypeMeta.set_meta(

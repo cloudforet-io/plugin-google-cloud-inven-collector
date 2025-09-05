@@ -1,5 +1,6 @@
 import os
 
+from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.common_parser import *
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     TextDyField,
@@ -33,7 +34,7 @@ cst_gke_cluster.is_primary = True
 cst_gke_cluster.is_major = True
 cst_gke_cluster.labels = ["Container", "KubernetesEngine"]
 cst_gke_cluster.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Google-Kubernetes-Engine.svg",
+    "spaceone:icon": f"{ASSET_URL}/Google-Kubernetes-Engine.svg",
 }
 
 cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
