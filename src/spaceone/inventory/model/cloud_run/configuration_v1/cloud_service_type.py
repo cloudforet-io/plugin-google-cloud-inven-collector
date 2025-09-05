@@ -1,6 +1,6 @@
 import os
 
-from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
+# from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
@@ -29,7 +29,7 @@ cst_configuration_v1.labels = ["Compute", "Container"]
 cst_configuration_v1.is_primary = True
 cst_configuration_v1.service_code = "Cloud Run"
 cst_configuration_v1.tags = {
-    "spaceone:icon": f"{ASSET_URL}/google_cloud/icons/Cloud-Run.svg"
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud-Run.svg"
 }
 
 cst_configuration_v1._metadata = CloudServiceTypeMeta.set_meta(
