@@ -29,7 +29,7 @@ cst_configuration_v1.labels = ["Compute", "Container"]
 cst_configuration_v1.is_primary = True
 cst_configuration_v1.service_code = "Cloud Run"
 cst_configuration_v1.tags = {
-    "spaceone:icon": f"{ASSET_URL}/google_cloud/icons/Cloud_Run.svg"
+    "spaceone:icon": f"{ASSET_URL}/google_cloud/icons/Cloud-Run.svg"
 }
 
 cst_configuration_v1._metadata = CloudServiceTypeMeta.set_meta(

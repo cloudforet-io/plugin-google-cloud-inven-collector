@@ -30,7 +30,7 @@ class CloudRunV2Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list services: {e}")
+                _LOGGER.warning(f"Failed to list services: {e}")
                 break
 
         return services
@@ -54,7 +54,7 @@ class CloudRunV2Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list revisions: {e}")
+                _LOGGER.warning(f"Failed to list revisions: {e}")
                 break
 
         return revisions
@@ -75,7 +75,7 @@ class CloudRunV2Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list jobs: {e}")
+                _LOGGER.warning(f"Failed to list jobs: {e}")
                 break
 
         return jobs
@@ -97,7 +97,7 @@ class CloudRunV2Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list executions: {e}")
+                _LOGGER.warning(f"Failed to list executions: {e}")
                 break
 
         return executions
@@ -122,7 +122,7 @@ class CloudRunV2Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list tasks: {e}")
+                _LOGGER.warning(f"Failed to list tasks: {e}")
                 break
 
         return tasks
@@ -143,7 +143,7 @@ class CloudRunV2Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list worker pools: {e}")
+                _LOGGER.warning(f"Failed to list worker pools: {e}")
                 break
 
         return worker_pools
@@ -167,7 +167,7 @@ class CloudRunV2Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.error(f"Failed to list worker pool revisions: {e}")
+                _LOGGER.warning(f"Failed to list worker pool revisions: {e}")
                 break
 
         return revisions
@@ -186,6 +186,6 @@ class CloudRunV2Connector(GoogleCloudConnector):
                     request, response
                 )
         except Exception as e:
-            _LOGGER.debug(f"Operations API not available in v2: {e}")
+            _LOGGER.warning(f"Failed to list operations: {e}")
             return []
         return operations

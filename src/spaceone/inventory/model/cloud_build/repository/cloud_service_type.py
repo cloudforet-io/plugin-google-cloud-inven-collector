@@ -31,7 +31,7 @@ cst_repository.is_primary = True
 cst_repository.is_major = True
 cst_repository.labels = ["Compute", "Developer Tools"]
 cst_repository.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud_Build.svg",
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud-Build.svg",
 }
 
 cst_repository._metadata = CloudServiceTypeMeta.set_meta(
