@@ -1,8 +1,25 @@
 from schematics import Model
-from schematics.types import ModelType, StringType, IntType, DateTimeType, BooleanType, ListType, DictType
-from spaceone.inventory.libs.schema.cloud_service import CloudServiceResource, CloudServiceResponse, CloudServiceMeta
-from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField, DateTimeDyField, EnumDyField, ListDyField
-from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout, TableDynamicLayout, ListDynamicLayout, SimpleTableDynamicLayout
+from schematics.types import (
+    BooleanType,
+    DateTimeType,
+    DictType,
+    IntType,
+    ListType,
+    ModelType,
+    StringType,
+)
+
+from spaceone.inventory.libs.schema.cloud_service import (
+    CloudServiceMeta,
+    CloudServiceResource,
+    CloudServiceResponse,
+)
+from spaceone.inventory.libs.schema.metadata.dynamic_field import (
+    DateTimeDyField,
+    EnumDyField,
+    TextDyField,
+)
+from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout
 
 
 class NodeConfig(Model):
@@ -87,7 +104,6 @@ class NodePoolResource(CloudServiceResource):
     def _set_meta(cls):
         meta = CloudServiceMeta.set_meta(
             fields=[
-                TextDyField.data_source("Name", "data.name"),
                 TextDyField.data_source("Cluster Name", "data.cluster_name"),
                 TextDyField.data_source("Location", "data.location"),
                 TextDyField.data_source("Project", "data.project_id"),
@@ -107,7 +123,6 @@ class NodePoolResource(CloudServiceResource):
             ],
             layouts=[
                 ItemDynamicLayout.set_fields("NodePool Details", fields=[
-                    TextDyField.data_source("Name", "data.name"),
                     TextDyField.data_source("Cluster Name", "data.cluster_name"),
                     TextDyField.data_source("Location", "data.location"),
                     EnumDyField.data_source("Status", "data.status", default_state={
