@@ -1,6 +1,6 @@
 import os
 
-from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
+# from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
@@ -30,7 +30,7 @@ cst_cluster.is_primary = True
 cst_cluster.is_major = True
 cst_cluster.resource_type = "inventory.CloudService"
 
-cst_cluster.metadata = CloudServiceTypeMeta.set_meta(
+cst_cluster._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         EnumDyField.data_source(
             "Status",
@@ -76,7 +76,7 @@ cst_cluster.metadata = CloudServiceTypeMeta.set_meta(
 )
 
 cst_cluster.tags = {
-    "spaceone:icon": f"{ASSET_URL}/google_dataproc.svg",
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Dataproc.svg",
 }
 
 CLOUD_SERVICE_TYPES = [
