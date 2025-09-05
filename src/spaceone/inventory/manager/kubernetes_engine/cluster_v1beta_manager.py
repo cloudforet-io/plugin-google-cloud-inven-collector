@@ -54,37 +54,14 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
             _LOGGER.error(f"Failed to list GKE clusters (v1beta1): {e}")
             return []
 
-    def list_node_pools(
-        self, cluster_name: str, location: str, params: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
-        """특정 클러스터의 노드풀 목록을 조회합니다 (v1beta1 API).
-
-        Args:
-            cluster_name: 클러스터 이름.
-            location: 클러스터 위치.
-            params: 조회에 필요한 파라미터 딕셔너리.
-
-        Returns:
-            노드풀 목록.
-
-        Raises:
-            Exception: GKE API 호출 중 오류 발생 시.
-        """
-        cluster_connector: GKEClusterV1BetaConnector = self.locator.get_connector(
-            self.connector_name, **params
-        )
-
-        try:
-            node_pools = cluster_connector.list_node_pools(cluster_name, location)
-            _LOGGER.info(
-                f"Found {len(node_pools)} node pools for cluster {cluster_name} (v1beta1)"
-            )
-            return node_pools
-        except Exception as e:
-            _LOGGER.error(
-                f"Failed to list node pools for cluster {cluster_name} (v1beta1): {e}"
-            )
-            return []
+    # NodePool 관련 기능은 별도의 NodePoolManager에서 처리
+    # def list_node_pools(self, cluster_name: str, location: str, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+    #     """특정 클러스터의 노드풀 목록을 조회합니다 (v1beta1 API).
+    #     
+    #     이 메서드는 제거되었습니다. 노드풀 정보는 GKENodePoolManager를 사용하세요.
+    #     """
+    #     _LOGGER.warning("list_node_pools method is deprecated. Use GKENodePoolManager instead.")
+    #     return []
 
     def get_cluster(
         self, name: str, location: str, params: Dict[str, Any]
@@ -214,11 +191,7 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
         for cluster in clusters:
             try:
                 # 클러스터별 노드풀 정보 조회
-                node_pools = []
-                if cluster.get("name") and cluster.get("location"):
-                    node_pools = self.list_node_pools(
-                        cluster["name"], cluster["location"], params
-                    )
+                # NodePool 정보는 별도의 NodePoolManager에서 처리
 
                 # v1beta1 전용 정보 조회
                 fleet_info = None
@@ -354,61 +327,7 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
                         ),
                     }
 
-                # 노드풀 정보 추가
-                if node_pools:
-                    simplified_node_pools = []
-                    for node_pool in node_pools:
-                        simplified_pool = {
-                            "name": str(node_pool.get("name", "")),
-                            "version": str(node_pool.get("version", "")),
-                            "status": str(node_pool.get("status", "")),
-                        }
-
-                        # config 정보 추가
-                        if "config" in node_pool:
-                            config = node_pool["config"]
-                            simplified_pool["config"] = str(
-                                {
-                                    "machineType": str(config.get("machineType", "")),
-                                    "diskSizeGb": str(config.get("diskSizeGb", "")),
-                                    "diskType": str(config.get("diskType", "")),
-                                    "imageType": str(config.get("imageType", "")),
-                                    "initialNodeCount": str(
-                                        config.get("initialNodeCount", "")
-                                    ),
-                                }
-                            )
-
-                        # autoscaling 정보 추가
-                        if "autoscaling" in node_pool:
-                            autoscaling = node_pool["autoscaling"]
-                            simplified_pool["autoscaling"] = str(
-                                {
-                                    "enabled": str(autoscaling.get("enabled", "")),
-                                    "minNodeCount": str(
-                                        autoscaling.get("minNodeCount", "")
-                                    ),
-                                    "maxNodeCount": str(
-                                        autoscaling.get("maxNodeCount", "")
-                                    ),
-                                }
-                            )
-
-                        # management 정보 추가
-                        if "management" in node_pool:
-                            management = node_pool["management"]
-                            simplified_pool["management"] = str(
-                                {
-                                    "autoRepair": str(management.get("autoRepair", "")),
-                                    "autoUpgrade": str(
-                                        management.get("autoUpgrade", "")
-                                    ),
-                                }
-                            )
-
-                        simplified_node_pools.append(simplified_pool)
-
-                    cluster_data["nodePools"] = simplified_node_pools
+                # NodePool 정보는 별도의 NodePoolManager에서 처리
 
                 # v1beta1 전용 정보 추가
                 if fleet_info:

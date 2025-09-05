@@ -143,9 +143,7 @@ class GKEClusterV1Manager(GoogleCloudManager):
 
         for cluster in clusters:
             try:
-                # 노드풀 정보는 별도의 NodePoolManager에서 처리
-                # 클러스터 정보만 수집
-                node_pools = []
+                # NodePool 정보는 별도의 NodePoolManager에서 처리
 
                 # 기본 클러스터 데이터 준비
                 cluster_data = {
@@ -257,61 +255,7 @@ class GKEClusterV1Manager(GoogleCloudManager):
                         ),
                     }
 
-                # 노드풀 정보 추가
-                if node_pools:
-                    simplified_node_pools = []
-                    for node_pool in node_pools:
-                        simplified_pool = {
-                            "name": str(node_pool.get("name", "")),
-                            "version": str(node_pool.get("version", "")),
-                            "status": str(node_pool.get("status", "")),
-                        }
-
-                        # config 정보 추가
-                        if "config" in node_pool:
-                            config = node_pool["config"]
-                            simplified_pool["config"] = str(
-                                {
-                                    "machineType": str(config.get("machineType", "")),
-                                    "diskSizeGb": str(config.get("diskSizeGb", "")),
-                                    "diskType": str(config.get("diskType", "")),
-                                    "imageType": str(config.get("imageType", "")),
-                                    "initialNodeCount": str(
-                                        config.get("initialNodeCount", "")
-                                    ),
-                                }
-                            )
-
-                        # autoscaling 정보 추가
-                        if "autoscaling" in node_pool:
-                            autoscaling = node_pool["autoscaling"]
-                            simplified_pool["autoscaling"] = str(
-                                {
-                                    "enabled": str(autoscaling.get("enabled", "")),
-                                    "minNodeCount": str(
-                                        autoscaling.get("minNodeCount", "")
-                                    ),
-                                    "maxNodeCount": str(
-                                        autoscaling.get("maxNodeCount", "")
-                                    ),
-                                }
-                            )
-
-                        # management 정보 추가
-                        if "management" in node_pool:
-                            management = node_pool["management"]
-                            simplified_pool["management"] = str(
-                                {
-                                    "autoRepair": str(management.get("autoRepair", "")),
-                                    "autoUpgrade": str(
-                                        management.get("autoUpgrade", "")
-                                    ),
-                                }
-                            )
-
-                        simplified_node_pools.append(simplified_pool)
-
-                    cluster_data["nodePools"] = simplified_node_pools
+                # NodePool 정보는 별도의 NodePoolManager에서 처리
 
                 # GKECluster 모델 생성
                 gke_cluster_data = GKECluster(cluster_data, strict=False)

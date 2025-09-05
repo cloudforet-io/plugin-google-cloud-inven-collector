@@ -36,7 +36,6 @@ gke_cluster = ItemDynamicLayout.set_fields(
         ),
         TextDyField.data_source("Kubernetes Version", "data.current_master_version"),
         TextDyField.data_source("Node Count", "data.current_node_count"),
-        TextDyField.data_source("Node Pool Count", "data.node_pool_count"),
         TextDyField.data_source("Network", "data.network"),
         TextDyField.data_source("Subnetwork", "data.subnetwork"),
         TextDyField.data_source("Cluster IPV4 CIDR", "data.cluster_ipv4_cidr"),

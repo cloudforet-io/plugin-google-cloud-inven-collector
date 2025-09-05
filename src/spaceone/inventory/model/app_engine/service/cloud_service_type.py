@@ -30,7 +30,7 @@ cst_app_engine_service.is_primary = False
 cst_app_engine_service.is_major = False
 cst_app_engine_service.labels = ["Compute", "AppEngine"]
 cst_app_engine_service.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/App_Engine.svg",
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/App-Engine.svg",
 }
 
 cst_app_engine_service._metadata = CloudServiceTypeMeta.set_meta(

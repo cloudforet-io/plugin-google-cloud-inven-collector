@@ -27,7 +27,7 @@ def convert_datetime(iso_string: str) -> str:
         return iso_string
 
 
-def parse_cluster_data(cluster_data: Dict, node_pools: List[Dict] = None, fleet_info: Dict = None, membership_info: Dict = None, api_version: str = "v1") -> Dict:
+def parse_cluster_data(cluster_data: Dict, fleet_info: Dict = None, membership_info: Dict = None, api_version: str = "v1") -> Dict:
     """GKE 클러스터 데이터를 파싱합니다 (v1/v1beta API 통합)."""
     if not cluster_data:
         return {}
@@ -114,47 +114,7 @@ def parse_cluster_data(cluster_data: Dict, node_pools: List[Dict] = None, fleet_
             "networkPolicyConfig": str(addons_config.get("networkPolicyConfig", {})),
         }
     
-    # 노드풀 정보 - 기본 정보만 추출
-    if node_pools:
-        simplified_node_pools = []
-        for node_pool in node_pools:
-            simplified_pool = {
-                "name": str(node_pool.get("name", "")),
-                "version": str(node_pool.get("version", "")),
-                "status": str(node_pool.get("status", "")),
-            }
-            
-            # config 정보 추출
-            if "config" in node_pool:
-                config = node_pool["config"]
-                simplified_pool["config"] = str({
-                    "machineType": str(config.get("machineType", "")),
-                    "diskSizeGb": str(config.get("diskSizeGb", "")),
-                    "diskType": str(config.get("diskType", "")),
-                    "imageType": str(config.get("imageType", "")),
-                    "initialNodeCount": str(config.get("initialNodeCount", "")),
-                })
-            
-            # autoscaling 정보 추출
-            if "autoscaling" in node_pool:
-                autoscaling = node_pool["autoscaling"]
-                simplified_pool["autoscaling"] = str({
-                    "enabled": str(autoscaling.get("enabled", "")),
-                    "minNodeCount": str(autoscaling.get("minNodeCount", "")),
-                    "maxNodeCount": str(autoscaling.get("maxNodeCount", "")),
-                })
-            
-            # management 정보 추출
-            if "management" in node_pool:
-                management = node_pool["management"]
-                simplified_pool["management"] = str({
-                    "autoRepair": str(management.get("autoRepair", "")),
-                    "autoUpgrade": str(management.get("autoUpgrade", "")),
-                })
-            
-            simplified_node_pools.append(simplified_pool)
-        
-        parsed_data["nodePools"] = simplified_node_pools
+    # NodePool 정보는 별도의 NodePool 서비스에서 처리
     
     # v1beta 전용 정보 (Fleet, Membership)
     if api_version == "v1beta1":
@@ -181,32 +141,7 @@ class Labels(Model):
     value = StringType()
 
 
-class NodePoolConfig(Model):
-    machine_type = StringType(deserialize_from="machineType", serialize_when_none=False)
-    disk_size_gb = IntType(deserialize_from="diskSizeGb", serialize_when_none=False)
-    disk_type = StringType(deserialize_from="diskType", serialize_when_none=False)
-    image_type = StringType(deserialize_from="imageType", serialize_when_none=False)
-    node_count = IntType(deserialize_from="initialNodeCount", serialize_when_none=False)
-
-
-class NodePoolAutoscaling(Model):
-    enabled = BooleanType(serialize_when_none=False)
-    min_node_count = IntType(deserialize_from="minNodeCount", serialize_when_none=False)
-    max_node_count = IntType(deserialize_from="maxNodeCount", serialize_when_none=False)
-
-
-class NodePoolManagement(Model):
-    auto_repair = BooleanType(deserialize_from="autoRepair", serialize_when_none=False)
-    auto_upgrade = BooleanType(deserialize_from="autoUpgrade", serialize_when_none=False)
-
-
-class NodePool(Model):
-    name = StringType(serialize_when_none=False)
-    version = StringType(serialize_when_none=False)
-    config = ModelType(NodePoolConfig, serialize_when_none=False)
-    autoscaling = ModelType(NodePoolAutoscaling, serialize_when_none=False)
-    management = ModelType(NodePoolManagement, serialize_when_none=False)
-    status = StringType(serialize_when_none=False)
+# NodePool 관련 모델들은 별도의 NodePool 서비스에서 정의됨
 
 
 class NetworkConfig(Model):
@@ -289,7 +224,6 @@ class GKECluster(BaseResource):
     current_master_version = StringType(deserialize_from="currentMasterVersion", serialize_when_none=False)
     current_node_version = StringType(deserialize_from="currentNodeVersion", serialize_when_none=False)
     current_node_count = IntType(deserialize_from="currentNodeCount", serialize_when_none=False)
-    node_pool_count = IntType(serialize_when_none=False)
     create_time = StringType(deserialize_from="createTime", serialize_when_none=False)
     update_time = StringType(deserialize_from="updateTime", serialize_when_none=False)
     resource_labels = DictType(StringType, deserialize_from="resourceLabels", serialize_when_none=False)
@@ -302,8 +236,7 @@ class GKECluster(BaseResource):
     services_ipv4_cidr = StringType(deserialize_from="servicesIpv4Cidr", serialize_when_none=False)
     network_config = DictType(StringType, deserialize_from="networkConfig", serialize_when_none=False)
     
-    # Node Pools
-    node_pools = ListType(DictType(StringType), deserialize_from="nodePools", default=[], serialize_when_none=False)
+    # NodePool 정보는 별도의 NodePool 서비스에서 관리
     
     # Configurations
     master_auth = DictType(StringType, deserialize_from="masterAuth", serialize_when_none=False)

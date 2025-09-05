@@ -1,0 +1,32 @@
+---
+metric_id: metric-google-cloud-gke-nodepool-count
+name: NodePool Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.KubernetesEngine.NodePool
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.status
+      name: NodePool Status
+      search_key: data.status
+      default: true
+    - key: data.config.machine_type
+      name: Machine Type
+      search_key: data.config.machine_type
+    - key: data.cluster_name
+      name: Cluster Name
+      search_key: data.cluster_name
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-gke-nodepool
+version: '1.0'

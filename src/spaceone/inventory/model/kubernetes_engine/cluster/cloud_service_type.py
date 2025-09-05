@@ -33,7 +33,7 @@ cst_gke_cluster.is_primary = True
 cst_gke_cluster.is_major = True
 cst_gke_cluster.labels = ["Container", "KubernetesEngine"]
 cst_gke_cluster.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Kubernetes_Engine.svg",
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Google-Kubernetes-Engine.svg",
 }
 
 cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
@@ -47,7 +47,6 @@ cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
         }),
         TextDyField.data_source("Kubernetes Version", "data.current_master_version"),
         TextDyField.data_source("Node Count", "data.current_node_count"),
-        TextDyField.data_source("Node Pool Count", "data.node_pool_count"),
         TextDyField.data_source("Network", "data.network"),
         TextDyField.data_source("Subnetwork", "data.subnetwork"),
         TextDyField.data_source("Cluster IPV4 CIDR", "data.cluster_ipv4_cidr"),
