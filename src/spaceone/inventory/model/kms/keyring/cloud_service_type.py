@@ -50,9 +50,18 @@ cst_keyring._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Location ID", key="data.location_id"),
         SearchField.set(name="Location", key="data.location_display_name"),
         SearchField.set(name="Project ID", key="data.project_id"),
-        SearchField.set(name="CryptoKey Count", key="data.crypto_key_count"),
+        SearchField.set(
+            name="CryptoKey Count", key="data.crypto_key_count", data_type="integer"
+        ),
         SearchField.set(
             name="Created Time", key="data.create_time", data_type="datetime"
+        ),
+        SearchField.set(name="Account", key="account"),
+        SearchField.set(name="Region", key="region_code"),
+        SearchField.set(
+            name="Project Group",
+            key="project_group_id",
+            reference="identity.ProjectGroup",
         ),
     ],
     widget=[
