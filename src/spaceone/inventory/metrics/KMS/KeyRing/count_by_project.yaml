@@ -4,6 +4,7 @@ name: Count by Project
 metric_type: GAUGE
 description: Count KeyRings by project
 resource_type: inventory.CloudService
+namespace_id: ns-google-cloud-kms-keyring
 query_options:
   aggregate:
     - group:
