@@ -45,6 +45,9 @@ class Job(Model):
     name = StringType()
     uid = StringType()
     generation = IntType()
+    project = StringType()  # Project ID
+    location = StringType()  # Location/Region
+    region = StringType()    # Region info
     labels = DictType(StringType, default={})
     annotations = DictType(StringType, default={})
     create_time = DateTimeType(deserialize_from="createTime")

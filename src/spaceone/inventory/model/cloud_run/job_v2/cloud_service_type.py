@@ -1,6 +1,5 @@
 import os
 
-from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
@@ -32,33 +31,33 @@ cst_job.labels = ["Serverless"]
 cst_job.is_primary = True
 cst_job.is_major = True
 cst_job.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Cloud-Run.svg",
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud-Run.svg",
 }
 
 cst_job._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         EnumDyField.data_source(
             "Status",
-            "data.status.conditions.0.status",
+            "data.terminal_condition.state",
             default_state={
-                "safe": ["True"],
-                "warning": ["False"],
-                "alert": ["Unknown"],
+                "safe": ["CONDITION_SUCCEEDED"],
+                "warning": ["CONDITION_PENDING"],
+                "alert": ["CONDITION_FAILED"],
             },
         ),
-        TextDyField.data_source("Location", "data.metadata.location"),
-        TextDyField.data_source("Project", "data.metadata.project"),
+        TextDyField.data_source("Location", "data.location"),
+        TextDyField.data_source("Project", "data.project"),
         TextDyField.data_source("Execution Count", "data.execution_count"),
         TextDyField.data_source(
-            "Latest Created Execution", "data.latestCreatedExecution"
+            "Latest Created Execution", "data.latest_created_execution.name"
         ),
     ],
     search=[
-        SearchField.set(name="Name", key="data.metadata.name"),
-        SearchField.set(name="Job ID", key="data.metadata.uid"),
-        SearchField.set(name="Location", key="data.metadata.location"),
-        SearchField.set(name="Project", key="data.metadata.project"),
-        SearchField.set(name="Status", key="data.status.conditions.0.status"),
+        SearchField.set(name="Name", key="data.name"),
+        SearchField.set(name="Job ID", key="data.uid"),
+        SearchField.set(name="Location", key="data.location"),
+        SearchField.set(name="Project", key="data.project"),
+        SearchField.set(name="Status", key="data.terminal_condition.state"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
