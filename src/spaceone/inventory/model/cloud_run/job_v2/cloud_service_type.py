@@ -46,7 +46,6 @@ cst_job._metadata = CloudServiceTypeMeta.set_meta(
                 "alert": ["Unknown"],
             },
         ),
-        TextDyField.data_source("Job Name", "data.metadata.name"),
         TextDyField.data_source("Location", "data.metadata.location"),
         TextDyField.data_source("Project", "data.metadata.project"),
         TextDyField.data_source("Execution Count", "data.execution_count"),
@@ -56,7 +55,6 @@ cst_job._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Name", key="data.metadata.name"),
-        SearchField.set(name="Job Name", key="data.metadata.name"),
         SearchField.set(name="Job ID", key="data.metadata.uid"),
         SearchField.set(name="Location", key="data.metadata.location"),
         SearchField.set(name="Project", key="data.metadata.project"),

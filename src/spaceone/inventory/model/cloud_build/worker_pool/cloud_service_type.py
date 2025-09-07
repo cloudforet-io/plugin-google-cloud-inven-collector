@@ -37,7 +37,6 @@ cst_worker_pool.tags = {
 
 cst_worker_pool._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Display Name", "data.display_name"),
         TextDyField.data_source("UID", "data.uid"),
         EnumDyField.data_source(
             "State",
@@ -53,7 +52,6 @@ cst_worker_pool._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
-        SearchField.set(name="Display Name", key="data.display_name"),
         SearchField.set(name="UID", key="data.uid"),
         SearchField.set(name="State", key="data.state"),
         SearchField.set(

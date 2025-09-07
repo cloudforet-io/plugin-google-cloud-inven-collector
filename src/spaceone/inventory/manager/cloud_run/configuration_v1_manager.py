@@ -114,7 +114,7 @@ class CloudRunConfigurationV1Manager(GoogleCloudManager):
             except Exception as e:
                 _LOGGER.error(f"Failed to process configuration {configuration_id}: {str(e)}")
                 error_response = self.generate_resource_error_response(
-                    e, "ConfigurationV1", "CloudRun", configuration_id
+                    e, "Configuration", "CloudRun", configuration_id
                 )
                 error_responses.append(error_response)
 

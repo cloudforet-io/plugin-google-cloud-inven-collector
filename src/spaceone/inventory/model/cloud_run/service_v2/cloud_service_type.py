@@ -41,7 +41,6 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
                 "alert": ["CONDITION_FAILED"],
             },
         ),
-        TextDyField.data_source("Service Name", "data.name"),
         TextDyField.data_source("Location", "data.location"),
         TextDyField.data_source("Project", "data.project"),
         TextDyField.data_source("URL", "data.uri"),
@@ -52,7 +51,6 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
-        SearchField.set(name="Service Name", key="data.name"),
         SearchField.set(name="Service ID", key="data.uid"),
         SearchField.set(name="Location", key="data.location"),
         SearchField.set(name="Project", key="data.project"),

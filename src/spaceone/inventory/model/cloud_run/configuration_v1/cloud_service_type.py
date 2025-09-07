@@ -4,7 +4,7 @@ from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
-    CloudServiceTypeResponse,
+    # CloudServiceTypeResponse,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
@@ -41,7 +41,7 @@ cst_configuration_v1._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Latest Created Revision", "data.status.latest_created_revision_name"),
     ],
     search=[
-        SearchField.set(name="Name", key="data.name"),
+        SearchField.set(name="Name", key="data.metadata.name"),
         SearchField.set(name="Kind", key="data.kind"),
         SearchField.set(name="Namespace", key="data.metadata.namespace"),
         SearchField.set(name="Latest Ready Revision", key="data.status.latest_ready_revision_name"),
@@ -55,6 +55,7 @@ cst_configuration_v1._metadata = CloudServiceTypeMeta.set_meta(
     ],
 )
 
+# V1 API CloudServiceType 비활성화
 CLOUD_SERVICE_TYPES = [
-    CloudServiceTypeResponse({"resource": cst_configuration_v1}),
+    # CloudServiceTypeResponse({"resource": cst_configuration_v1}),
 ]

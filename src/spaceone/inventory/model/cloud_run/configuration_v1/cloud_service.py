@@ -44,7 +44,7 @@ configuration_v1_meta = CloudServiceMeta.set_layouts(
 
 
 class ConfigurationV1Resource(CloudServiceResource):
-    cloud_service_type = StringType(default="ConfigurationV1")
+    cloud_service_type = StringType(default="Configuration")
     cloud_service_group = StringType(default="CloudRun")
     provider = StringType(default="google_cloud")
     data = ModelType(ConfigurationV1)

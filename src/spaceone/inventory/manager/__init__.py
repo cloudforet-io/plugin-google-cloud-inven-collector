@@ -11,15 +11,18 @@ from .cloud_build.trigger_v1_manager import CloudBuildTriggerV1Manager
 from .cloud_build.worker_pool_v1_manager import CloudBuildWorkerPoolV1Manager
 from .cloud_functions.function_gen1_manager import FunctionGen1Manager
 from .cloud_functions.function_gen2_manager import FunctionGen2Manager
-from .cloud_run.configuration_v1_manager import CloudRunConfigurationV1Manager
-from .cloud_run.domain_mapping_v1_manager import CloudRunDomainMappingV1Manager
-from .cloud_run.job_v1_manager import CloudRunJobV1Manager
+
+# from .cloud_run.configuration_v1_manager import CloudRunConfigurationV1Manager
+# from .cloud_run.domain_mapping_v1_manager import CloudRunDomainMappingV1Manager
+# from .cloud_run.job_v1_manager import CloudRunJobV1Manager
 from .cloud_run.job_v2_manager import CloudRunJobV2Manager
 from .cloud_run.operation_v2_manager import CloudRunOperationV2Manager
-from .cloud_run.route_v1_manager import CloudRunRouteV1Manager
-from .cloud_run.service_v1_manager import CloudRunServiceV1Manager
+
+# from .cloud_run.route_v1_manager import CloudRunRouteV1Manager
+# from .cloud_run.service_v1_manager import CloudRunServiceV1Manager
 from .cloud_run.service_v2_manager import CloudRunServiceV2Manager
-from .cloud_run.worker_pool_v1_manager import CloudRunWorkerPoolV1Manager
+
+# from .cloud_run.worker_pool_v1_manager import CloudRunWorkerPoolV1Manager
 from .cloud_run.worker_pool_v2_manager import CloudRunWorkerPoolV2Manager
 from .cloud_sql.instance_manager import CloudSQLManager
 from .cloud_storage.storage_manager import StorageManager
