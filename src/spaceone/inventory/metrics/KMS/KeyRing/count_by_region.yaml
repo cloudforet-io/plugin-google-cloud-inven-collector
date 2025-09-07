@@ -25,6 +25,4 @@ query_options:
     - key: cloud_service_type
       value: KeyRing
       operator: eq
-unit:
-  name: Count
-  reference: https://cloud.google.com/kms/docs/
+unit: Count
