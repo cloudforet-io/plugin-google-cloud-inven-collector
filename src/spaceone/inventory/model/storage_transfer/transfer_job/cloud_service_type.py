@@ -82,7 +82,6 @@ cst_transfer_job._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Transfer Job Name", key="name"),
-        SearchField.set(name="Project ID", key="data.project_id"),
         SearchField.set(
             name="Status",
             key="data.status",

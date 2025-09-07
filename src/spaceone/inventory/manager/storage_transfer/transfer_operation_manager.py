@@ -72,6 +72,11 @@ class StorageTransferOperationManager(GoogleCloudManager):
                     # 1. Set Basic Information
                     ##################################
                     operation_name = operation.get("name", "")
+                    operation_simple_name = (
+                        operation_name.split("/")[-1]
+                        if "/" in operation_name
+                        else operation_name
+                    )
                     metadata = operation.get("metadata", {})
 
                     ##################################
@@ -80,17 +85,19 @@ class StorageTransferOperationManager(GoogleCloudManager):
                     # Duration 계산
                     duration = self._calculate_duration(metadata)
 
-                    # 라벨 변환
-                    labels = self.convert_labels_format(operation.get("labels", {}))
-
                     # 데이터 업데이트
                     operation.update(
                         {
-                            "project_id": project_id,
+                            "name": operation_simple_name,
+                            "full_name": operation_name,
+                            "project": project_id,
                             "transfer_job_name": metadata.get("transferJobName", ""),
                             "duration": duration,
-                            "labels": labels,
                         }
+                    )
+
+                    self_link = (
+                        f"https://storagetransfer.googleapis.com/v1/{operation_name}"
                     )
 
                     operation_data = TransferOperation(operation, strict=False)
@@ -100,16 +107,17 @@ class StorageTransferOperationManager(GoogleCloudManager):
                     ##################################
                     operation_resource = TransferOperationResource(
                         {
-                            "name": operation_name,
+                            "name": operation_simple_name,
                             "account": project_id,
-                            "tags": labels,
                             "region_code": "global",
                             "instance_type": metadata.get("status", ""),
                             "instance_size": metadata.get("counters", {}).get(
                                 "bytesCopiedToSink", 0
                             ),
                             "data": operation_data,
-                            "reference": ReferenceModel(operation_data.reference()),
+                            "reference": ReferenceModel(
+                                operation_data.reference(self_link=self_link)
+                            ),
                         }
                     )
 

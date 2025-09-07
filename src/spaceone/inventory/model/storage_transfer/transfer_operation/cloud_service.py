@@ -29,7 +29,6 @@ operation_configuration_meta = ItemDynamicLayout.set_fields(
     fields=[
         TextDyField.data_source("Operation Name", "data.name"),
         TextDyField.data_source("Transfer Job", "data.transfer_job_name"),
-        TextDyField.data_source("Project ID", "data.project_id"),
         EnumDyField.data_source(
             "Status",
             "data.metadata.status",
@@ -85,22 +84,11 @@ error_breakdowns_meta = TableDynamicLayout.set_fields(
     ],
 )
 
-# TAB - Labels
-operation_labels_meta = TableDynamicLayout.set_fields(
-    "Labels",
-    root_path="data.labels",
-    fields=[
-        TextDyField.data_source("Key", "key"),
-        TextDyField.data_source("Value", "value"),
-    ],
-)
-
 transfer_operation_meta = CloudServiceMeta.set_layouts(
     [
         operation_configuration_meta,
         transfer_counters_meta,
         error_breakdowns_meta,
-        operation_labels_meta,
     ]
 )
 

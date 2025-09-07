@@ -65,12 +65,10 @@ cst_transfer_operation._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source(
             "Objects Failed", "data.metadata.counters.objects_from_source_failed"
         ),
-        TextDyField.data_source("Project ID", "data.project_id"),
     ],
     search=[
         SearchField.set(name="Operation Name", key="name"),
         SearchField.set(name="Transfer Job Name", key="data.transfer_job_name"),
-        SearchField.set(name="Project ID", key="data.project_id"),
         SearchField.set(
             name="Status",
             key="data.metadata.status",

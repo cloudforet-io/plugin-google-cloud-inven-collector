@@ -47,12 +47,10 @@ cst_agent_pool._metadata = CloudServiceTypeMeta.set_meta(
             },
         ),
         TextDyField.data_source("Bandwidth Limit", "data.bandwidth_limit.limit_mbps"),
-        TextDyField.data_source("Project ID", "data.project_id"),
     ],
     search=[
         SearchField.set(name="Agent Pool Name", key="name"),
         SearchField.set(name="Display Name", key="data.display_name"),
-        SearchField.set(name="Project ID", key="data.project_id"),
         SearchField.set(
             name="State",
             key="data.state",

@@ -12,7 +12,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
     ItemDynamicLayout,
-    TableDynamicLayout,
 )
 from spaceone.inventory.model.storage_transfer.transfer_job.data import (
     TransferJob,
@@ -27,7 +26,6 @@ transfer_job_configuration_meta = ItemDynamicLayout.set_fields(
     "Configuration",
     fields=[
         TextDyField.data_source("Job Name", "data.name"),
-        TextDyField.data_source("Project ID", "data.project_id"),
         TextDyField.data_source("Description", "data.description"),
         EnumDyField.data_source(
             "Status",
@@ -111,23 +109,12 @@ logging_config_meta = ItemDynamicLayout.set_fields(
     ],
 )
 
-# TAB - Labels
-transfer_job_labels_meta = TableDynamicLayout.set_fields(
-    "Labels",
-    root_path="data.labels",
-    fields=[
-        TextDyField.data_source("Key", "key"),
-        TextDyField.data_source("Value", "value"),
-    ],
-)
-
 transfer_job_meta = CloudServiceMeta.set_layouts(
     [
         transfer_job_configuration_meta,
         transfer_spec_meta,
         notification_config_meta,
         logging_config_meta,
-        transfer_job_labels_meta,
     ]
 )
 

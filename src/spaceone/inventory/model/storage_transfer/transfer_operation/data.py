@@ -82,14 +82,11 @@ class TransferOperation(BaseResource):
     error = DictType(StringType, serialize_when_none=False)
 
     # 표시용 정보
-    project_id = StringType(serialize_when_none=False)
     transfer_job_name = StringType(serialize_when_none=False)
     duration = StringType(serialize_when_none=False)  # 실행 시간
 
-    labels = ListType(ModelType(Labels), default=[])
-
     def reference(self):
         return {
-            "resource_id": self.name,
-            "external_link": f"https://console.cloud.google.com/transfer/jobs?project={self.project_id}",
+            "resource_id": self.self_link,
+            "external_link": f"https://console.cloud.google.com/transfer/jobs?project={self.project}",
         }

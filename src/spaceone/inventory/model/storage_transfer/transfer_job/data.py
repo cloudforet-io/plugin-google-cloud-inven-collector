@@ -101,6 +101,7 @@ class LoggingConfig(Model):
 class TransferJob(BaseResource):
     """Storage Transfer Job 메인 모델 (간소화 버전)"""
 
+    full_name = StringType(deserialize_from="fullName")
     project_id = StringType(deserialize_from="projectId")
     description = StringType(serialize_when_none=False)
     transfer_spec = ModelType(TransferSpec, deserialize_from="transferSpec")
@@ -129,10 +130,8 @@ class TransferJob(BaseResource):
     schedule_display = StringType(serialize_when_none=False)
     transfer_options_display = StringType(serialize_when_none=False)
 
-    labels = ListType(ModelType(Labels), default=[])
-
-    def reference(self):
+    def reference(self, self_link):
         return {
-            "resource_id": self.self_link,
-            "external_link": f"https://console.cloud.google.com/transfer/jobs/{self.name}?project={self.project_id}",
+            "resource_id": self_link,
+            "external_link": f"https://console.cloud.google.com/transfer/jobs/{self.full_name}?project={self.project_id}",
         }

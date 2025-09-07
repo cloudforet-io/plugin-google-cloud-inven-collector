@@ -67,22 +67,27 @@ class StorageTransferAgentPoolManager(GoogleCloudManager):
                     # 1. Set Basic Information
                     ##################################
                     agent_pool_name = agent_pool.get("name", "")
+                    agent_pool_simple_name = (
+                        agent_pool_name.split("/")[-1]
+                        if "/" in agent_pool_name
+                        else agent_pool_name
+                    )
 
                     ##################################
                     # 2. Make Base Data
                     ##################################
-                    # 라벨 변환
-                    labels = self.convert_labels_format(agent_pool.get("labels", {}))
 
-                    # 데이터 업데이트
                     agent_pool.update(
                         {
-                            "project_id": project_id,
-                            "region": "global",  # Agent Pool은 글로벌 리소스
-                            "labels": labels,
+                            "name": agent_pool_simple_name,
+                            "project": project_id,
                         }
                     )
+                    self_link = (
+                        f"https://storagetransfer.googleapis.com/v1/{agent_pool_name}"
+                    )
 
+                    # No labels!!
                     agent_pool_data = AgentPool(agent_pool, strict=False)
 
                     ##################################
@@ -90,14 +95,14 @@ class StorageTransferAgentPoolManager(GoogleCloudManager):
                     ##################################
                     agent_pool_resource = AgentPoolResource(
                         {
-                            "name": agent_pool_name,
+                            "name": agent_pool_simple_name,
                             "account": project_id,
-                            "tags": labels,
                             "region_code": "global",
                             "instance_type": agent_pool.get("state", ""),
-                            "instance_size": 0,
                             "data": agent_pool_data,
-                            "reference": ReferenceModel(agent_pool_data.reference()),
+                            "reference": ReferenceModel(
+                                agent_pool_data.reference(self_link=self_link)
+                            ),
                         }
                     )
 
