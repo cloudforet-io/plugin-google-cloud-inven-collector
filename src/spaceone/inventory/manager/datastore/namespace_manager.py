@@ -131,10 +131,6 @@ class DatastoreNamespaceManager(GoogleCloudManager):
                         if namespace_data:
                             all_namespaces.append(namespace_data)
 
-                    _LOGGER.info(
-                        f"Found {len(namespace_ids) + 1} namespaces for database {database_id}"
-                    )
-
                 except Exception as e:
                     _LOGGER.error(
                         f"Error listing namespaces for database {database_id}: {e}"

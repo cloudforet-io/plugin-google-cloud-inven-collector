@@ -40,8 +40,6 @@ cst_filestore_instance.tags = {
 
 cst_filestore_instance._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Instance ID", "data.instance_id"),
-        TextDyField.data_source("Name", "data.name"),
         EnumDyField.data_source(
             "State",
             "data.state",
@@ -102,8 +100,6 @@ cst_filestore_instance._metadata = CloudServiceTypeMeta.set_meta(
         ),
     ],
     search=[
-        SearchField.set(name="Instance ID", key="data.instance_id"),
-        SearchField.set(name="Name", key="data.name"),
         SearchField.set(
             name="State",
             key="data.state",

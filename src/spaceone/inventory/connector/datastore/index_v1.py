@@ -51,11 +51,9 @@ class DatastoreIndexV1Connector(GoogleCloudConnector):
             request = self.client.projects().indexes().list(projectId=self.project_id)
 
             response = request.execute()
-            _LOGGER.debug(f"Index list response: {response}")
 
             # indexes 필드에서 index 목록 추출, 없으면 빈 리스트 반환
             indexes = response.get("indexes", [])
-            _LOGGER.info(f"Retrieved {len(indexes)} total indexes")
 
             return indexes
 

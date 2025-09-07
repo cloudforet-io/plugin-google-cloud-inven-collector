@@ -91,9 +91,7 @@ class DatastoreDatabaseManager(GoogleCloudManager):
         """
         if self._cached_databases is None:
             self._cached_databases = self.database_conn.list_databases()
-            _LOGGER.info(
-                f"Cached {len(self._cached_databases)} DATASTORE_MODE databases"
-            )
+
         return self._cached_databases
 
     def _list_datastore_databases(self):
@@ -241,9 +239,6 @@ class DatastoreDatabaseManager(GoogleCloudManager):
             if not database_ids:
                 database_ids.append("(default)")  # default를 (default)로 처리
 
-            _LOGGER.info(
-                f"Found {len(database_ids)} DATASTORE_MODE database IDs: {database_ids}"
-            )
             return database_ids
 
         except Exception as e:
