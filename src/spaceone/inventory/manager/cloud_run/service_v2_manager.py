@@ -103,14 +103,19 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                # Extract URL from service
+                service_uri = service.get("uri", "")
+                
                 service.update(
                     {
                         "name": service_name,  # Set name for SpaceONE display
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "uri": service_uri,
                     }
                 )
+                
 
                 ##################################
                 # 3. Make Return Resource
