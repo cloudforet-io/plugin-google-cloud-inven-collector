@@ -1,28 +1,20 @@
 ---
-metric_id: count_by_region
+metric_id: metric-google-cloud-kms-keyring-count-by-region
 name: Count by Region
 metric_type: GAUGE
-description: Count KeyRings by region
-resource_type: inventory.CloudService
-namespace_id: ns-google-cloud-kms-keyring
+resource_type: inventory.CloudService:google_cloud.KMS.KeyRing
 query_options:
-  aggregate:
-    - group:
-        keys:
-          - name: region_code
-            key: region_code
-        fields:
-          - name: value
-            key: region_code
-            operator: count
-    - sort:
-        key: region_code
-        desc: false
-  filter:
-    - key: cloud_service_group
-      value: KMS
-      operator: eq
-    - key: cloud_service_type
-      value: KeyRing
-      operator: eq
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+      default: true
+  fields:
+    value:
+      operator: count
 unit: Count
+namespace_id: ns-google-cloud-kms-keyring
+version: '1.0'
