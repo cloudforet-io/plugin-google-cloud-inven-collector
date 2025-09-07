@@ -34,7 +34,7 @@ cst_keyring.labels = ["Security", "Encryption"]
 cst_keyring.is_primary = True
 cst_keyring.is_major = True
 cst_keyring.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Cloud_KMS.svg",
+    "spaceone:icon": f"{ASSET_URL}/Key-Management-Service.svg",
 }
 
 cst_keyring._metadata = CloudServiceTypeMeta.set_meta(
