@@ -74,9 +74,6 @@ class DatastoreNamespaceV1Connector(GoogleCloudConnector):
                 request.headers.update(headers)
 
             response = request.execute()
-            _LOGGER.debug(
-                f"runQuery response for namespace '{namespace_id}' in database '{database_id}': {response}"
-            )
 
             return response
 
@@ -129,9 +126,6 @@ class DatastoreNamespaceV1Connector(GoogleCloudConnector):
                 request.headers.update(headers)
 
             response = request.execute()
-            _LOGGER.debug(
-                f"Namespace list response for database '{database_id}': {response}"
-            )
 
             return response
 
@@ -210,9 +204,6 @@ class DatastoreNamespaceV1Connector(GoogleCloudConnector):
                             if namespace_name:
                                 # 실제 사용자가 생성한 namespace만 수집 (name 필드가 있음)
                                 namespaces.append(namespace_name)
-                                _LOGGER.debug(
-                                    f"Found user-created namespace: '{namespace_name}'"
-                                )
                             elif namespace_id == "1":
                                 # 기본 namespace는 스킵 (GCP 자체 생성)
                                 _LOGGER.debug(
@@ -221,13 +212,6 @@ class DatastoreNamespaceV1Connector(GoogleCloudConnector):
                             else:
                                 # 기타 ID namespace (혹시 있다면)
                                 namespaces.append(f"namespace-{namespace_id}")
-                                _LOGGER.debug(
-                                    f"Found namespace with ID: '{namespace_id}'"
-                                )
-
-                            _LOGGER.debug(
-                                f"Found namespace - name: '{namespace_name}', id: '{namespace_id}'"
-                            )
 
             return namespaces
 

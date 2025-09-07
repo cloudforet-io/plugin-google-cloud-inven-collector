@@ -30,8 +30,8 @@ cst_transfer_job.name = "TransferJob"
 cst_transfer_job.provider = "google_cloud"
 cst_transfer_job.group = "StorageTransfer"
 cst_transfer_job.service_code = "Storage Transfer Service"
-cst_transfer_job.is_primary = False
-cst_transfer_job.is_major = False
+cst_transfer_job.is_primary = True
+cst_transfer_job.is_major = True
 cst_transfer_job.labels = ["Storage", "Transfer", "Migration"]
 cst_transfer_job.tags = {
     "spaceone:icon": f"{ASSET_URL}/Storage-Transfer.svg",

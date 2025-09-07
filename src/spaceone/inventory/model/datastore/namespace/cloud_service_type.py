@@ -43,17 +43,13 @@ cst_namespace.tags = {
 # 메타데이터 설정
 cst_namespace._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Namespace ID", "data.namespace_id"),
         TextDyField.data_source("Database ID", "data.database_id"),
         TextDyField.data_source("Display Name", "data.display_name"),
         TextDyField.data_source("Kind Count", "data.kind_count"),
-        TextDyField.data_source("Project ID", "data.project_id"),
     ],
     search=[
-        SearchField.set(name="Namespace ID", key="data.namespace_id"),
         SearchField.set(name="Database ID", key="data.database_id"),
         SearchField.set(name="Display Name", key="data.display_name"),
-        SearchField.set(name="Project ID", key="data.project_id"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

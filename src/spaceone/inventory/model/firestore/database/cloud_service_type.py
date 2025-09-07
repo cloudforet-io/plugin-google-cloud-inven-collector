@@ -41,7 +41,6 @@ cst_database.tags = {
 
 cst_database._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Database ID", "data.id"),
         TextDyField.data_source("Location", "data.location_id"),
         EnumDyField.data_source(
             "Type",
@@ -65,7 +64,6 @@ cst_database._metadata = CloudServiceTypeMeta.set_meta(
         DateTimeDyField.data_source("Created", "data.create_time"),
     ],
     search=[
-        SearchField.set(name="Database ID", key="data.id"),
         SearchField.set(name="Location", key="data.location_id"),
         SearchField.set(name="Type", key="data.type"),
         SearchField.set(name="Project", key="data.project_id"),

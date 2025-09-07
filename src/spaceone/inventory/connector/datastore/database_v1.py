@@ -59,19 +59,13 @@ class DatastoreDatabaseV1Connector(GoogleCloudConnector):
             request = self.client.projects().databases().list(parent=parent)
 
             response = request.execute()
-            _LOGGER.debug(f"Database list response: {response}")
 
             # databases 필드에서 데이터베이스 목록 추출, 없으면 빈 리스트 반환
             all_databases = response.get("databases", [])
-            _LOGGER.info(f"Retrieved {len(all_databases)} total databases")
 
             # DATASTORE_MODE 타입만 필터링
             datastore_databases = list(
                 filter(lambda db: db.get("type") == "DATASTORE_MODE", all_databases)
-            )
-
-            _LOGGER.info(
-                f"Filtered {len(datastore_databases)} DATASTORE_MODE databases"
             )
 
             return datastore_databases
