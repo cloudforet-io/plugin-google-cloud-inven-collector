@@ -98,7 +98,9 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                 # 1. Set Basic Information
                 ##################################
                 build_id = build.get("id")
-                build_name = build.get("name", build_id)
+                build_full_name = build.get("name", "")  # Original full path
+                # Use build_id for name (short display)
+                build_name = build_id if build_id else build_full_name
                 location_id = build.get("_location", "global")
                 region = (
                     self.parse_region_from_zone(location_id)
@@ -114,6 +116,8 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "name": build_id,  # Override name with short ID
+                        "full_name": build_full_name,  # Set full path for Build ID column
                     }
                 )
 

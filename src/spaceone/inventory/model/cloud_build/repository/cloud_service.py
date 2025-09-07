@@ -21,7 +21,6 @@ Cloud Build Repository
 repository_overview = ItemDynamicLayout.set_fields(
     "Repository Overview",
     fields=[
-        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("Remote URI", "data.remote_uri"),
         TextDyField.data_source("UID", "data.uid"),
         TextDyField.data_source("Webhook ID", "data.webhook_id"),

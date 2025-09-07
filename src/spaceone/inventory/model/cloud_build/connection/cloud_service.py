@@ -21,7 +21,6 @@ Cloud Build Connection
 connection_overview = ItemDynamicLayout.set_fields(
     "Connection Overview",
     fields=[
-        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("UID", "data.uid"),
         TextDyField.data_source("Disabled", "data.disabled"),
         TextDyField.data_source("Reconciling", "data.reconciling"),

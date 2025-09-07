@@ -1,6 +1,6 @@
 import os
 
-# from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
+from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
@@ -27,7 +27,7 @@ cst_service.labels = ["Serverless"]
 cst_service.is_primary = True
 cst_service.is_major = True
 cst_service.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud-Run.svg",
+    "spaceone:icon": f"{ASSET_URL}/Cloud-Run.svg",
 }
 
 cst_service._metadata = CloudServiceTypeMeta.set_meta(
@@ -51,6 +51,7 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Revision Count", "data.revision_count"),
     ],
     search=[
+        SearchField.set(name="Name", key="data.metadata.name"),
         SearchField.set(name="Service Name", key="data.metadata.name"),
         SearchField.set(name="Service ID", key="data.metadata.uid"),
         SearchField.set(name="Location", key="data.metadata.location"),

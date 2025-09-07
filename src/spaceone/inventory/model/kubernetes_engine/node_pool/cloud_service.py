@@ -104,6 +104,7 @@ class NodePoolResource(CloudServiceResource):
     def _set_meta(cls):
         meta = CloudServiceMeta.set_meta(
             fields=[
+                TextDyField.data_source("Name", "data.name"),
                 TextDyField.data_source("Cluster Name", "data.cluster_name"),
                 TextDyField.data_source("Location", "data.location"),
                 TextDyField.data_source("Project", "data.project_id"),
@@ -123,6 +124,7 @@ class NodePoolResource(CloudServiceResource):
             ],
             layouts=[
                 ItemDynamicLayout.set_fields("NodePool Details", fields=[
+                    TextDyField.data_source("Name", "data.name"),
                     TextDyField.data_source("Cluster Name", "data.cluster_name"),
                     TextDyField.data_source("Location", "data.location"),
                     EnumDyField.data_source("Status", "data.status", default_state={

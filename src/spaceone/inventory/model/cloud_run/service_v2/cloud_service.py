@@ -23,7 +23,6 @@ Cloud Run Service
 service_overview = ItemDynamicLayout.set_fields(
     "Service Overview",
     fields=[
-        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("UID", "data.uid"),
         TextDyField.data_source("Generation", "data.generation"),
         TextDyField.data_source("URI", "data.uri"),
@@ -80,16 +79,17 @@ service_config = ItemDynamicLayout.set_fields(
 # TAB - Revisions
 service_revisions = TableDynamicLayout.set_fields(
     "Revisions",
+    "data.revisions",
     fields=[
-        TextDyField.data_source("Name", "data.revisions.name"),
-        TextDyField.data_source("UID", "data.revisions.uid"),
-        TextDyField.data_source("Service", "data.revisions.service"),
-        TextDyField.data_source("Generation", "data.revisions.generation"),
-        DateTimeDyField.data_source("Create Time", "data.revisions.create_time"),
-        DateTimeDyField.data_source("Update Time", "data.revisions.update_time"),
+        TextDyField.data_source("Name", "name"),
+        TextDyField.data_source("UID", "uid"),
+        TextDyField.data_source("Service", "service"),
+        TextDyField.data_source("Generation", "generation"),
+        DateTimeDyField.data_source("Create Time", "create_time"),
+        DateTimeDyField.data_source("Update Time", "update_time"),
         ListDyField.data_source(
             "Conditions",
-            "data.revisions.conditions",
+            "conditions",
             default_badge={
                 "type": "outline",
                 "sub_key": "type",
@@ -97,7 +97,6 @@ service_revisions = TableDynamicLayout.set_fields(
             },
         ),
     ],
-    root_path="data.revisions",
 )
 
 cloud_run_service_meta = CloudServiceMeta.set_layouts(

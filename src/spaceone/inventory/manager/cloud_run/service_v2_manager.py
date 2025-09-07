@@ -105,6 +105,7 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                 ##################################
                 service.update(
                     {
+                        "name": service_name,  # Set name for SpaceONE display
                         "project": project_id,
                         "location": location_id,
                         "region": region,

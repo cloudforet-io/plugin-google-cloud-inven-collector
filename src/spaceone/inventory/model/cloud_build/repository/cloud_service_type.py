@@ -36,7 +36,6 @@ cst_repository.tags = {
 
 cst_repository._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("Remote URI", "data.remote_uri"),
         TextDyField.data_source("UID", "data.uid"),
         TextDyField.data_source("Webhook ID", "data.webhook_id"),
