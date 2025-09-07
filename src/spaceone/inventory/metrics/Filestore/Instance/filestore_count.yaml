@@ -1,16 +1,29 @@
 ---
-metric_id: count-filestore-instance
+metric_id: metric-google-cloud-filestore-instance-count
 name: Filestore Instance Count
-namespace_id: ns-google-cloud-filestore-instance
+metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.Filestore.Instance
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.tier
+      name: Tier
+      search_key: data.tier
+      default: true
+    - key: data.state
+      name: State
+      search_key: data.state
+  fields:
+    value:
+      operator: count
 unit: Count
-metric_type: COUNT
-metric_groups:
-  - name: Instance
-    metrics:
-      - name: Instance Count
-        key: count
-        unit: Count
-        chart_type: VALUE
-        chart_option:
-          color: '#4CAF50' 
+namespace_id: ns-google-cloud-filestore-instance
+version: '1.0' 
