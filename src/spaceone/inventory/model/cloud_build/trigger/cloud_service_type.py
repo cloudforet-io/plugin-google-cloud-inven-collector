@@ -39,7 +39,6 @@ cst_trigger.tags = {
 cst_trigger._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source("Trigger ID", "data.id"),
-        TextDyField.data_source("Description", "data.description"),
         EnumDyField.data_source(
             "Disabled",
             "data.disabled",
@@ -48,17 +47,13 @@ cst_trigger._metadata = CloudServiceTypeMeta.set_meta(
                 "alert": [True],
             },
         ),
-        TextDyField.data_source("Service Account", "data.service_account"),
-        TextDyField.data_source("Filename", "data.filename"),
         DateTimeDyField.data_source("Create Time", "data.create_time"),
         ListDyField.data_source("Tags", "data.tags"),
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
         SearchField.set(name="Trigger ID", key="data.id"),
-        SearchField.set(name="Description", key="data.description"),
         SearchField.set(name="Disabled", key="data.disabled", data_type="boolean"),
-        SearchField.set(name="Service Account", key="data.service_account"),
         SearchField.set(
             name="Create Time", key="data.create_time", data_type="datetime"
         ),
