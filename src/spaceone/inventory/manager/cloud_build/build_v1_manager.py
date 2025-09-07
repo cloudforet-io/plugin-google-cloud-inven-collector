@@ -140,7 +140,7 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
 
                 build_resource = BuildResource(
                     {
-                        "name": build_name,
+                        "name": build_name_short,
                         "account": project_id,
                         "region_code": location_id,
                         "data": build_data,
