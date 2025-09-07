@@ -67,6 +67,11 @@ class StorageTransferManager(GoogleCloudManager):
                     # 1. Set Basic Information
                     ##################################
                     transfer_job_name = transfer_job.get("name", "")
+                    transfer_job_simple_name = (
+                        transfer_job_name.split("/")[-1]
+                        if "/" in transfer_job_name
+                        else transfer_job_name
+                    )
 
                     ##################################
                     # 2. Make Base Data
@@ -86,17 +91,15 @@ class StorageTransferManager(GoogleCloudManager):
                         transfer_spec.get("transferOptions", {})
                     )
 
-                    # 라벨 변환
-                    labels = self.convert_labels_format(transfer_job.get("labels", {}))
-
                     # 데이터 업데이트
                     transfer_job.update(
                         {
+                            "name": transfer_job_simple_name,
+                            "full_name": transfer_job_name,
                             "source_type": source_type,
                             "sink_type": sink_type,
                             "schedule_display": schedule_display,
                             "transfer_options_display": transfer_options_display,
-                            "labels": labels,
                         }
                     )
 
@@ -106,11 +109,16 @@ class StorageTransferManager(GoogleCloudManager):
                                 "StorageTransfer",
                                 "TransferJob",
                                 project_id,
-                                transfer_job_name,
+                                transfer_job_simple_name,
                             ),
                         }
                     )
 
+                    self_link = (
+                        f"https://storagetransfer.googleapis.com/v1/{transfer_job_name}"
+                    )
+
+                    # No labels!!
                     transfer_job_data = TransferJob(transfer_job, strict=False)
 
                     ##################################
@@ -118,14 +126,14 @@ class StorageTransferManager(GoogleCloudManager):
                     ##################################
                     transfer_job_resource = TransferJobResource(
                         {
-                            "name": transfer_job_name,
+                            "name": transfer_job_simple_name,
                             "account": project_id,
-                            "tags": labels,
                             "region_code": "global",  # Storage Transfer는 글로벌 서비스
                             "instance_type": source_type,
-                            "instance_size": 0,
                             "data": transfer_job_data,
-                            "reference": ReferenceModel(transfer_job_data.reference()),
+                            "reference": ReferenceModel(
+                                transfer_job_data.reference(self_link=self_link)
+                            ),
                         }
                     )
 
@@ -181,12 +189,16 @@ class StorageTransferManager(GoogleCloudManager):
             return "GCS"
         elif "awsS3DataSource" in transfer_spec:
             return "S3"
+        elif "awsS3CompatibleDataSource" in transfer_spec:
+            return "S3 Compatible"
         elif "azureBlobStorageDataSource" in transfer_spec:
             return "Azure"
         elif "httpDataSource" in transfer_spec:
             return "HTTP"
         elif "posixDataSource" in transfer_spec:
             return "POSIX"
+        elif "hdfsDataSource" in transfer_spec:
+            return "HDFS"
         else:
             return "Unknown"
 
@@ -234,11 +246,36 @@ class StorageTransferManager(GoogleCloudManager):
         end_date = schedule.get("scheduleEndDate")
 
         if start_date and end_date:
-            return f"Scheduled ({start_date} - {end_date})"
+            start_date_str = StorageTransferManager._format_date_dict(start_date)
+            end_date_str = StorageTransferManager._format_date_dict(end_date)
+            return f"Scheduled ({start_date_str} - {end_date_str})"
         elif start_date:
-            return f"Scheduled (from {start_date})"
+            start_date_str = StorageTransferManager._format_date_dict(start_date)
+            return f"Scheduled (from {start_date_str})"
         else:
             return "Scheduled"
+
+    @staticmethod
+    def _format_date_dict(date_dict: Dict) -> str:
+        """날짜 딕셔너리를 YYYY-MM-DD 형태의 문자열로 변환합니다.
+
+        Args:
+            date_dict: {"year": int, "month": int, "day": int} 형태의 딕셔너리
+
+        Returns:
+            YYYY-MM-DD 형태의 날짜 문자열
+        """
+        if not date_dict or not isinstance(date_dict, dict):
+            return "Unknown"
+
+        year = date_dict.get("year", 0)
+        month = date_dict.get("month", 0)
+        day = date_dict.get("day", 0)
+
+        if year and month and day:
+            return f"{year:04d}-{month:02d}-{day:02d}"
+        else:
+            return "Invalid Date"
 
     @staticmethod
     def _make_transfer_options_display(transfer_options: Dict) -> str:

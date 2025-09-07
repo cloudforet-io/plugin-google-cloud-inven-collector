@@ -11,7 +11,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
     ItemDynamicLayout,
-    TableDynamicLayout,
 )
 from spaceone.inventory.model.storage_transfer.agent_pool.data import (
     AgentPool,
@@ -27,7 +26,6 @@ agent_pool_configuration_meta = ItemDynamicLayout.set_fields(
     fields=[
         TextDyField.data_source("Pool Name", "data.name"),
         TextDyField.data_source("Display Name", "data.display_name"),
-        TextDyField.data_source("Project ID", "data.project_id"),
         EnumDyField.data_source(
             "State",
             "data.state",
@@ -43,20 +41,9 @@ agent_pool_configuration_meta = ItemDynamicLayout.set_fields(
     ],
 )
 
-# TAB - Labels
-agent_pool_labels_meta = TableDynamicLayout.set_fields(
-    "Labels",
-    root_path="data.labels",
-    fields=[
-        TextDyField.data_source("Key", "key"),
-        TextDyField.data_source("Value", "value"),
-    ],
-)
-
 agent_pool_meta = CloudServiceMeta.set_layouts(
     [
         agent_pool_configuration_meta,
-        agent_pool_labels_meta,
     ]
 )
 

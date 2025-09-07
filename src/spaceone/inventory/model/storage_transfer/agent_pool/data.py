@@ -1,16 +1,10 @@
 from schematics import Model
 from schematics.types import (
-    ListType,
     ModelType,
     StringType,
 )
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
-
-
-class Labels(Model):
-    key = StringType()
-    value = StringType()
 
 
 class BandwidthLimit(Model):
@@ -28,14 +22,8 @@ class AgentPool(BaseResource):
         BandwidthLimit, deserialize_from="bandwidthLimit", serialize_when_none=False
     )
 
-    # 표시용 정보
-    project_id = StringType(serialize_when_none=False)
-    region = StringType(serialize_when_none=False)
-
-    labels = ListType(ModelType(Labels), default=[])
-
-    def reference(self):
+    def reference(self, self_link):
         return {
-            "resource_id": self.name,
-            "external_link": f"https://console.cloud.google.com/transfer/agent-pools?project={self.project_id}",
+            "resource_id": self_link,
+            "external_link": f"https://console.cloud.google.com/transfer/agent-pools?project={self.project}",
         }
