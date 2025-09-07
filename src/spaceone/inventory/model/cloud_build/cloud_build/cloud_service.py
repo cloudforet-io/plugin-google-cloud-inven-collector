@@ -48,20 +48,20 @@ build_config = ItemDynamicLayout.set_fields(
 # TAB - Build Steps
 build_steps = TableDynamicLayout.set_fields(
     "Build Steps",
+    "data.steps",
     fields=[
-        TextDyField.data_source("Step Name", "data.steps.name"),
-        TextDyField.data_source("Args", "data.steps.args"),
-        TextDyField.data_source("Env", "data.steps.env"),
-        TextDyField.data_source("Dir", "data.steps.dir"),
-        TextDyField.data_source("Step ID", "data.steps.id"),
-        TextDyField.data_source("Wait For", "data.steps.waitFor"),
-        TextDyField.data_source("Entrypoint", "data.steps.entrypoint"),
-        TextDyField.data_source("Secret Env", "data.steps.secretEnv"),
-        TextDyField.data_source("Volumes", "data.steps.volumes"),
-        TextDyField.data_source("Timeout", "data.steps.timeout"),
-        TextDyField.data_source("Status", "data.steps.status"),
+        TextDyField.data_source("Step Name", "name"),
+        ListDyField.data_source("Args", "args"),
+        ListDyField.data_source("Env", "env"),
+        TextDyField.data_source("Dir", "dir"),
+        TextDyField.data_source("Step ID", "id"),
+        ListDyField.data_source("Wait For", "waitFor"),
+        TextDyField.data_source("Entrypoint", "entrypoint"),
+        ListDyField.data_source("Secret Env", "secretEnv"),
+        ListDyField.data_source("Volumes", "volumes"),
+        TextDyField.data_source("Timeout", "timeout"),
+        TextDyField.data_source("Status", "status"),
     ],
-    root_path="data.steps",
 )
 
 cloud_build_build_meta = CloudServiceMeta.set_layouts(

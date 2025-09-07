@@ -1,6 +1,6 @@
 import os
 
-# from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
+from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
@@ -22,19 +22,18 @@ count_by_project_conf = os.path.join(current_dir, "widget/count_by_project.yml")
 CONFIGURATION V1
 """
 cst_configuration_v1 = CloudServiceTypeResource()
-cst_configuration_v1.name = "ConfigurationV1"
+cst_configuration_v1.name = "Configuration"
 cst_configuration_v1.provider = "google_cloud"
 cst_configuration_v1.group = "CloudRun"
 cst_configuration_v1.labels = ["Compute", "Container"]
 cst_configuration_v1.is_primary = True
 cst_configuration_v1.service_code = "Cloud Run"
 cst_configuration_v1.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud-Run.svg"
+    "spaceone:icon": f"{ASSET_URL}/Cloud-Run.svg"
 }
 
 cst_configuration_v1._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("Kind", "data.kind"),
         TextDyField.data_source("Namespace", "data.metadata.namespace"),
         DateTimeDyField.data_source("Created", "data.metadata.creation_timestamp"),

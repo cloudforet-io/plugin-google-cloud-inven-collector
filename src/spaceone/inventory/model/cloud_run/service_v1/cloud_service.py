@@ -40,9 +40,13 @@ service_v1_meta = CloudServiceMeta.set_layouts(
             "Revisions",
             "data.revisions",
             fields=[
-                TextDyField.data_source("Name", "metadata.name"),
-                TextDyField.data_source("Ready", "status.conditions[0].status"),
-                DateTimeDyField.data_source("Created", "metadata.creationTimestamp"),
+                TextDyField.data_source("Name", "name"),
+                TextDyField.data_source("UID", "uid"),
+                TextDyField.data_source("Service", "service"),
+                TextDyField.data_source("Generation", "generation"),
+                DateTimeDyField.data_source("Create Time", "create_time"),
+                DateTimeDyField.data_source("Update Time", "update_time"),
+                TextDyField.data_source("Conditions", "conditions"),
             ],
         ),
         ItemDynamicLayout.set_fields(

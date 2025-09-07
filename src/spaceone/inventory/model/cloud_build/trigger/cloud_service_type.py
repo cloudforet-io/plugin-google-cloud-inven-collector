@@ -38,8 +38,7 @@ cst_trigger.tags = {
 
 cst_trigger._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("ID", "data.id"),
-        TextDyField.data_source("Name", "data.name"),
+        TextDyField.data_source("Trigger ID", "data.id"),
         TextDyField.data_source("Description", "data.description"),
         EnumDyField.data_source(
             "Disabled",
@@ -55,8 +54,8 @@ cst_trigger._metadata = CloudServiceTypeMeta.set_meta(
         ListDyField.data_source("Tags", "data.tags"),
     ],
     search=[
-        SearchField.set(name="ID", key="data.id"),
         SearchField.set(name="Name", key="data.name"),
+        SearchField.set(name="Trigger ID", key="data.id"),
         SearchField.set(name="Description", key="data.description"),
         SearchField.set(name="Disabled", key="data.disabled", data_type="boolean"),
         SearchField.set(name="Service Account", key="data.service_account"),

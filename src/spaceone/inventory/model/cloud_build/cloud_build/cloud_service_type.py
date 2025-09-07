@@ -38,8 +38,7 @@ cst_build.tags = {
 
 cst_build._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("ID", "data.id"),
-        TextDyField.data_source("Name", "data.name"),
+        TextDyField.data_source("Build ID", "data.full_name"),
         EnumDyField.data_source(
             "Status",
             "data.status",
@@ -58,8 +57,8 @@ cst_build._metadata = CloudServiceTypeMeta.set_meta(
         ListDyField.data_source("Tags", "data.tags"),
     ],
     search=[
-        SearchField.set(name="ID", key="data.id"),
         SearchField.set(name="Name", key="data.name"),
+        SearchField.set(name="Build ID", key="data.full_name"),
         SearchField.set(name="Status", key="data.status"),
         SearchField.set(name="Build Trigger ID", key="data.build_trigger_id"),
         SearchField.set(name="Service Account", key="data.service_account"),

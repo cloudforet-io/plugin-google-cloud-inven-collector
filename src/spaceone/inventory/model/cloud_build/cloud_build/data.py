@@ -10,6 +10,7 @@ from schematics.types import (
 class Build(Model):
     id = StringType()
     name = StringType()
+    full_name = StringType()  # Full path for Build ID column
     status = StringType()
     source = DictType(BaseType, default={})
     steps = ListType(DictType(BaseType), default=[])

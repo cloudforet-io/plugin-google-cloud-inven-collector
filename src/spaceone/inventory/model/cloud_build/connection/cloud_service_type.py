@@ -37,7 +37,6 @@ cst_connection.tags = {
 
 cst_connection._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("UID", "data.uid"),
         EnumDyField.data_source(
             "Disabled",
