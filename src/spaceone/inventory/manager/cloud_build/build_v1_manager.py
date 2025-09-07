@@ -99,8 +99,19 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                 ##################################
                 build_id = build.get("id")
                 build_full_name = build.get("name", "")  # Original full path
-                # Use build_id for name (short display)
-                build_name = build_id if build_id else build_full_name
+                
+                # Name을 첫 8자리로 변경 (04788528-aa29-4bd1-aa61-b301ea0edb8c → 04788528)
+                build_name_short = build_id[:8] if build_id and len(build_id) >= 8 else build_id
+                
+                # Build Trigger ID에서 빌드 ID만 추출
+                build_trigger_id = build.get("substitutions", {}).get("TRIGGER_BUILD_CONFIG_PATH", "")
+                if not build_trigger_id and "name" in build:
+                    # projects/.../builds/04788528-aa29-4bd1-aa61-b301ea0edb8c → 04788528-aa29-4bd1-aa61-b301ea0edb8c
+                    if "/builds/" in build_full_name:
+                        build_trigger_id = build_full_name.split("/builds/")[-1]
+                    else:
+                        build_trigger_id = build_id if build_id else ""
+                
                 location_id = build.get("_location", "global")
                 region = (
                     self.parse_region_from_zone(location_id)
@@ -116,8 +127,9 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                         "project": project_id,
                         "location": location_id,
                         "region": region,
-                        "name": build_id,  # Override name with short ID
+                        "name": build_name_short,  # 첫 8자리만 표시
                         "full_name": build_full_name,  # Set full path for Build ID column
+                        "build_trigger_id": build_trigger_id,  # 빌드 ID만 표시
                     }
                 )
 

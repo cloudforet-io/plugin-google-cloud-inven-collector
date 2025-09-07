@@ -113,6 +113,7 @@ cluster_meta = CloudServiceMeta.set_layouts(
 
 class DataprocClusterResource(CloudServiceResource):
     cloud_service_type = StringType(default="Cluster")
+    cloud_service_group = StringType(default="Dataproc")
     data = ModelType(DataprocCluster)
     _metadata = ModelType(
         CloudServiceMeta, default=cluster_meta, serialized_name="metadata"

@@ -110,6 +110,28 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         }
     },
     "BigQuery": {},
+    "CloudBuild": {
+        "Build": {
+            "resource_type": "cloud_build",
+            "labels_key": "resource.labels.build_id",
+        },
+        "Trigger": {
+            "resource_type": "cloud_build_trigger",
+            "labels_key": "resource.labels.trigger_id",
+        },
+        "WorkerPool": {
+            "resource_type": "cloud_build_worker_pool",
+            "labels_key": "resource.labels.worker_pool_id",
+        },
+        "Connection": {
+            "resource_type": "cloud_build_connection",
+            "labels_key": "resource.labels.connection_id",
+        },
+        "Repository": {
+            "resource_type": "cloud_build_repository",
+            "labels_key": "resource.labels.repository_id",
+        },
+    },
     "CloudStorage": {
         "Bucket": {
             "resource_type": "gcs_bucket",

@@ -106,6 +106,21 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                 # Extract URL from service
                 service_uri = service.get("uri", "")
                 
+                # Extract status information
+                status = service.get("status", {})
+                latest_ready_revision_name = status.get("latestReadyRevisionName", "")
+                latest_created_revision_name = status.get("latestCreatedRevisionName", "")
+                
+                # Extract terminal condition for status
+                terminal_condition = status.get("terminalCondition", {})
+                if not terminal_condition:
+                    # Fallback: check conditions array for terminal condition
+                    conditions = status.get("conditions", [])
+                    for condition in conditions:
+                        if condition.get("type") == "Ready":
+                            terminal_condition = condition
+                            break
+                
                 service.update(
                     {
                         "name": service_name,  # Set name for SpaceONE display
@@ -113,6 +128,9 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                         "location": location_id,
                         "region": region,
                         "uri": service_uri,
+                        "latest_ready_revision_name": latest_ready_revision_name,
+                        "latest_created_revision_name": latest_created_revision_name,
+                        "terminal_condition": terminal_condition,
                     }
                 )
                 
