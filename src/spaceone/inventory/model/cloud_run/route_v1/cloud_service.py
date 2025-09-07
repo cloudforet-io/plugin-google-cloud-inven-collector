@@ -55,7 +55,7 @@ route_v1_meta = CloudServiceMeta.set_layouts(
 
 
 class RouteV1Resource(CloudServiceResource):
-    cloud_service_type = StringType(default="RouteV1")
+    cloud_service_type = StringType(default="Route")
     cloud_service_group = StringType(default="CloudRun")
     provider = StringType(default="google_cloud")
     data = ModelType(RouteV1)

@@ -114,7 +114,7 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
             except Exception as e:
                 _LOGGER.error(f"Failed to process route {route_id}: {str(e)}")
                 error_response = self.generate_resource_error_response(
-                    e, "RouteV1", "CloudRun", route_id
+                    e, "Route", "CloudRun", route_id
                 )
                 error_responses.append(error_response)
 

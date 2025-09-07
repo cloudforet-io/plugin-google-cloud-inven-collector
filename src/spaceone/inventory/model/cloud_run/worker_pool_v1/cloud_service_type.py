@@ -41,7 +41,6 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
                 "alert": ["Unknown"],
             },
         ),
-        TextDyField.data_source("Service Name", "data.metadata.name"),
         TextDyField.data_source("Location", "data.metadata.location"),
         TextDyField.data_source("Project", "data.metadata.project"),
         TextDyField.data_source("URL", "data.status.url"),
@@ -52,7 +51,6 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Name", key="data.metadata.name"),
-        SearchField.set(name="Service Name", key="data.metadata.name"),
         SearchField.set(name="Service ID", key="data.metadata.uid"),
         SearchField.set(name="Location", key="data.metadata.location"),
         SearchField.set(name="Project", key="data.metadata.project"),
@@ -66,6 +64,7 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
     ],
 )
 
+# V1 API는 deprecated되어 CloudServiceType 비활성화
 CLOUD_SERVICE_TYPES = [
-    CloudServiceTypeResponse({"resource": cst_service}),
+    # CloudServiceTypeResponse({'resource': cst_*}),
 ]

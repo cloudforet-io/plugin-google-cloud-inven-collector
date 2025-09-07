@@ -4,7 +4,7 @@ from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
-    CloudServiceTypeResponse,
+    # CloudServiceTypeResponse,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     EnumDyField,
@@ -41,10 +41,9 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
                 "alert": ["Unknown"],
             },
         ),
-        TextDyField.data_source("Service Name", "data.metadata.name"),
-        TextDyField.data_source("Location", "data.metadata.location"),
-        TextDyField.data_source("Project", "data.metadata.project"),
-        TextDyField.data_source("URL", "data.status.url"),
+        TextDyField.data_source("Location", "data.location"),
+        TextDyField.data_source("Project", "data.project"),
+        TextDyField.data_source("URL", "data.status.address.url"),
         TextDyField.data_source(
             "Latest Ready Revision", "data.status.latest_ready_revision_name"
         ),
@@ -52,12 +51,11 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Name", key="data.metadata.name"),
-        SearchField.set(name="Service Name", key="data.metadata.name"),
         SearchField.set(name="Service ID", key="data.metadata.uid"),
-        SearchField.set(name="Location", key="data.metadata.location"),
-        SearchField.set(name="Project", key="data.metadata.project"),
+        SearchField.set(name="Location", key="data.location"),
+        SearchField.set(name="Project", key="data.project"),
         SearchField.set(name="Status", key="data.status.conditions.0.status"),
-        SearchField.set(name="URL", key="data.status.url"),
+        SearchField.set(name="URL", key="data.status.address.url"),
     ],
     widget=[
         # CardWidget.set(**get_data_from_yaml(total_count_conf)),
@@ -66,6 +64,7 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
     ],
 )
 
+# V1 API는 CloudServiceType 비활성화
 CLOUD_SERVICE_TYPES = [
-    CloudServiceTypeResponse({"resource": cst_service}),
+    # CloudServiceTypeResponse({"resource": cst_service}),
 ]
