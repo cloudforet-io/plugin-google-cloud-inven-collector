@@ -47,15 +47,18 @@ worker_pool_revisions = TableDynamicLayout.set_fields(
     fields=[
         TextDyField.data_source("Name", "name"),
         TextDyField.data_source("UID", "uid"),
-        TextDyField.data_source("Service", "service"),
         TextDyField.data_source("Generation", "generation"),
         DateTimeDyField.data_source("Create Time", "create_time"),
         DateTimeDyField.data_source("Update Time", "update_time"),
-        ListDyField.data_source("Conditions", "conditions", default_badge={
-            "type": "outline",
-            "sub_key": "type",
-            "delimiter": " ",
-        }),
+        ListDyField.data_source(
+            "Conditions",
+            "conditions",
+            default_badge={
+                "type": "outline",
+                "sub_key": "type",
+                "delimiter": " ",
+            },
+        ),
     ],
 )
 

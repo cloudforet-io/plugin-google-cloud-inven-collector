@@ -27,6 +27,7 @@ class Task(Model):
 
 class Execution(Model):
     name = StringType()
+    display_name = StringType()  # Short name for display
     uid = StringType()
     creator = StringType()
     job = StringType()
@@ -47,7 +48,7 @@ class Job(Model):
     generation = IntType()
     project = StringType()  # Project ID
     location = StringType()  # Location/Region
-    region = StringType()    # Region info
+    region = StringType()  # Region info
     labels = DictType(StringType, default={})
     annotations = DictType(StringType, default={})
     create_time = DateTimeType(deserialize_from="createTime")

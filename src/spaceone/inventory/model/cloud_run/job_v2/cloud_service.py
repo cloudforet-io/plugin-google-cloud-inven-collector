@@ -73,7 +73,7 @@ job_status = ItemDynamicLayout.set_fields(
 job_executions = TableDynamicLayout.set_fields(
     "Executions",
     fields=[
-        TextDyField.data_source("Name", "data.executions.name"),
+        TextDyField.data_source("Name", "data.executions.display_name"),
         TextDyField.data_source("UID", "data.executions.uid"),
         TextDyField.data_source("Creator", "data.executions.creator"),
         TextDyField.data_source("Job", "data.executions.job"),

@@ -21,7 +21,6 @@ Cloud Build Worker Pool
 worker_pool_overview = ItemDynamicLayout.set_fields(
     "Worker Pool Overview",
     fields=[
-        TextDyField.data_source("Display Name", "data.display_name"),
         TextDyField.data_source("UID", "data.uid"),
         TextDyField.data_source("State", "data.state"),
         TextDyField.data_source("ETag", "data.etag"),
