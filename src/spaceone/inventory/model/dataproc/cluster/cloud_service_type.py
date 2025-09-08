@@ -51,7 +51,13 @@ cst_cluster._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source(
             "Worker Instances", "data.config.worker_config.num_instances"
         ),
-        TextDyField.data_source("Project", "data.project_id"),
+        TextDyField.data_source(
+            "Preemptible VMs", "data.config.secondary_worker_config.num_instances"
+        ),
+        TextDyField.data_source(
+            "Scheduled Deletion", "data.config.lifecycle_config.auto_delete_time"
+        ),
+        TextDyField.data_source("Staging Bucket", "data.config.config_bucket"),
     ],
     search=[
         SearchField.set(name="Cluster Name", key="data.cluster_name"),

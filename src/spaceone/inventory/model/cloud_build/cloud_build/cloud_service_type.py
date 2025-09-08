@@ -9,7 +9,6 @@ from spaceone.inventory.libs.schema.cloud_service_type import (
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
-    ListDyField,
     SearchField,
     TextDyField,
 )
@@ -58,7 +57,6 @@ cst_build._metadata = CloudServiceTypeMeta.set_meta(
         DateTimeDyField.data_source("Create Time", "data.create_time"),
         DateTimeDyField.data_source("Start Time", "data.start_time"),
         DateTimeDyField.data_source("Finish Time", "data.finish_time"),
-        ListDyField.data_source("Images", "data.images"),
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),

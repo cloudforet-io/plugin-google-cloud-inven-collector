@@ -9,7 +9,6 @@ from spaceone.inventory.libs.schema.cloud_service_type import (
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
-    ListDyField,
     SearchField,
     TextDyField,
 )
@@ -39,8 +38,12 @@ cst_trigger.tags = {
 cst_trigger._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source("Trigger ID", "data.id"),
+        TextDyField.data_source("Description", "data.description"),
+        TextDyField.data_source("Repository", "data.github.name"),
+        TextDyField.data_source("Event", "data.github.push.branch"),
+        TextDyField.data_source("Build Config", "data.filename"),
         EnumDyField.data_source(
-            "Disabled",
+            "Status",
             "data.disabled",
             default_state={
                 "safe": [False],
@@ -48,7 +51,6 @@ cst_trigger._metadata = CloudServiceTypeMeta.set_meta(
             },
         ),
         DateTimeDyField.data_source("Create Time", "data.create_time"),
-        ListDyField.data_source("Tags", "data.tags"),
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),

@@ -46,7 +46,6 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
             },
         ),
         TextDyField.data_source("Location", "data.location"),
-        TextDyField.data_source("Project", "data.project"),
         TextDyField.data_source("URL", "data.uri"),
         TextDyField.data_source(
             "Latest Ready Revision", "data.latest_ready_revision_name"
@@ -57,7 +56,6 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Name", key="data.name"),
         SearchField.set(name="Service ID", key="data.uid"),
         SearchField.set(name="Location", key="data.location"),
-        SearchField.set(name="Project", key="data.project"),
         SearchField.set(name="Status", key="data.terminal_condition.state"),
         SearchField.set(name="URL", key="data.uri"),
         SearchField.set(

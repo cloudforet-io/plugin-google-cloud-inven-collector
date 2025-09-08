@@ -50,17 +50,17 @@ build_steps = TableDynamicLayout.set_fields(
     "Build Steps",
     "data.steps",
     fields=[
-        TextDyField.data_source("Step Name", "name"),
+        TextDyField.data_source("ID", "id"),
+        TextDyField.data_source("Name", "name"),
+        TextDyField.data_source("Status", "status"),
         ListDyField.data_source("Args", "args"),
         ListDyField.data_source("Env", "env"),
         TextDyField.data_source("Dir", "dir"),
-        TextDyField.data_source("Step ID", "id"),
         ListDyField.data_source("Wait For", "waitFor"),
         TextDyField.data_source("Entrypoint", "entrypoint"),
         ListDyField.data_source("Secret Env", "secretEnv"),
         ListDyField.data_source("Volumes", "volumes"),
         TextDyField.data_source("Timeout", "timeout"),
-        TextDyField.data_source("Status", "status"),
     ],
 )
 
