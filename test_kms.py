@@ -18,8 +18,8 @@ from unittest.mock import Mock
 os.environ["SPACEONE_PACKAGE"] = "plugin"
 
 try:
-    from src.spaceone.inventory.connector.kms.keyring_v1 import KMSKeyRingV1Connector
-    from src.spaceone.inventory.manager.kms.keyring_manager import KMSKeyRingManager
+    from src.spaceone.inventory.connector.kms.kms import KMSConnector
+    from src.spaceone.inventory.manager.kms.kms_manager import KMSKeyRingManager
 except ImportError as e:
     print(f"Import 오류: {e}")
     print("SpaceONE 관련 패키지가 설치되지 않았거나 경로를 찾을 수 없습니다.")
@@ -96,7 +96,7 @@ def test_kms_manager():
         }
 
         # Mock connector 설정
-        mock_connector = Mock(spec=KMSKeyRingV1Connector)
+        mock_connector = Mock(spec=KMSConnector)
         mock_connector.list_all_key_rings.return_value = [
             {
                 "name": "projects/test-project/locations/global/keyRings/test-keyring-1",

@@ -1,7 +1,7 @@
 import logging
 import time
 
-from spaceone.inventory.connector.firebase.project import FirebaseProjectConnector
+from spaceone.inventory.connector.firebase.firebase_v1beta1 import FirebaseV1Beta1Connector
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
 from spaceone.inventory.model.firebase.project.cloud_service import (
@@ -16,8 +16,8 @@ from spaceone.inventory.model.firebase.project.data import Project
 _LOGGER = logging.getLogger(__name__)
 
 
-class FirebaseProjectManager(GoogleCloudManager):
-    connector_name = "FirebaseProjectConnector"
+class FirebaseManager(GoogleCloudManager):
+    connector_name = "FirebaseV1Beta1Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params):
@@ -44,7 +44,7 @@ class FirebaseProjectManager(GoogleCloudManager):
         # 0. Gather All Related Resources
         # List all information through connector
         ##################################
-        firebase_conn: FirebaseProjectConnector = self.locator.get_connector(
+        firebase_conn: FirebaseV1Beta1Connector = self.locator.get_connector(
             self.connector_name, **params
         )
 

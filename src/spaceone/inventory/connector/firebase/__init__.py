@@ -1,3 +1,3 @@
-from spaceone.inventory.connector.firebase.project import FirebaseProjectConnector
+from spaceone.inventory.connector.firebase.firebase_v1beta1 import FirebaseV1Beta1Connector
 
-__all__ = ["FirebaseProjectConnector"]
+__all__ = ["FirebaseV1Beta1Connector"]

@@ -3,12 +3,12 @@ from typing import Dict, List
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
-__all__ = ["BatchConnector"]
+__all__ = ["BatchJobV1Connector"]
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class BatchConnector(GoogleCloudConnector):
+class BatchJobV1Connector(GoogleCloudConnector):
     """최적화된 Batch Connector - 효율적인 API 호출과 에러 처리"""
 
     google_client_service = "batch"

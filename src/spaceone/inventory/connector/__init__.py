@@ -1,4 +1,4 @@
-from spaceone.inventory.connector.batch.batch_connector import BatchConnector
+from spaceone.inventory.connector.batch.batch_v1 import BatchV1Connector
 from spaceone.inventory.connector.bigquery.sql_workspace import SQLWorkspaceConnector
 from spaceone.inventory.connector.cloud_build.cloud_build_v1 import (
     CloudBuildV1Connector,
@@ -48,8 +48,9 @@ from spaceone.inventory.connector.filestore.instance_v1 import (
 from spaceone.inventory.connector.filestore.instance_v1beta1 import (
     FilestoreInstanceV1Beta1Connector,
 )
-from spaceone.inventory.connector.firebase.project import FirebaseProjectConnector
+from spaceone.inventory.connector.firebase.firebase_v1beta1 import FirebaseV1Beta1Connector
 from spaceone.inventory.connector.kms.keyring_v1 import KMSKeyRingV1Connector
+from spaceone.inventory.connector.kms.kms_v1 import KMSV1Connector
 from spaceone.inventory.connector.firestore.database_v1 import (
     FirestoreDatabaseConnector,
 )
@@ -94,7 +95,7 @@ from spaceone.inventory.connector.storage_transfer.storage_transfer_v1 import (
     StorageTransferConnector,
 )
 __all__ = [
-    "BatchConnector",
+    "BatchV1Connector",
     "SQLWorkspaceConnector",
     "EventarcConnector",
     "FunctionGen1Connector",
@@ -118,8 +119,9 @@ __all__ = [
     "DatastoreNamespaceV1Connector",
     "FilestoreInstanceConnector",
     "FilestoreInstanceV1Beta1Connector",
-    "FirebaseProjectConnector",
+    "FirebaseV1Beta1Connector",
     "KMSKeyRingV1Connector",
+    "KMSV1Connector",
     "GKEClusterV1Connector",
     "GKEClusterV1BetaConnector",
     "GKENodePoolV1Connector",

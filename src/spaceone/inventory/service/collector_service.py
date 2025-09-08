@@ -56,7 +56,7 @@ class CollectorService(BaseService):
             'RouteManager',
             'LoadBalancingManager',
             'VMInstance',
-            'FirebaseProjectManager'
+            'FirebaseManager'
             'CloudRunServiceManager',
             'CloudRunJobManager',
             'CloudRunWorkerPoolManager',

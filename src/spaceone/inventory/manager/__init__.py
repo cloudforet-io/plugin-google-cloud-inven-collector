@@ -2,7 +2,7 @@ from .app_engine.application_v1_manager import AppEngineApplicationV1Manager
 from .app_engine.instance_v1_manager import AppEngineInstanceV1Manager
 from .app_engine.service_v1_manager import AppEngineServiceV1Manager
 from .app_engine.version_v1_manager import AppEngineVersionV1Manager
-from .batch.batch_manager import BatchManager
+from .batch.job_manager import BatchJobManager
 from .bigquery.sql_workspace_manager import SQLWorkspaceManager
 from .cloud_build.build_v1_manager import CloudBuildBuildV1Manager
 from .cloud_build.connection_v2_manager import CloudBuildConnectionV2Manager
@@ -38,9 +38,9 @@ from .datastore.index_manager import DatastoreIndexManager
 from .datastore.namespace_manager import DatastoreNamespaceManager
 from .filestore.instance_v1_manager import FilestoreInstanceManager
 from .filestore.instance_v1beta1_manager import FilestoreInstanceV1Beta1Manager
-from .firebase.project_manager import FirebaseProjectManager
+from .firebase.firebase_manager import FirebaseManager
 from .firestore.firestore_manager import FirestoreManager
-from .kms.keyring_manager import KMSKeyRingManager
+from .kms.kms_manager import KMSKeyRingManager
 from .kubernetes_engine.cluster_v1_manager import GKEClusterV1Manager
 from .kubernetes_engine.cluster_v1beta_manager import GKEClusterV1BetaManager
 from .kubernetes_engine.node_pool_v1_manager import GKENodePoolV1Manager

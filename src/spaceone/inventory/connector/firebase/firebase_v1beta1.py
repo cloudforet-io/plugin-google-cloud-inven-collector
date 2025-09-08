@@ -4,11 +4,11 @@ import googleapiclient
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
-__all__ = ["FirebaseProjectConnector"]
+__all__ = ["FirebaseV1Beta1Connector"]
 _LOGGER = logging.getLogger(__name__)
 
 
-class FirebaseProjectConnector(GoogleCloudConnector):
+class FirebaseV1Beta1Connector(GoogleCloudConnector):
     google_client_service = "firebase"
     version = "v1beta1"
 
