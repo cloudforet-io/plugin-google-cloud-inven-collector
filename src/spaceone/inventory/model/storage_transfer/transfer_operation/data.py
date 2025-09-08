@@ -53,8 +53,8 @@ class OperationMetadata(Model):
     type = StringType(deserialize_from="@type", serialize_when_none=False)
     name = StringType()
     project_id = StringType(deserialize_from="projectId")
-    start_time = DateTimeType(deserialize_from="startTime", serialize_when_none=False)
-    end_time = DateTimeType(deserialize_from="endTime", serialize_when_none=False)
+    start_time = StringType(deserialize_from="startTime", serialize_when_none=False)
+    end_time = StringType(deserialize_from="endTime", serialize_when_none=False)
     status = StringType(
         choices=(
             "IN_PROGRESS",
@@ -85,8 +85,8 @@ class TransferOperation(BaseResource):
     transfer_job_name = StringType(serialize_when_none=False)
     duration = StringType(serialize_when_none=False)  # 실행 시간
 
-    def reference(self):
+    def reference(self, self_link):
         return {
-            "resource_id": self.self_link,
+            "resource_id": self_link,
             "external_link": f"https://console.cloud.google.com/transfer/jobs?project={self.project}",
         }

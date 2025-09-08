@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, List
 
+from googleapiclient.errors import HttpError
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
 _LOGGER = logging.getLogger(__name__)
@@ -69,8 +70,22 @@ class FilestoreInstanceV1Beta1Connector(GoogleCloudConnector):
 
             return instances
 
+        except HttpError as e:
+            if e.resp.status == 404:
+                _LOGGER.warning(
+                    f"Filestore service not available for project {self.project_id} "
+                )
+                return []
+            elif e.resp.status == 403:
+                _LOGGER.warning(
+                    f"Filestore API not enabled or insufficient permissions for project {self.project_id}, "
+                )
+                return []
+            else:
+                _LOGGER.error(f"HTTP error listing Filestore instances (v1beta1) for project {self.project_id}: {e}")
+                raise e
         except Exception as e:
-            _LOGGER.error(f"Error listing Filestore instances (v1beta1): {e}")
+            _LOGGER.error(f"Error listing Filestore instances (v1beta1) for project {self.project_id}: {e}")
             raise e from e
 
     def list_shares_for_instance(

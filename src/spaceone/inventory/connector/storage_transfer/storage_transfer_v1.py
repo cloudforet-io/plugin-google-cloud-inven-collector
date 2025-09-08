@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, List
 
+from googleapiclient.errors import HttpError
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
 __all__ = ["StorageTransferConnector"]
@@ -47,6 +48,20 @@ class StorageTransferConnector(GoogleCloudConnector):
 
             return transfer_jobs
 
+        except HttpError as e:
+            if e.resp.status == 404:
+                _LOGGER.warning(
+                    f"Storage Transfer service not available for project {self.project_id} "
+                )
+                return []
+            elif e.resp.status == 403:
+                _LOGGER.warning(
+                    f"Storage Transfer API not enabled or insufficient permissions for project {self.project_id}, "
+                )
+                return []
+            else:
+                _LOGGER.error(f"HTTP error listing transfer jobs for project {self.project_id}: {e}")
+                raise e
         except Exception as e:
             _LOGGER.error(
                 f"Failed to list transfer jobs for project {self.project_id}: {e}"
@@ -96,6 +111,20 @@ class StorageTransferConnector(GoogleCloudConnector):
 
             return operations
 
+        except HttpError as e:
+            if e.resp.status == 404:
+                _LOGGER.warning(
+                    f"Storage Transfer service not available for project {self.project_id} "
+                )
+                return []
+            elif e.resp.status == 403:
+                _LOGGER.warning(
+                    f"Storage Transfer API not enabled or insufficient permissions for project {self.project_id}, "
+                )
+                return []
+            else:
+                _LOGGER.error(f"HTTP error listing transfer operations for project {self.project_id}: {e}")
+                raise e
         except Exception as e:
             _LOGGER.error(
                 f"Failed to list transfer operations for project {self.project_id}: {e}"
@@ -132,6 +161,20 @@ class StorageTransferConnector(GoogleCloudConnector):
                 )
             return agent_pools
 
+        except HttpError as e:
+            if e.resp.status == 404:
+                _LOGGER.warning(
+                    f"Storage Transfer service not available for project {self.project_id} "
+                )
+                return []
+            elif e.resp.status == 403:
+                _LOGGER.warning(
+                    f"Storage Transfer API not enabled or insufficient permissions for project {self.project_id}, "
+                )
+                return []
+            else:
+                _LOGGER.error(f"HTTP error listing agent pools for project {self.project_id}: {e}")
+                raise e
         except Exception as e:
             _LOGGER.error(
                 f"Failed to list agent pools for project {self.project_id}: {e}"

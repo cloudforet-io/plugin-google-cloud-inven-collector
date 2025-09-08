@@ -1,6 +1,7 @@
 import logging
 from typing import List
 
+from googleapiclient.errors import HttpError
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
 __all__ = ["FirestoreDatabaseConnector"]
@@ -71,27 +72,46 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
         database_list = []
         query.update({"parent": f"projects/{self.project_id}"})
 
-        request = self.client.projects().databases().list(**query)
-        while request is not None:
-            response = request.execute()
-            all_databases = response.get("databases", [])
-            # FIRESTORE_NATIVE 타입만 필터링
-            firestore_databases = list(
-                filter(lambda db: db.get("type") == "FIRESTORE_NATIVE", all_databases)
-            )
-            database_list.extend(firestore_databases)
-            # 페이지네이션 처리 - list_next가 있는지 확인
-            try:
-                request = (
-                    self.client.projects()
-                    .databases()
-                    .list_next(previous_request=request, previous_response=response)
+        try:
+            request = self.client.projects().databases().list(**query)
+            while request is not None:
+                response = request.execute()
+                all_databases = response.get("databases", [])
+                # FIRESTORE_NATIVE 타입만 필터링
+                firestore_databases = list(
+                    filter(lambda db: db.get("type") == "FIRESTORE_NATIVE", all_databases)
                 )
-            except AttributeError:
-                # list_next가 없는 경우 첫 페이지만 처리
-                break
+                database_list.extend(firestore_databases)
+                # 페이지네이션 처리 - list_next가 있는지 확인
+                try:
+                    request = (
+                        self.client.projects()
+                        .databases()
+                        .list_next(previous_request=request, previous_response=response)
+                    )
+                except AttributeError:
+                    # list_next가 없는 경우 첫 페이지만 처리
+                    break
 
-        return database_list
+            return database_list
+
+        except HttpError as e:
+            if e.resp.status == 404:
+                _LOGGER.warning(
+                    f"Firestore service not available for project {self.project_id} "
+                )
+                return []
+            elif e.resp.status == 403:
+                _LOGGER.warning(
+                    f"Firestore API not enabled or insufficient permissions for project {self.project_id}, "
+                )
+                return []
+            else:
+                _LOGGER.error(f"HTTP error listing Firestore databases for project {self.project_id}: {e}")
+                raise e
+        except Exception as e:
+            _LOGGER.error(f"Error listing Firestore databases for project {self.project_id}: {e}")
+            raise e
 
     def list_indexes(self, database_name, **query):
         """데이터베이스의 인덱스 목록을 조회합니다.
@@ -108,30 +128,49 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
 
         query.update({"parent": parent})
 
-        request = (
-            self.client.projects()
-            .databases()
-            .collectionGroups()
-            .indexes()
-            .list(**query)
-        )
-        while request is not None:
-            response = request.execute()
-            indexes.extend(response.get("indexes", []))
-            # 페이지네이션 처리 - list_next가 있는지 확인
-            try:
-                request = (
-                    self.client.projects()
-                    .databases()
-                    .collectionGroups()
-                    .indexes()
-                    .list_next(previous_request=request, previous_response=response)
-                )
-            except AttributeError:
-                # list_next가 없는 경우 첫 페이지만 처리
-                break
+        try:
+            request = (
+                self.client.projects()
+                .databases()
+                .collectionGroups()
+                .indexes()
+                .list(**query)
+            )
+            while request is not None:
+                response = request.execute()
+                indexes.extend(response.get("indexes", []))
+                # 페이지네이션 처리 - list_next가 있는지 확인
+                try:
+                    request = (
+                        self.client.projects()
+                        .databases()
+                        .collectionGroups()
+                        .indexes()
+                        .list_next(previous_request=request, previous_response=response)
+                    )
+                except AttributeError:
+                    # list_next가 없는 경우 첫 페이지만 처리
+                    break
 
-        return indexes
+            return indexes
+
+        except HttpError as e:
+            if e.resp.status == 404:
+                _LOGGER.warning(
+                    f"Firestore index service not available for database {database_name} "
+                )
+                return []
+            elif e.resp.status == 403:
+                _LOGGER.warning(
+                    f"Firestore API not enabled or insufficient permissions for database {database_name}, "
+                )
+                return []
+            else:
+                _LOGGER.error(f"HTTP error listing indexes for database {database_name}: {e}")
+                raise e
+        except Exception as e:
+            _LOGGER.error(f"Error listing indexes for database {database_name}: {e}")
+            raise e
 
     def list_collections_with_documents(self, database_name, parent="", **query):
         """컬렉션 ID와 각 컬렉션의 문서들을 한 번에 조회합니다. (최적화된 통합 메서드)
