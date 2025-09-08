@@ -46,7 +46,7 @@ cst_job._metadata = CloudServiceTypeMeta.set_meta(
             },
         ),
         TextDyField.data_source("Location", "data.location"),
-        TextDyField.data_source("Project", "data.project"),
+        TextDyField.data_source("Creator", "data.creator"),
         TextDyField.data_source("Execution Count", "data.execution_count"),
         TextDyField.data_source(
             "Latest Created Execution", "data.latest_created_execution.name"
@@ -56,7 +56,6 @@ cst_job._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Name", key="data.name"),
         SearchField.set(name="Job ID", key="data.uid"),
         SearchField.set(name="Location", key="data.location"),
-        SearchField.set(name="Project", key="data.project"),
         SearchField.set(name="Status", key="data.terminal_condition.state"),
     ],
     widget=[

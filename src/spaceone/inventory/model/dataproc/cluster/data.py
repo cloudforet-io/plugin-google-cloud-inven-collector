@@ -57,6 +57,14 @@ class SoftwareConfig(Model):
     optional_components = ListType(StringType())
 
 
+class LifecycleConfig(Model):
+    """Dataproc 클러스터의 생명주기 구성을 나타냅니다."""
+
+    auto_delete_time = StringType()
+    auto_delete_ttl = StringType()
+    idle_delete_ttl = StringType()
+
+
 class ClusterConfig(Model):
     """Dataproc 클러스터의 전체적인 구성을 나타냅니다."""
 
@@ -71,7 +79,7 @@ class ClusterConfig(Model):
     encryption_config = DictType(StringType())
     autoscaling_policy = StringType()
     security_config = DictType(StringType())
-    lifecycle_config = DictType(StringType())
+    lifecycle_config = ModelType(LifecycleConfig)
 
 
 class AutoscalingPolicy(Model):

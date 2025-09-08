@@ -38,20 +38,18 @@ cst_connection.tags = {
 cst_connection._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source("UID", "data.uid"),
+        TextDyField.data_source(
+            "URL", "data.github_config.authorizerCredential.username"
+        ),
+        TextDyField.data_source(
+            "Provider Auth Account", "data.github_config.appInstallationId"
+        ),
         EnumDyField.data_source(
-            "Disabled",
+            "Status",
             "data.disabled",
             default_state={
                 "safe": [False],
                 "alert": [True],
-            },
-        ),
-        EnumDyField.data_source(
-            "Reconciling",
-            "data.reconciling",
-            default_state={
-                "safe": [False],
-                "warning": [True],
             },
         ),
         DateTimeDyField.data_source("Create Time", "data.create_time"),
