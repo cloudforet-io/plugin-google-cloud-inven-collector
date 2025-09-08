@@ -1,6 +1,5 @@
 from schematics import Model
 from schematics.types import (
-    DateTimeType,
     StringType,
 )
 
@@ -20,8 +19,8 @@ class BackupSchedule(Model):
     recurrence_type = StringType(choices=["DAILY", "WEEKLY"])
 
     # 시간 정보
-    create_time = DateTimeType()
-    update_time = DateTimeType()
+    create_time = StringType()
+    update_time = StringType()
 
     # 메타데이터
     uid = StringType()
