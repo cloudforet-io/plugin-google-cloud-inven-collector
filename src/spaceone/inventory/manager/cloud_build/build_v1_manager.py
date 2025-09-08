@@ -59,26 +59,24 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
         # Get locations and regional builds using REGION_INFO fallback
         regional_builds = []
         parent = f"projects/{project_id}"
-        
+
         # V1에서는 locations API가 지원되지 않으므로 REGION_INFO를 사용
         locations = [
             {
                 "locationId": region_id,
                 "name": f"{parent}/locations/{region_id}",
-                "displayName": REGION_INFO[region_id]["name"]
+                "displayName": REGION_INFO[region_id]["name"],
             }
             for region_id in REGION_INFO.keys()
             if region_id != "global"
         ]
-        
+
         for location in locations:
             location_id = location.get("locationId", "")
             if location_id:
                 try:
                     parent = f"projects/{project_id}/locations/{location_id}"
-                    location_builds = cloud_build_v1_conn.list_location_builds(
-                        parent
-                    )
+                    location_builds = cloud_build_v1_conn.list_location_builds(parent)
                     for build in location_builds:
                         build["_location"] = location_id
                     regional_builds.extend(location_builds)
@@ -99,19 +97,28 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                 ##################################
                 build_id = build.get("id")
                 build_full_name = build.get("name", "")  # Original full path
-                
+
                 # Name을 첫 8자리로 변경 (04788528-aa29-4bd1-aa61-b301ea0edb8c → 04788528)
-                build_name_short = build_id[:8] if build_id and len(build_id) >= 8 else build_id
-                
-                # Build Trigger ID에서 빌드 ID만 추출
-                build_trigger_id = build.get("substitutions", {}).get("TRIGGER_BUILD_CONFIG_PATH", "")
-                if not build_trigger_id and "name" in build:
-                    # projects/.../builds/04788528-aa29-4bd1-aa61-b301ea0edb8c → 04788528-aa29-4bd1-aa61-b301ea0edb8c
-                    if "/builds/" in build_full_name:
-                        build_trigger_id = build_full_name.split("/builds/")[-1]
-                    else:
-                        build_trigger_id = build_id if build_id else ""
-                
+                build_name_short = (
+                    build_id[:8] if build_id and len(build_id) >= 8 else build_id
+                )
+
+                # Build Trigger ID 추출 - 실제 trigger ID를 가져오거나 빈 문자열로 설정
+                build_trigger_id = build.get("buildTriggerId", "")
+                if not build_trigger_id:
+                    # substitutions에서 TRIGGER_ID를 확인
+                    build_trigger_id = build.get("substitutions", {}).get(
+                        "TRIGGER_ID", ""
+                    )
+                if not build_trigger_id:
+                    # substitutions에서 TRIGGER_NAME을 확인
+                    build_trigger_id = build.get("substitutions", {}).get(
+                        "TRIGGER_NAME", ""
+                    )
+                # 여전히 없으면 빈 문자열로 설정
+                if not build_trigger_id:
+                    build_trigger_id = ""
+
                 location_id = build.get("_location", "global")
                 region = (
                     self.parse_region_from_zone(location_id)

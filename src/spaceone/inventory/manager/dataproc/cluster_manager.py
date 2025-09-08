@@ -229,7 +229,7 @@ class DataprocClusterManager(GoogleCloudManager):
                 # 기본 클러스터 데이터 준비
                 cluster_data = {
                     "clusterName": str(cluster.get("clusterName", "")),
-                    "projectId": str(cluster.get("projectId", project_id)),
+                    "projectId": str(project_id),  # project_id를 명시적으로 설정
                     "clusterUuid": str(cluster.get("clusterUuid", "")),
                     "status": cluster.get("status", {}),
                     "labels": {k: str(v) for k, v in cluster.get("labels", {}).items()},
@@ -274,8 +274,8 @@ class DataprocClusterManager(GoogleCloudManager):
                         }
 
                     # 마스터 설정
-                    if "masterConfig" in config:
-                        master_config = config["masterConfig"]
+                    master_config = config.get("masterConfig", {})
+                    if master_config:
                         cluster_data["config"]["masterConfig"] = {
                             "numInstances": str(master_config.get("numInstances", "")),
                             "instanceNames": master_config.get("instanceNames", []),
@@ -285,10 +285,18 @@ class DataprocClusterManager(GoogleCloudManager):
                             ),
                             "diskConfig": master_config.get("diskConfig", {}),
                         }
+                    else:
+                        cluster_data["config"]["masterConfig"] = {
+                            "numInstances": "",
+                            "instanceNames": [],
+                            "imageUri": "",
+                            "machineTypeUri": "",
+                            "diskConfig": {},
+                        }
 
                     # 워커 설정
-                    if "workerConfig" in config:
-                        worker_config = config["workerConfig"]
+                    worker_config = config.get("workerConfig", {})
+                    if worker_config:
                         cluster_data["config"]["workerConfig"] = {
                             "numInstances": str(worker_config.get("numInstances", "")),
                             "instanceNames": worker_config.get("instanceNames", []),
@@ -298,10 +306,18 @@ class DataprocClusterManager(GoogleCloudManager):
                             ),
                             "diskConfig": worker_config.get("diskConfig", {}),
                         }
+                    else:
+                        cluster_data["config"]["workerConfig"] = {
+                            "numInstances": "",
+                            "instanceNames": [],
+                            "imageUri": "",
+                            "machineTypeUri": "",
+                            "diskConfig": {},
+                        }
 
                     # 소프트웨어 설정
-                    if "softwareConfig" in config:
-                        software_config = config["softwareConfig"]
+                    software_config = config.get("softwareConfig", {})
+                    if software_config:
                         cluster_data["config"]["softwareConfig"] = {
                             "imageVersion": str(
                                 software_config.get("imageVersion", "")
@@ -310,6 +326,12 @@ class DataprocClusterManager(GoogleCloudManager):
                             "optionalComponents": software_config.get(
                                 "optionalComponents", []
                             ),
+                        }
+                    else:
+                        cluster_data["config"]["softwareConfig"] = {
+                            "imageVersion": "",
+                            "properties": {},
+                            "optionalComponents": [],
                         }
 
                 # 메트릭 정보 추가

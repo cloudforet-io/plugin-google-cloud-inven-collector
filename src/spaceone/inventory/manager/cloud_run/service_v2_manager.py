@@ -105,22 +105,46 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                 ##################################
                 # Extract URL from service
                 service_uri = service.get("uri", "")
-                
+
                 # Extract status information
                 status = service.get("status", {})
                 latest_ready_revision_name = status.get("latestReadyRevisionName", "")
-                latest_created_revision_name = status.get("latestCreatedRevisionName", "")
-                
+                latest_created_revision_name = status.get(
+                    "latestCreatedRevisionName", ""
+                )
+
+                # If latest_ready_revision_name is empty, try to get from latestReadyRevision
+                if not latest_ready_revision_name:
+                    latest_ready_revision = service.get("latestReadyRevision", "")
+                    if latest_ready_revision and "/revisions/" in latest_ready_revision:
+                        latest_ready_revision_name = latest_ready_revision.split(
+                            "/revisions/"
+                        )[-1]
+
+                # If latest_created_revision_name is empty, try to get from latestCreatedRevision
+                if not latest_created_revision_name:
+                    latest_created_revision = service.get("latestCreatedRevision", "")
+                    if (
+                        latest_created_revision
+                        and "/revisions/" in latest_created_revision
+                    ):
+                        latest_created_revision_name = latest_created_revision.split(
+                            "/revisions/"
+                        )[-1]
+
                 # Extract terminal condition for status
-                terminal_condition = status.get("terminalCondition", {})
+                terminal_condition = service.get("terminalCondition", {})
+                if not terminal_condition:
+                    # Fallback: check status.terminalCondition
+                    terminal_condition = status.get("terminalCondition", {})
                 if not terminal_condition:
                     # Fallback: check conditions array for terminal condition
-                    conditions = status.get("conditions", [])
+                    conditions = service.get("conditions", [])
                     for condition in conditions:
                         if condition.get("type") == "Ready":
                             terminal_condition = condition
                             break
-                
+
                 service.update(
                     {
                         "name": service_name,  # Set name for SpaceONE display
@@ -133,7 +157,6 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                         "terminal_condition": terminal_condition,
                     }
                 )
-                
 
                 ##################################
                 # 3. Make Return Resource
@@ -167,6 +190,8 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                 )
                 error_responses.append(error_response)
 
-        _LOGGER.debug(f"** Cloud Run Service V2 END ** ({time.time() - start_time:.2f}s)")
+        _LOGGER.debug(
+            f"** Cloud Run Service V2 END ** ({time.time() - start_time:.2f}s)"
+        )
 
         return collected_cloud_services, error_responses

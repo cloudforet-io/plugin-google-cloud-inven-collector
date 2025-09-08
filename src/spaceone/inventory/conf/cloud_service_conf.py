@@ -57,10 +57,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "CloudRunWorkerPoolV2Manager",
         # "CloudRunOperationV2Manager",
     ],
-    "KubernetesEngine": [
-        "GKEClusterV1Manager",
-        "GKENodePoolV1Manager"
-    ],
+    "KubernetesEngine": ["GKEClusterV1Manager", "GKENodePoolV1Manager"],
     "AppEngine": [
         "AppEngineApplicationV1Manager",
         "AppEngineServiceV1Manager",
@@ -211,7 +208,7 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "NodePool": {
             "resource_type": "gke_nodepool",
             "labels_key": "resource.labels.nodepool_name",
-        }
+        },
     },
     "AppEngine": {
         "Application": {

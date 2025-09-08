@@ -74,9 +74,20 @@ class CloudRunJobV2Manager(GoogleCloudManager):
                                 for execution in executions:
                                     execution_name = execution.get("name")
                                     if execution_name:
+                                        # Extract execution name from full path for display
+                                        if "/executions/" in execution_name:
+                                            execution_display_name = (
+                                                execution_name.split("/executions/")[-1]
+                                            )
+                                            execution["display_name"] = (
+                                                execution_display_name
+                                            )
+
                                         try:
-                                            tasks = cloud_run_v2_conn.list_execution_tasks(
-                                                execution_name
+                                            tasks = (
+                                                cloud_run_v2_conn.list_execution_tasks(
+                                                    execution_name
+                                                )
                                             )
                                             execution["tasks"] = tasks
                                             execution["task_count"] = len(tasks)
