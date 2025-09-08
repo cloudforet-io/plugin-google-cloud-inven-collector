@@ -244,7 +244,7 @@ class FilestoreInstanceV1Beta1Manager(GoogleCloudManager):
         # FilestoreInstanceData 객체 생성
         instance_data_obj = FilestoreInstanceData(instance_data, strict=False)
 
-        # FilestoreInstanceResource 객체 생성
+        # FilestoreInstanceResource 객체 생성 (표준 패턴: 다른 매니저들과 동일)
         resource_data = {
             "name": instance_id,
             "account": project_id,
@@ -257,7 +257,8 @@ class FilestoreInstanceV1Beta1Manager(GoogleCloudManager):
         }
 
         try:
-            resource = FilestoreInstanceResource(resource_data, strict=False)
+            # 표준 패턴: 리소스에는 strict 옵션 사용하지 않음 (데이터에만 사용)
+            resource = FilestoreInstanceResource(resource_data)
             return resource
         except Exception as e:
             _LOGGER.error(

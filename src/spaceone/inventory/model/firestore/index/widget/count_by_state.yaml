@@ -1,0 +1,15 @@
+---
+cloud_service_group: Firestore
+cloud_service_type: Index
+name: Indexes by State
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.state
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: DONUT

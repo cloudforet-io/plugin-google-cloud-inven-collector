@@ -1,0 +1,15 @@
+---
+cloud_service_group: Firestore
+cloud_service_type: Collection
+name: Collections by Database
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.database_id
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: DONUT
