@@ -1,11 +1,11 @@
 from schematics import Model
 from schematics.types import (
     BooleanType,
-    DateTimeType,
     DictType,
     ListType,
     ModelType,
     StringType,
+    BaseType,
 )
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
@@ -46,7 +46,7 @@ class TransferSpec(Model):
         StringType, deserialize_from="objectConditions", serialize_when_none=False
     )
     transfer_options = DictType(
-        StringType, deserialize_from="transferOptions", serialize_when_none=False
+        BaseType, deserialize_from="transferOptions", serialize_when_none=False
     )
     transfer_manifest = DictType(
         StringType, deserialize_from="transferManifest", serialize_when_none=False
@@ -115,9 +115,9 @@ class TransferJob(BaseResource):
     )
     schedule = ModelType(Schedule, serialize_when_none=False)
     status = StringType(choices=("ENABLED", "DISABLED", "DELETED"))
-    creation_time = DateTimeType(deserialize_from="creationTime")
-    last_modification_time = DateTimeType(deserialize_from="lastModificationTime")
-    deletion_time = DateTimeType(
+    creation_time = StringType(deserialize_from="creationTime")
+    last_modification_time = StringType(deserialize_from="lastModificationTime")
+    deletion_time = StringType(
         deserialize_from="deletionTime", serialize_when_none=False
     )
     latest_operation_name = StringType(

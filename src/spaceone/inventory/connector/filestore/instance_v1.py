@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, List
 
+from googleapiclient.errors import HttpError
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
 _LOGGER = logging.getLogger(__name__)
@@ -76,8 +77,22 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
 
             return instances
 
+        except HttpError as e:
+            if e.resp.status == 404:
+                _LOGGER.warning(
+                    f"Filestore service not available for project {self.project_id} "
+                )
+                return []
+            elif e.resp.status == 403:
+                _LOGGER.warning(
+                    f"Filestore API not enabled or insufficient permissions for project {self.project_id}, "
+                )
+                return []
+            else:
+                _LOGGER.error(f"HTTP error listing Filestore instances for project {self.project_id}: {e}")
+                raise e
         except Exception as e:
-            _LOGGER.error(f"Error listing Filestore instances: {e}")
+            _LOGGER.error(f"Error listing Filestore instances for project {self.project_id}: {e}")
             raise e from e
 
     def list_snapshots_for_instance(
@@ -123,6 +138,20 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
 
             return snapshots
 
+        except HttpError as e:
+            if e.resp.status == 404:
+                _LOGGER.warning(
+                    f"Filestore snapshot service not available for instance {instance_name} "
+                )
+                return []
+            elif e.resp.status == 403:
+                _LOGGER.warning(
+                    f"Filestore API not enabled or insufficient permissions for instance {instance_name}, "
+                )
+                return []
+            else:
+                _LOGGER.error(f"HTTP error listing snapshots for instance {instance_name}: {e}")
+                raise e
         except Exception as e:
             _LOGGER.error(f"Error listing snapshots for instance {instance_name}: {e}")
             raise e from e
