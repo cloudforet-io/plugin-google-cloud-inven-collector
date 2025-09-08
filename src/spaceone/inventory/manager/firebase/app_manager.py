@@ -116,7 +116,7 @@ class FirebaseAppManager(GoogleCloudManager):
         firebase_app = App(app_data)
         
         app_resource = AppResource({
-            "name": firebase_app.app_id,
+            "name": firebase_app.display_name,
             "data": firebase_app,
             "reference": ReferenceModel(firebase_app.reference()),
             "region_code": "global",
