@@ -68,56 +68,26 @@ class FirebaseV1Beta1Connector(GoogleCloudConnector):
 
     def get_firebase_project_info(self, **query):
         """
-        특정 프로젝트의 Firebase 프로젝트 정보를 조회합니다.
-        프로젝트 기준으로 Firebase 서비스 사용 여부를 확인합니다.
+        Firebase 앱 목록을 조회하고 서비스 사용 여부를 확인합니다.
 
         Args:
             **query: 추가 쿼리 파라미터
 
         Returns:
-            dict: Firebase 프로젝트 정보
+            dict: Firebase 앱 목록과 서비스 사용 여부
         """
         try:
-            # 1. Resource Manager로 프로젝트 기본 정보 확인
-            import googleapiclient.discovery
-
-            resource_manager = googleapiclient.discovery.build(
-                "cloudresourcemanager", "v1", credentials=self.credentials
-            )
-
-            project_info = (
-                resource_manager.projects().get(projectId=self.project_id).execute()
-            )
-
-            # 2. Firebase 앱들 조회
+            # Firebase 앱들 조회
             firebase_apps = self.list_firebase_apps()
 
-            # 3. Firebase 프로젝트 정보 구성
-            firebase_project = {
-                "projectId": self.project_id,
-                "displayName": project_info.get("name", ""),
-                "projectNumber": project_info.get("projectNumber", ""),
-                "state": project_info.get("lifecycleState", "ACTIVE"),
-                "name": f"projects/{self.project_id}",
+            return {
                 "firebaseApps": firebase_apps,
-                "appCount": len(firebase_apps),
-                "hasFirebaseServices": str(len(firebase_apps) > 0),
+                "hasFirebaseServices": len(firebase_apps) > 0,
             }
-
-            # 4. 플랫폼별 앱 통계 추가
-            platform_stats = {"IOS": 0, "ANDROID": 0, "WEB": 0}
-            for app in firebase_apps:
-                platform = app.get("platform", "PLATFORM_UNSPECIFIED")
-                if platform in platform_stats:
-                    platform_stats[platform] += 1
-
-            firebase_project["platformStats"] = platform_stats
-
-            return firebase_project
 
         except Exception as e:
             _LOGGER.error(
-                f"Failed to get Firebase project info for {self.project_id}: {e}"
+                f"Failed to get Firebase apps for {self.project_id}: {e}"
             )
             raise e
 

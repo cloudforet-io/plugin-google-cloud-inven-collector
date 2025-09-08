@@ -50,13 +50,6 @@ class FirebaseAppManager(GoogleCloudManager):
 
             firebase_apps = firebase_project_info.get("firebaseApps", [])
             
-            # 프로젝트 정보 구성
-            project_info_data = {
-                "project_id": firebase_project_info.get("projectId"),
-                "display_name": firebase_project_info.get("displayName"),
-                "project_number": firebase_project_info.get("projectNumber"),
-                "state": firebase_project_info.get("state"),
-            }
 
             # 각 앱별로 개별 응답 생성
             for app_data in firebase_apps:
@@ -75,8 +68,8 @@ class FirebaseAppManager(GoogleCloudManager):
                     # 최종 앱 데이터 구성
                     enhanced_app_data = {
                         **merged_app_data,
-                        "projectInfo": project_info_data,
                         "appConfig": app_config_data,
+                        "namespace": project_id,  # Firebase 앱의 namespace는 프로젝트 ID
                     }
 
                     # Firebase 앱 리소스 생성

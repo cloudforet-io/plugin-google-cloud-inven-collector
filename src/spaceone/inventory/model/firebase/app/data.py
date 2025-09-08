@@ -17,15 +17,6 @@ Firebase App Data Model
 """
 
 
-class ProjectInfo(Model):
-    """Firebase 앱이 속한 프로젝트 정보"""
-
-    project_id = StringType()
-    display_name = StringType()
-    project_number = StringType()
-    state = StringType()
-
-
 class AppConfig(Model):
     """Firebase 앱 설정 정보"""
 
@@ -44,8 +35,7 @@ class App(Model):
     app_id = StringType(deserialize_from="appId")
     state = StringType()
     
-    # 프로젝트 및 설정 정보
-    project_info = ModelType(ProjectInfo, deserialize_from="projectInfo")
+    # 설정 정보
     app_config = ModelType(AppConfig, deserialize_from="appConfig")
     
     # API 메타데이터
@@ -61,7 +51,7 @@ class App(Model):
     web_id = StringType(deserialize_from="webId")
 
     def reference(self):
-        project_id = self.project_info.project_id if self.project_info else ""
+        project_id = self.project_id or ""
         return {
             "resource_id": self.app_id,
             "external_link": f"https://console.firebase.google.com/project/{project_id}/settings/general",
@@ -74,8 +64,8 @@ firebase_app_meta = CloudServiceMeta.set_layouts(
         ItemDynamicLayout.set_fields(
             "App Information",
             fields=[
-                TextDyField.data_source("App ID", "data.app_id"),
                 TextDyField.data_source("Display Name", "data.display_name"),
+                TextDyField.data_source("App ID", "data.app_id"),
                 EnumDyField.data_source(
                     "Platform",
                     "data.platform",
@@ -85,24 +75,11 @@ firebase_app_meta = CloudServiceMeta.set_layouts(
                         "blue.500": ["WEB"],
                     },
                 ),
-                TextDyField.data_source("Name", "data.name"),
+                TextDyField.data_source("Resource Name", "data.name"),
                 TextDyField.data_source("Namespace", "data.namespace"),
                 BadgeDyField.data_source("State", "data.state"),
                 TextDyField.data_source("API Key ID", "data.api_key_id"),
                 TextDyField.data_source("Expire Time", "data.expire_time"),
-            ],
-        ),
-        ItemDynamicLayout.set_fields(
-            "Project Information",
-            fields=[
-                TextDyField.data_source("Project ID", "data.project_info.project_id"),
-                TextDyField.data_source(
-                    "Project Display Name", "data.project_info.display_name"
-                ),
-                TextDyField.data_source(
-                    "Project Number", "data.project_info.project_number"
-                ),
-                BadgeDyField.data_source("Project State", "data.project_info.state"),
             ],
         ),
         ItemDynamicLayout.set_fields(
