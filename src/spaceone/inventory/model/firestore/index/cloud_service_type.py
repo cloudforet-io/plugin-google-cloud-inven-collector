@@ -1,3 +1,7 @@
+import os
+
+from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
@@ -13,18 +17,27 @@ from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
     ChartWidget,
 )
 
-ASSET_URL = "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/gcp"
+"""
+Google Cloud Firestore Index 서비스 타입을 SpaceONE에서 표현하기 위한 모델을 정의합니다.
+"""
 
+current_dir = os.path.abspath(os.path.dirname(__file__))
+
+total_count_conf = os.path.join(current_dir, "widget/total_count.yaml")
+count_by_state_conf = os.path.join(current_dir, "widget/count_by_state.yaml")
+count_by_query_scope_conf = os.path.join(current_dir, "widget/count_by_query_scope.yaml")
+
+# Cloud Service Type 리소스 정의
 cst_index = CloudServiceTypeResource()
 cst_index.name = "Index"
-cst_index.provider = "gcp"
+cst_index.provider = "google_cloud"
 cst_index.group = "Firestore"
 cst_index.service_code = "Cloud Firestore"
 cst_index.is_primary = False
 cst_index.is_major = True
 cst_index.labels = ["Database", "Index"]
 cst_index.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Firestore.svg",
+    "spaceone:icon": f"{ASSET_URL}/Firestore.svg",
 }
 
 cst_index._metadata = CloudServiceTypeMeta.set_meta(
@@ -60,41 +73,9 @@ cst_index._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="State", key="data.state"),
     ],
     widget=[
-        CardWidget.set(
-            **{
-                "cloud_service_group": "Firestore",
-                "cloud_service_type": "Index",
-                "name": "Total Count",
-                "query": {
-                    "aggregate": [
-                        {"group": {"fields": [{"name": "value", "operator": "count"}]}}
-                    ]
-                },
-                "options": {
-                    "value_options": {"key": "value", "options": {"default": 0}}
-                },
-            }
-        ),
-        ChartWidget.set(
-            **{
-                "cloud_service_group": "Firestore",
-                "cloud_service_type": "Index",
-                "name": "Indexes by State",
-                "query": {
-                    "aggregate": [
-                        {
-                            "group": {
-                                "keys": [{"key": "data.state", "name": "state"}],
-                                "fields": [
-                                    {"name": "index_count", "operator": "count"}
-                                ],
-                            }
-                        }
-                    ]
-                },
-                "options": {"chart_type": "DONUT"},
-            }
-        ),
+        CardWidget.set(**get_data_from_yaml(total_count_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_state_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_query_scope_conf)),
     ],
 )
 

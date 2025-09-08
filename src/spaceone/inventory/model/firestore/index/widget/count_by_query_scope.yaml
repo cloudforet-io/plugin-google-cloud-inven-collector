@@ -1,0 +1,15 @@
+---
+cloud_service_group: Firestore
+cloud_service_type: Index
+name: Indexes by Query Scope
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: name
+            key: data.query_scope
+        fields:
+          - name: value
+            operator: count
+options:
+  chart_type: COLUMN

@@ -37,42 +37,8 @@ class FilestoreInstanceManager(GoogleCloudManager):
     cloud_service_types = CLOUD_SERVICE_TYPES
     instance_conn = None
 
-    def _convert_google_cloud_datetime(self, google_cloud_datetime: str) -> str:
-        """
-        Google Cloud API의 날짜 형식을 SpaceONE에서 사용하는 형식으로 변환합니다.
-
-        Args:
-            google_cloud_datetime: Google Cloud API 날짜 형식
-                (예: 2025-08-18T06:13:54.868444486Z)
-
-        Returns:
-            변환된 날짜 형식 (예: 2025-08-18T06:13:54Z)
-        """
-        try:
-            if not google_cloud_datetime:
-                return ""
-
-            # 나노초를 마이크로초로 자르기 (소수점 이하 6자리까지만)
-            processed_datetime = google_cloud_datetime
-            if "." in processed_datetime and "Z" in processed_datetime:
-                parts = processed_datetime.split(".")
-                if len(parts) == 2:
-                    # 마이크로초(6자리)까지만 유지하고 나머지 나노초 제거
-                    microseconds = parts[1].replace("Z", "")[:6]
-                    processed_datetime = f"{parts[0]}.{microseconds}Z"
-
-            # Google Cloud API 날짜 형식 파싱 (Z를 +00:00으로 변경)
-            # 예: 2025-08-18T06:13:54.868444Z
-            dt = datetime.fromisoformat(processed_datetime.replace("Z", "+00:00"))
-
-            # 초 단위까지로 변환
-            return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-        except (ValueError, TypeError) as e:
-            _LOGGER.warning(f"Failed to convert datetime {google_cloud_datetime}: {e}")
-            return google_cloud_datetime
-
     def collect_cloud_service(
-        self, params: Dict[str, Any]
+        self, params
     ) -> Tuple[List[FilestoreInstanceResponse], List[ErrorResourceResponse]]:
         """
         Filestore 인스턴스 리소스를 수집합니다 (v1 API).
@@ -103,16 +69,13 @@ class FilestoreInstanceManager(GoogleCloudManager):
                 self.connector_name, **params
             )
 
-            # Filestore 인스턴스 목록 조회 (v1 API)
+            # Get Filestore instances (v1 API)
             filestore_instances = self.instance_conn.list_instances()
 
-            ##################################
-            # 1. 각 Filestore 인스턴스 처리 (v1 API 데이터만)
-            ##################################
             for filestore_instance in filestore_instances:
                 try:
                     ##################################
-                    # 2. 기본 정보 설정
+                    # 1. Set Basic Information
                     ##################################
                     instance_id = filestore_instance.get("name", "")
                     location = filestore_instance.get("location", "")
@@ -231,7 +194,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
         # FilestoreInstanceData 객체 생성
         instance_data_obj = FilestoreInstanceData(instance_data, strict=False)
 
-        # FilestoreInstanceResource 객체 생성
+        # FilestoreInstanceResource 객체 생성 (표준 패턴: 다른 매니저들과 동일)
         resource_data = {
             "name": instance_id,
             "account": project_id,
@@ -244,7 +207,8 @@ class FilestoreInstanceManager(GoogleCloudManager):
         }
 
         try:
-            resource = FilestoreInstanceResource(resource_data, strict=False)
+            # 표준 패턴: 리소스에는 strict 옵션 사용하지 않음 (데이터에만 사용)
+            resource = FilestoreInstanceResource(resource_data)
             return resource
         except Exception as e:
             _LOGGER.error(
@@ -393,3 +357,38 @@ class FilestoreInstanceManager(GoogleCloudManager):
             return "unknown"
         except Exception:
             return "unknown"
+
+
+    def _convert_google_cloud_datetime(self, google_cloud_datetime: str) -> str:
+        """
+        Google Cloud API의 날짜 형식을 SpaceONE에서 사용하는 형식으로 변환합니다.
+
+        Args:
+            google_cloud_datetime: Google Cloud API 날짜 형식
+                (예: 2025-08-18T06:13:54.868444486Z)
+
+        Returns:
+            변환된 날짜 형식 (예: 2025-08-18T06:13:54Z)
+        """
+        try:
+            if not google_cloud_datetime:
+                return ""
+
+            # 나노초를 마이크로초로 자르기 (소수점 이하 6자리까지만)
+            processed_datetime = google_cloud_datetime
+            if "." in processed_datetime and "Z" in processed_datetime:
+                parts = processed_datetime.split(".")
+                if len(parts) == 2:
+                    # 마이크로초(6자리)까지만 유지하고 나머지 나노초 제거
+                    microseconds = parts[1].replace("Z", "")[:6]
+                    processed_datetime = f"{parts[0]}.{microseconds}Z"
+
+            # Google Cloud API 날짜 형식 파싱 (Z를 +00:00으로 변경)
+            # 예: 2025-08-18T06:13:54.868444Z
+            dt = datetime.fromisoformat(processed_datetime.replace("Z", "+00:00"))
+
+            # 초 단위까지로 변환
+            return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+        except (ValueError, TypeError) as e:
+            _LOGGER.warning(f"Failed to convert datetime {google_cloud_datetime}: {e}")
+            return google_cloud_datetime
