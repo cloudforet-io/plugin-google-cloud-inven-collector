@@ -1,6 +1,6 @@
 ---
 cloud_service_group: Firebase
-cloud_service_type: Project
+cloud_service_type: App
 name: Count By Region
 query:
   aggregate:
@@ -11,10 +11,9 @@ query:
         fields:
           - name: value
             operator: count
+  filter:
+    - key: region_code
+      value: true
+      operator: exists
 options:
-  chart_type: COLUMN
-  name_options:
-    key: name
-    reference:
-      resource_type: inventory.Region
-      reference_key: region_code
+  chart_type: DONUT

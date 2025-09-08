@@ -121,6 +121,35 @@ class FirebaseV1Beta1Connector(GoogleCloudConnector):
             )
             raise e
 
+    def get_app_details(self, app_name):
+        """
+        특정 Firebase 앱의 상세 정보를 가져옵니다.
+
+        Args:
+            app_name (str): Firebase 앱 이름 (projects/{project}/iosApps/{app-id} 형식)
+
+        Returns:
+            dict: 앱 상세 정보
+        """
+        try:
+            # 플랫폼에 따라 다른 API 엔드포인트 사용
+            if "/iosApps/" in app_name:
+                response = self.client.projects().iosApps().get(name=app_name).execute()
+            elif "/androidApps/" in app_name:
+                response = (
+                    self.client.projects().androidApps().get(name=app_name).execute()
+                )
+            elif "/webApps/" in app_name:
+                response = self.client.projects().webApps().get(name=app_name).execute()
+            else:
+                # 기본적으로 searchApps로 얻은 정보 반환
+                return {}
+
+            return response
+        except Exception as e:
+            _LOGGER.warning(f"Failed to get app details for {app_name}: {e}")
+            return {}
+
     def get_project(self, project_id):
         """
         특정 Firebase 프로젝트의 상세 정보를 가져옵니다.
