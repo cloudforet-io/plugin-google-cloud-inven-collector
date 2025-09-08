@@ -1,7 +1,6 @@
 from schematics import Model
 from schematics.types import (
     BooleanType,
-    DateTimeType,
     DictType,
     IntType,
     ListType,

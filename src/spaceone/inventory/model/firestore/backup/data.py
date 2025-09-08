@@ -1,6 +1,5 @@
 from schematics import Model
 from schematics.types import (
-    DateTimeType,
     IntType,
     StringType,
 )
@@ -19,9 +18,9 @@ class Backup(Model):
     state = StringType(choices=["CREATING", "READY", "NOT_AVAILABLE"])
 
     # 시간 정보
-    create_time = DateTimeType()
-    expire_time = DateTimeType()
-    version_time = DateTimeType()  # 백업된 데이터의 시점
+    create_time = StringType()
+    expire_time = StringType()
+    version_time = StringType()  # 백업된 데이터의 시점
 
     # 백업 크기 및 통계
     size_bytes = IntType()

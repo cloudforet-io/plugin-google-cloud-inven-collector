@@ -1,6 +1,5 @@
 from schematics import Model
 from schematics.types import (
-    DateTimeType,
     StringType,
 )
 
@@ -23,9 +22,9 @@ class Database(Model):
     )
 
     # 시간 정보
-    create_time = DateTimeType()
-    update_time = DateTimeType()
-    earliest_version_time = DateTimeType()
+    create_time = StringType()
+    update_time = StringType()
+    earliest_version_time = StringType()
 
     # 보안 및 백업
     version_retention_period = StringType()  # "3600s" 형태
