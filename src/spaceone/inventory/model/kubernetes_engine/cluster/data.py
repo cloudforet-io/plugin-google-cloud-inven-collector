@@ -116,6 +116,10 @@ def parse_cluster_data(cluster_data: Dict, fleet_info: Dict = None, membership_i
     
     # NodePool 정보는 별도의 NodePool 서비스에서 처리
     
+    # Resource Limits 정보
+    if "resourceLimits" in cluster_data:
+        parsed_data["resourceLimits"] = cluster_data["resourceLimits"]
+    
     # v1beta 전용 정보 (Fleet, Membership)
     if api_version == "v1beta1":
         if fleet_info:
@@ -249,6 +253,9 @@ class GKECluster(BaseResource):
     # v1beta1 specific
     fleet_info = DictType(StringType, serialize_when_none=False)
     membership_info = DictType(StringType, serialize_when_none=False)
+    
+    # Resource Limits
+    resource_limits = ListType(DictType(StringType), serialize_when_none=False)
 
     def reference(self):
         return {

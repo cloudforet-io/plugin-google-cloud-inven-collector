@@ -56,6 +56,10 @@ cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("API Version", "data.api_version"),
         TextDyField.data_source("Fleet Info", "data.fleet_info"),
         TextDyField.data_source("Membership Info", "data.membership_info"),
+        TextDyField.data_source("Resource Limits Count", "data.resource_limits", options={
+            "sub_key": "length",
+            "delimiter": ""
+        }),
     ],
     search=[
         SearchField.set(name="Cluster Name", key="data.name"),
@@ -70,6 +74,7 @@ cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="API Version", key="data.api_version"),
         SearchField.set(name="Fleet Info", key="data.fleet_info"),
         SearchField.set(name="Membership Info", key="data.membership_info"),
+        SearchField.set(name="Resource Limits", key="data.resource_limits"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

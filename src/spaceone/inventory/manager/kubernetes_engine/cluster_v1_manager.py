@@ -117,6 +117,31 @@ class GKEClusterV1Manager(GoogleCloudManager):
             _LOGGER.error(f"Failed to list GKE operations (v1): {e}")
             return []
 
+    def get_resource_limits(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """GKE 리소스 제한 정보를 조회합니다.
+
+        Args:
+            params: 조회에 필요한 파라미터 딕셔너리.
+
+        Returns:
+            GKE 리소스 제한 목록.
+
+        Raises:
+            Exception: GKE API 호출 중 오류 발생 시.
+        """
+        try:
+            cluster_connector: GKEClusterV1Connector = self.locator.get_connector(
+                self.connector_name, **params
+            )
+
+            # Container Engine 관련 할당량 조회
+            resource_limits = cluster_connector.get_container_engine_quotas()
+            _LOGGER.info(f"Found {len(resource_limits)} GKE resource limits")
+            return resource_limits
+        except Exception as e:
+            _LOGGER.error(f"Failed to get GKE resource limits: {e}")
+            return []
+
     def collect_cloud_service(
         self, params: Dict[str, Any]
     ) -> Tuple[List[Any], List[ErrorResourceResponse]]:
@@ -140,6 +165,9 @@ class GKEClusterV1Manager(GoogleCloudManager):
 
         # GKE 클러스터 목록 조회
         clusters = self.list_clusters(params)
+        
+        # GKE 리소스 제한 정보 조회
+        resource_limits = self.get_resource_limits(params)
 
         for cluster in clusters:
             try:
@@ -256,6 +284,11 @@ class GKEClusterV1Manager(GoogleCloudManager):
                     }
 
                 # NodePool 정보는 별도의 NodePoolManager에서 처리
+
+                # ResourceLimit 정보 추가
+                if resource_limits:
+                    cluster_data["resourceLimits"] = resource_limits
+                    _LOGGER.info(f"Added {len(resource_limits)} resource limits to cluster {cluster_data.get('name')}")
 
                 # GKECluster 모델 생성
                 gke_cluster_data = GKECluster(cluster_data, strict=False)
