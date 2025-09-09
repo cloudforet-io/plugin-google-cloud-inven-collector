@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Dict, List, Tuple
 
 from spaceone.inventory.connector.kms.kms_v1 import KMSV1Connector
 from spaceone.inventory.libs.manager import GoogleCloudManager
@@ -36,7 +37,7 @@ class KMSKeyRingManager(GoogleCloudManager):
         self.cloud_service_group = "KMS"
         self.cloud_service_type = "KeyRing"
 
-    def collect_cloud_service(self, params):
+    def collect_cloud_service(self, params) -> Tuple[List[KMSKeyRingResponse], List]:
         """
         KMS KeyRing 리소스를 수집합니다.
 
@@ -50,6 +51,10 @@ class KMSKeyRingManager(GoogleCloudManager):
                 성공한 리소스 응답 리스트와 에러 응답 리스트
         """
         _LOGGER.debug("** KMS KeyRing START **")
+        
+        # v2.0 로깅 시스템 초기화 (가능한 경우에만)
+        if hasattr(self, 'reset_state_counters'):
+            self.reset_state_counters()
 
         resource_responses = []
         error_responses = []
@@ -67,27 +72,34 @@ class KMSKeyRingManager(GoogleCloudManager):
             # 각 KeyRing에 대해 리소스 생성
             for keyring_data in key_rings:
                 try:
-                    resource_response = self._make_keyring_response(
+                    resource_response = self._make_keyring_response_with_logging(
                         keyring_data, params
                     )
                     resource_responses.append(resource_response)
                 except Exception as e:
                     keyring_name = keyring_data.get("name", "unknown")
                     _LOGGER.error(f"Failed to process KeyRing {keyring_name}: {e}")
-                    error_response = self.generate_error_response(e, "KMS", "KeyRing")
+                    error_response = self.generate_resource_error_response(
+                        e, "KMS", "KeyRing", keyring_name
+                    )
                     error_responses.append(error_response)
 
             _LOGGER.info(f"Successfully processed {len(resource_responses)} KeyRings")
 
         except Exception as e:
             _LOGGER.error(f"Failed to collect KMS KeyRings: {e}")
-            error_response = self.generate_error_response(e, "KMS", "KeyRing")
+            error_response = self.generate_resource_error_response(
+                e, "KMS", "Service", "kms"
+            )
             error_responses.append(error_response)
 
+        # v2.0 로깅 시스템 요약 (가능한 경우에만)
+        if hasattr(self, 'log_state_summary'):
+            self.log_state_summary()
         _LOGGER.debug("** KMS KeyRing END **")
         return resource_responses, error_responses
 
-    def _list_key_rings(self, params=None):
+    def _list_key_rings(self, params: Dict = None) -> List[Dict]:
         """
         KMS의 모든 KeyRing을 조회합니다.
 
@@ -133,7 +145,7 @@ class KMSKeyRingManager(GoogleCloudManager):
 
         return key_rings
 
-    def _collect_crypto_keys(self, keyring_name):
+    def _collect_crypto_keys(self, keyring_name: str) -> List[Dict]:
         """
         특정 KeyRing의 CryptoKey들을 수집하고 처리합니다.
 
@@ -164,7 +176,7 @@ class KMSKeyRingManager(GoogleCloudManager):
             _LOGGER.error(f"Error collecting crypto keys for {keyring_name}: {e}")
             return []
 
-    def _collect_crypto_key_versions(self, crypto_key_name):
+    def _collect_crypto_key_versions(self, crypto_key_name: str) -> List[Dict]:
         """
         특정 CryptoKey의 CryptoKeyVersion들을 수집하고 처리합니다.
 
@@ -193,7 +205,7 @@ class KMSKeyRingManager(GoogleCloudManager):
             )
             return []
 
-    def _process_crypto_key_version_data(self, version):
+    def _process_crypto_key_version_data(self, version: Dict) -> Dict:
         """
         CryptoKeyVersion 데이터를 처리하고 필요한 정보를 추가합니다.
 
@@ -252,7 +264,7 @@ class KMSKeyRingManager(GoogleCloudManager):
             _LOGGER.error(f"Error processing CryptoKeyVersion data: {e}")
             return None
 
-    def _process_crypto_key_data(self, crypto_key):
+    def _process_crypto_key_data(self, crypto_key: Dict) -> Dict:
         """
         CryptoKey 데이터를 처리하고 필요한 정보를 추가합니다.
 
@@ -310,7 +322,7 @@ class KMSKeyRingManager(GoogleCloudManager):
             _LOGGER.error(f"Error processing CryptoKey data: {e}")
             return None
 
-    def _process_keyring_data(self, keyring):
+    def _process_keyring_data(self, keyring: Dict) -> Dict:
         """
         KeyRing 데이터를 처리하고 필요한 정보를 추가합니다.
 
@@ -365,7 +377,7 @@ class KMSKeyRingManager(GoogleCloudManager):
             _LOGGER.error(f"Error processing KeyRing data: {e}")
             return None
 
-    def _make_keyring_response(self, keyring_data, params):
+    def _make_keyring_response(self, keyring_data: Dict, params: Dict) -> KMSKeyRingResponse:
         """
         KeyRing 데이터를 기반으로 리소스 응답을 생성합니다.
 
@@ -404,3 +416,23 @@ class KMSKeyRingManager(GoogleCloudManager):
 
         # 응답 생성
         return KMSKeyRingResponse({"resource": resource})
+
+    def _make_keyring_response_with_logging(self, keyring_data: Dict, params: Dict) -> KMSKeyRingResponse:
+        """
+        KeyRing 데이터를 기반으로 리소스 응답을 v2.0 로깅과 함께 생성합니다.
+        """
+        try:
+            # 기본 응답 생성
+            response = self._make_keyring_response(keyring_data, params)
+            
+            # v2.0 로깅: SUCCESS 상태 기록
+            if hasattr(self, 'update_state_counter'):
+                self.update_state_counter("SUCCESS")
+            
+            return response
+            
+        except Exception as e:
+            # v2.0 로깅: FAILURE 상태 기록
+            if hasattr(self, 'update_state_counter'):
+                self.update_state_counter("FAILURE")
+            raise e

@@ -1,3 +1,3 @@
-from spaceone.inventory.manager.batch.job_manager import BatchJobManager
+from spaceone.inventory.manager.batch.batch_manager import BatchManager
 
-__all__ = ["BatchJobManager"]
+__all__ = ["BatchManager"]
