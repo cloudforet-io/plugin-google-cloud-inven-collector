@@ -49,7 +49,6 @@ from spaceone.inventory.connector.filestore.instance_v1beta1 import (
     FilestoreInstanceV1Beta1Connector,
 )
 from spaceone.inventory.connector.firebase.firebase_v1beta1 import FirebaseV1Beta1Connector
-from spaceone.inventory.connector.kms.keyring_v1 import KMSKeyRingV1Connector
 from spaceone.inventory.connector.kms.kms_v1 import KMSV1Connector
 from spaceone.inventory.connector.firestore.database_v1 import (
     FirestoreDatabaseConnector,
@@ -120,7 +119,6 @@ __all__ = [
     "FilestoreInstanceConnector",
     "FilestoreInstanceV1Beta1Connector",
     "FirebaseV1Beta1Connector",
-    "KMSKeyRingV1Connector",
     "KMSV1Connector",
     "GKEClusterV1Connector",
     "GKEClusterV1BetaConnector",

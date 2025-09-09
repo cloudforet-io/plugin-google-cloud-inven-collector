@@ -56,7 +56,7 @@ class CollectorService(BaseService):
             'RouteManager',
             'LoadBalancingManager',
             'VMInstance',
-            'FirebaseManager'
+            'FirebaseAppManager',
             'CloudRunServiceManager',
             'CloudRunJobManager',
             'CloudRunWorkerPoolManager',
@@ -104,7 +104,6 @@ class CollectorService(BaseService):
         """
 
         # Project validation을 건너뛰고 바로 매니저 실행으로 진행
-        # ProjectConnector 호출로 인한 private key 오류를 회피
         secret_data = params.get("secret_data", {})
         project_id = secret_data.get("project_id", "unknown")
         _LOGGER.debug(f"[collect] project => {project_id}")
@@ -327,11 +326,11 @@ class CollectorService(BaseService):
             dict: Firebase 앱 목록
         """
         try:
-            from spaceone.inventory.connector.firebase.project import (
-                FirebaseProjectConnector,
+            from spaceone.inventory.connector.firebase.firebase_v1beta1 import (
+                FirebaseV1Beta1Connector,
             )
 
-            firebase_conn = FirebaseProjectConnector(**params)
+            firebase_conn = FirebaseV1Beta1Connector(**params)
             firebase_apps = firebase_conn.list_firebase_apps()
 
             return {

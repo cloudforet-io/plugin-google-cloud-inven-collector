@@ -163,10 +163,6 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         }
     },
     "Firebase": {
-        "Project": {
-            "resource_type": "firebase_project",
-            "labels_key": "resource.labels.project_id",
-        },
         "App": {
             "resource_type": "firebase_app",
             "labels_key": "resource.labels.app_id",
