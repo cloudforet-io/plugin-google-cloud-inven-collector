@@ -42,10 +42,10 @@ cst_configuration_v1._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Namespace", "data.metadata.namespace"),
         DateTimeDyField.data_source("Created", "data.metadata.creation_timestamp"),
         TextDyField.data_source(
-            "Latest Ready Revision", "data.status.latest_ready_revision_name"
+            "Latest Ready Revision", "data.status.latestReadyRevisionName"
         ),
         TextDyField.data_source(
-            "Latest Created Revision", "data.status.latest_created_revision_name"
+            "Latest Created Revision", "data.status.latestCreatedRevisionName"
         ),
     ],
     search=[
@@ -53,7 +53,10 @@ cst_configuration_v1._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Kind", key="data.kind"),
         SearchField.set(name="Namespace", key="data.metadata.namespace"),
         SearchField.set(
-            name="Latest Ready Revision", key="data.status.latest_ready_revision_name"
+            name="Latest Ready Revision", key="data.status.latestReadyRevisionName"
+        ),
+        SearchField.set(
+            name="Latest Created Revision", key="data.status.latestCreatedRevisionName"
         ),
         SearchField.set(name="Project", key="data.project"),
         SearchField.set(name="Location", key="data.location"),

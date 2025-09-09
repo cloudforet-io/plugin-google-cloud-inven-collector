@@ -123,7 +123,7 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
                         "data": route_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": route_data.name,
+                                "resource_id": route_data.metadata.uid,
                                 "external_link": f"https://console.cloud.google.com/run/routes/details/{location_id}/{route_id}?project={project_id}",
                             }
                         ),

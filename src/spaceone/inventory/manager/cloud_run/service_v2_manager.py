@@ -218,7 +218,7 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                         "data": service_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": service_data.name,
+                                "resource_id": service_data.uid,
                                 "external_link": f"https://console.cloud.google.com/run/detail/{location_id}/{service_name}?project={project_id}",
                             }
                         ),

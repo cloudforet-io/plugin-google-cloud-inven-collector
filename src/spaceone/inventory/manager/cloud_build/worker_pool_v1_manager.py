@@ -108,11 +108,22 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                # diskSizeGb를 GB 단위로 표시
+                private_pool_config = worker_pool.get("privatePoolV1Config", {})
+                worker_config = private_pool_config.get("workerConfig", {})
+                disk_size_gb = worker_config.get("diskSizeGb")
+                disk_size_display = ""
+                if disk_size_gb is not None:
+                    # 숫자든 문자열이든 GB 단위로 표시
+                    disk_size_str = str(disk_size_gb)
+                    disk_size_display = f"{disk_size_str} GB"
+
                 worker_pool.update(
                     {
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "disk_size_display": disk_size_display,
                     }
                 )
 

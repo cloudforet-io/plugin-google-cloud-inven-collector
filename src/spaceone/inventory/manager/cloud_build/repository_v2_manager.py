@@ -122,11 +122,11 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
                 ##################################
                 # Connection 정보 추출 - Repository name에서 추출
                 connection_display_name = ""
-                repository_name = repository.get("name", "")
-                if repository_name:
+                repository_full_name = repository.get("name", "")
+                if repository_full_name:
                     # Repository name 형식: projects/{project}/locations/{location}/connections/{connection}/repositories/{repo}
                     # Connection 부분을 추출
-                    name_parts = repository_name.split("/")
+                    name_parts = repository_full_name.split("/")
                     if "connections" in name_parts:
                         connection_index = name_parts.index("connections")
                         if connection_index + 1 < len(name_parts):
@@ -138,9 +138,9 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
                         "location": location_id,
                         "region": region,
                         "connection": connection_display_name,
+                        "name": repository_name,  # Repository ID만 표시
                     }
                 )
-
                 ##################################
                 # 3. Make Return Resource
                 ##################################
@@ -154,7 +154,7 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
                         "data": repository_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": repository_data.name,
+                                "resource_id": repository_full_name,
                                 "external_link": f"https://console.cloud.google.com/cloud-build/repositories/2nd-gen?project={project_id}",
                             }
                         ),

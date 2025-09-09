@@ -407,6 +407,7 @@ class DataprocClusterManager(GoogleCloudManager):
                                         "status": job.get("status", {}),
                                         "labels": job.get("labels", {}),
                                         "jobUuid": job.get("jobUuid", ""),
+                                        "name": job.get("cluster_name", ""),
                                     }
                                     cluster_data["jobs"].append(job_data)
                     except Exception as e:
