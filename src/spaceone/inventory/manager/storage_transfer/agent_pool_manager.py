@@ -118,7 +118,7 @@ class StorageTransferAgentPoolManager(GoogleCloudManager):
                         AgentPoolResponse({"resource": agent_pool_resource})
                     )
 
-                except Exception as e:
+                except Exception as e: 
                     _LOGGER.error(
                         f"Failed to process agent pool {agent_pool_name}: {e}",
                         exc_info=True,
