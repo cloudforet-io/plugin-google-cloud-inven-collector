@@ -28,6 +28,10 @@ class FirebaseAppManager(GoogleCloudManager):
         """
         _LOGGER.debug("** Firebase App START **")
         start_time = time.time()
+        
+        # v2.0 로깅 시스템 초기화 (가능한 경우에만)
+        if hasattr(self, 'reset_state_counters'):
+            self.reset_state_counters()
 
         collected_cloud_services = []
         error_responses = []
@@ -72,8 +76,8 @@ class FirebaseAppManager(GoogleCloudManager):
                         "namespace": project_id,  # Firebase 앱의 namespace는 프로젝트 ID
                     }
 
-                    # Firebase 앱 리소스 생성
-                    app_response = self._create_app_response(enhanced_app_data, project_id)
+                    # Firebase 앱 리소스 생성 (v2.0 로깅 포함)
+                    app_response = self._create_app_response_with_logging(enhanced_app_data, project_id)
                     collected_cloud_services.append(app_response)
 
                     _LOGGER.debug(f"Collected Firebase App: {app_id}")
@@ -93,6 +97,9 @@ class FirebaseAppManager(GoogleCloudManager):
             error_responses.append(error_response)
 
         finally:
+            # v2.0 로깅 시스템 요약 (가능한 경우에만)
+            if hasattr(self, 'log_state_summary'):
+                self.log_state_summary()
             _LOGGER.debug(f"** Firebase App END ** ({time.time() - start_time:.2f}s)")
             _LOGGER.debug(f"Collected {len(collected_cloud_services)} Firebase Apps")
 
@@ -124,3 +131,21 @@ class FirebaseAppManager(GoogleCloudManager):
         })
         
         return AppResponse({"resource": app_resource})
+
+    def _create_app_response_with_logging(self, app_data: dict, project_id: str) -> AppResponse:
+        """Firebase 앱 응답 객체를 v2.0 로깅과 함께 생성합니다."""
+        try:
+            # 기본 응답 생성
+            response = self._create_app_response(app_data, project_id)
+            
+            # v2.0 로깅: SUCCESS 상태 기록
+            if hasattr(self, 'update_state_counter'):
+                self.update_state_counter("SUCCESS")
+            
+            return response
+            
+        except Exception as e:
+            # v2.0 로깅: FAILURE 상태 기록
+            if hasattr(self, 'update_state_counter'):
+                self.update_state_counter("FAILURE")
+            raise e

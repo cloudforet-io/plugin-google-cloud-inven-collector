@@ -35,7 +35,7 @@ CLOUD_SERVICE_GROUP_MAP = {
     "CloudFunctions": ["FunctionGen2Manager", "FunctionGen1Manager"],
     "Filestore": ["FilestoreInstanceManager"],
     "Firebase": ["FirebaseAppManager"],
-    "Batch": ["BatchJobManager"],
+    "Batch": ["BatchManager"],
     "CloudBuild": [
         "CloudBuildBuildV1Manager",
         "CloudBuildTriggerV1Manager",
