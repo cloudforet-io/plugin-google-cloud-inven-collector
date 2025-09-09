@@ -1,7 +1,7 @@
 import logging
 import time
 
-from spaceone.inventory.conf.cloud_service_conf import REGION_INFO
+from spaceone.inventory.connector.cloud_run.cloud_run_v1 import CloudRunV1Connector
 from spaceone.inventory.connector.cloud_run.cloud_run_v2 import CloudRunV2Connector
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
@@ -50,28 +50,40 @@ class CloudRunOperationV2Manager(GoogleCloudManager):
         cloud_run_v2_conn: CloudRunV2Connector = self.locator.get_connector(
             self.connector_name, **params
         )
+        cloud_run_v1_conn: CloudRunV1Connector = self.locator.get_connector(
+            "CloudRunV1Connector", **params
+        )
 
         # Get lists that relate with operations through Google Cloud API
         all_operations = []
+        parent = f"projects/{project_id}"
+
         try:
-            # REGION_INFO에서 모든 위치 사용 (global 제외)
-            for region_id in REGION_INFO.keys():
-                if region_id == "global":
-                    continue
-                location_id = region_id
-                try:
-                    parent = f"projects/{project_id}/locations/{location_id}"
-                    operations = cloud_run_v2_conn.list_operations(parent)
-                    for operation in operations:
-                        operation["_location"] = location_id
-                    all_operations.extend(operations)
-                except Exception as e:
-                    _LOGGER.debug(
-                        f"Failed to query operations in location {location_id}: {str(e)}"
-                    )
-                    continue
+            locations = cloud_run_v1_conn.list_locations(parent)
+            _LOGGER.info(f"V1 API: Found {len(locations)} locations for operations")
         except Exception as e:
-            _LOGGER.warning(f"Failed to iterate REGION_INFO: {str(e)}")
+            _LOGGER.warning(
+                f"V1 API: Failed to get locations, falling back to empty list: {e}"
+            )
+            locations = []
+
+        try:
+            for location in locations:
+                location_id = location.get("locationId", "")
+                if location_id:
+                    try:
+                        parent = f"projects/{project_id}/locations/{location_id}"
+                        operations = cloud_run_v2_conn.list_operations(parent)
+                        for operation in operations:
+                            operation["_location"] = location_id
+                        all_operations.extend(operations)
+                    except Exception as e:
+                        _LOGGER.debug(
+                            f"Failed to query operations in location {location_id}: {str(e)}"
+                        )
+                        continue
+        except Exception as e:
+            _LOGGER.warning(f"Failed to process locations: {str(e)}")
 
         for operation in all_operations:
             try:
@@ -79,7 +91,11 @@ class CloudRunOperationV2Manager(GoogleCloudManager):
                 # 1. Set Basic Information
                 ##################################
                 operation_id = operation.get("name", "")
-                operation_name = self.get_param_in_url(operation_id, "operations") if operation_id else ""
+                operation_name = (
+                    self.get_param_in_url(operation_id, "operations")
+                    if operation_id
+                    else ""
+                )
                 location_id = operation.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
@@ -96,16 +112,21 @@ class CloudRunOperationV2Manager(GoogleCloudManager):
                     "project": project_id,
                     "location": location_id,
                     "region": region,
-                    
                     # 추가 필드들 추출
-                    "operation_type": operation.get("metadata", {}).get("@type", "").split(".")[-1] if operation.get("metadata", {}).get("@type") else "Unknown",
+                    "operation_type": operation.get("metadata", {})
+                    .get("@type", "")
+                    .split(".")[-1]
+                    if operation.get("metadata", {}).get("@type")
+                    else "Unknown",
                     "target_resource": operation.get("metadata", {}).get("target", ""),
                     "status": "Completed" if operation.get("done") else "Running",
                     "progress": 100 if operation.get("done") else 50,
                     "create_time": operation.get("metadata", {}).get("createTime"),
-                    "end_time": operation.get("metadata", {}).get("endTime") if operation.get("done") else None,
+                    "end_time": operation.get("metadata", {}).get("endTime")
+                    if operation.get("done")
+                    else None,
                     "labels": {},
-                    "annotations": {}
+                    "annotations": {},
                 }
 
                 ##################################
@@ -129,7 +150,9 @@ class CloudRunOperationV2Manager(GoogleCloudManager):
                     strict=False,
                 )
 
-                collected_cloud_services.append(OperationResponse({"resource": operation_resource}))
+                collected_cloud_services.append(
+                    OperationResponse({"resource": operation_resource})
+                )
 
             except Exception as e:
                 _LOGGER.error(f"Failed to process operation {operation_id}: {str(e)}")
@@ -138,6 +161,8 @@ class CloudRunOperationV2Manager(GoogleCloudManager):
                 )
                 error_responses.append(error_response)
 
-        _LOGGER.debug(f"** Cloud Run Operation V2 END ** ({time.time() - start_time:.2f}s)")
+        _LOGGER.debug(
+            f"** Cloud Run Operation V2 END ** ({time.time() - start_time:.2f}s)"
+        )
 
         return collected_cloud_services, error_responses

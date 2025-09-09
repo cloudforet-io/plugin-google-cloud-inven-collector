@@ -24,7 +24,7 @@ route_v1_meta = CloudServiceMeta.set_layouts(
         ItemDynamicLayout.set_fields(
             "Route Details",
             fields=[
-                TextDyField.data_source("Name", "data.name"),
+                TextDyField.data_source("Name", "data.metadata.name"),
                 TextDyField.data_source("Kind", "data.kind"),
                 TextDyField.data_source("API Version", "data.api_version"),
                 TextDyField.data_source("Namespace", "data.metadata.namespace"),
@@ -39,10 +39,9 @@ route_v1_meta = CloudServiceMeta.set_layouts(
             "Traffic Configuration",
             "data.spec.traffic",
             fields=[
-                TextDyField.data_source("Revision", "revision_name"),
-                TextDyField.data_source("Configuration", "configuration_name"),
+                TextDyField.data_source("Configuration Name", "configurationName"),
                 TextDyField.data_source("Percent", "percent"),
-                TextDyField.data_source("Tag", "tag"),
+                TextDyField.data_source("Latest Revision", "latestRevision"),
             ],
         ),
         ItemDynamicLayout.set_fields(

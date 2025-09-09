@@ -7,7 +7,6 @@ from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeResponse,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
-    EnumDyField,
     SearchField,
     TextDyField,
 )
@@ -36,15 +35,6 @@ cst_service.tags = {
 
 cst_service._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        EnumDyField.data_source(
-            "Status",
-            "data.status.conditions.0.status",
-            default_state={
-                "safe": ["True"],
-                "warning": ["False"],
-                "alert": ["Unknown"],
-            },
-        ),
         TextDyField.data_source("URL", "data.status.address.url"),
         TextDyField.data_source("Namespace", "data.metadata.namespace"),
         TextDyField.data_source(
@@ -54,8 +44,12 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Name", key="data.metadata.name"),
-        SearchField.set(name="Status", key="data.status.conditions.0.status"),
         SearchField.set(name="URL", key="data.status.address.url"),
+        SearchField.set(name="Namespace", key="data.metadata.namespace"),
+        SearchField.set(
+            name="Latest Ready Revision", key="data.latest_ready_revision_name"
+        ),
+        SearchField.set(name="Revision Count", key="data.revision_count"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
