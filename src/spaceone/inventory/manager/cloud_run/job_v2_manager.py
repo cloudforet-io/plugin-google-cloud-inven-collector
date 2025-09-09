@@ -1,7 +1,7 @@
 import logging
 import time
 
-from spaceone.inventory.conf.cloud_service_conf import REGION_INFO
+from spaceone.inventory.connector.cloud_run.cloud_run_v1 import CloudRunV1Connector
 from spaceone.inventory.connector.cloud_run.cloud_run_v2 import CloudRunV2Connector
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
@@ -49,70 +49,83 @@ class CloudRunJobV2Manager(GoogleCloudManager):
         cloud_run_v2_conn: CloudRunV2Connector = self.locator.get_connector(
             self.connector_name, **params
         )
+        cloud_run_v1_conn: CloudRunV1Connector = self.locator.get_connector(
+            "CloudRunV1Connector", **params
+        )
 
         # Get lists that relate with jobs through Google Cloud API
         all_jobs = []
-        try:
-            # REGION_INFO에서 모든 위치 사용 (global 제외)
-            for region_id in REGION_INFO.keys():
-                if region_id == "global":
-                    continue
-                location_id = region_id
-                try:
-                    parent = f"projects/{project_id}/locations/{location_id}"
-                    jobs = cloud_run_v2_conn.list_jobs(parent)
-                    for job in jobs:
-                        job["_location"] = location_id
-                        # Get executions for each job
-                        job_name = job.get("name")
-                        if job_name:
-                            try:
-                                executions = cloud_run_v2_conn.list_job_executions(
-                                    job_name
-                                )
-                                # Get tasks for each execution
-                                for execution in executions:
-                                    execution_name = execution.get("name")
-                                    if execution_name:
-                                        # Extract execution name from full path for display
-                                        if "/executions/" in execution_name:
-                                            execution_display_name = (
-                                                execution_name.split("/executions/")[-1]
-                                            )
-                                            execution["display_name"] = (
-                                                execution_display_name
-                                            )
+        parent = f"projects/{project_id}"
 
-                                        try:
-                                            tasks = (
-                                                cloud_run_v2_conn.list_execution_tasks(
+        try:
+            locations = cloud_run_v1_conn.list_locations(parent)
+            _LOGGER.info(f"V1 API: Found {len(locations)} locations for jobs")
+        except Exception as e:
+            _LOGGER.warning(
+                f"V1 API: Failed to get locations, falling back to empty list: {e}"
+            )
+            locations = []
+
+        try:
+            for location in locations:
+                location_id = location.get("locationId", "")
+                if location_id:
+                    try:
+                        parent = f"projects/{project_id}/locations/{location_id}"
+                        jobs = cloud_run_v2_conn.list_jobs(parent)
+                        for job in jobs:
+                            job["_location"] = location_id
+                            # Get executions for each job
+                            job_name = job.get("name")
+                            if job_name:
+                                try:
+                                    executions = cloud_run_v2_conn.list_job_executions(
+                                        job_name
+                                    )
+                                    # Get tasks for each execution
+                                    for execution in executions:
+                                        execution_name = execution.get("name")
+                                        if execution_name:
+                                            # Extract execution name from full path for display
+                                            if "/executions/" in execution_name:
+                                                execution_display_name = (
+                                                    execution_name.split(
+                                                        "/executions/"
+                                                    )[-1]
+                                                )
+                                                execution["display_name"] = (
+                                                    execution_display_name
+                                                )
+
+                                            try:
+                                                tasks = cloud_run_v2_conn.list_execution_tasks(
                                                     execution_name
                                                 )
-                                            )
-                                            execution["tasks"] = tasks
-                                            execution["task_count"] = len(tasks)
-                                        except Exception as e:
-                                            _LOGGER.warning(
-                                                f"Failed to get tasks for execution {execution_name}: {str(e)}"
-                                            )
-                                            execution["tasks"] = []
-                                            execution["task_count"] = 0
-                                job["executions"] = executions
-                                job["execution_count"] = len(executions)
-                            except Exception as e:
-                                _LOGGER.warning(
-                                    f"Failed to get executions for job {job_name}: {str(e)}"
-                                )
-                                job["executions"] = []
-                                job["execution_count"] = 0
-                    all_jobs.extend(jobs)
-                except Exception as e:
-                    _LOGGER.debug(
-                        f"Failed to query jobs in location {location_id}: {str(e)}"
-                    )
-                    continue
+                                                execution["tasks"] = tasks
+                                                execution["task_count"] = len(tasks)
+                                            except Exception as e:
+                                                _LOGGER.warning(
+                                                    f"Failed to get tasks for execution {execution_name}: {str(e)}"
+                                                )
+                                                execution["tasks"] = []
+                                                execution["task_count"] = 0
+                                    job["executions"] = executions
+                                    job["execution_count"] = len(executions)
+                                except Exception as e:
+                                    _LOGGER.warning(
+                                        f"Failed to get executions for job {job_name}: {str(e)}"
+                                    )
+                                    job["executions"] = []
+                                    job["execution_count"] = 0
+                            all_jobs.append(job)
+
+                    except Exception as e:
+                        _LOGGER.debug(
+                            f"Failed to query jobs in location {location_id}: {str(e)}"
+                        )
+                        continue
         except Exception as e:
-            _LOGGER.warning(f"Failed to iterate REGION_INFO: {str(e)}")
+            _LOGGER.warning(f"Failed to process locations: {str(e)}")
 
         for job in all_jobs:
             try:

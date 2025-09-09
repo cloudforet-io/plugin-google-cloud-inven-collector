@@ -1,7 +1,7 @@
 import logging
 import time
 
-from spaceone.inventory.conf.cloud_service_conf import REGION_INFO
+from spaceone.inventory.connector.cloud_run.cloud_run_v1 import CloudRunV1Connector
 from spaceone.inventory.connector.cloud_run.cloud_run_v2 import CloudRunV2Connector
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
@@ -50,43 +50,57 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
         cloud_run_v2_conn: CloudRunV2Connector = self.locator.get_connector(
             self.connector_name, **params
         )
+        cloud_run_v1_conn: CloudRunV1Connector = self.locator.get_connector(
+            "CloudRunV1Connector", **params
+        )
 
         # Get lists that relate with services through Google Cloud API
         all_services = []
+        parent = f"projects/{project_id}"
+
         try:
-            # REGION_INFO에서 모든 위치 사용 (global 제외)
-            for region_id in REGION_INFO.keys():
-                if region_id == "global":
-                    continue
-                location_id = region_id
-                try:
-                    parent = f"projects/{project_id}/locations/{location_id}"
-                    services = cloud_run_v2_conn.list_services(parent)
-                    for service in services:
-                        service["_location"] = location_id
-                        # Get revisions for each service
-                        service_name = service.get("name")
-                        if service_name:
-                            try:
-                                revisions = cloud_run_v2_conn.list_service_revisions(
-                                    service_name
-                                )
-                                service["revisions"] = revisions
-                                service["revision_count"] = len(revisions)
-                            except Exception as e:
-                                _LOGGER.warning(
-                                    f"Failed to get revisions for service {service_name}: {str(e)}"
-                                )
-                                service["revisions"] = []
-                                service["revision_count"] = 0
-                    all_services.extend(services)
-                except Exception as e:
-                    _LOGGER.debug(
-                        f"Failed to query services in location {location_id}: {str(e)}"
-                    )
-                    continue
+            locations = cloud_run_v1_conn.list_locations(parent)
+            _LOGGER.info(f"V1 API: Found {len(locations)} locations for services")
         except Exception as e:
-            _LOGGER.warning(f"Failed to iterate REGION_INFO: {str(e)}")
+            _LOGGER.warning(
+                f"V1 API: Failed to get locations, falling back to empty list: {e}"
+            )
+            locations = []
+
+        try:
+            for location in locations:
+                location_id = location.get("locationId", "")
+                if location_id:
+                    try:
+                        parent = f"projects/{project_id}/locations/{location_id}"
+                        services = cloud_run_v2_conn.list_services(parent)
+                        for service in services:
+                            service["_location"] = location_id
+                            # Get revisions for each service
+                            service_name = service.get("name")
+                            if service_name:
+                                try:
+                                    revisions = (
+                                        cloud_run_v2_conn.list_service_revisions(
+                                            service_name
+                                        )
+                                    )
+                                    service["revisions"] = revisions
+                                    service["revision_count"] = len(revisions)
+                                except Exception as e:
+                                    _LOGGER.warning(
+                                        f"Failed to get revisions for service {service_name}: {str(e)}"
+                                    )
+                                    service["revisions"] = []
+                                    service["revision_count"] = 0
+                        all_services.extend(services)
+                    except Exception as e:
+                        _LOGGER.debug(
+                            f"Failed to query services in location {location_id}: {str(e)}"
+                        )
+                        continue
+        except Exception as e:
+            _LOGGER.warning(f"Failed to process locations: {str(e)}")
 
         for service in all_services:
             try:

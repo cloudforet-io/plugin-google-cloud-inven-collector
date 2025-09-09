@@ -1,9 +1,11 @@
 import logging
 import time
 
-from spaceone.inventory.conf.cloud_service_conf import REGION_INFO
 from spaceone.inventory.connector.cloud_build.cloud_build_v1 import (
     CloudBuildV1Connector,
+)
+from spaceone.inventory.connector.cloud_build.cloud_build_v2 import (
+    CloudBuildV2Connector,
 )
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
@@ -52,21 +54,22 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
         cloud_build_v1_conn: CloudBuildV1Connector = self.locator.get_connector(
             self.connector_name, **params
         )
+        cloud_build_v2_conn: CloudBuildV2Connector = self.locator.get_connector(
+            "CloudBuildV2Connector", **params
+        )
 
-        # Get lists that relate with worker pools through Google Cloud API using REGION_INFO fallback
+        # Get lists that relate with worker pools through Google Cloud API using V2 locations
         all_worker_pools = []
         parent = f"projects/{project_id}"
 
-        # V1에서는 locations API가 지원되지 않으므로 REGION_INFO를 사용
-        locations = [
-            {
-                "locationId": region_id,
-                "name": f"{parent}/locations/{region_id}",
-                "displayName": REGION_INFO[region_id]["name"],
-            }
-            for region_id in REGION_INFO.keys()
-            if region_id != "global"
-        ]
+        try:
+            locations = cloud_build_v2_conn.list_locations(parent)
+            _LOGGER.info(f"V2 API: Found {len(locations)} locations for worker pools")
+        except Exception as e:
+            _LOGGER.warning(
+                f"V2 API: Failed to get locations, falling back to empty list: {e}"
+            )
+            locations = []
 
         for location in locations:
             location_id = location.get("locationId", "")

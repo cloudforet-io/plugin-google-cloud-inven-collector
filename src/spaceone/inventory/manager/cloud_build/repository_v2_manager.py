@@ -62,13 +62,10 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
 
             for location in locations:
                 location_id = location.get("locationId", "")
-                _LOGGER.info(f"Processing location: {location_id}")
                 if location_id:
                     try:
                         parent = f"projects/{project_id}/locations/{location_id}"
-                        _LOGGER.info(f"Getting connections for: {parent}")
                         connections = cloud_build_v2_conn.list_connections(parent)
-
                         for connection in connections:
                             connection_name = connection.get("name", "")
                             _LOGGER.info(f"Processing connection: {connection_name}")
