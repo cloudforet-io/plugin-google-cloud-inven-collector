@@ -1,5 +1,6 @@
 from schematics import Model
 from schematics.types import IntType, ListType, ModelType, StringType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 __all__ = ["FirestoreCollection", "DocumentInfo"]
 
@@ -7,14 +8,14 @@ __all__ = ["FirestoreCollection", "DocumentInfo"]
 class DocumentInfo(Model):
     """컬렉션 내 문서 정보"""
 
-    id = StringType(required=True)
-    name = StringType()  # 전체 문서 경로
+    document_id = StringType(required=True)  # 원래 id 필드
+    document_name = StringType()             # 원래 name 필드 (전체 문서 경로)
     fields_summary = StringType()  # 문서 필드 정보를 문자열로 요약
     create_time = StringType()
     update_time = StringType()
 
 
-class FirestoreCollection(Model):
+class FirestoreCollection(BaseResource):
     # 기본 정보
     collection_id = StringType(required=True)
     database_id = StringType(required=True)

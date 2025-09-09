@@ -200,29 +200,22 @@ class FirestoreManager(GoogleCloudManager):
         """Database 리소스 생성 (기존과 동일)"""
         database_id = self._extract_database_id(database.get("name", ""))
 
-        database_data = Database(
-            {
-                "id": database_id,
-                "name": database.get("name", ""),
-                "project_id": project_id,
-                "location_id": database.get("locationId", ""),
-                "type": database.get("type", ""),
-                "concurrency_mode": database.get("concurrencyMode", ""),
-                "app_engine_integration_mode": database.get(
-                    "appEngineIntegrationMode", ""
-                ),
-                "create_time": database.get("createTime"),
-                "update_time": database.get("updateTime"),
-                "etag": database.get("etag", ""),
-                "uid": database.get("uid", ""),
-                "delete_protection_state": database.get("deleteProtectionState", ""),
-                "point_in_time_recovery_enablement": database.get(
-                    "pointInTimeRecoveryEnablement", ""
-                ),
-                "version_retention_period": database.get("versionRetentionPeriod", ""),
-                "earliest_version_time": database.get("earliestVersionTime"),
-            }
-        )
+        # BaseResource 필드 매핑을 위한 데이터 준비
+        database_with_mapping = database.copy()
+        database_with_mapping.update({
+            # BaseResource 필드 매핑
+            "id": database_id,                    # BaseResource.id
+            "name": database_id,                  # BaseResource.name (display name)
+            "project": project_id,               # BaseResource.project
+            "region": region_code,               # BaseResource.region
+            
+            # Firestore 전용 필드
+            "database_id": database_id,
+            "full_name": database.get("name", ""),
+            "project_id": project_id,
+        })
+        
+        database_data = Database(database_with_mapping, strict=False)
 
         return DatabaseResource(
             {
@@ -281,8 +274,8 @@ class FirestoreManager(GoogleCloudManager):
                         # DocumentInfo 객체로 복원하되 에러 처리 추가
                         document_info = DocumentInfo(
                             {
-                                "id": doc_id,
-                                "name": doc.get("name", ""),
+                                "document_id": doc_id,
+                                "document_name": doc.get("name", ""),
                                 "fields_summary": fields_summary,
                                 "create_time": doc.get("createTime", ""),
                                 "update_time": doc.get("updateTime", ""),
@@ -296,18 +289,26 @@ class FirestoreManager(GoogleCloudManager):
                         continue
 
                 # 컬렉션 데이터 생성
-                collection_data = FirestoreCollection(
-                    {
-                        "collection_id": collection_id,
-                        "database_id": database_id,
-                        "project_id": project_id,
-                        "collection_path": collection_path,
-                        "documents": document_infos,
-                        "document_count": len(document_infos),
-                        "depth_level": depth_level,
-                        "parent_document_path": parent_document_path,
-                    }
-                )
+                # BaseResource 필드 매핑을 위한 데이터 준비
+                collection_data_dict = {
+                    # BaseResource 필드 매핑
+                    "id": collection_id,
+                    "name": f"{database_id}/{collection_path}",
+                    "project": project_id,
+                    "region": region_code,
+                    
+                    # FirestoreCollection 전용 필드
+                    "collection_id": collection_id,
+                    "database_id": database_id,
+                    "project_id": project_id,
+                    "collection_path": collection_path,
+                    "documents": document_infos,
+                    "document_count": len(document_infos),
+                    "depth_level": depth_level,
+                    "parent_document_path": parent_document_path,
+                }
+                
+                collection_data = FirestoreCollection(collection_data_dict, strict=False)
 
                 collection_resource = CollectionResource(
                     {

@@ -50,9 +50,7 @@ cst_worker_pool._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source(
             "Machine Type", "data.private_pool_v1_config.workerConfig.machineType"
         ),
-        TextDyField.data_source(
-            "Disk Size", "data.private_pool_v1_config.workerConfig.diskSizeGb"
-        ),
+        TextDyField.data_source("Disk Size", "data.disk_size_display"),
         TextDyField.data_source(
             "Network", "data.private_pool_v1_config.networkConfig.egressOption"
         ),

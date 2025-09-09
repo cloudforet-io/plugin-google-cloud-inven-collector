@@ -17,8 +17,8 @@ from spaceone.inventory.model.batch.location.data import Location
 _LOGGER = logging.getLogger(__name__)
 
 
-class BatchJobManager(GoogleCloudManager):
-    """최적화된 Batch Manager - 효율적인 리소스 수집과 처리 (test update for firebase branch)"""
+class BatchManager(GoogleCloudManager):
+    """최적화된 Batch Manager - 효율적인 리소스 수집과 처리"""
 
     connector_name = "BatchV1Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
@@ -35,6 +35,10 @@ class BatchJobManager(GoogleCloudManager):
         """
         _LOGGER.debug("** Batch START **")
         start_time = time.time()
+        
+        # v2.0 로깅 시스템 초기화 (가능한 경우에만)
+        if hasattr(self, 'reset_state_counters'):
+            self.reset_state_counters()
 
         collected_cloud_services = []
         error_responses = []
@@ -56,7 +60,7 @@ class BatchJobManager(GoogleCloudManager):
 
             for location_id, location_jobs in jobs_by_location.items():
                 try:
-                    resource = self._create_location_resource(
+                    resource = self._create_location_resource_with_logging(
                         location_id, location_jobs, project_id, batch_conn, params
                     )
                     collected_cloud_services.append(resource)
@@ -70,17 +74,20 @@ class BatchJobManager(GoogleCloudManager):
                         f"Failed to process location {location_id}: {e}", exc_info=True
                     )
                     error_responses.append(
-                        self.generate_error_response(
-                            e, location_id, "inventory.CloudService"
+                        self.generate_resource_error_response(
+                            e, "Batch", "Location", location_id
                         )
                     )
 
         except Exception as e:
             _LOGGER.error(f"Batch collection failed: {e}", exc_info=True)
             error_responses.append(
-                self.generate_error_response(e, "batch", "inventory.CloudService")
+                self.generate_resource_error_response(e, "Batch", "Service", "batch")
             )
 
+        # v2.0 로깅 시스템 요약 (가능한 경우에만)
+        if hasattr(self, 'log_state_summary'):
+            self.log_state_summary()
         _LOGGER.debug(f"** Batch Finished {time.time() - start_time:.2f} Seconds **")
         return collected_cloud_services, error_responses
 
@@ -191,12 +198,36 @@ class BatchJobManager(GoogleCloudManager):
             }
         )
 
-        return LocationResponse(
-            {
-                "resource_type": "inventory.CloudService",
-                "resource": resource,
-            }
-        )
+        return LocationResponse({"resource": resource})
+
+    def _create_location_resource_with_logging(
+        self,
+        location_id: str,
+        location_jobs: List[Dict],
+        project_id: str,
+        batch_conn: BatchV1Connector,
+        params: Dict,
+    ) -> LocationResponse:
+        """
+        Location 리소스를 v2.0 로깅과 함께 생성합니다.
+        """
+        try:
+            # 기본 리소스 생성
+            resource = self._create_location_resource(
+                location_id, location_jobs, project_id, batch_conn, params
+            )
+            
+            # v2.0 로깅: SUCCESS 상태 기록
+            if hasattr(self, 'update_state_counter'):
+                self.update_state_counter("SUCCESS")
+            
+            return resource
+            
+        except Exception as e:
+            # v2.0 로깅: FAILURE 상태 기록
+            if hasattr(self, 'update_state_counter'):
+                self.update_state_counter("FAILURE")
+            raise e
 
     def _process_jobs(self, jobs: List[Dict], batch_conn: BatchV1Connector) -> List[Dict]:
         """

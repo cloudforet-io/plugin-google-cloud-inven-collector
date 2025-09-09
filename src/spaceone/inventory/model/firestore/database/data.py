@@ -1,17 +1,18 @@
-from schematics import Model
-from schematics.types import (
-    StringType,
-)
+from schematics.types import StringType
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 __all__ = ["Database"]
 
 
-class Database(Model):
-    # 기본 정보
-    id = StringType(required=True)
-    name = StringType(required=True)
-    project_id = StringType(required=True)
-    location_id = StringType()
+class Database(BaseResource):
+    # BaseResource에서 상속되는 필드들:
+    # id, name, project, region, self_link, google_cloud_monitoring, google_cloud_logging
+    
+    # Firestore 전용 필드들
+    database_id = StringType(required=True)  # 원래 id 필드
+    full_name = StringType(required=True)    # 원래 name 필드 (full resource name)
+    project_id = StringType(required=True)   # 원래 project_id 필드
+    location_id = StringType()               # 원래 location_id 필드
     uid = StringType()
 
     # 데이터베이스 설정
@@ -44,6 +45,6 @@ class Database(Model):
 
     def reference(self):
         return {
-            "resource_id": self.name,
-            "external_link": f"https://console.cloud.google.com/firestore/databases/{self.id}?project={self.project_id}",
+            "resource_id": self.full_name,
+            "external_link": f"https://console.cloud.google.com/firestore/databases/{self.database_id}?project={self.project_id}",
         }

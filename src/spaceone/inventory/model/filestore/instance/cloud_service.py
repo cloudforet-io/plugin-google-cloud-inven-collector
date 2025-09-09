@@ -37,7 +37,7 @@ filestore_instance_details = ItemDynamicLayout.set_fields(
     "Instance Details",
     fields=[
         TextDyField.data_source("Instance ID", "data.instance_id"),
-        TextDyField.data_source("Name", "data.name"),
+        TextDyField.data_source("Full Name", "data.full_name"),
         EnumDyField.data_source(
             "State",
             "data.state",
@@ -62,49 +62,20 @@ filestore_instance_details = ItemDynamicLayout.set_fields(
         TextDyField.data_source("Location", "data.location"),
         TextDyField.data_source("Description", "data.description"),
         DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
     ],
 )
 
-# TAB - File Shares
-filestore_file_shares = TableDynamicLayout.set_fields(
-    "File Shares",
-    root_path="data.file_shares",
+# TAB - Performance
+filestore_performance = ItemDynamicLayout.set_fields(
+    "Performance",
     fields=[
-        TextDyField.data_source("Name", "name"),
-        SizeField.data_source("Capacity (GB)", "capacity_gb"),
-        TextDyField.data_source("Source Backup", "source_backup"),
-        ListDyField.data_source(
-            "NFS Export Options",
-            "nfs_export_options",
-            default_badge={"type": "outline", "delimiter": "<br>"},
-        ),
-    ],
-)
-
-# TAB - Detailed Shares (Enterprise only)
-filestore_detailed_shares = TableDynamicLayout.set_fields(
-    "Detailed Shares",
-    root_path="data.detailed_shares",
-    fields=[
-        TextDyField.data_source("Name", "name"),
-        TextDyField.data_source("Mount Name", "mount_name"),
-        TextDyField.data_source("Description", "description"),
-        SizeField.data_source("Capacity (GB)", "capacity_gb"),
-        EnumDyField.data_source(
-            "State",
-            "state",
-            default_state={
-                "safe": ["READY"],
-                "warning": ["CREATING", "DELETING"],
-                "alert": ["ERROR"],
-            },
-        ),
-        ListDyField.data_source(
-            "NFS Export Options",
-            "nfs_export_options",
-            default_badge={"type": "outline", "delimiter": "<br>"},
-        ),
+        TextDyField.data_source("Protocol", "data.protocol"),
+        TextDyField.data_source("Custom Performance Supported", "data.custom_performance_supported"),
+        TextDyField.data_source("Max Read IOPS", "data.performance_limits.max_read_iops"),
+        TextDyField.data_source("Max Write IOPS", "data.performance_limits.max_write_iops"),
+        TextDyField.data_source("Max Read Throughput (Bps)", "data.performance_limits.max_read_throughput_bps"),
+        TextDyField.data_source("Max Write Throughput (Bps)", "data.performance_limits.max_write_throughput_bps"),
+        TextDyField.data_source("Max IOPS", "data.performance_limits.max_iops"),
     ],
 )
 
@@ -124,6 +95,35 @@ filestore_networks = TableDynamicLayout.set_fields(
     ],
 )
 
+# TAB - File Shares (통합: 기본 정보 + 상세 정보)
+filestore_file_shares = TableDynamicLayout.set_fields(
+    "File Shares",
+    root_path="data.unified_file_shares",
+    fields=[
+        TextDyField.data_source("Name", "name"),
+        TextDyField.data_source("Mount Name", "mount_name"),
+        TextDyField.data_source("Description", "description"),
+        SizeField.data_source("Capacity (GB)", "capacity_gb"),
+        EnumDyField.data_source(
+            "State",
+            "state",
+            default_state={
+                "safe": ["READY"],
+                "warning": ["CREATING", "DELETING"],
+                "alert": ["ERROR"],
+                "disable": ["UNKNOWN", ""],
+            },
+        ),
+        TextDyField.data_source("Source Backup", "source_backup"),
+        ListDyField.data_source(
+            "NFS Export Options",
+            "nfs_export_options",
+            default_badge={"type": "outline", "delimiter": "<br>"},
+        ),
+        TextDyField.data_source("Data Source", "data_source"),
+    ],
+)
+
 # TAB - Snapshots
 filestore_snapshots = TableDynamicLayout.set_fields(
     "Snapshots",
@@ -140,7 +140,6 @@ filestore_snapshots = TableDynamicLayout.set_fields(
                 "alert": ["ERROR"],
             },
         ),
-        TextDyField.data_source("File Share", "file_share"),
         DateTimeDyField.data_source("Create Time", "create_time"),
     ],
 )
@@ -166,13 +165,13 @@ filestore_labels = TableDynamicLayout.set_fields(
     ],
 )
 
-# Combined metadata layout
+# Unified metadata layout (통합된 File Shares 탭 사용)
 filestore_instance_meta = CloudServiceMeta.set_layouts(
     [
         filestore_instance_details,
-        filestore_file_shares,
-        filestore_detailed_shares,
+        filestore_performance,
         filestore_networks,
+        filestore_file_shares,
         filestore_snapshots,
         filestore_statistics,
         filestore_labels,

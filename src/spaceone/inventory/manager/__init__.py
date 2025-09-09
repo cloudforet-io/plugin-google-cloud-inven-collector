@@ -2,7 +2,7 @@ from .app_engine.application_v1_manager import AppEngineApplicationV1Manager
 from .app_engine.instance_v1_manager import AppEngineInstanceV1Manager
 from .app_engine.service_v1_manager import AppEngineServiceV1Manager
 from .app_engine.version_v1_manager import AppEngineVersionV1Manager
-from .batch.job_manager import BatchJobManager
+from .batch.batch_manager import BatchManager
 from .bigquery.sql_workspace_manager import SQLWorkspaceManager
 from .cloud_build.build_v1_manager import CloudBuildBuildV1Manager
 from .cloud_build.connection_v2_manager import CloudBuildConnectionV2Manager

@@ -14,6 +14,36 @@ class CloudRunV1Connector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def list_locations(self, name, **query):
+        """V1 API에서 locations 조회"""
+        locations = []
+        query.update({"name": name})
+        _LOGGER.info(f"V1 API: Getting locations for name: {name}")
+
+        try:
+            request = self.client.projects().locations().list(**query)
+        except Exception as e:
+            _LOGGER.warning(f"V1 API: Failed to create request for locations: {e}")
+            return locations
+
+        while request is not None:
+            try:
+                response = request.execute()
+                raw_locations = response.get("locations", [])
+                # global 위치는 제외
+                filtered_locations = [
+                    loc for loc in raw_locations if loc.get("locationId") != "global"
+                ]
+                locations.extend(filtered_locations)
+                request = (
+                    self.client.projects().locations().list_next(request, response)
+                )
+            except Exception as e:
+                _LOGGER.warning(f"V1 API: Failed to list locations: {e}")
+                break
+
+        return locations
+
     def list_domain_mappings(self, parent, **query):
         domain_mappings = []
         query.update({"parent": parent})
@@ -159,8 +189,7 @@ class CloudRunV1Connector(GoogleCloudConnector):
             except Exception as e:
                 _LOGGER.warning(f"Failed to list routes: {e}")
                 break
-        for route in enumerate(routes):
-            print(f"route: {route}")
+
         return routes
 
     def list_configurations(self, parent, **query):

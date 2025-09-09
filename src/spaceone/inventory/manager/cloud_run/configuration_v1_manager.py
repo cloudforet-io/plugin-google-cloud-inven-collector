@@ -55,13 +55,17 @@ class CloudRunConfigurationV1Manager(GoogleCloudManager):
         try:
             namespace = f"namespaces/{project_id}"
             configurations = cloud_run_v1_conn.list_configurations(namespace)
-            
+
             for configuration in configurations:
                 # V1에서는 location 정보가 metadata에 포함되어 있을 수 있음
                 location_id = (
-                    configuration.get("metadata", {}).get("labels", {}).get("cloud.googleapis.com/location") or
-                    configuration.get("metadata", {}).get("namespace", "").split("/")[-1] or
-                    "us-central1"  # default location
+                    configuration.get("metadata", {})
+                    .get("labels", {})
+                    .get("cloud.googleapis.com/location")
+                    or configuration.get("metadata", {})
+                    .get("namespace", "")
+                    .split("/")[-1]
+                    or "us-central1"  # default location
                 )
                 configuration["_location"] = location_id
         except Exception as e:
@@ -101,7 +105,7 @@ class CloudRunConfigurationV1Manager(GoogleCloudManager):
                         "data": configuration_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": configuration_data.name,
+                                "resource_id": configuration_data.metadata.uid,
                                 "external_link": f"https://console.cloud.google.com/run/configurations/details/{location_id}/{configuration_id}?project={project_id}",
                             }
                         ),
@@ -109,15 +113,21 @@ class CloudRunConfigurationV1Manager(GoogleCloudManager):
                     strict=False,
                 )
 
-                collected_cloud_services.append(ConfigurationV1Response({"resource": configuration_resource}))
+                collected_cloud_services.append(
+                    ConfigurationV1Response({"resource": configuration_resource})
+                )
 
             except Exception as e:
-                _LOGGER.error(f"Failed to process configuration {configuration_id}: {str(e)}")
+                _LOGGER.error(
+                    f"Failed to process configuration {configuration_id}: {str(e)}"
+                )
                 error_response = self.generate_resource_error_response(
                     e, "Configuration", "CloudRun", configuration_id
                 )
                 error_responses.append(error_response)
 
-        _LOGGER.debug(f"** Cloud Run Configuration V1 END ** ({time.time() - start_time:.2f}s)")
+        _LOGGER.debug(
+            f"** Cloud Run Configuration V1 END ** ({time.time() - start_time:.2f}s)"
+        )
 
         return collected_cloud_services, error_responses

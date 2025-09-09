@@ -20,17 +20,19 @@ class IndexProperty(Model):
 class DatastoreIndexData(BaseResource):
     """Datastore Index 데이터 모델"""
 
-    index_id = StringType()
+    # API 응답 필드들
+    index_id = StringType(deserialize_from="indexId")
     kind = StringType()
     ancestor = StringType()
     state = StringType()
     properties = ListType(ModelType(IndexProperty))
+    
+    # 처리된 필드들 (매니저에서 추가)
     property_count = IntType()
     sorted_properties = ListType(StringType())
     unsorted_properties = ListType(StringType())
     project_id = StringType()
     display_name = StringType()
-    raw_data = DictType(StringType)
 
     def reference(self):
         return {
