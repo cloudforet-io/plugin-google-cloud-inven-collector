@@ -7,6 +7,7 @@ from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeResponse,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
+    DateTimeDyField,
     EnumDyField,
     SearchField,
     TextDyField,
@@ -45,7 +46,14 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
                 "alert": ["CONDITION_FAILED"],
             },
         ),
-        TextDyField.data_source("Location", "data.location"),
+        TextDyField.data_source("Deployment Type", "data.deployment_type"),
+        TextDyField.data_source("Requests per Second", "data.requests_per_second"),
+        TextDyField.data_source("Authentication", "data.authentication"),
+        TextDyField.data_source("Ingress", "data.ingress"),
+        DateTimeDyField.data_source(
+            "Last Deployment Time", "data.last_deployment_time"
+        ),
+        TextDyField.data_source("Deployer", "data.deployer"),
         TextDyField.data_source("URL", "data.uri"),
         TextDyField.data_source(
             "Latest Ready Revision", "data.latest_ready_revision_name"
@@ -54,9 +62,11 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
-        SearchField.set(name="Service ID", key="data.uid"),
-        SearchField.set(name="Location", key="data.location"),
         SearchField.set(name="Status", key="data.terminal_condition.state"),
+        SearchField.set(name="Deployment Type", key="data.deployment_type"),
+        SearchField.set(name="Authentication", key="data.authentication"),
+        SearchField.set(name="Ingress", key="data.ingress"),
+        SearchField.set(name="Deployer", key="data.deployer"),
         SearchField.set(name="URL", key="data.uri"),
         SearchField.set(
             name="Latest Ready Revision", key="data.latest_ready_revision_name"

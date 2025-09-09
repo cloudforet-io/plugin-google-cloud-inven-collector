@@ -55,13 +55,15 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
         try:
             namespace = f"namespaces/{project_id}"
             routes = cloud_run_v1_conn.list_routes(namespace)
-            
+
             for route in routes:
                 # V1에서는 location 정보가 metadata에 포함되어 있을 수 있음
                 location_id = (
-                    route.get("metadata", {}).get("labels", {}).get("cloud.googleapis.com/location") or
-                    route.get("metadata", {}).get("namespace", "").split("/")[-1] or
-                    "us-central1"  # default location
+                    route.get("metadata", {})
+                    .get("labels", {})
+                    .get("cloud.googleapis.com/location")
+                    or route.get("metadata", {}).get("namespace", "").split("/")[-1]
+                    or ""  # default location
                 )
                 route["_location"] = location_id
         except Exception as e:
@@ -80,18 +82,38 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                # Latest Ready Revision 추출
+                latest_ready_revision_name = ""
+                revision_count = 0
+
+                status_traffic = route.get("status", {}).get("traffic", [])
+                for traffic_item in status_traffic:
+                    if traffic_item.get("latestRevision") is True:
+                        latest_ready_revision_name = traffic_item.get(
+                            "revisionName", ""
+                        )
+                    revision_count += 1
+
                 route.update(
                     {
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "latest_ready_revision_name": latest_ready_revision_name,
+                        "revision_count": revision_count,
                     }
                 )
 
                 ##################################
                 # 3. Make Return Resource
                 ##################################
-                route_data = RouteV1(route, strict=False)
+                try:
+                    route_data = RouteV1(route, strict=False)
+                except Exception as e:
+                    _LOGGER.error(
+                        f"Route {route_id}: Failed to create RouteV1: {str(e)}"
+                    )
+                    continue
 
                 route_resource = RouteV1Resource(
                     {
@@ -109,7 +131,9 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
                     strict=False,
                 )
 
-                collected_cloud_services.append(RouteV1Response({"resource": route_resource}))
+                collected_cloud_services.append(
+                    RouteV1Response({"resource": route_resource})
+                )
 
             except Exception as e:
                 _LOGGER.error(f"Failed to process route {route_id}: {str(e)}")

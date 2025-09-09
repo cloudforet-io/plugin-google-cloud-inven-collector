@@ -228,6 +228,7 @@ class DataprocClusterManager(GoogleCloudManager):
 
                 # 기본 클러스터 데이터 준비
                 cluster_data = {
+                    "name": str(cluster.get("clusterName", "")),  # name 필드로 매핑
                     "cluster_name": str(cluster.get("clusterName", "")),
                     "project_id": str(project_id),  # project_id를 명시적으로 설정
                     "cluster_uuid": str(cluster.get("clusterUuid", "")),
