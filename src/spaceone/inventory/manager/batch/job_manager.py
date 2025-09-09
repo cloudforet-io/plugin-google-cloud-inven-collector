@@ -18,7 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class BatchJobManager(GoogleCloudManager):
-    """최적화된 Batch Manager - 효율적인 리소스 수집과 처리"""
+    """최적화된 Batch Manager - 효율적인 리소스 수집과 처리 (test update for firebase branch)"""
 
     connector_name = "BatchV1Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
