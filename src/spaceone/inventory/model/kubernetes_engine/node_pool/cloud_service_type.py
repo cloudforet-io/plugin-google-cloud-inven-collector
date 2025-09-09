@@ -47,7 +47,7 @@ cst_gke_node_pool._metadata = CloudServiceTypeMeta.set_meta(
             "warning": ["PROVISIONING", "RECONCILING"],
             "alert": ["STOPPING", "ERROR", "DEGRADED"],
         }),
-        TextDyField.data_source("Node Count", "data.initial_node_count"),
+        TextDyField.data_source("Node Count", "data.total_nodes"),
         TextDyField.data_source("Machine Type", "data.config.machine_type"),
         TextDyField.data_source("Disk Size (GB)", "data.config.disk_size_gb"),
         TextDyField.data_source("Disk Type", "data.config.disk_type"),

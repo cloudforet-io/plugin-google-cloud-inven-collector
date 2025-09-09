@@ -72,6 +72,7 @@ class NodePool(CloudServiceResource):
     status = StringType()
     status_message = StringType(deserialize_from="statusMessage")
     initial_node_count = IntType(deserialize_from="initialNodeCount")
+    total_nodes = IntType(serialize_when_none=False)
     config = ModelType(NodeConfig)
     autoscaling = ModelType(AutoScaling)
     management = ModelType(Management)

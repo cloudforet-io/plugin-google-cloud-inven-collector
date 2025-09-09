@@ -692,6 +692,11 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                         node_group_data["metrics"] = metrics
 
                     # 노드 정보 추가
+                    if nodes_info:
+                        node_group_data["total_nodes"] = nodes_info["total_nodes"]
+                        node_group_data["total_groups"] = nodes_info["total_groups"]
+
+                    # 노드 정보 추가
                     if nodes:
                         node_group_data["nodes"] = []
                         for node in nodes:
@@ -775,7 +780,15 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                 except Exception as e:
                     _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
                     error_responses.append(
-                        self.generate_error_response(e, self.cloud_service_group, "NodeGroup")
+                        ErrorResourceResponse(
+                            {
+                                "message": str(e),
+                                "resource": {
+                                    "cloud_service_group": self.cloud_service_group,
+                                    "cloud_service_type": "NodePool",
+                                },
+                            }
+                        )
                     )
 
             _LOGGER.info(f"Successfully collected {len(collected_cloud_services)} node group resources (v1beta1)")
@@ -783,7 +796,15 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
         except Exception as e:
             _LOGGER.error(f"Failed to collect cloud services (v1beta1): {e}", exc_info=True)
             error_responses.append(
-                self.generate_error_response(e, self.cloud_service_group, "NodeGroup")
+                ErrorResourceResponse(
+                    {
+                        "message": str(e),
+                        "resource": {
+                            "cloud_service_group": self.cloud_service_group,
+                            "cloud_service_type": "NodePool",
+                        },
+                    }
+                )
             )
 
         _LOGGER.info("** GKE Node Pool V1Beta END **")

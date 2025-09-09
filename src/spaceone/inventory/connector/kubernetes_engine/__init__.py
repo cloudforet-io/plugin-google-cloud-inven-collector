@@ -7,5 +7,5 @@ __all__ = [
     "GKEClusterV1Connector",
     "GKEClusterV1BetaConnector", 
     "GKENodePoolV1Connector",
-    "GKENodePoolV1BetaConnector"
+    "GKENodePoolV1BetaConnector",
 ]

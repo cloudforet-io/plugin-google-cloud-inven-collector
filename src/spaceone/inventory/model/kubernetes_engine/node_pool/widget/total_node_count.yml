@@ -7,7 +7,7 @@ query:
     - group:
         fields:
           - name: value
-            key: data.initial_node_count
+            key: data.total_nodes
             operator: sum
 options:
   value_options:

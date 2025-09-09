@@ -405,7 +405,15 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
             except Exception as e:
                 _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
                 error_responses.append(
-                    self.generate_error_response(e, self.cloud_service_group, "Cluster")
+                    ErrorResourceResponse(
+                        {
+                            "message": str(e),
+                            "resource": {
+                                "cloud_service_group": self.cloud_service_group,
+                                "cloud_service_type": "Cluster",
+                            },
+                        }
+                    )
                 )
 
         _LOGGER.debug("** GKE Cluster V1Beta END **")
