@@ -109,19 +109,21 @@ class DatastoreIndexManager(GoogleCloudManager):
     def _process_index_data(self, index):
         """
         Index 데이터를 처리하고 필요한 정보를 추가합니다.
+        다른 도메인과 일관되게 원본 API 응답에 추가 정보만 추가합니다.
 
         Args:
             index (dict): 원본 index 데이터
 
         Returns:
-            dict: 처리된 index 데이터
+            dict: 처리된 index 데이터 (원본 + 추가 정보)
         """
         try:
+            # 원본 데이터 복사
+            processed_data = index.copy()
+            
             # 기본 정보 추출
             index_id = index.get("indexId", "")
             kind = index.get("kind", "")
-            ancestor = index.get("ancestor", "NONE")
-            state = index.get("state", "")
             properties = index.get("properties", [])
 
             # Properties 분석
@@ -137,13 +139,8 @@ class DatastoreIndexManager(GoogleCloudManager):
                 else:
                     unsorted_properties.append(prop_name)
 
-            # 처리된 데이터 구성
-            processed_data = {
-                "index_id": index_id,
-                "kind": kind,
-                "ancestor": ancestor,
-                "state": state,
-                "properties": properties,
+            # 추가 처리된 정보만 추가
+            processed_data.update({
                 "property_count": property_count,
                 "sorted_properties": sorted_properties,
                 "unsorted_properties": unsorted_properties,
@@ -151,9 +148,7 @@ class DatastoreIndexManager(GoogleCloudManager):
                 "display_name": f"{kind} Index ({index_id})"
                 if kind
                 else f"Index ({index_id})",
-                # 원본 데이터도 포함
-                "raw_data": index,
-            }
+            })
 
             return processed_data
 

@@ -137,37 +137,23 @@ class DatastoreDatabaseManager(GoogleCloudManager):
             dict: 처리된 database 데이터
         """
         try:
-            # 기본 정보 추출
-            name = database.get("name", "")
-            uid = database.get("uid", "")
-            location_id = database.get("locationId", "")
-            database_type = database.get("type", "")
-            concurrency_mode = database.get("concurrencyMode", "")
-            create_time = database.get("createTime", "")
-            update_time = database.get("updateTime", "")
-
+            # 원본 데이터 복사
+            processed_data = database.copy()
+            
             # Database ID 추출 (name에서 마지막 부분)
+            name = database.get("name", "")
             database_id = (
                 name.split("/")[-1] if name else "(default)"
             )  # 기본 데이터베이스는 (default)
 
-            # 처리된 데이터 구성
-            processed_data = {
-                "name": name,
-                "uid": uid,
+            # 추가 처리된 정보만 추가
+            processed_data.update({
                 "database_id": database_id,
-                "location_id": location_id,
-                "type": database_type,
-                "concurrency_mode": concurrency_mode,
-                "create_time": create_time,
-                "update_time": update_time,
                 "project_id": self.database_conn.project_id,
                 "display_name": f"Database ({database_id})"
                 if database_id != "(default)"
                 else "Default Database",
-                # 원본 데이터도 포함
-                "raw_data": database,
-            }
+            })
 
             return processed_data
 

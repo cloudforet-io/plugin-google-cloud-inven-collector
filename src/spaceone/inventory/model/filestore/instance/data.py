@@ -16,36 +16,41 @@ class Network(Model):
     network = StringType()
     modes = ListType(StringType())
     reserved_ip_range = StringType()
+    connect_mode = StringType(serialize_when_none=False)
 
 
-class FileShare(Model):
-    """파일 공유 정보 모델"""
+class PerformanceLimits(Model):
+    """성능 제한 정보 모델"""
+    
+    max_read_iops = StringType(serialize_when_none=False)
+    max_write_iops = StringType(serialize_when_none=False)
+    max_read_throughput_bps = StringType(serialize_when_none=False)
+    max_write_throughput_bps = StringType(serialize_when_none=False)
+    max_iops = StringType(serialize_when_none=False)
+
+
+class UnifiedFileShare(Model):
+    """통합 파일 공유 정보 모델 (기본 + 상세 정보)"""
 
     name = StringType()
+    mount_name = StringType(serialize_when_none=False)
+    description = StringType(serialize_when_none=False)
     capacity_gb = StringType()
-    source_backup = StringType()
-    nfs_export_options = ListType(StringType)
-
-
-class DetailedShare(Model):
-    """상세 파일 공유 정보 모델 (v1beta1 API)"""
-
-    name = StringType()
-    mount_name = StringType()
-    description = StringType()
-    capacity_gb = StringType()
-    state = StringType()
-    labels = DictType(StringType)
-    nfs_export_options = ListType(StringType)
+    state = StringType(serialize_when_none=False)
+    source_backup = StringType(serialize_when_none=False)
+    nfs_export_options = ListType(StringType, default=[], serialize_when_none=False)
+    data_source = StringType()  # "Basic" 또는 "Detailed" 표시
 
 
 class Snapshot(Model):
     """스냅샷 정보 모델"""
 
     name = StringType()
+    full_name = StringType()
+    description = StringType()
     state = StringType()
     create_time = StringType()
-    source_file_share = StringType()
+    labels = ListType(DictType(StringType), default=[])
 
 
 class Stats(Model):
@@ -71,30 +76,29 @@ class FilestoreInstanceData(BaseResource):
     # 네트워크 정보
     networks = ListType(ModelType(Network))
 
-    # 파일 공유 정보
-    file_shares = ListType(ModelType(FileShare))
-    detailed_shares = ListType(ModelType(DetailedShare), serialize_when_none=False)
+    # 파일 공유 정보 (통합)
+    unified_file_shares = ListType(ModelType(UnifiedFileShare), serialize_when_none=False)
 
     # 스냅샷 정보
     snapshots = ListType(ModelType(Snapshot))
 
     # 라벨 정보
-    labels = DictType(StringType)
+    labels = ListType(DictType(StringType), default=[])
 
     # 시간 정보
-    create_time = StringType()
-    update_time = StringType()
+    create_time = StringType(deserialize_from="createTime")
 
-    # 통계 정보
+    # 통계 정보s
     stats = ModelType(Stats)
+    
+    # 인스턴스 레벨 성능 및 용량 정보
+    protocol = StringType(serialize_when_none=False)
+    custom_performance_supported = StringType(serialize_when_none=False)
+    performance_limits = ModelType(PerformanceLimits, serialize_when_none=False)
 
     def reference(self):
-        # 프로젝트 ID와 리전 추출 (full_name 사용)
-        parts = self.full_name.split("/")
-        project_id = parts[1]  # projects/{project_id}
-        location = parts[3]  # locations/{location}
 
         return {
-            "resource_id": self.full_name,
-            "external_link": f"https://console.cloud.google.com/filestore/instances?project={project_id}&location={location}",
+            "resource_id": f"https://file.googleapis.com/v1/{self.full_name}",
+            "external_link": f"https://console.cloud.google.com/filestore/instances/locations/{self.location}/id/{self.instance_id}?project={self.project}",
         }
