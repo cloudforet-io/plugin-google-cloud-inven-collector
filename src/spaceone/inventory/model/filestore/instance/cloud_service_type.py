@@ -63,25 +63,13 @@ cst_filestore_instance._metadata = CloudServiceTypeMeta.set_meta(
                 "ENTERPRISE_TIER_2",
             ],
         ),
-        TextDyField.data_source("Location", "data.location"),
         TextDyField.data_source("Description", "data.description"),
         SizeField.data_source("Total Capacity (GB)", "data.stats.total_capacity_gb"),
         TextDyField.data_source("File Share Count", "data.stats.file_share_count"),
         TextDyField.data_source("Snapshot Count", "data.stats.snapshot_count"),
         TextDyField.data_source("Network Count", "data.stats.network_count"),
         DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
-        # Optional fields
-        TextDyField.data_source(
-            "Primary File Share Name",
-            "data.file_shares.0.name",
-            options={"is_optional": True},
-        ),
-        SizeField.data_source(
-            "Primary File Share Capacity (GB)",
-            "data.file_shares.0.capacity_gb",
-            options={"is_optional": True},
-        ),
+        # Essential optional fields only
         TextDyField.data_source(
             "Primary Network", "data.networks.0.network", options={"is_optional": True}
         ),
@@ -92,11 +80,6 @@ cst_filestore_instance._metadata = CloudServiceTypeMeta.set_meta(
         ),
         TextDyField.data_source(
             "Latest Snapshot", "data.snapshots.0.name", options={"is_optional": True}
-        ),
-        DateTimeDyField.data_source(
-            "Latest Snapshot Created",
-            "data.snapshots.0.create_time",
-            options={"is_optional": True},
         ),
     ],
     search=[
@@ -125,7 +108,6 @@ cst_filestore_instance._metadata = CloudServiceTypeMeta.set_meta(
                 "ENTERPRISE_TIER_2": {"label": "Enterprise Tier 2"},
             },
         ),
-        SearchField.set(name="Location", key="data.location"),
         SearchField.set(name="Description", key="data.description"),
         SearchField.set(
             name="Total Capacity (GB)",
@@ -144,12 +126,6 @@ cst_filestore_instance._metadata = CloudServiceTypeMeta.set_meta(
             name="Network Count", key="data.stats.network_count", data_type="integer"
         ),
         SearchField.set(name="Created", key="data.create_time", data_type="datetime"),
-        SearchField.set(name="Updated", key="data.update_time", data_type="datetime"),
-        SearchField.set(name="File Share Name", key="data.file_shares.name"),
-        SearchField.set(name="Network", key="data.networks.network"),
-        SearchField.set(name="Snapshot Name", key="data.snapshots.name"),
-        SearchField.set(name="Account ID", key="account"),
-        SearchField.set(name="Region", key="region_code"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
