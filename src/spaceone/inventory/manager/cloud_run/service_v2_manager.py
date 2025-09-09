@@ -145,6 +145,33 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                             terminal_condition = condition
                             break
 
+                # Extract additional information
+                template = service.get("template", {})
+                ingress = service.get("ingress", "")
+
+                # Determine deployment type based on template
+                deployment_type = "Service"  # Default
+                if template.get("containers"):
+                    # Check if it's a function deployment
+                    containers = template.get("containers", [])
+                    if containers and any(
+                        "function" in str(container).lower() for container in containers
+                    ):
+                        deployment_type = "Function"
+
+                # Extract authentication info
+                authentication = "No Authentication Required"
+                if template.get("serviceAccount"):
+                    authentication = "Authentication Required"
+
+                # Extract deployer information
+                deployer = service.get("creator", "")
+                if not deployer:
+                    deployer = service.get("lastModifier", "")
+
+                # Extract last deployment time
+                last_deployment_time = service.get("updateTime", "")
+
                 service.update(
                     {
                         "name": service_name,  # Set name for SpaceONE display
@@ -155,6 +182,12 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                         "latest_ready_revision_name": latest_ready_revision_name,
                         "latest_created_revision_name": latest_created_revision_name,
                         "terminal_condition": terminal_condition,
+                        "deployment_type": deployment_type,
+                        "requests_per_second": 0,  # Default value, could be calculated from metrics
+                        "authentication": authentication,
+                        "ingress": ingress,
+                        "last_deployment_time": last_deployment_time,
+                        "deployer": deployer,
                     }
                 )
 

@@ -44,14 +44,14 @@ CLOUD_SERVICE_GROUP_MAP = {
         "CloudBuildRepositoryV2Manager",
     ],
     "CloudRun": [
-        # V1 API는 비활성화
+        # V1 API
         # "CloudRunServiceV1Manager",
         # "CloudRunJobV1Manager",
         # "CloudRunWorkerPoolV1Manager",
-        # "CloudRunDomainMappingV1Manager",
-        # "CloudRunRouteV1Manager",
-        # "CloudRunConfigurationV1Manager",
-        # V2 API 활성화
+        "CloudRunDomainMappingV1Manager",
+        "CloudRunRouteV1Manager",
+        "CloudRunConfigurationV1Manager",
+        # V2 API
         "CloudRunServiceV2Manager",
         "CloudRunJobV2Manager",
         "CloudRunWorkerPoolV2Manager",
@@ -179,6 +179,18 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         },
     },
     "CloudRun": {
+        "Configuration": {
+            "resource_type": "cloud_run_configuration",
+            "labels_key": "resource.labels.configuration_name",
+        },
+        "Route": {
+            "resource_type": "cloud_run_route",
+            "labels_key": "resource.labels.route_name",
+        },
+        "DomainMapping": {
+            "resource_type": "cloud_run_domain_mapping",
+            "labels_key": "resource.labels.domain_mapping_name",
+        },
         "Service": {
             "resource_type": "cloud_run_service",
             "labels_key": "resource.labels.service_name",
@@ -191,10 +203,6 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             "resource_type": "cloud_run_worker_pool",
             "labels_key": "resource.labels.worker_pool_name",
         },
-        # "DomainMapping": {
-        #     "resource_type": "cloud_run_domain_mapping",
-        #     "labels_key": "resource.labels.domain_mapping_name",
-        # },
     },
     "KubernetesEngine": {
         "Cluster": {

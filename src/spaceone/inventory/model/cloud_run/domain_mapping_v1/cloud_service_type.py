@@ -4,11 +4,11 @@ from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
+    CloudServiceTypeResponse,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     EnumDyField,
     SearchField,
-    TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
     CardWidget,
@@ -35,6 +35,7 @@ cst_domain_mapping.tags = {
 
 cst_domain_mapping._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
+        # TextDyField.data_source("Domain Mapping ID", "data.metadata.uid"),
         EnumDyField.data_source(
             "Status",
             "data.status.conditions.0.status",
@@ -44,14 +45,10 @@ cst_domain_mapping._metadata = CloudServiceTypeMeta.set_meta(
                 "alert": ["Unknown"],
             },
         ),
-        TextDyField.data_source("Location", "data.metadata.location"),
-        TextDyField.data_source("Project", "data.metadata.project"),
     ],
     search=[
         SearchField.set(name="Name", key="data.metadata.name"),
-        SearchField.set(name="Domain Mapping ID", key="data.metadata.uid"),
-        SearchField.set(name="Location", key="data.metadata.location"),
-        SearchField.set(name="Project", key="data.metadata.project"),
+        # SearchField.set(name="Domain Mapping ID", key="data.metadata.uid"),
         SearchField.set(name="Status", key="data.status.conditions.0.status"),
     ],
     widget=[
@@ -61,6 +58,6 @@ cst_domain_mapping._metadata = CloudServiceTypeMeta.set_meta(
     ],
 )
 
-# V1 API는 deprecated되어 CloudServiceType 비활성화
-# V1 API는 완전히 비활성화됨
-CLOUD_SERVICE_TYPES = []
+CLOUD_SERVICE_TYPES = [
+    CloudServiceTypeResponse({"resource": cst_domain_mapping}),
+]

@@ -45,7 +45,6 @@ cst_job._metadata = CloudServiceTypeMeta.set_meta(
                 "alert": ["CONDITION_FAILED"],
             },
         ),
-        TextDyField.data_source("Location", "data.location"),
         TextDyField.data_source("Creator", "data.creator"),
         TextDyField.data_source("Execution Count", "data.execution_count"),
         TextDyField.data_source(
@@ -55,7 +54,6 @@ cst_job._metadata = CloudServiceTypeMeta.set_meta(
     search=[
         SearchField.set(name="Name", key="data.name"),
         SearchField.set(name="Job ID", key="data.uid"),
-        SearchField.set(name="Location", key="data.location"),
         SearchField.set(name="Status", key="data.terminal_condition.state"),
     ],
     widget=[

@@ -56,18 +56,18 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
         # Get lists that relate with worker pools through Google Cloud API using REGION_INFO fallback
         all_worker_pools = []
         parent = f"projects/{project_id}"
-        
+
         # V1에서는 locations API가 지원되지 않으므로 REGION_INFO를 사용
         locations = [
             {
                 "locationId": region_id,
                 "name": f"{parent}/locations/{region_id}",
-                "displayName": REGION_INFO[region_id]["name"]
+                "displayName": REGION_INFO[region_id]["name"],
             }
             for region_id in REGION_INFO.keys()
             if region_id != "global"
         ]
-        
+
         for location in locations:
             location_id = location.get("locationId", "")
             if location_id:

@@ -29,4 +29,5 @@ class Connection(Model):
     reconciling = BooleanType(default=False)
     annotations = DictType(StringType, default={})
     etag = StringType()
-    uid = StringType()
+    scm_type = StringType()
+    username = StringType()

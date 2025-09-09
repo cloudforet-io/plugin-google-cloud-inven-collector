@@ -37,13 +37,10 @@ cst_connection.tags = {
 
 cst_connection._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("UID", "data.uid"),
-        TextDyField.data_source(
-            "URL", "data.github_config.authorizerCredential.username"
-        ),
-        TextDyField.data_source(
-            "Provider Auth Account", "data.github_config.appInstallationId"
-        ),
+        TextDyField.data_source("SCM Type", "data.scm_type"),
+        TextDyField.data_source("Username", "data.username"),
+        TextDyField.data_source("Installation State", "data.installation_state.stage"),
+        TextDyField.data_source("Reconciling", "data.reconciling"),
         EnumDyField.data_source(
             "Status",
             "data.disabled",
@@ -57,7 +54,9 @@ cst_connection._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
-        SearchField.set(name="UID", key="data.uid"),
+        SearchField.set(name="SCM Type", key="data.scm_type"),
+        SearchField.set(name="Username", key="data.username"),
+        SearchField.set(name="Installation State", key="data.installation_state.stage"),
         SearchField.set(name="Disabled", key="data.disabled", data_type="boolean"),
         SearchField.set(
             name="Reconciling", key="data.reconciling", data_type="boolean"

@@ -42,7 +42,7 @@ class Service(Model):
     generation = IntType()
     project = StringType()  # Project ID
     location = StringType()  # Location/Region
-    region = StringType()    # Region info
+    region = StringType()  # Region info
     labels = DictType(StringType, default={})
     annotations = DictType(StringType, default={})
     create_time = DateTimeType(deserialize_from="createTime")
@@ -71,3 +71,9 @@ class Service(Model):
     ingress = StringType()
     revisions = ListType(ModelType(Revision), default=[])
     revision_count = IntType(default=0)
+    # New fields for additional information
+    deployment_type = StringType(default="")
+    requests_per_second = IntType(default=0)
+    authentication = StringType(default="")
+    last_deployment_time = DateTimeType(deserialize_from="lastDeploymentTime")
+    deployer = StringType(default="")
