@@ -22,7 +22,7 @@ ROUTE V1
 route_v1_meta = CloudServiceMeta.set_layouts(
     [
         ItemDynamicLayout.set_fields(
-            "Route V1 Details",
+            "Route Details",
             fields=[
                 TextDyField.data_source("Name", "data.name"),
                 TextDyField.data_source("Kind", "data.kind"),
@@ -30,7 +30,9 @@ route_v1_meta = CloudServiceMeta.set_layouts(
                 TextDyField.data_source("Namespace", "data.metadata.namespace"),
                 TextDyField.data_source("UID", "data.metadata.uid"),
                 TextDyField.data_source("URL", "data.status.url"),
-                DateTimeDyField.data_source("Created", "data.metadata.creation_timestamp"),
+                DateTimeDyField.data_source(
+                    "Created", "data.metadata.creation_timestamp"
+                ),
             ],
         ),
         TableDynamicLayout.set_fields(
@@ -59,7 +61,9 @@ class RouteV1Resource(CloudServiceResource):
     cloud_service_group = StringType(default="CloudRun")
     provider = StringType(default="google_cloud")
     data = ModelType(RouteV1)
-    _metadata = ModelType(CloudServiceMeta, default=route_v1_meta, serialized_name="metadata")
+    _metadata = ModelType(
+        CloudServiceMeta, default=route_v1_meta, serialized_name="metadata"
+    )
 
 
 class RouteV1Response(CloudServiceResponse):

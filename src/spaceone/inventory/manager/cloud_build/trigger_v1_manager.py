@@ -59,18 +59,18 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
         # Get locations and regional triggers using REGION_INFO fallback
         regional_triggers = []
         parent = f"projects/{project_id}"
-        
+
         # V1에서는 locations API가 지원되지 않으므로 REGION_INFO를 사용
         locations = [
             {
                 "locationId": region_id,
                 "name": f"{parent}/locations/{region_id}",
-                "displayName": REGION_INFO[region_id]["name"]
+                "displayName": REGION_INFO[region_id]["name"],
             }
             for region_id in REGION_INFO.keys()
             if region_id != "global"
         ]
-        
+
         for location in locations:
             location_id = location.get("locationId", "")
             if location_id:
@@ -107,11 +107,29 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                # Convert boolean values to user-friendly strings for display
+                autodetect = trigger.get("autodetect", False)
+                disabled = trigger.get("disabled", False)
+
+                # Convert autodetect to display string
+                if autodetect:
+                    autodetect_display = "Auto Detect"
+                else:
+                    autodetect_display = "Manual Config"
+
+                # Convert disabled to display string
+                if disabled:
+                    disabled_display = "Disabled"
+                else:
+                    disabled_display = "Enabled"
+
                 trigger.update(
                     {
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "autodetect_display": autodetect_display,
+                        "disabled_display": disabled_display,
                     }
                 )
 

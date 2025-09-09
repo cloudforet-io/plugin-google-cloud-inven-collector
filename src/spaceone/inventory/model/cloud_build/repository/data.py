@@ -12,5 +12,4 @@ class Repository(Model):
     update_time = StringType(deserialize_from="updateTime")
     annotations = DictType(StringType, default={})
     etag = StringType()
-    uid = StringType()
-    webhook_id = StringType(deserialize_from="webhookId")
+    connection = StringType()

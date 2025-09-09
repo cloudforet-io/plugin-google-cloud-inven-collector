@@ -36,17 +36,15 @@ cst_repository.tags = {
 
 cst_repository._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
+        TextDyField.data_source("Connection", "data.connection"),
         TextDyField.data_source("Remote URI", "data.remote_uri"),
-        TextDyField.data_source("UID", "data.uid"),
-        TextDyField.data_source("Webhook ID", "data.webhook_id"),
         DateTimeDyField.data_source("Create Time", "data.create_time"),
         DateTimeDyField.data_source("Update Time", "data.update_time"),
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
+        SearchField.set(name="Connection", key="data.connection"),
         SearchField.set(name="Remote URI", key="data.remote_uri"),
-        SearchField.set(name="UID", key="data.uid"),
-        SearchField.set(name="Webhook ID", key="data.webhook_id"),
         SearchField.set(
             name="Create Time", key="data.create_time", data_type="datetime"
         ),

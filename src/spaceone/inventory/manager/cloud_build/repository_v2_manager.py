@@ -23,7 +23,7 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params):
-        _LOGGER.debug("** Cloud Build Repository START **")
+        _LOGGER.info("** Cloud Build Repository START **")
         start_time = time.time()
         """
         Args:
@@ -56,39 +56,54 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
         all_repositories = []
         try:
             parent = f"projects/{project_id}"
+            _LOGGER.info(f"Getting locations for project: {parent}")
             locations = cloud_build_v2_conn.list_locations(parent)
+            _LOGGER.info(f"V2 API: Found {len(locations)} locations")
+
             for location in locations:
                 location_id = location.get("locationId", "")
+                _LOGGER.info(f"Processing location: {location_id}")
                 if location_id:
                     try:
                         parent = f"projects/{project_id}/locations/{location_id}"
+                        _LOGGER.info(f"Getting connections for: {parent}")
                         connections = cloud_build_v2_conn.list_connections(parent)
 
                         for connection in connections:
                             connection_name = connection.get("name", "")
+                            _LOGGER.info(f"Processing connection: {connection_name}")
                             if connection_name:
                                 try:
+                                    _LOGGER.info(
+                                        f"Getting repositories for connection: {connection_name}"
+                                    )
                                     repositories = (
                                         cloud_build_v2_conn.list_repositories(
                                             connection_name
                                         )
+                                    )
+                                    _LOGGER.info(
+                                        f"V2 API: Found {len(repositories)} repositories in connection {connection_name}"
                                     )
                                     for repository in repositories:
                                         repository["_location"] = location_id
                                         repository["_connection"] = connection_name
                                     all_repositories.extend(repositories)
                                 except Exception as e:
-                                    _LOGGER.debug(
+                                    _LOGGER.warning(
                                         f"Failed to query repositories in connection {connection_name}: {str(e)}"
                                     )
+                                    # Continue with next connection even if this one fails
                                     continue
                     except Exception as e:
-                        _LOGGER.debug(
+                        _LOGGER.error(
                             f"Failed to query connections in location {location_id}: {str(e)}"
                         )
+                        # Continue with next location even if this one fails
                         continue
         except Exception as e:
-            _LOGGER.warning(f"Failed to get locations: {str(e)}")
+            _LOGGER.error(f"V2 API failed to get locations: {str(e)}")
+            all_repositories = []
 
         _LOGGER.info(f"cloud build all_repositories length: {len(all_repositories)}")
         for repository in all_repositories:
@@ -108,11 +123,24 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                # Connection 정보 추출 - Repository name에서 추출
+                connection_display_name = ""
+                repository_name = repository.get("name", "")
+                if repository_name:
+                    # Repository name 형식: projects/{project}/locations/{location}/connections/{connection}/repositories/{repo}
+                    # Connection 부분을 추출
+                    name_parts = repository_name.split("/")
+                    if "connections" in name_parts:
+                        connection_index = name_parts.index("connections")
+                        if connection_index + 1 < len(name_parts):
+                            connection_display_name = name_parts[connection_index + 1]
+
                 repository.update(
                     {
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "connection": connection_display_name,
                     }
                 )
 
@@ -148,7 +176,7 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
                 )
                 error_responses.append(error_response)
 
-        _LOGGER.debug(
+        _LOGGER.info(
             f"** Cloud Build Repository END ** ({time.time() - start_time:.2f}s)"
         )
 
