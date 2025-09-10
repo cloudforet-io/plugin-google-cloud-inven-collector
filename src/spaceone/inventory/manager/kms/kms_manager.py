@@ -140,8 +140,8 @@ class KMSKeyRingManager(GoogleCloudManager):
             
             processed_key_rings = []
             for key_ring in raw_key_rings:
-                # 기본 KeyRing 정보만 처리
-                keyring_data = self._process_keyring_data(key_ring)
+                # KeyRing 정보와 CryptoKey 정보 함께 처리
+                keyring_data = self._process_keyring_data(key_ring, kms_connector)
                 if keyring_data:
                     processed_key_rings.append(keyring_data)
 
@@ -152,12 +152,13 @@ class KMSKeyRingManager(GoogleCloudManager):
             _LOGGER.error(f"Error listing key rings: {e}", exc_info=True)
             raise e
 
-    def _process_keyring_data(self, keyring: Dict) -> Optional[Dict]:
+    def _process_keyring_data(self, keyring: Dict, kms_connector: KMSConnector) -> Optional[Dict]:
         """
         KeyRing 데이터를 처리합니다.
 
         Args:
             keyring: 원본 KeyRing 데이터
+            kms_connector: KMS 커넥터 인스턴스
 
         Returns:
             dict: 처리된 KeyRing 데이터
@@ -190,6 +191,9 @@ class KMSKeyRingManager(GoogleCloudManager):
             location_display_name = LOCATION_DISPLAY_NAMES.get(location_id, 
                                                              location_data.get("displayName", location_id))
 
+            # CryptoKey 정보 조회
+            crypto_keys = self.get_crypto_keys_for_keyring(name, kms_connector)
+            
             # 데이터 구조 생성
             return {
                 "name": name,
@@ -200,8 +204,9 @@ class KMSKeyRingManager(GoogleCloudManager):
                 "create_time": create_time,
                 "display_name": f"{keyring_id} ({location_display_name})",
                 "full_location_path": f"projects/{project_id}/locations/{location_id}",
-                # CryptoKey 정보는 필요시 별도 API로 조회
-                "crypto_key_count": 0,  # 기본값
+                # CryptoKey 정보 포함
+                "crypto_keys": crypto_keys,
+                "crypto_key_count": len(crypto_keys),
             }
 
         except Exception as e:
