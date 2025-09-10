@@ -1,3 +1,3 @@
-from spaceone.inventory.manager.firebase.app_manager import FirebaseAppManager
+from spaceone.inventory.manager.firebase.app_manager import FirebaseManager
 
-__all__ = ["FirebaseAppManager"]
+__all__ = ["FirebaseManager"]

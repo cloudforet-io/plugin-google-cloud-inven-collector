@@ -94,7 +94,7 @@ class BatchV1Connector(GoogleCloudConnector):
 
     def _get_next_request(self, api_method, request, response):
         """
-        다음 페이지 요청을 생성합니다.
+        다음 페이지 요청을 생성합니다 (최적화된 페이지네이션 처리).
 
         Args:
             api_method: 원본 API 메서드
@@ -105,67 +105,61 @@ class BatchV1Connector(GoogleCloudConnector):
             다음 페이지 요청 또는 None
         """
         try:
-            # client 객체에서 해당 경로의 _next 메서드 찾기
-            if "jobs" in str(api_method):
-                if "tasks" in str(api_method):
-                    # tasks API
-                    next_method = (
-                        self.client.projects()
-                        .locations()
-                        .jobs()
-                        .taskGroups()
-                        .tasks()
-                        .list_next
-                    )
-                else:
-                    # jobs API
-                    next_method = self.client.projects().locations().jobs().list_next
-            else:
-                # locations API
-                next_method = self.client.projects().locations().list_next
-
-            return next_method(previous_request=request, previous_response=response)
-        except Exception:
+            # 메서드 경로를 기반으로 적절한 list_next 메서드 매핑
+            method_path = str(api_method)
+            
+            # API 경로별 next 메서드 매핑 테이블 (성능 최적화)
+            next_method_mapping = {
+                "tasks().list": lambda: self.client.projects().locations().jobs().taskGroups().tasks().list_next,
+                "jobs().list": lambda: self.client.projects().locations().jobs().list_next,
+            }
+            
+            # 매핑 테이블에서 적절한 next 메서드 찾기
+            for pattern, next_method_getter in next_method_mapping.items():
+                if pattern in method_path:
+                    next_method = next_method_getter()
+                    return next_method(previous_request=request, previous_response=response)
+            
+            # 기본값: locations list_next
+            return self.client.projects().locations().list_next(
+                previous_request=request, previous_response=response
+            )
+            
+        except (AttributeError, Exception) as e:
             # 다음 페이지가 없거나 에러 발생 시
+            _LOGGER.debug(f"No more pages available or error in pagination: {e}")
             return None
 
-    # ===== 레거시 호환성을 위한 메서드들 =====
+    # ===== 선택적 사용 메서드들 =====
 
-    def list_locations(self, **query) -> List[Dict]:
+    def get_job_details(self, name: str, **query) -> Dict:
         """
-        레거시 호환성을 위한 메서드. 현재는 사용되지 않습니다.
-        """
-        _LOGGER.warning("list_locations is deprecated and not used in optimized flow")
-        return []
-
-    def list_jobs(self, location_id: str, **query) -> List[Dict]:
-        """
-        레거시 호환성을 위한 메서드. list_all_jobs 사용을 권장합니다.
-        """
-        _LOGGER.warning("list_jobs is deprecated. Use list_all_jobs instead")
-        parent = f"projects/{self.project_id}/locations/{location_id}"
-        return self._paginated_list(
-            self.client.projects().locations().jobs().list,
-            parent=parent,
-            resource_key="jobs",
-            error_context=f"list jobs for location {location_id}",
-            **query,
-        )
-
-    def get_job(self, name: str, **query) -> Dict:
-        """
-        특정 Job의 상세 정보를 조회합니다. 현재는 사용되지 않습니다.
+        특정 Job의 상세 정보를 조회합니다 (필요시에만 사용).
+        
+        Args:
+            name: Job의 전체 경로명
+            **query: 추가 쿼리 파라미터
+            
+        Returns:
+            Dict: Job 상세 정보
         """
         query.update({"name": name})
         try:
             return self.client.projects().locations().jobs().get(**query).execute()
         except Exception as e:
-            _LOGGER.warning(f"Failed to get job {name}: {e}")
+            _LOGGER.warning(f"Failed to get job details {name}: {e}")
             return {}
 
-    def get_task(self, name: str, **query) -> Dict:
+    def get_task_details(self, name: str, **query) -> Dict:
         """
-        특정 Task의 상세 정보를 조회합니다. 현재는 사용되지 않습니다.
+        특정 Task의 상세 정보를 조회합니다 (필요시에만 사용).
+        
+        Args:
+            name: Task의 전체 경로명
+            **query: 추가 쿼리 파라미터
+            
+        Returns:
+            Dict: Task 상세 정보
         """
         query.update({"name": name})
         try:
@@ -179,5 +173,5 @@ class BatchV1Connector(GoogleCloudConnector):
                 .execute()
             )
         except Exception as e:
-            _LOGGER.warning(f"Failed to get task {name}: {e}")
+            _LOGGER.warning(f"Failed to get task details {name}: {e}")
             return {}

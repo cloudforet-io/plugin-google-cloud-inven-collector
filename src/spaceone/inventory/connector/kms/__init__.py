@@ -1,3 +1,3 @@
-from spaceone.inventory.connector.kms.kms_v1 import KMSV1Connector
+from spaceone.inventory.connector.kms.kms_v1 import KMSConnector
 
-__all__ = ["KMSV1Connector"]
+__all__ = ["KMSConnector"]

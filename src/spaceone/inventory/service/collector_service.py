@@ -327,10 +327,10 @@ class CollectorService(BaseService):
         """
         try:
             from spaceone.inventory.connector.firebase.firebase_v1beta1 import (
-                FirebaseV1Beta1Connector,
+                FirebaseConnector,
             )
 
-            firebase_conn = FirebaseV1Beta1Connector(**params)
+            firebase_conn = FirebaseConnector(**params)
             firebase_apps = firebase_conn.list_firebase_apps()
 
             return {
