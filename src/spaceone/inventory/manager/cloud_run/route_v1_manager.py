@@ -37,7 +37,7 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
 
         collected_cloud_services = []
         error_responses = []
-        route_id = ""
+        route_name = ""
 
         secret_data = params["secret_data"]
         project_id = secret_data["project_id"]
@@ -75,9 +75,15 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
                 ##################################
                 # 1. Set Basic Information
                 ##################################
-                route_id = route.get("metadata", {}).get("name", "")
+                route_name = route.get("metadata", {}).get("name", "")
                 location_id = route.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
+                self_link = route.get("metadata", {}).get("selfLink", "")
+                # Remove the leading "/apis/serving.knative.dev/v1/" from selfLink for full_name
+                if self_link.startswith("/apis/serving.knative.dev/v1/"):
+                    full_name = self_link[len("/apis/serving.knative.dev/v1/") :]
+                else:
+                    full_name = self_link
 
                 ##################################
                 # 2. Make Base Data
@@ -96,6 +102,8 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
 
                 route.update(
                     {
+                        "name": route_name,
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
@@ -111,20 +119,20 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
                     route_data = RouteV1(route, strict=False)
                 except Exception as e:
                     _LOGGER.error(
-                        f"Route {route_id}: Failed to create RouteV1: {str(e)}"
+                        f"Route {route_name}: Failed to create RouteV1: {str(e)}"
                     )
                     continue
 
                 route_resource = RouteV1Resource(
                     {
-                        "name": route_id,
+                        "name": route_name,
                         "account": project_id,
                         "region_code": location_id,
                         "data": route_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": route_data.metadata.uid,
-                                "external_link": f"https://console.cloud.google.com/run/routes/details/{location_id}/{route_id}?project={project_id}",
+                                "resource_id": f"https://run.googleapis.com{self_link}",
+                                "external_link": "",
                             }
                         ),
                     },
@@ -136,9 +144,9 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
                 )
 
             except Exception as e:
-                _LOGGER.error(f"Failed to process route {route_id}: {str(e)}")
+                _LOGGER.error(f"Failed to process route {route_name}: {str(e)}")
                 error_response = self.generate_resource_error_response(
-                    e, "Route", "CloudRun", route_id
+                    e, "Route", "CloudRun", route_name
                 )
                 error_responses.append(error_response)
 

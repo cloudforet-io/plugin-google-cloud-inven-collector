@@ -23,8 +23,8 @@ Cloud Run Job
 job_overview = ItemDynamicLayout.set_fields(
     "Job Overview",
     fields=[
-        TextDyField.data_source("Name", "data.name"),
-        TextDyField.data_source("UID", "data.uid"),
+        TextDyField.data_source("ID", "data.uid"),
+        TextDyField.data_source("Name", "data.full_name"),
         TextDyField.data_source("Generation", "data.generation"),
         TextDyField.data_source("Creator", "data.creator"),
         TextDyField.data_source("Last Modifier", "data.last_modifier"),
@@ -73,8 +73,8 @@ job_status = ItemDynamicLayout.set_fields(
 job_executions = TableDynamicLayout.set_fields(
     "Executions",
     fields=[
+        TextDyField.data_source("ID", "uid"),
         TextDyField.data_source("Name", "display_name"),
-        TextDyField.data_source("UID", "uid"),
         TextDyField.data_source("Creator", "creator"),
         TextDyField.data_source("Job", "job"),
         TextDyField.data_source("Task Count", "task_count"),

@@ -156,7 +156,7 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                         "data": build_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": build_data.id,
+                                "resource_id": f"https://cloudbuild.googleapis.com/v1/{build_data.full_name}",
                                 "external_link": f"https://console.cloud.google.com/cloud-build/builds?project={project_id}",
                             }
                         ),

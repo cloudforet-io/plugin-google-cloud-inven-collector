@@ -24,6 +24,7 @@ build_overview = ItemDynamicLayout.set_fields(
     "Build Overview",
     fields=[
         TextDyField.data_source("ID", "data.id"),
+        TextDyField.data_source("Name", "data.full_name"),
         TextDyField.data_source("Status", "data.status"),
         TextDyField.data_source("Build Trigger ID", "data.build_trigger_id"),
         TextDyField.data_source("Service Account", "data.service_account"),

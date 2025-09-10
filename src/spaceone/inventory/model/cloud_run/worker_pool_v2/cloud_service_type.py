@@ -49,8 +49,8 @@ cst_worker_pool._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
-        SearchField.set(name="Worker Pool ID", key="data.uid"),
         SearchField.set(name="Status", key="data.terminal_condition.state"),
+        SearchField.set(name="Revision Count", key="data.revision_count"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

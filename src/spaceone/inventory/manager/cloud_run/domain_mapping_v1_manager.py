@@ -67,18 +67,26 @@ class CloudRunDomainMappingV1Manager(GoogleCloudManager):
                 ##################################
                 # 1. Set Basic Information
                 ##################################
-                domain_mapping_id = domain_mapping.get("metadata", {}).get("name", "")
+                domain_mapping_name = domain_mapping.get("metadata", {}).get("name", "")
                 location_id = domain_mapping.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
+                self_link = domain_mapping.get("metadata", {}).get("selfLink", "")
+                if self_link.startswith("/apis/domains.cloudrun.com/v1/"):
+                    full_name = self_link[len("/apis/domains.cloudrun.com/v1") :]
+                else:
+                    full_name = self_link
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
                 domain_mapping.update(
                     {
+                        "name": domain_mapping_name,
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "self_link": self_link,
                     }
                 )
 
@@ -89,14 +97,14 @@ class CloudRunDomainMappingV1Manager(GoogleCloudManager):
 
                 domain_mapping_resource = DomainMappingResource(
                     {
-                        "name": domain_mapping_id,
+                        "name": domain_mapping_name,
                         "account": project_id,
                         "region_code": location_id,
                         "data": domain_mapping_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": domain_mapping_data.name,
-                                "external_link": f"https://console.cloud.google.com/run/domains/details/{location_id}/{domain_mapping_id}?project={project_id}",
+                                "resource_id": f"https://run.googleapis.com{self_link}",
+                                "external_link": f"https://console.cloud.google.com/run/domains?project={project_id}",
                             }
                         ),
                     },

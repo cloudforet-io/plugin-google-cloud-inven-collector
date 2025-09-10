@@ -40,11 +40,11 @@ class RouteV1(Model):
     status = (
         BaseType()
     )  # 전체 status를 BaseType으로 처리하여 복잡한 traffic 구조 문제 해결
-
-    # Additional fields
     name = StringType()
+    full_name = StringType()
     project = StringType()
     location = StringType()
     region = StringType()
     latest_ready_revision_name = StringType()
     revision_count = IntType()
+    self_link = StringType()

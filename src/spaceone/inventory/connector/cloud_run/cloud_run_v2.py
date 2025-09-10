@@ -182,8 +182,11 @@ class CloudRunV2Connector(GoogleCloudConnector):
                 response = request.execute()
                 raw_operations = response.get("operations", [])
                 operations.extend(raw_operations)
-                request = self.client.projects().locations().operations().list_next(
-                    request, response
+                request = (
+                    self.client.projects()
+                    .locations()
+                    .operations()
+                    .list_next(request, response)
                 )
         except Exception as e:
             _LOGGER.warning(f"Failed to list operations: {e}")

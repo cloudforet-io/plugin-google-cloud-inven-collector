@@ -9,6 +9,7 @@ from schematics.types import (
 
 class Connection(Model):
     name = StringType()
+    full_name = StringType()
     create_time = StringType(deserialize_from="createTime")
     update_time = StringType(deserialize_from="updateTime")
     github_config = DictType(BaseType, deserialize_from="githubConfig", default={})

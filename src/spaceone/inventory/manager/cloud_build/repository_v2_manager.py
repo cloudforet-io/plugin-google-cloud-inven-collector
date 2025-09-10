@@ -114,6 +114,7 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
                     if repository_id
                     else ""
                 )
+                full_name = repository.get("name", "")
                 location_id = repository.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
@@ -122,11 +123,11 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
                 ##################################
                 # Connection 정보 추출 - Repository name에서 추출
                 connection_display_name = ""
-                repository_full_name = repository.get("name", "")
-                if repository_full_name:
+
+                if full_name:
                     # Repository name 형식: projects/{project}/locations/{location}/connections/{connection}/repositories/{repo}
                     # Connection 부분을 추출
-                    name_parts = repository_full_name.split("/")
+                    name_parts = full_name.split("/")
                     if "connections" in name_parts:
                         connection_index = name_parts.index("connections")
                         if connection_index + 1 < len(name_parts):
@@ -134,11 +135,12 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
 
                 repository.update(
                     {
+                        "name": repository_name,
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
                         "connection": connection_display_name,
-                        "name": repository_name,  # Repository ID만 표시
                     }
                 )
                 ##################################
@@ -154,7 +156,7 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
                         "data": repository_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": repository_full_name,
+                                "resource_id": f"https://cloudbuild.googleapis.com/v2/{repository_data.full_name}",
                                 "external_link": f"https://console.cloud.google.com/cloud-build/repositories/2nd-gen?project={project_id}",
                             }
                         ),
