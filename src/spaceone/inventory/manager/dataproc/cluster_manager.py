@@ -282,6 +282,9 @@ class DataprocClusterManager(GoogleCloudManager):
                             master_config.get("machineTypeUri", "")
                         ),
                         "disk_config": master_config.get("diskConfig", {}),
+                        "preemptibility": str(
+                            master_config.get("preemptibility", "NON_PREEMPTIBLE")
+                        ),
                     }
                 else:
                     cluster_data["config"]["master_config"] = {
@@ -290,6 +293,7 @@ class DataprocClusterManager(GoogleCloudManager):
                         "image_uri": "",
                         "machine_type_uri": "",
                         "disk_config": {},
+                        "preemptibility": "NON_PREEMPTIBLE",
                     }
 
                 # 워커 설정
@@ -407,7 +411,6 @@ class DataprocClusterManager(GoogleCloudManager):
                                         "status": job.get("status", {}),
                                         "labels": job.get("labels", {}),
                                         "jobUuid": job.get("jobUuid", ""),
-                                        "name": job.get("cluster_name", ""),
                                     }
                                     cluster_data["jobs"].append(job_data)
                     except Exception as e:
@@ -423,7 +426,7 @@ class DataprocClusterManager(GoogleCloudManager):
                 # DataprocClusterResource 생성
                 cluster_resource = DataprocClusterResource(
                     {
-                        "name": cluster_data.get("clusterName"),
+                        "name": cluster_data.get("name"),
                         "data": dataproc_cluster_data,
                         "reference": {
                             "resource_id": cluster.get("clusterUuid"),

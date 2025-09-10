@@ -33,6 +33,7 @@ class InstanceGroupConfig(Model):
     machine_type_uri = StringType()
     disk_config = ModelType(DiskConfig)
     is_preemptible = BooleanType()
+    preemptibility = StringType()  # 가변형 VM 여부 (PREEMPTIBLE/NON_PREEMPTIBLE)
     min_cpu_platform = StringType()
 
 
@@ -158,6 +159,7 @@ class DataprocJob(Model):
 class DataprocCluster(Model):
     """Dataproc 클러스터 리소스의 기본 데이터 모델입니다."""
 
+    name = StringType()
     project_id = StringType()
     cluster_name = StringType()
     cluster_uuid = StringType()
