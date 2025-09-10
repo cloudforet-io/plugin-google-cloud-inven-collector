@@ -100,6 +100,7 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                 ##################################
                 trigger_id = trigger.get("id")
                 trigger_name = trigger.get("name", trigger_id)
+                full_name = trigger.get("resourceName", trigger_name)
                 location_id = trigger.get("_location", "global")
                 region = (
                     GoogleCloudManager.parse_region_from_zone(location_id)
@@ -128,6 +129,7 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
 
                 trigger.update(
                     {
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
@@ -149,7 +151,7 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                         "data": trigger_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": trigger_data.id,
+                                "resource_id": f"https://cloudbuild.googleapis.com/v1/{trigger_data.full_name}",
                                 "external_link": f"https://console.cloud.google.com/cloud-build/triggers?project={project_id}",
                             }
                         ),

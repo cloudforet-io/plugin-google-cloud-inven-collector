@@ -21,6 +21,8 @@ Cloud Build Repository
 repository_overview = ItemDynamicLayout.set_fields(
     "Repository Overview",
     fields=[
+        TextDyField.data_source("Name", "data.full_name"),
+        TextDyField.data_source("Connection", "data.connection"),
         TextDyField.data_source("Remote URI", "data.remote_uri"),
         TextDyField.data_source("ETag", "data.etag"),
         DateTimeDyField.data_source("Create Time", "data.create_time"),

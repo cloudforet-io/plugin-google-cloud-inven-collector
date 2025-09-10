@@ -102,6 +102,7 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
                     if worker_pool_id
                     else ""
                 )
+                full_name = worker_pool.get("name", worker_pool_name)
                 location_id = worker_pool.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
@@ -120,6 +121,8 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
 
                 worker_pool.update(
                     {
+                        "name": worker_pool_name,
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
@@ -140,7 +143,7 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
                         "data": worker_pool_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": worker_pool_data.name,
+                                "resource_id": f"https://cloudbuild.googleapis.com/v1/{worker_pool_data.full_name}",
                                 "external_link": f"https://console.cloud.google.com/cloud-build/worker-pools?project={project_id}",
                             }
                         ),

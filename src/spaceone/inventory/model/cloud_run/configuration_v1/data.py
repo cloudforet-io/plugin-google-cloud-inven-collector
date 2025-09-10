@@ -27,7 +27,9 @@ class ConfigurationSpec(Model):
 class ConfigurationStatus(Model):
     observed_generation = IntType(deserialize_from="observedGeneration")
     conditions = BaseType()  # 복잡한 조건 배열
-    latest_created_revision_name = StringType(deserialize_from="latestCreatedRevisionName")
+    latest_created_revision_name = StringType(
+        deserialize_from="latestCreatedRevisionName"
+    )
     latest_ready_revision_name = StringType(deserialize_from="latestReadyRevisionName")
 
 
@@ -35,10 +37,8 @@ class ConfigurationV1(Model):
     api_version = StringType(deserialize_from="apiVersion")
     kind = StringType()
     metadata = ModelType(ObjectMeta)
-    spec = BaseType()  # 전체 spec을 BaseType으로 처리하여 복잡한 template 구조 문제 해결
-    status = BaseType()  # 전체 status를 BaseType으로 처리하여 복잡한 조건 구조 문제 해결
-    
-    # Additional fields
+    spec = BaseType()
+    status = BaseType()
     name = StringType()
     project = StringType()
     location = StringType()

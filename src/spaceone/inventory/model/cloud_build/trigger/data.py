@@ -11,6 +11,7 @@ from schematics.types import (
 class Trigger(Model):
     id = StringType()
     name = StringType()
+    full_name = StringType()
     description = StringType()
     tags = ListType(StringType, default=[])
     disabled = BooleanType(default=False)
