@@ -35,7 +35,7 @@ cst_index.group = "Datastore"
 cst_index.labels = ["Database", "NoSQL", "Index"]
 cst_index.service_code = "Datastore"
 cst_index.is_primary = False
-cst_index.is_major = True
+cst_index.is_major = False
 cst_index.resource_type = "inventory.CloudService"
 cst_index.tags = {
     "spaceone:icon": f"{ASSET_URL}/Datastore.svg",
@@ -45,7 +45,6 @@ cst_index.tags = {
 # 메타데이터 설정
 cst_index._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Index ID", "data.index_id"),
         TextDyField.data_source("Kind", "data.kind"),
         TextDyField.data_source("Ancestor", "data.ancestor"),
         EnumDyField.data_source(
@@ -58,15 +57,12 @@ cst_index._metadata = CloudServiceTypeMeta.set_meta(
                 "disable": ["UNKNOWN"],
             },
         ),
-        TextDyField.data_source("Project ID", "data.project_id"),
         TextDyField.data_source("Property Count", "data.property_count"),
     ],
     search=[
-        SearchField.set(name="Index ID", key="data.index_id"),
         SearchField.set(name="Kind", key="data.kind"),
         SearchField.set(name="State", key="data.state"),
         SearchField.set(name="Ancestor", key="data.ancestor"),
-        SearchField.set(name="Project ID", key="data.project_id"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

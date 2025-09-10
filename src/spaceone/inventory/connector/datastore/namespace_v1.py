@@ -204,14 +204,10 @@ class DatastoreNamespaceV1Connector(GoogleCloudConnector):
                             if namespace_name:
                                 # 실제 사용자가 생성한 namespace만 수집 (name 필드가 있음)
                                 namespaces.append(namespace_name)
-                            elif namespace_id == "1":
-                                # 기본 namespace는 스킵 (GCP 자체 생성)
-                                _LOGGER.debug(
-                                    f"Skipping default namespace (id: {namespace_id})"
-                                )
-                            else:
-                                # 기타 ID namespace (혹시 있다면)
+                            elif namespace_id and namespace_id != "1":
+                                # 기타 ID namespace (기본 namespace "1" 제외)
                                 namespaces.append(f"namespace-{namespace_id}")
+                            # namespace_id == "1" (기본 namespace)는 매니저에서 별도 처리
 
             return namespaces
 

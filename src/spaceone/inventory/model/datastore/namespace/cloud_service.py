@@ -6,7 +6,6 @@ from spaceone.inventory.libs.schema.cloud_service import (
     CloudServiceResponse,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
-    DateTimeDyField,
     ListDyField,
     TextDyField,
 )
@@ -27,10 +26,7 @@ datastore_namespace_details = ItemDynamicLayout.set_fields(
     fields=[
         TextDyField.data_source("Namespace ID", "data.namespace_id"),
         TextDyField.data_source("Database ID", "data.database_id"),
-        TextDyField.data_source("Display Name", "data.display_name"),
-        TextDyField.data_source("Project ID", "data.project_id"),
         TextDyField.data_source("Kind Count", "data.kind_count"),
-        DateTimeDyField.data_source("Created Time", "data.created_time"),
     ],
 )
 
