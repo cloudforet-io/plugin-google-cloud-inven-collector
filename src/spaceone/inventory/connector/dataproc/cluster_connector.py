@@ -181,6 +181,8 @@ class DataprocClusterConnector(GoogleCloudConnector):
             cluster_list = self._list_clusters_parallel(**query)
 
         logger.info(f"Total clusters found: {len(cluster_list)}")
+        for cluster in enumerate(cluster_list):
+            logger.info(f"Cluster {cluster[0] + 1}: {cluster[1]}")
         return cluster_list
 
     def get_cluster(self, cluster_name: str, region: str) -> Optional[Dict[str, Any]]:

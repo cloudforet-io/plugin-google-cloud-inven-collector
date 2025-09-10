@@ -48,6 +48,9 @@ cst_cluster._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source(
             "Master Instances", "data.config.master_config.num_instances"
         ),
+        TextDyField.data_source(
+            "Worker Instances", "data.config.worker_config.num_instances"
+        ),
         EnumDyField.data_source(
             "Preemptible VMs",
             "data.config.master_config.preemptibility",
@@ -68,6 +71,9 @@ cst_cluster._metadata = CloudServiceTypeMeta.set_meta(
         ),
         SearchField.set(
             name="Master Machine Type", key="data.config.master_config.machine_type_uri"
+        ),
+        SearchField.set(
+            name="Worker Instances", key="data.config.worker_config.num_instances"
         ),
     ],
     widget=[

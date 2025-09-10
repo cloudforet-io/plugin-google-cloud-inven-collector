@@ -145,7 +145,7 @@ class CloudRunWorkerPoolV2Manager(GoogleCloudManager):
                         "data": worker_pool_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": f"https://cloudrun.googleapis.com/v2/{worker_pool_data.full_name}",
+                                "resource_id": f"https://run.googleapis.com/v2/{worker_pool_data.full_name}",
                                 "external_link": f"https://console.cloud.google.com/run/worker-pools/details/{location_id}/{worker_pool_name}/observability/metrics?project={project_id}",
                             }
                         ),
