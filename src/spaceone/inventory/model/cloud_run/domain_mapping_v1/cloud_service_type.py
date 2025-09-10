@@ -35,7 +35,6 @@ cst_domain_mapping.tags = {
 
 cst_domain_mapping._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        # TextDyField.data_source("Domain Mapping ID", "data.metadata.uid"),
         EnumDyField.data_source(
             "Status",
             "data.status.conditions.0.status",
@@ -48,7 +47,6 @@ cst_domain_mapping._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Name", key="data.metadata.name"),
-        # SearchField.set(name="Domain Mapping ID", key="data.metadata.uid"),
         SearchField.set(name="Status", key="data.status.conditions.0.status"),
     ],
     widget=[

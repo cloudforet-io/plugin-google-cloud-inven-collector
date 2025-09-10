@@ -1,12 +1,18 @@
 import logging
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
+from spaceone.inventory.conf.kms_config import (
+    COMMON_KMS_LOCATIONS,
+    LOCATION_DISPLAY_NAMES,
+    KMS_API_CONFIG,
+    LOG_LEVEL_CONFIG,
+)
 
-__all__ = ["KMSV1Connector"]
+__all__ = ["KMSConnector"]
 _LOGGER = logging.getLogger(__name__)
 
 
-class KMSV1Connector(GoogleCloudConnector):
+class KMSConnector(GoogleCloudConnector):
     """
     Google Cloud KMS KeyRing Connector
 
@@ -21,17 +27,7 @@ class KMSV1Connector(GoogleCloudConnector):
     google_client_service = "cloudkms"
     version = "v1"
 
-    # 일반적으로 사용되는 KMS location 목록 (성능 최적화를 위해)
-    COMMON_KMS_LOCATIONS = [
-        "global",
-        "us-central1",
-        "us-east1",
-        "us-west1",
-        "europe-west1",
-        "asia-northeast1",
-        "asia-northeast3",
-        "asia-southeast1",
-    ]
+    # 설정에서 로드된 일반적인 KMS location 목록 사용
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -89,10 +85,10 @@ class KMSV1Connector(GoogleCloudConnector):
             page_token = None
 
             while True:
-                # API 요청 구성
+                # API 요청 구성 (설정에서 로드)
                 request_params = {
                     "parent": f"projects/{self.project_id}/locations/{location}",
-                    "pageSize": 1000,  # 최대 페이지 크기 설정
+                    "pageSize": KMS_API_CONFIG["page_size"],
                 }
 
                 if page_token:
@@ -213,7 +209,7 @@ class KMSV1Connector(GoogleCloudConnector):
 
             # 일반적인 location 중에서 실제 존재하는 것만 반환
             common_locations = [
-                loc for loc in self.COMMON_KMS_LOCATIONS if loc in all_location_ids
+                loc for loc in COMMON_KMS_LOCATIONS if loc in all_location_ids
             ]
 
             _LOGGER.info(
@@ -246,12 +242,12 @@ class KMSV1Connector(GoogleCloudConnector):
 
             # 일반적인 location 먼저 (실제 존재하는 것만)
             priority_locations = [
-                loc for loc in self.COMMON_KMS_LOCATIONS if loc in all_location_ids
+                loc for loc in COMMON_KMS_LOCATIONS if loc in all_location_ids
             ]
 
             # 나머지 location들 (priority에 없는 것들)
             remaining_locations = [
-                loc for loc in all_location_ids if loc not in self.COMMON_KMS_LOCATIONS
+                loc for loc in all_location_ids if loc not in COMMON_KMS_LOCATIONS
             ]
 
             # 우선순위 + 나머지 순서로 반환
@@ -305,35 +301,7 @@ class KMSV1Connector(GoogleCloudConnector):
         Returns:
             str: 표시할 이름
         """
-        location_names = {
-            "global": "Global",
-            "us-central1": "Iowa (us-central1)",
-            "us-east1": "South Carolina (us-east1)",
-            "us-west1": "Oregon (us-west1)",
-            "us-west2": "Los Angeles (us-west2)",
-            "us-west3": "Salt Lake City (us-west3)",
-            "us-west4": "Las Vegas (us-west4)",
-            "us-east4": "Northern Virginia (us-east4)",
-            "europe-west1": "Belgium (europe-west1)",
-            "europe-west2": "London (europe-west2)",
-            "europe-west3": "Frankfurt (europe-west3)",
-            "europe-west4": "Netherlands (europe-west4)",
-            "europe-west6": "Zurich (europe-west6)",
-            "asia-northeast1": "Tokyo (asia-northeast1)",
-            "asia-northeast2": "Osaka (asia-northeast2)",
-            "asia-northeast3": "Seoul (asia-northeast3)",
-            "asia-southeast1": "Singapore (asia-southeast1)",
-            "asia-southeast2": "Jakarta (asia-southeast2)",
-            "asia-south1": "Mumbai (asia-south1)",
-            "asia-east1": "Taiwan (asia-east1)",
-            "asia-east2": "Hong Kong (asia-east2)",
-            "australia-southeast1": "Sydney (australia-southeast1)",
-            "australia-southeast2": "Melbourne (australia-southeast2)",
-            "southamerica-east1": "São Paulo (southamerica-east1)",
-            "northamerica-northeast1": "Montréal (northamerica-northeast1)",
-        }
-
-        return location_names.get(location_id, location_id)
+        return LOCATION_DISPLAY_NAMES.get(location_id, location_id)
 
     def list_crypto_keys(self, keyring_name):
         """
@@ -372,10 +340,10 @@ class KMSV1Connector(GoogleCloudConnector):
             page_token = None
 
             while True:
-                # API 요청 구성
+                # API 요청 구성 (설정에서 로드)
                 request_params = {
                     "parent": keyring_name,
-                    "pageSize": 1000,  # 최대 페이지 크기 설정
+                    "pageSize": KMS_API_CONFIG["page_size"],
                 }
 
                 if page_token:
@@ -410,8 +378,14 @@ class KMSV1Connector(GoogleCloudConnector):
             return crypto_keys
 
         except Exception as e:
-            _LOGGER.warning(f"Error listing crypto keys in keyring {keyring_name}: {e}")
-            # CryptoKey 조회 실패는 warning으로 처리 (KeyRing은 있지만 CryptoKey가 없을 수 있음)
+            # CryptoKey 조회 실패는 정보성 로그로 처리 (KeyRing은 있지만 CryptoKey가 없을 수 있음)
+            log_level = LOG_LEVEL_CONFIG.get("crypto_key_not_found", "INFO")
+            if log_level == "INFO":
+                _LOGGER.info(f"No crypto keys found in keyring {keyring_name}: {e}")
+            elif log_level == "WARNING":
+                _LOGGER.warning(f"Error listing crypto keys in keyring {keyring_name}: {e}")
+            else:
+                _LOGGER.error(f"Error listing crypto keys in keyring {keyring_name}: {e}")
             return []
 
     def list_crypto_key_versions(self, crypto_key_name):
@@ -453,10 +427,10 @@ class KMSV1Connector(GoogleCloudConnector):
             page_token = None
 
             while True:
-                # API 요청 구성
+                # API 요청 구성 (설정에서 로드)
                 request_params = {
                     "parent": crypto_key_name,
-                    "pageSize": 1000,  # 최대 페이지 크기 설정
+                    "pageSize": KMS_API_CONFIG["page_size"],
                     "view": "FULL",  # 전체 정보 조회
                 }
 
@@ -493,8 +467,12 @@ class KMSV1Connector(GoogleCloudConnector):
             return crypto_key_versions
 
         except Exception as e:
-            _LOGGER.warning(
-                f"Error listing crypto key versions in crypto key {crypto_key_name}: {e}"
-            )
-            # CryptoKeyVersion 조회 실패는 warning으로 처리 (CryptoKey는 있지만 Version이 없을 수 있음)
+            # CryptoKeyVersion 조회 실패는 정보성 로그로 처리 (CryptoKey는 있지만 Version이 없을 수 있음)
+            log_level = LOG_LEVEL_CONFIG.get("crypto_key_not_found", "INFO")
+            if log_level == "INFO":
+                _LOGGER.info(f"No crypto key versions found in crypto key {crypto_key_name}: {e}")
+            elif log_level == "WARNING":
+                _LOGGER.warning(f"Error listing crypto key versions in crypto key {crypto_key_name}: {e}")
+            else:
+                _LOGGER.error(f"Error listing crypto key versions in crypto key {crypto_key_name}: {e}")
             return []

@@ -22,6 +22,7 @@ trigger_overview = ItemDynamicLayout.set_fields(
     "Trigger Overview",
     fields=[
         TextDyField.data_source("ID", "data.id"),
+        TextDyField.data_source("Name", "data.full_name"),
         TextDyField.data_source("Disabled", "data.disabled"),
         TextDyField.data_source("Service Account", "data.service_account"),
         TextDyField.data_source("Autodetect", "data.autodetect"),

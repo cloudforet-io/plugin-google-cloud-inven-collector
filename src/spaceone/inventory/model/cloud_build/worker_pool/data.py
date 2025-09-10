@@ -8,7 +8,7 @@ from schematics.types import (
 
 class WorkerPool(Model):
     name = StringType()
-    display_name = StringType(deserialize_from="displayName")
+    full_name = StringType()
     uid = StringType()
     annotations = DictType(StringType, default={})
     create_time = StringType(deserialize_from="createTime")

@@ -1,5 +1,5 @@
 from schematics import Model
-from schematics.types import DictType, IntType, ListType, ModelType, StringType
+from schematics.types import IntType, ListType, ModelType, StringType
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
@@ -26,16 +26,14 @@ class DatastoreIndexData(BaseResource):
     ancestor = StringType()
     state = StringType()
     properties = ListType(ModelType(IndexProperty))
-    
+
     # 처리된 필드들 (매니저에서 추가)
     property_count = IntType()
     sorted_properties = ListType(StringType())
     unsorted_properties = ListType(StringType())
-    project_id = StringType()
-    display_name = StringType()
 
     def reference(self):
         return {
-            "resource_id": f"{self.project_id}:{self.index_id}",
-            "external_link": f"https://console.cloud.google.com/datastore/indexes?project={self.project_id}",
+            "resource_id": f"https://datastore.googleapis.com/v1/projects/{self.project}",
+            "external_link": f"https://console.cloud.google.com/datastore/indexes?project={self.project}",
         }

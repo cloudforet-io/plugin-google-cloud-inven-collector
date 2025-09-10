@@ -16,18 +16,9 @@ class DatastoreNamespaceData(BaseResource):
     display_name = StringType()
     kinds = ListType(StringType())
     kind_count = IntType()
-    database_id = StringType()  # 데이터베이스 ID 추가
-    project_id = StringType()
-    created_time = StringType()
+    database_id = StringType()
 
     def reference(self):
-        # 데이터베이스 name 구성 (projects/{project_id}/databases/{database_id})
-        database_name = (
-            f"projects/{self.project_id}/databases/{self.database_id}"
-            if self.database_id != "(default)"
-            else f"projects/{self.project_id}/databases/(default)"
-        )
-
         # database_id가 "(default)"인 경우 "-default-"로 변환
         url_database_id = (
             "-default-" if self.database_id == "(default)" else self.database_id
@@ -39,6 +30,6 @@ class DatastoreNamespaceData(BaseResource):
         )
 
         return {
-            "resource_id": f"{database_name}:{self.namespace_id}",
-            "external_link": f"https://console.cloud.google.com/datastore/databases/{url_database_id}/entities;ns={url_namespace_id}/query/kind?project={self.project_id}",
+            "resource_id": f"https://datastore.googleapis.com/v1/projects/{self.project}:runQuery (POST)",
+            "external_link": f"https://console.cloud.google.com/datastore/databases/{url_database_id}/entities;ns={url_namespace_id}/query/kind?project={self.project}",
         }

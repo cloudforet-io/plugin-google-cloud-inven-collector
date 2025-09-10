@@ -86,6 +86,7 @@ class CloudBuildConnectionV2Manager(GoogleCloudManager):
                     if connection_id
                     else ""
                 )
+                full_name = connection.get("name", connection_name)
                 location_id = connection.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
@@ -136,6 +137,8 @@ class CloudBuildConnectionV2Manager(GoogleCloudManager):
 
                 connection.update(
                     {
+                        "name": connection_name,
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
@@ -157,7 +160,7 @@ class CloudBuildConnectionV2Manager(GoogleCloudManager):
                         "data": connection_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": connection_data.name,
+                                "resource_id": f"https://cloudbuild.googleapis.com/v2/{connection_data.full_name}",
                                 "external_link": f"https://console.cloud.google.com/cloud-build/repositories/2nd-gen?project={project_id}",
                             }
                         ),

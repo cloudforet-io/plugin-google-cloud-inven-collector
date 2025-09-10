@@ -7,7 +7,8 @@ from schematics.types import (
 
 class Repository(Model):
     name = StringType()
-    repository_name = StringType()  # Repository ID만 표시
+    full_name = StringType()
+    repository_name = StringType()
     remote_uri = StringType(deserialize_from="remoteUri")
     create_time = StringType(deserialize_from="createTime")
     update_time = StringType(deserialize_from="updateTime")

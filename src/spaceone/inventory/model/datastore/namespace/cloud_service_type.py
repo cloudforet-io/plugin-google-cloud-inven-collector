@@ -33,8 +33,6 @@ cst_namespace.provider = "google_cloud"
 cst_namespace.group = "Datastore"
 cst_namespace.labels = ["Database", "NoSQL", "Namespace"]
 cst_namespace.service_code = "Datastore"
-cst_namespace.is_primary = False
-cst_namespace.is_major = True
 cst_namespace.resource_type = "inventory.CloudService"
 cst_namespace.tags = {
     "spaceone:icon": f"{ASSET_URL}/Datastore.svg",
@@ -44,12 +42,10 @@ cst_namespace.tags = {
 cst_namespace._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source("Database ID", "data.database_id"),
-        TextDyField.data_source("Display Name", "data.display_name"),
         TextDyField.data_source("Kind Count", "data.kind_count"),
     ],
     search=[
         SearchField.set(name="Database ID", key="data.database_id"),
-        SearchField.set(name="Display Name", key="data.display_name"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

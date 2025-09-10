@@ -134,6 +134,7 @@ class CloudRunJobV2Manager(GoogleCloudManager):
                 ##################################
                 job_id = job.get("name", "")
                 job_name = self.get_param_in_url(job_id, "jobs") if job_id else ""
+                full_name = job.get("name", job_name)
                 location_id = job.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
@@ -142,6 +143,8 @@ class CloudRunJobV2Manager(GoogleCloudManager):
                 ##################################
                 job.update(
                     {
+                        "name": job_name,
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
@@ -163,7 +166,7 @@ class CloudRunJobV2Manager(GoogleCloudManager):
                         "data": job_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": job_data.name,
+                                "resource_id": f"https://cloudrun.googleapis.com/v2/{job_data.full_name}",
                                 "external_link": f"https://console.cloud.google.com/run/jobs/details/{location_id}/{job_name}?project={project_id}",
                             }
                         ),

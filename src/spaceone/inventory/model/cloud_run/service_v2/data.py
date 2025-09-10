@@ -38,6 +38,7 @@ class Revision(Model):
 
 class Service(Model):
     name = StringType()
+    full_name = StringType()
     uid = StringType()
     generation = IntType()
     project = StringType()  # Project ID

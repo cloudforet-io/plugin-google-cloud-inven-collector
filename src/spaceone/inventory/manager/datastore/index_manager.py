@@ -29,7 +29,6 @@ class DatastoreIndexManager(GoogleCloudManager):
 
     connector_name = "DatastoreIndexV1Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
-    index_conn = None
 
     def collect_cloud_service(self, params):
         """
@@ -46,151 +45,100 @@ class DatastoreIndexManager(GoogleCloudManager):
         """
         _LOGGER.debug("** Datastore Index START **")
 
-        resource_responses = []
+        collected_cloud_services = []
         error_responses = []
+        index_id = ""
+
+        secret_data = params["secret_data"]
+        project_id = secret_data["project_id"]
 
         try:
-            # Connector 초기화
-            self.index_conn: DatastoreIndexV1Connector = self.locator.get_connector(
+            ##################################
+            # 0. Gather All Related Resources
+            ##################################
+            index_conn: DatastoreIndexV1Connector = self.locator.get_connector(
                 self.connector_name, **params
             )
 
             # 모든 index 조회 (프로젝트 레벨)
-            indexes = self._list_indexes()
+            indexes = index_conn.list_indexes()
+            _LOGGER.info(f"Found {len(indexes)} total indexes")
 
             # 각 index에 대해 리소스 생성
-            for index_data in indexes:
+            for index in indexes:
                 try:
-                    resource_response = self._make_index_response(index_data, params)
-                    resource_responses.append(resource_response)
+                    ##################################
+                    # 1. Set Basic Information
+                    ##################################
+                    index_id = index.get("indexId", "")
+
+                    ##################################
+                    # 2. Make Base Data
+                    ##################################
+                    # Properties 분석
+                    properties = index.get("properties", [])
+                    property_count = len(properties)
+                    sorted_properties = []
+                    unsorted_properties = []
+
+                    for prop in properties:
+                        prop_name = prop.get("name", "")
+                        direction = prop.get("direction", "ASCENDING")
+                        if direction in ["ASCENDING", "DESCENDING"]:
+                            sorted_properties.append(f"{prop_name} ({direction})")
+                        else:
+                            unsorted_properties.append(prop_name)
+
+                    # 추가 처리된 정보 업데이트
+                    index.update(
+                        {
+                            "property_count": property_count,
+                            "sorted_properties": sorted_properties,
+                            "unsorted_properties": unsorted_properties,
+                            "project": project_id,
+                        }
+                    )
+
+                    index_data = DatastoreIndexData(index, strict=False)
+
+                    ##################################
+                    # 3. Make Return Resource
+                    ##################################
+                    index_resource = DatastoreIndexResource(
+                        {
+                            "name": index_id,
+                            "account": project_id,
+                            "data": index_data,
+                            "region_code": "global",
+                            "reference": ReferenceModel(index_data.reference()),
+                        }
+                    )
+
+                    ##################################
+                    # 4. Make Collected Region Code
+                    ##################################
+                    self.set_region_code("global")
+
+                    ##################################
+                    # 5. Make Resource Response Object
+                    ##################################
+                    collected_cloud_services.append(
+                        DatastoreIndexResponse({"resource": index_resource})
+                    )
+
                 except Exception as e:
-                    index_id = index_data.get("index_id", "unknown")
                     _LOGGER.error(f"Failed to process index {index_id}: {e}")
-                    error_response = self.generate_error_response(
+                    error_response = self.generate_resource_error_response(
                         e, "Datastore", "Index", index_id
                     )
                     error_responses.append(error_response)
 
         except Exception as e:
             _LOGGER.error(f"Failed to collect Datastore indexes: {e}")
-            error_response = self.generate_error_response(e, "Datastore", "Index")
+            error_response = self.generate_resource_error_response(
+                e, "Datastore", "Index"
+            )
             error_responses.append(error_response)
 
         _LOGGER.debug("** Datastore Index END **")
-        return resource_responses, error_responses
-
-    def _list_indexes(self):
-        """
-        프로젝트의 모든 index를 조회합니다.
-
-        Returns:
-            List[dict]: index 정보 목록
-        """
-        indexes = []
-
-        try:
-            # 모든 index 조회 (프로젝트 레벨)
-            raw_indexes = self.index_conn.list_indexes()
-
-            for index in raw_indexes:
-                # 각 index에 대해 추가 정보 수집
-                index_data = self._process_index_data(index)
-                if index_data:
-                    indexes.append(index_data)
-
-            _LOGGER.info(f"Found {len(indexes)} total indexes")
-
-        except Exception as e:
-            _LOGGER.error(f"Error listing indexes: {e}")
-            raise e
-
-        return indexes
-
-    def _process_index_data(self, index):
-        """
-        Index 데이터를 처리하고 필요한 정보를 추가합니다.
-        다른 도메인과 일관되게 원본 API 응답에 추가 정보만 추가합니다.
-
-        Args:
-            index (dict): 원본 index 데이터
-
-        Returns:
-            dict: 처리된 index 데이터 (원본 + 추가 정보)
-        """
-        try:
-            # 원본 데이터 복사
-            processed_data = index.copy()
-            
-            # 기본 정보 추출
-            index_id = index.get("indexId", "")
-            kind = index.get("kind", "")
-            properties = index.get("properties", [])
-
-            # Properties 분석
-            property_count = len(properties)
-            sorted_properties = []
-            unsorted_properties = []
-
-            for prop in properties:
-                prop_name = prop.get("name", "")
-                direction = prop.get("direction", "ASCENDING")
-                if direction in ["ASCENDING", "DESCENDING"]:
-                    sorted_properties.append(f"{prop_name} ({direction})")
-                else:
-                    unsorted_properties.append(prop_name)
-
-            # 추가 처리된 정보만 추가
-            processed_data.update({
-                "property_count": property_count,
-                "sorted_properties": sorted_properties,
-                "unsorted_properties": unsorted_properties,
-                "project_id": self.index_conn.project_id,
-                "display_name": f"{kind} Index ({index_id})"
-                if kind
-                else f"Index ({index_id})",
-            })
-
-            return processed_data
-
-        except Exception as e:
-            _LOGGER.error(f"Error processing index data: {e}")
-            return None
-
-    def _make_index_response(self, index_data, params):
-        """
-        Index 데이터를 기반으로 리소스 응답을 생성합니다.
-
-        Args:
-            index_data (dict): index 데이터
-            params (dict): 수집 파라미터
-
-        Returns:
-            DatastoreIndexResponse: index 리소스 응답
-        """
-        index_id = index_data["index_id"]
-        project_id = index_data["project_id"]
-
-        # 리소스 ID 생성
-        resource_id = f"{project_id}:{index_id}"
-
-        # 리소스 데이터 생성
-        index_data_obj = DatastoreIndexData(index_data, strict=False)
-
-        # 리소스 생성
-        resource = DatastoreIndexResource(
-            {
-                "name": index_data["display_name"],
-                "account": project_id,
-                "data": index_data_obj,
-                "region_code": "global",
-                "reference": ReferenceModel(
-                    {
-                        "resource_id": resource_id,
-                        "external_link": f"https://console.cloud.google.com/datastore/indexes?project={project_id}",
-                    }
-                ),
-            }
-        )
-
-        # 응답 생성
-        return DatastoreIndexResponse({"resource": resource})
+        return collected_cloud_services, error_responses
