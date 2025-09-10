@@ -37,7 +37,6 @@ datastore_index_details = ItemDynamicLayout.set_fields(
                 "disable": ["UNKNOWN"],
             },
         ),
-        TextDyField.data_source("Project ID", "data.project_id"),
         TextDyField.data_source("Property Count", "data.property_count"),
     ],
 )

@@ -21,8 +21,8 @@ DATABASE
 database_info_meta = ItemDynamicLayout.set_fields(
     "Database Details",
     fields=[
-        TextDyField.data_source("Database ID", "data.database_id"),
-        TextDyField.data_source("Name", "data.name"),
+        TextDyField.data_source("Database ID", "data.name"),
+        TextDyField.data_source("Name", "data.full_name"),
         TextDyField.data_source("UID", "data.uid"),
         EnumDyField.data_source(
             "Type",
@@ -32,7 +32,6 @@ database_info_meta = ItemDynamicLayout.set_fields(
                 "coral.600": ["FIRESTORE_NATIVE"],
             },
         ),
-        TextDyField.data_source("Location", "data.location_id"),
         EnumDyField.data_source(
             "Concurrency Mode",
             "data.concurrency_mode",
@@ -44,7 +43,52 @@ database_info_meta = ItemDynamicLayout.set_fields(
         ),
         DateTimeDyField.data_source("Created", "data.create_time"),
         DateTimeDyField.data_source("Updated", "data.update_time"),
-        TextDyField.data_source("Project ID", "data.project_id"),
+        TextDyField.data_source("Location", "data.location_id"),
+        EnumDyField.data_source(
+            "Database Edition",
+            "data.database_edition",
+            default_badge={
+                "indigo.500": ["STANDARD"],
+                "violet.500": ["ENTERPRISE"],
+                "coral.600": ["ENTERPRISE_PLUS"],
+            },
+        ),
+        EnumDyField.data_source(
+            "Free Tier",
+            "data.free_tier",
+            default_badge={"indigo.500": ["true"], "coral.600": ["false"]},
+        ),
+        EnumDyField.data_source(
+            "App Engine Integration",
+            "data.app_engine_integration_mode",
+            default_badge={
+                "indigo.500": ["ENABLED"],
+                "gray.500": ["DISABLED"],
+            },
+        ),
+        EnumDyField.data_source(
+            "Point-in-Time Recovery",
+            "data.point_in_time_recovery_enablement",
+            default_badge={
+                "green.500": ["ENABLED"],
+                "red.500": ["DISABLED"],
+            },
+        ),
+        EnumDyField.data_source(
+            "Delete Protection",
+            "data.delete_protection_state",
+            default_badge={
+                "green.500": ["DELETE_PROTECTION_ENABLED"],
+                "red.500": ["DELETE_PROTECTION_DISABLED"],
+                "gray.500": ["DELETE_PROTECTION_STATE_UNSPECIFIED"],
+            },
+        ),
+        TextDyField.data_source(
+            "Version Retention Period", "data.version_retention_period"
+        ),
+        DateTimeDyField.data_source(
+            "Earliest Version Time", "data.earliest_version_time"
+        ),
     ],
 )
 

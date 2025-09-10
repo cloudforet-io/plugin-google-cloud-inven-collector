@@ -1,4 +1,4 @@
-from schematics.types import StringType
+from schematics.types import BooleanType, StringType
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
@@ -6,26 +6,34 @@ from spaceone.inventory.libs.schema.cloud_service import BaseResource
 class DatastoreDatabaseData(BaseResource):
     """Datastore Database 데이터 모델"""
 
-    # 기본 정보 - API 응답 필드들
-    database_id = StringType()  # 데이터베이스 ID (projects/{project}/databases/{database_id}에서 추출)
-    uid = StringType()  # 시스템 할당 고유 식별자
-    location_id = StringType(deserialize_from="locationId")  # 위치 ID (예: nam5, eur3)
-    type = StringType()  # 데이터베이스 유형 (DATASTORE_MODE, FIRESTORE_NATIVE)
-    concurrency_mode = StringType(deserialize_from="concurrencyMode")  # 동시성 제어 모드
+    full_name = StringType()
+    uid = StringType()
+    type = StringType()
+    concurrency_mode = StringType(deserialize_from="concurrencyMode")
+    location_id = StringType(deserialize_from="locationId")
 
-    # 시간 정보
-    create_time = StringType(deserialize_from="createTime")  # 생성 시간
-    update_time = StringType(deserialize_from="updateTime")  # 업데이트 시간
+    create_time = StringType(deserialize_from="createTime")
+    update_time = StringType(deserialize_from="updateTime")
 
-    # 메타데이터
-    etag = StringType()  # ETag
-    
-    # 추가 처리된 필드들
-    project_id = StringType()  # 프로젝트 ID (매니저에서 추가)
-    display_name = StringType()  # 표시 이름 (매니저에서 생성)
+    version_retention_period = StringType(deserialize_from="versionRetentionPeriod")
+    earliest_version_time = StringType(deserialize_from="earliestVersionTime")
+    app_engine_integration_mode = StringType(
+        deserialize_from="appEngineIntegrationMode"
+    )
+    point_in_time_recovery_enablement = StringType(
+        deserialize_from="pointInTimeRecoveryEnablement"
+    )
+    delete_protection_state = StringType(deserialize_from="deleteProtectionState")
+    database_edition = StringType(deserialize_from="databaseEdition")
+    free_tier = BooleanType(deserialize_from="freeTier", serialize_when_none=False)
+
+    etag = StringType()
 
     def reference(self):
+        # database_id가 "(default)"인 경우 "-default-"로 변환
+        url_database_id = "-default-" if self.name == "(default)" else self.name
+
         return {
-            "resource_id": self.name,
-            "external_link": f"https://console.cloud.google.com/datastore/databases?project={self.project_id}",
+            "resource_id": f"https://firestore.googleapis.com/v1/{self.full_name}",
+            "external_link": f"https://console.cloud.google.com/datastore/databases/{url_database_id}?project={self.project}",
         }

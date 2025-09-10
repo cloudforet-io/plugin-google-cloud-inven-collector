@@ -11,7 +11,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
     SearchField,
-    TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
     CardWidget,
@@ -45,7 +44,6 @@ cst_database._metadata = CloudServiceTypeMeta.set_meta(
                 "coral.600": ["FIRESTORE_NATIVE"],
             },
         ),
-        TextDyField.data_source("Location", "data.location_id"),
         EnumDyField.data_source(
             "Concurrency Mode",
             "data.concurrency_mode",
@@ -59,7 +57,6 @@ cst_database._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Type", key="data.type"),
-        SearchField.set(name="Location", key="data.location_id"),
         SearchField.set(name="Concurrency Mode", key="data.concurrency_mode"),
         SearchField.set(name="Project ID", key="data.project_id"),
     ],
