@@ -402,7 +402,7 @@ class KMSKeyRingManager(GoogleCloudManager):
             import_job = version.get("importJob", "")
             import_time = version.get("importTime", "")
             import_failure_reason = version.get("importFailureReason", "")
-            reimport_eligible = version.get("reimportEligible", False)
+            reimport_eligible = str(version.get("reimportEligible", False))
             
             # Version ID 추출 (name의 마지막 부분)
             version_id = name.split("/")[-1] if name else ""
