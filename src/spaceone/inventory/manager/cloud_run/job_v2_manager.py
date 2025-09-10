@@ -166,7 +166,7 @@ class CloudRunJobV2Manager(GoogleCloudManager):
                         "data": job_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": f"https://cloudrun.googleapis.com/v2/{job_data.full_name}",
+                                "resource_id": f"https://run.googleapis.com/v2/{job_data.full_name}",
                                 "external_link": f"https://console.cloud.google.com/run/jobs/details/{location_id}/{job_name}?project={project_id}",
                             }
                         ),

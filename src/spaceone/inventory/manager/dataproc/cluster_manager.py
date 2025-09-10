@@ -5,6 +5,7 @@ from spaceone.inventory.connector.dataproc.cluster_connector import (
     DataprocClusterConnector,
 )
 from spaceone.inventory.libs.manager import GoogleCloudManager
+from spaceone.inventory.libs.schema.base import ReferenceModel
 from spaceone.inventory.model.dataproc.cluster.cloud_service import (
     DataprocClusterResource,
     DataprocClusterResponse,
@@ -334,29 +335,35 @@ class DataprocClusterManager(GoogleCloudManager):
                         "optional_components": [],
                     }
 
-                # Secondary Worker Config (Preemptible VMs)
-                secondary_worker_config = config.get("secondaryWorkerConfig", {})
-                if secondary_worker_config:
-                    cluster_data["config"]["secondary_worker_config"] = {
-                        "num_instances": str(
-                            secondary_worker_config.get("numInstances", "")
-                        ),
-                        "instance_names": secondary_worker_config.get(
-                            "instanceNames", []
-                        ),
-                        "image_uri": str(secondary_worker_config.get("imageUri", "")),
+                # Worker Config
+                worker_config = config.get("workerConfig", {})
+                if worker_config:
+                    cluster_data["config"]["worker_config"] = {
+                        "num_instances": str(worker_config.get("numInstances", "")),
+                        "instance_names": worker_config.get("instanceNames", []),
+                        "image_uri": str(worker_config.get("imageUri", "")),
                         "machine_type_uri": str(
-                            secondary_worker_config.get("machineTypeUri", "")
+                            worker_config.get("machineTypeUri", "")
                         ),
-                        "disk_config": secondary_worker_config.get("diskConfig", {}),
+                        "disk_config": worker_config.get("diskConfig", {}),
+                        "is_preemptible": worker_config.get("isPreemptible", False),
+                        "min_cpu_platform": str(
+                            worker_config.get("minCpuPlatform", "")
+                        ),
+                        "preemptibility": str(
+                            worker_config.get("preemptibility", "NON_PREEMPTIBLE")
+                        ),
                     }
                 else:
-                    cluster_data["config"]["secondary_worker_config"] = {
+                    cluster_data["config"]["worker_config"] = {
                         "num_instances": "",
                         "instance_names": [],
                         "image_uri": "",
                         "machine_type_uri": "",
                         "disk_config": {},
+                        "is_preemptible": False,
+                        "min_cpu_platform": "",
+                        "preemptibility": "NON_PREEMPTIBLE",
                     }
 
                 # Lifecycle Config (Scheduled Deletion)
@@ -428,12 +435,9 @@ class DataprocClusterManager(GoogleCloudManager):
                     {
                         "name": cluster_data.get("name"),
                         "data": dataproc_cluster_data,
-                        "reference": {
-                            "resource_id": cluster.get("clusterUuid"),
-                            "external_link": f"https://console.cloud.google.com/dataproc/clusters/details/{location}/{cluster_name}?project={project_id}",
-                        },
                         "region_code": location,
                         "account": project_id,
+                        "reference": ReferenceModel(dataproc_cluster_data.reference()),
                     }
                 )
 

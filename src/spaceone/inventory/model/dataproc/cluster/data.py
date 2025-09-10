@@ -74,7 +74,6 @@ class ClusterConfig(Model):
     gce_cluster_config = ModelType(GceClusterConfig)
     master_config = ModelType(InstanceGroupConfig)
     worker_config = ModelType(InstanceGroupConfig)
-    secondary_worker_config = ModelType(InstanceGroupConfig)
     software_config = ModelType(SoftwareConfig)
     initialization_actions = ListType(DictType(StringType()))
     encryption_config = DictType(StringType())
@@ -88,7 +87,7 @@ class AutoscalingPolicy(Model):
 
     id = StringType()
     name = StringType()
-    secondary_worker_config = DictType(StringType())
+    worker_config = DictType(StringType())
     basic_algorithm = DictType(StringType())
 
 
@@ -181,6 +180,6 @@ class DataprocCluster(Model):
             리소스 ID와 외부 링크를 포함한 참조 정보
         """
         return {
-            "resource_id": str(self.cluster_uuid or ""),
-            "external_link": f"https://console.cloud.google.com/dataproc/clusters/details/{self.location}/{self.cluster_name}?project={self.project_id}",
+            "resource_id": f"https://dataproc.googleapis.com/v1/projects/{self.project_id}/regions/{self.location}/clusters/{self.cluster_name}",
+            "external_link": f"https://console.cloud.google.com/dataproc/clusters?project={self.project_id}",
         }
