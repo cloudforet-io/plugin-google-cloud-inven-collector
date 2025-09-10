@@ -111,6 +111,7 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                 service_name = (
                     self.get_param_in_url(service_id, "services") if service_id else ""
                 )
+                full_name = service.get("name", service_name)
                 location_id = service.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
@@ -188,7 +189,8 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
 
                 service.update(
                     {
-                        "name": service_name,  # Set name for SpaceONE display
+                        "name": service_name,
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
@@ -218,7 +220,7 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                         "data": service_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": service_data.uid,
+                                "resource_id": f"https://cloudrun.googleapis.com/v2/{service_data.full_name}",
                                 "external_link": f"https://console.cloud.google.com/run/detail/{location_id}/{service_name}?project={project_id}",
                             }
                         ),

@@ -77,18 +77,27 @@ class CloudRunConfigurationV1Manager(GoogleCloudManager):
                 ##################################
                 # 1. Set Basic Information
                 ##################################
-                configuration_id = configuration.get("metadata", {}).get("name", "")
+                configuration_name = configuration.get("metadata", {}).get("name", "")
                 location_id = configuration.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
+                self_link = configuration.get("metadata", {}).get("selfLink", "")
+                # Remove the leading "/apis/serving.knative.dev/v1/" from selfLink for full_name
+                if self_link.startswith("/apis/serving.knative.dev/v1/"):
+                    full_name = self_link[len("/apis/serving.knative.dev/v1/") :]
+                else:
+                    full_name = self_link
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
                 configuration.update(
                     {
+                        "name": configuration_name,
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "self_link": self_link,
                     }
                 )
 
@@ -99,14 +108,14 @@ class CloudRunConfigurationV1Manager(GoogleCloudManager):
 
                 configuration_resource = ConfigurationV1Resource(
                     {
-                        "name": configuration_id,
+                        "name": configuration_name,
                         "account": project_id,
                         "region_code": location_id,
                         "data": configuration_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": configuration_data.metadata.uid,
-                                "external_link": f"https://console.cloud.google.com/run/configurations/details/{location_id}/{configuration_id}?project={project_id}",
+                                "resource_id": f"https://run.googleapis.com{self_link}",
+                                "external_link": "",
                             }
                         ),
                     },

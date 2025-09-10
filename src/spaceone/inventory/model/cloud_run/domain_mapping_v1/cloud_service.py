@@ -21,11 +21,11 @@ Cloud Run Domain Mapping
 domain_mapping_overview = ItemDynamicLayout.set_fields(
     "Domain Mapping Overview",
     fields=[
+        TextDyField.data_source("ID", "data.metadata.uid"),
+        TextDyField.data_source("Name", "data.full_name"),
         TextDyField.data_source("API Version", "data.api_version"),
         TextDyField.data_source("Kind", "data.kind"),
-        TextDyField.data_source("Name", "data.metadata.name"),
         TextDyField.data_source("Namespace", "data.metadata.namespace"),
-        TextDyField.data_source("UID", "data.metadata.uid"),
         TextDyField.data_source("Cluster Name", "data.metadata.cluster_name"),
         DateTimeDyField.data_source(
             "Creation Timestamp", "data.metadata.creation_timestamp"

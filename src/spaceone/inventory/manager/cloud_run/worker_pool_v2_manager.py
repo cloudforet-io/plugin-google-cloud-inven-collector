@@ -115,6 +115,7 @@ class CloudRunWorkerPoolV2Manager(GoogleCloudManager):
                     if worker_pool_id
                     else ""
                 )
+                full_name = worker_pool.get("name", worker_pool_name)
                 location_id = worker_pool.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
@@ -123,6 +124,8 @@ class CloudRunWorkerPoolV2Manager(GoogleCloudManager):
                 ##################################
                 worker_pool.update(
                     {
+                        "name": worker_pool_name,
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
@@ -142,8 +145,8 @@ class CloudRunWorkerPoolV2Manager(GoogleCloudManager):
                         "data": worker_pool_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": worker_pool_data.name,
-                                "external_link": f"https://console.cloud.google.com/run/workerpools/details/{location_id}/{worker_pool_name}?project={project_id}",
+                                "resource_id": f"https://cloudrun.googleapis.com/v2/{worker_pool_data.full_name}",
+                                "external_link": f"https://console.cloud.google.com/run/worker-pools/details/{location_id}/{worker_pool_name}/observability/metrics?project={project_id}",
                             }
                         ),
                     },

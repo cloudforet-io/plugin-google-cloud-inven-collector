@@ -40,6 +40,8 @@ class ConfigurationV1(Model):
     spec = BaseType()
     status = BaseType()
     name = StringType()
+    full_name = StringType()
     project = StringType()
     location = StringType()
     region = StringType()
+    self_link = StringType()

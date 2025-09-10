@@ -23,7 +23,8 @@ Cloud Run Worker Pool
 worker_pool_meta = ItemDynamicLayout.set_fields(
     "Worker Pool Overview",
     fields=[
-        TextDyField.data_source("UID", "data.uid"),
+        TextDyField.data_source("ID", "data.uid"),
+        TextDyField.data_source("Name", "data.full_name"),
         TextDyField.data_source("Generation", "data.generation"),
         DateTimeDyField.data_source("Create Time", "data.create_time"),
         DateTimeDyField.data_source("Update Time", "data.update_time"),
@@ -45,8 +46,8 @@ worker_pool_revisions = TableDynamicLayout.set_fields(
     "Revisions",
     "data.revisions",
     fields=[
+        TextDyField.data_source("ID", "uid"),
         TextDyField.data_source("Name", "name"),
-        TextDyField.data_source("UID", "uid"),
         TextDyField.data_source("Generation", "generation"),
         DateTimeDyField.data_source("Create Time", "create_time"),
         DateTimeDyField.data_source("Update Time", "update_time"),

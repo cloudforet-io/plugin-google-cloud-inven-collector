@@ -23,10 +23,11 @@ configuration_v1_meta = CloudServiceMeta.set_layouts(
         ItemDynamicLayout.set_fields(
             "Configuration Details",
             fields=[
-                TextDyField.data_source("Kind", "data.kind"),
+                TextDyField.data_source("ID", "data.metadata.uid"),
+                TextDyField.data_source("Name", "data.full_name"),
                 TextDyField.data_source("API Version", "data.api_version"),
+                TextDyField.data_source("Kind", "data.kind"),
                 TextDyField.data_source("Namespace", "data.metadata.namespace"),
-                TextDyField.data_source("UID", "data.metadata.uid"),
                 DateTimeDyField.data_source(
                     "Created", "data.metadata.creation_timestamp"
                 ),
