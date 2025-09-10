@@ -140,8 +140,8 @@ class KMSKeyRingManager(GoogleCloudManager):
             
             processed_key_rings = []
             for key_ring in raw_key_rings:
-                # 기본 KeyRing 정보만 처리
-                keyring_data = self._process_keyring_data(key_ring)
+                # KeyRing 정보와 CryptoKey 정보 함께 처리
+                keyring_data = self._process_keyring_data(key_ring, kms_connector)
                 if keyring_data:
                     processed_key_rings.append(keyring_data)
 
@@ -152,12 +152,13 @@ class KMSKeyRingManager(GoogleCloudManager):
             _LOGGER.error(f"Error listing key rings: {e}", exc_info=True)
             raise e
 
-    def _process_keyring_data(self, keyring: Dict) -> Optional[Dict]:
+    def _process_keyring_data(self, keyring: Dict, kms_connector: KMSConnector) -> Optional[Dict]:
         """
         KeyRing 데이터를 처리합니다.
 
         Args:
             keyring: 원본 KeyRing 데이터
+            kms_connector: KMS 커넥터 인스턴스
 
         Returns:
             dict: 처리된 KeyRing 데이터
@@ -190,6 +191,9 @@ class KMSKeyRingManager(GoogleCloudManager):
             location_display_name = LOCATION_DISPLAY_NAMES.get(location_id, 
                                                              location_data.get("displayName", location_id))
 
+            # CryptoKey 정보 조회
+            crypto_keys = self.get_crypto_keys_for_keyring(name, kms_connector)
+            
             # 데이터 구조 생성
             return {
                 "name": name,
@@ -200,8 +204,9 @@ class KMSKeyRingManager(GoogleCloudManager):
                 "create_time": create_time,
                 "display_name": f"{keyring_id} ({location_display_name})",
                 "full_location_path": f"projects/{project_id}/locations/{location_id}",
-                # CryptoKey 정보는 필요시 별도 API로 조회
-                "crypto_key_count": 0,  # 기본값
+                # CryptoKey 정보 포함
+                "crypto_keys": crypto_keys,
+                "crypto_key_count": len(crypto_keys),
             }
 
         except Exception as e:
@@ -274,8 +279,8 @@ class KMSKeyRingManager(GoogleCloudManager):
             processed_crypto_keys = []
 
             for crypto_key in crypto_keys:
-                # 기본 정보만 처리 (Version 조회 제거)
-                processed_key = self._process_crypto_key_data(crypto_key)
+                # CryptoKey와 CryptoKeyVersion 정보 함께 처리
+                processed_key = self._process_crypto_key_data(crypto_key, kms_connector)
                 if processed_key:
                     processed_crypto_keys.append(processed_key)
 
@@ -285,15 +290,16 @@ class KMSKeyRingManager(GoogleCloudManager):
             _LOGGER.warning(f"Error collecting crypto keys for {keyring_name}: {e}")
             return []
 
-    def _process_crypto_key_data(self, crypto_key: Dict) -> Optional[Dict]:
+    def _process_crypto_key_data(self, crypto_key: Dict, kms_connector: KMSConnector) -> Optional[Dict]:
         """
-        CryptoKey 기본 데이터만 처리합니다 (성능 최적화).
+        CryptoKey 데이터와 CryptoKeyVersion 정보를 함께 처리합니다.
 
         Args:
             crypto_key: 원본 CryptoKey 데이터
+            kms_connector: KMS 커넥터 인스턴스
 
         Returns:
-            dict: 처리된 기본 CryptoKey 데이터
+            dict: 처리된 CryptoKey 데이터 (CryptoKeyVersion 포함)
         """
         try:
             # 기본 정보 추출
@@ -314,27 +320,110 @@ class KMSKeyRingManager(GoogleCloudManager):
             # Primary key version 정보
             primary = crypto_key.get("primary", {})
             primary_state = primary.get("state", "")
+            primary_name = primary.get("name", "")
 
             # Version template 정보
             version_template = crypto_key.get("versionTemplate", {})
             protection_level = version_template.get("protectionLevel", "")
             algorithm = version_template.get("algorithm", "")
 
-            # 최적화된 데이터 구조
+            # Next rotation time
+            next_rotation_time = crypto_key.get("nextRotationTime", "")
+
+            # CryptoKeyVersion 정보 조회
+            crypto_key_versions = self._get_crypto_key_versions(name, kms_connector)
+
+            # 최종 데이터 구조
             return {
                 "name": name,
                 "crypto_key_id": crypto_key_id,
                 "purpose": purpose,
                 "create_time": create_time,
+                "next_rotation_time": next_rotation_time,
                 "primary_state": primary_state,
+                "primary_name": primary_name,
                 "protection_level": protection_level,
                 "algorithm": algorithm,
                 "display_name": f"{crypto_key_id} ({purpose})",
-                # 성능 최적화: Version 정보는 필요시 별도 API로 조회
-                "crypto_key_version_count": 0,  # 기본값
+                # CryptoKeyVersion 정보 포함
+                "crypto_key_versions": crypto_key_versions,
+                "crypto_key_version_count": len(crypto_key_versions),
             }
 
         except Exception as e:
             _LOGGER.error(f"Error processing CryptoKey data: {e}", exc_info=True)
+            return None
+
+    def _get_crypto_key_versions(self, crypto_key_name: str, kms_connector: KMSConnector) -> List[Dict]:
+        """
+        특정 CryptoKey의 CryptoKeyVersion 목록을 조회하고 처리합니다.
+        
+        Args:
+            crypto_key_name: CryptoKey의 전체 이름
+            kms_connector: KMS 커넥터 인스턴스
+            
+        Returns:
+            list: 처리된 CryptoKeyVersion 목록
+        """
+        try:
+            raw_versions = kms_connector.list_crypto_key_versions(crypto_key_name)
+            processed_versions = []
+            
+            for version in raw_versions:
+                processed_version = self._process_crypto_key_version_data(version)
+                if processed_version:
+                    processed_versions.append(processed_version)
+                    
+            return processed_versions
+            
+        except Exception as e:
+            _LOGGER.warning(f"Error collecting crypto key versions for {crypto_key_name}: {e}")
+            return []
+
+    def _process_crypto_key_version_data(self, version: Dict) -> Optional[Dict]:
+        """
+        CryptoKeyVersion 데이터를 처리합니다.
+        
+        Args:
+            version: 원본 CryptoKeyVersion 데이터
+            
+        Returns:
+            dict: 처리된 CryptoKeyVersion 데이터
+        """
+        try:
+            name = version.get("name", "")
+            state = version.get("state", "")
+            create_time = version.get("createTime", "")
+            generate_time = version.get("generateTime", "")
+            protection_level = version.get("protectionLevel", "")
+            algorithm = version.get("algorithm", "")
+            destroy_time = version.get("destroyTime", "")
+            destroy_event_time = version.get("destroyEventTime", "")
+            import_job = version.get("importJob", "")
+            import_time = version.get("importTime", "")
+            import_failure_reason = version.get("importFailureReason", "")
+            reimport_eligible = str(version.get("reimportEligible", False))
+            
+            # Version ID 추출 (name의 마지막 부분)
+            version_id = name.split("/")[-1] if name else ""
+            
+            return {
+                "name": name,
+                "version_id": version_id,
+                "state": state,
+                "create_time": create_time,
+                "generate_time": generate_time,
+                "protection_level": protection_level,
+                "algorithm": algorithm,
+                "destroy_time": destroy_time,
+                "destroy_event_time": destroy_event_time,
+                "import_job": import_job,
+                "import_time": import_time,
+                "import_failure_reason": import_failure_reason,
+                "reimport_eligible": reimport_eligible,
+            }
+            
+        except Exception as e:
+            _LOGGER.error(f"Error processing CryptoKeyVersion data: {e}", exc_info=True)
             return None
 
