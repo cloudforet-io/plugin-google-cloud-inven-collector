@@ -49,13 +49,13 @@ class BatchManager(GoogleCloudManager):
             project_id = params["secret_data"]["project_id"]
             batch_connector = self._get_connector(params)
 
-            # 1. 글로벌 Jobs 수집 (locations/- 패턴)
+            # 1. 모든 Batch Jobs 수집
             all_jobs = batch_connector.list_all_jobs()
             if not all_jobs:
-                _LOGGER.info("No Batch jobs found in any location")
+                _LOGGER.info("No Batch jobs found")
                 return collected_cloud_services, error_responses
 
-            _LOGGER.debug(f"Found {len(all_jobs)} Batch jobs across all locations")
+            _LOGGER.debug(f"Found {len(all_jobs)} Batch jobs")
 
             # 2. 각 Job을 개별 리소스로 처리
             for job in all_jobs:
@@ -158,8 +158,9 @@ class BatchManager(GoogleCloudManager):
             
             processed_job = processed_jobs[0]
 
-            # Task 개수 계산 (TaskGroup의 task_count 필드 사용)
+            # Task 개수 계산 및 모든 Task 수집
             task_count = 0
+            all_tasks = []
             task_groups = processed_job.get("task_groups", [])
             for task_group in task_groups:
                 # TaskGroup의 task_count를 사용 (문자열이므로 int로 변환)
@@ -169,6 +170,10 @@ class BatchManager(GoogleCloudManager):
                 except (ValueError, TypeError):
                     _LOGGER.warning(f"Invalid task_count value: {group_task_count}")
                     task_count += 0
+                
+                # 각 TaskGroup의 tasks를 all_tasks에 추가
+                tasks = task_group.get("tasks", [])
+                all_tasks.extend(tasks)
 
             # Display name 설정 (빈 값이면 Job ID 사용)
             display_name = processed_job.get("display_name", "")
@@ -187,6 +192,7 @@ class BatchManager(GoogleCloudManager):
                 "project_id": project_id,
                 "task_groups": task_groups,
                 "task_count": task_count,
+                "all_tasks": all_tasks,  # UI에서 표시할 모든 Task 목록
                 "labels": job.get("labels", {}),
                 "annotations": job.get("annotations", {}),
             })

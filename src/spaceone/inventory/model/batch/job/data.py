@@ -17,16 +17,28 @@ Batch Job 기준 Data Models - Job 개별 리소스로 관리
 """
 
 
+class StatusEvent(Model):
+    """Task Status Event 모델"""
+    
+    event_time = StringType(deserialize_from="eventTime", serialize_when_none=False)
+    type = StringType(serialize_when_none=False)
+    task_state = StringType(deserialize_from="taskState", serialize_when_none=False)
+    description = StringType(serialize_when_none=False)
+
+
 class BatchTask(Model):
     """Batch Task 모델 - Job 내 개별 Task 정보"""
 
     name = StringType(serialize_when_none=False)
-    task_index = IntType(deserialize_from="taskIndex", serialize_when_none=False)
     state = StringType(serialize_when_none=False)
-    create_time = StringType(deserialize_from="createTime", serialize_when_none=False)
-    start_time = StringType(deserialize_from="startTime", serialize_when_none=False)
-    end_time = StringType(deserialize_from="endTime", serialize_when_none=False)
-    exit_code = IntType(deserialize_from="exitCode", serialize_when_none=False)
+    status_events = ListType(
+        ModelType(StatusEvent),
+        deserialize_from="statusEvents",
+        serialize_when_none=False,
+    )
+    # 최신 이벤트 정보 (UI 표시용)
+    last_event_type = StringType(serialize_when_none=False)
+    last_event_time = StringType(serialize_when_none=False)
 
 
 class BatchTaskGroup(Model):
@@ -63,6 +75,10 @@ class BatchJobResource(Model):
         serialize_when_none=False,
     )
     task_count = IntType(serialize_when_none=False)  # 총 Task 개수
+    all_tasks = ListType(
+        ModelType(BatchTask),
+        serialize_when_none=False,
+    )  # UI 표시용 모든 Task 목록 (평면화)
     
     # 메타데이터
     labels = DictType(StringType, serialize_when_none=False)
@@ -129,10 +145,9 @@ task_groups_meta = TableDynamicLayout.set_fields(
 # TAB - Tasks (Task 세부 정보)
 tasks_meta = TableDynamicLayout.set_fields(
     "Tasks",
-    root_path="data.task_groups.tasks",
+    root_path="data.all_tasks",
     fields=[
         TextDyField.data_source("Task Name", "name"),
-        TextDyField.data_source("Task Index", "task_index"),
         EnumDyField.data_source(
             "Status",
             "state",
@@ -143,10 +158,8 @@ tasks_meta = TableDynamicLayout.set_fields(
                 "disable": ["STATE_UNSPECIFIED"],
             },
         ),
-        DateTimeDyField.data_source("Created", "create_time"),
-        DateTimeDyField.data_source("Started", "start_time"),
-        DateTimeDyField.data_source("Ended", "end_time"),
-        TextDyField.data_source("Exit Code", "exit_code"),
+        TextDyField.data_source("Last Event Type", "last_event_type"),
+        DateTimeDyField.data_source("Last Event Time", "last_event_time"),
     ],
 )
 

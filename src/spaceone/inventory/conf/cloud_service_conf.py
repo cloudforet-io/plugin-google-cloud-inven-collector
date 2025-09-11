@@ -175,10 +175,6 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         },
     },
     "Batch": {
-        "Location": {
-            "resource_type": "batch_location",
-            "labels_key": "resource.labels.location_id",
-        },
         "Job": {
             "resource_type": "batch_job",
             "labels_key": "resource.labels.job_id",
