@@ -29,5 +29,5 @@ query_options:
       operator: sum
       key: data.version.instance_count
 unit: Count
-namespace_id: ns-google-cloud-app-engine-version
+namespace_id: ns-google-cloud-appengine-version
 version: '1.0'
