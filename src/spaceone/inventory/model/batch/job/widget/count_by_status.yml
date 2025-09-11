@@ -1,0 +1,12 @@
+widget_type: "chart"
+title: "Jobs by Status"
+icon: "ic_pie-chart"
+options:
+  chart_type: "DONUT"
+  legend:
+    enabled: true
+    show_at: "table"
+  value_options:
+    key: "data.state"
+    options:
+      default: 0

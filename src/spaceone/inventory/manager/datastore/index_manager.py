@@ -1,4 +1,5 @@
 import logging
+import time
 
 from spaceone.inventory.connector.datastore.index_v1 import DatastoreIndexV1Connector
 from spaceone.inventory.libs.manager import GoogleCloudManager
@@ -44,6 +45,7 @@ class DatastoreIndexManager(GoogleCloudManager):
                 성공한 리소스 응답 리스트와 에러 응답 리스트
         """
         _LOGGER.debug("** Datastore Index START **")
+        start_time = time.time()
 
         collected_cloud_services = []
         error_responses = []
@@ -140,5 +142,8 @@ class DatastoreIndexManager(GoogleCloudManager):
             )
             error_responses.append(error_response)
 
-        _LOGGER.debug("** Datastore Index END **")
+        # 수집 완료 로깅
+        _LOGGER.debug(
+            f"** Datastore Namespace Finished {time.time() - start_time} Seconds **"
+        )
         return collected_cloud_services, error_responses

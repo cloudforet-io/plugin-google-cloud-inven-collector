@@ -11,7 +11,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
     SearchField,
-    TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
     CardWidget,
@@ -41,17 +40,22 @@ cst_database.tags = {
 
 cst_database._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Location", "data.location_id"),
         EnumDyField.data_source(
             "Type",
             "data.type",
             default_badge={
-                "indigo.500": ["FIRESTORE_NATIVE"],
-                "coral.600": ["DATASTORE_MODE"],
+                "coral.600": ["FIRESTORE_NATIVE"],
+                "indigo.500": ["DATASTORE_MODE"],
             },
         ),
-        TextDyField.data_source("Document Count", "data.document_count"),
-        TextDyField.data_source("Index Count", "data.index_count"),
+        EnumDyField.data_source(
+            "Concurrency Mode",
+            "data.concurrency_mode",
+            default_badge={
+                "indigo.500": ["OPTIMISTIC"],
+                "coral.600": ["PESSIMISTIC"],
+            },
+        ),
         EnumDyField.data_source(
             "Delete Protection",
             "data.delete_protection_state",
@@ -64,9 +68,8 @@ cst_database._metadata = CloudServiceTypeMeta.set_meta(
         DateTimeDyField.data_source("Created", "data.create_time"),
     ],
     search=[
-        SearchField.set(name="Location", key="data.location_id"),
         SearchField.set(name="Type", key="data.type"),
-        SearchField.set(name="Project", key="data.project_id"),
+        SearchField.set(name="Concurrency Mode", key="data.concurrency_mode"),
         SearchField.set(
             name="Delete Protection State", key="data.delete_protection_state"
         ),

@@ -23,16 +23,17 @@ backup_schedule_meta = CloudServiceMeta.set_layouts(
             "Backup Schedule Information",
             fields=[
                 TextDyField.data_source("Name", "data.name"),
+                TextDyField.data_source("Full Name", "data.full_name"),
                 TextDyField.data_source("Database ID", "data.database_id"),
                 EnumDyField.data_source(
                     "Recurrence Type",
                     "data.recurrence_type",
                     default_badge={"indigo.500": ["DAILY"], "coral.600": ["WEEKLY"]},
                 ),
+                TextDyField.data_source("Weekly Day", "data.weekly_day"),
                 TextDyField.data_source("Retention", "data.retention"),
                 DateTimeDyField.data_source("Created", "data.create_time"),
                 DateTimeDyField.data_source("Updated", "data.update_time"),
-                TextDyField.data_source("UID", "data.uid"),
             ],
         )
     ]

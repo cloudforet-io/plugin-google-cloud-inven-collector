@@ -18,7 +18,9 @@ from spaceone.inventory.model.datastore.database.data import DatastoreDatabaseDa
 """
 DATABASE
 """
-database_info_meta = ItemDynamicLayout.set_fields(
+
+# TAB - Database Details
+datastore_database_details = ItemDynamicLayout.set_fields(
     "Database Details",
     fields=[
         TextDyField.data_source("Database ID", "data.name"),
@@ -28,8 +30,8 @@ database_info_meta = ItemDynamicLayout.set_fields(
             "Type",
             "data.type",
             default_badge={
-                "indigo.500": ["DATASTORE_MODE"],
-                "coral.600": ["FIRESTORE_NATIVE"],
+                "indigo.500": ["FIRESTORE_NATIVE"],
+                "coral.600": ["DATASTORE_MODE"],
             },
         ),
         EnumDyField.data_source(
@@ -38,49 +40,40 @@ database_info_meta = ItemDynamicLayout.set_fields(
             default_badge={
                 "indigo.500": ["OPTIMISTIC"],
                 "coral.600": ["PESSIMISTIC"],
-                "peacock.500": ["OPTIMISTIC_WITH_ENTITY_GROUPS"],
             },
-        ),
-        DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
-        TextDyField.data_source("Location", "data.location_id"),
-        EnumDyField.data_source(
-            "Database Edition",
-            "data.database_edition",
-            default_badge={
-                "indigo.500": ["STANDARD"],
-                "violet.500": ["ENTERPRISE"],
-                "coral.600": ["ENTERPRISE_PLUS"],
-            },
-        ),
-        EnumDyField.data_source(
-            "Free Tier",
-            "data.free_tier",
-            default_badge={"indigo.500": ["true"], "coral.600": ["false"]},
         ),
         EnumDyField.data_source(
             "App Engine Integration",
             "data.app_engine_integration_mode",
             default_badge={
                 "indigo.500": ["ENABLED"],
-                "gray.500": ["DISABLED"],
+                "gray.400": ["DISABLED"],
             },
         ),
-        EnumDyField.data_source(
-            "Point-in-Time Recovery",
-            "data.point_in_time_recovery_enablement",
-            default_badge={
-                "green.500": ["ENABLED"],
-                "red.500": ["DISABLED"],
-            },
-        ),
+        TextDyField.data_source("Location", "data.location_id"),
+    ],
+)
+
+# TAB - Security & Backup
+datastore_security_backup = ItemDynamicLayout.set_fields(
+    "Security & Backup",
+    fields=[
         EnumDyField.data_source(
             "Delete Protection",
             "data.delete_protection_state",
             default_badge={
-                "green.500": ["DELETE_PROTECTION_ENABLED"],
-                "red.500": ["DELETE_PROTECTION_DISABLED"],
-                "gray.500": ["DELETE_PROTECTION_STATE_UNSPECIFIED"],
+                "indigo.500": ["DELETE_PROTECTION_ENABLED"],
+                "coral.600": ["DELETE_PROTECTION_DISABLED"],
+                "gray.400": ["DELETE_PROTECTION_STATE_UNSPECIFIED"],
+            },
+        ),
+        EnumDyField.data_source(
+            "Point-in-time Recovery",
+            "data.point_in_time_recovery_enablement",
+            default_badge={
+                "indigo.500": ["POINT_IN_TIME_RECOVERY_ENABLED"],
+                "coral.600": ["POINT_IN_TIME_RECOVERY_DISABLED"],
+                "gray.400": ["POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED"],
             },
         ),
         TextDyField.data_source(
@@ -92,16 +85,34 @@ database_info_meta = ItemDynamicLayout.set_fields(
     ],
 )
 
-database_meta = CloudServiceMeta.set_layouts([database_info_meta])
+# TAB - Timestamps
+datastore_timestamps = ItemDynamicLayout.set_fields(
+    "Timestamps",
+    fields=[
+        DateTimeDyField.data_source("Created", "data.create_time"),
+        DateTimeDyField.data_source("Updated", "data.update_time"),
+    ],
+)
+
+# Unified metadata layout
+datastore_database_meta = CloudServiceMeta.set_layouts(
+    [
+        datastore_database_details,
+        datastore_security_backup,
+        datastore_timestamps,
+    ]
+)
 
 
-class DatastoreDatabaseResource(CloudServiceResource):
-    cloud_service_type = StringType(default="Database")
+class DatastoreResource(CloudServiceResource):
     cloud_service_group = StringType(default="Datastore")
-    provider = StringType(default="google_cloud")
+
+
+class DatastoreDatabaseResource(DatastoreResource):
+    cloud_service_type = StringType(default="Database")
     data = ModelType(DatastoreDatabaseData)
     _metadata = ModelType(
-        CloudServiceMeta, default=database_meta, serialized_name="metadata"
+        CloudServiceMeta, default=datastore_database_meta, serialized_name="metadata"
     )
 
 

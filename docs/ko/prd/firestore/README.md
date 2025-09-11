@@ -221,7 +221,12 @@ SpaceONE 인벤토리 플랫폼에서 Google Cloud Firestore 리소스를 자동
 ## 부록: 현재 구현 상태 (Implementation Status)
 
 ### A.1. 구현 완료 기능
-- ✅ **FirestoreManager**: 통합 매니저를 통한 데이터베이스, 컬렉션, 인덱스 수집
+- ✅ **Firestore 매니저들**: 분리된 매니저를 통한 리소스별 독립 수집
+  - FirestoreDatabaseManager: 데이터베이스 수집
+  - FirestoreCollectionManager: 컬렉션 및 문서 수집
+  - FirestoreIndexManager: 인덱스 수집
+  - FirestoreBackupScheduleManager: 백업 스케줄 수집
+  - FirestoreBackupManager: 백업 수집
 - ✅ **FirestoreDatabaseConnector**: Google Cloud Firestore API 연동, Admin SDK 활용
 - ✅ **재귀적 문서 탐색**: 모든 컬렉션을 재귀적으로 수집하여 전체 문서 구조 파악
 - ✅ **다중 리소스 타입**: Database, Collection, Index 3가지 리소스 타입 지원

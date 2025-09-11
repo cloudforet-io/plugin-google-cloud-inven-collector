@@ -53,12 +53,26 @@ cst_database._metadata = CloudServiceTypeMeta.set_meta(
                 "peacock.500": ["OPTIMISTIC_WITH_ENTITY_GROUPS"],
             },
         ),
+        EnumDyField.data_source(
+            "Delete Protection",
+            "data.delete_protection_state",
+            default_badge={
+                "indigo.500": ["DELETE_PROTECTION_ENABLED"],
+                "coral.600": ["DELETE_PROTECTION_DISABLED"],
+                "gray.400": ["DELETE_PROTECTION_STATE_UNSPECIFIED"],
+            },
+        ),
         DateTimeDyField.data_source("Created", "data.create_time"),
     ],
     search=[
         SearchField.set(name="Type", key="data.type"),
         SearchField.set(name="Concurrency Mode", key="data.concurrency_mode"),
-        SearchField.set(name="Project ID", key="data.project_id"),
+        SearchField.set(
+            name="Delete Protection State", key="data.delete_protection_state"
+        ),
+        SearchField.set(
+            name="Created Time", key="data.create_time", data_type="datetime"
+        ),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

@@ -36,7 +36,11 @@ from .datastore.namespace_manager import DatastoreNamespaceManager
 from .filestore.instance_v1_manager import FilestoreInstanceManager
 from .filestore.instance_v1beta1_manager import FilestoreInstanceV1Beta1Manager
 from .firebase.app_manager import FirebaseManager as FirebaseAppManager
-from .firestore.firestore_manager import FirestoreManager
+from .firestore.backup_manager import FirestoreBackupManager
+from .firestore.backup_schedule_manager import FirestoreBackupScheduleManager
+from .firestore.collection_manager import FirestoreCollectionManager
+from .firestore.database_manager import FirestoreDatabaseManager
+from .firestore.index_manager import FirestoreIndexManager
 from .kms.kms_manager import KMSKeyRingManager
 from .kubernetes_engine.cluster_v1_manager import GKEClusterV1Manager
 from .kubernetes_engine.cluster_v1beta_manager import GKEClusterV1BetaManager

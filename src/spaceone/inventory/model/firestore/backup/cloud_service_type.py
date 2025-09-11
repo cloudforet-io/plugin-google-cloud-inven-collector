@@ -11,7 +11,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
     SearchField,
-    SizeField,
     TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
@@ -34,7 +33,7 @@ cst_backup.provider = "google_cloud"
 cst_backup.group = "Firestore"
 cst_backup.service_code = "Cloud Firestore"
 cst_backup.is_primary = False
-cst_backup.is_major = True
+cst_backup.is_major = False
 cst_backup.labels = ["NoSQL", "Database", "Backup"]
 cst_backup.tags = {
     "spaceone:icon": f"{ASSET_URL}/Firestore.svg",
@@ -42,8 +41,7 @@ cst_backup.tags = {
 
 cst_backup._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Location", "data.location_id"),
-        TextDyField.data_source("Database", "data.database"),
+        TextDyField.data_source("Database ID", "data.database_id"),
         EnumDyField.data_source(
             "State",
             "data.state",
@@ -53,20 +51,14 @@ cst_backup._metadata = CloudServiceTypeMeta.set_meta(
                 "red.500": ["NOT_AVAILABLE"],
             },
         ),
-        SizeField.data_source("Size", "data.size_bytes"),
-        DateTimeDyField.data_source("Created", "data.create_time"),
         DateTimeDyField.data_source("Expires", "data.expire_time"),
-        DateTimeDyField.data_source("Version Time", "data.version_time"),
+        DateTimeDyField.data_source("Snapshot Time", "data.snapshot_time"),
     ],
     search=[
-        SearchField.set(name="Location", key="data.location_id"),
-        SearchField.set(name="Database", key="data.database"),
+        SearchField.set(name="Database ID", key="data.database_id"),
         SearchField.set(name="State", key="data.state"),
         SearchField.set(
-            name="Size (Bytes)", key="data.size_bytes", data_type="integer"
-        ),
-        SearchField.set(
-            name="Created Time", key="data.create_time", data_type="datetime"
+            name="Created Time", key="data.expire_time", data_type="datetime"
         ),
     ],
     widget=[

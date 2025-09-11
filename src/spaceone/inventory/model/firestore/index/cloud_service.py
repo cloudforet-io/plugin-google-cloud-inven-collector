@@ -21,8 +21,8 @@ index_meta = CloudServiceMeta.set_layouts(
             "Index",
             fields=[
                 TextDyField.data_source("Index Name", "data.name"),
+                TextDyField.data_source("Full Name", "data.full_name"),
                 TextDyField.data_source("Database ID", "data.database_id"),
-                TextDyField.data_source("Project", "data.project_id"),
                 TextDyField.data_source("Collection Group", "data.collection_group"),
                 EnumDyField.data_source(
                     "Query Scope",
@@ -30,14 +30,6 @@ index_meta = CloudServiceMeta.set_layouts(
                     default_badge={
                         "indigo.500": ["COLLECTION"],
                         "coral.600": ["COLLECTION_GROUP"],
-                    },
-                ),
-                EnumDyField.data_source(
-                    "API Scope",
-                    "data.api_scope",
-                    default_badge={
-                        "indigo.500": ["ANY_API"],
-                        "coral.600": ["DATASTORE_MODE_API"],
                     },
                 ),
                 EnumDyField.data_source(
@@ -50,6 +42,7 @@ index_meta = CloudServiceMeta.set_layouts(
                     },
                 ),
                 TextDyField.data_source("Fields Summary", "data.fields_summary"),
+                TextDyField.data_source("Density", "data.density"),
             ],
         ),
     ]

@@ -33,7 +33,7 @@ cst_backup_schedule.provider = "google_cloud"
 cst_backup_schedule.group = "Firestore"
 cst_backup_schedule.service_code = "Cloud Firestore"
 cst_backup_schedule.is_primary = False
-cst_backup_schedule.is_major = False
+cst_backup_schedule.is_major = True
 cst_backup_schedule.labels = ["NoSQL", "Database", "Backup"]
 cst_backup_schedule.tags = {
     "spaceone:icon": f"{ASSET_URL}/Firestore.svg",
@@ -47,14 +47,12 @@ cst_backup_schedule._metadata = CloudServiceTypeMeta.set_meta(
             "data.recurrence_type",
             default_badge={"indigo.500": ["DAILY"], "coral.600": ["WEEKLY"]},
         ),
-        TextDyField.data_source("Retention", "data.retention"),
         DateTimeDyField.data_source("Created", "data.create_time"),
         DateTimeDyField.data_source("Updated", "data.update_time"),
     ],
     search=[
         SearchField.set(name="Database ID", key="data.database_id"),
         SearchField.set(name="Recurrence Type", key="data.recurrence_type"),
-        SearchField.set(name="Retention", key="data.retention"),
         SearchField.set(
             name="Created Time", key="data.create_time", data_type="datetime"
         ),

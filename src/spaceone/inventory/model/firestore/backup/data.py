@@ -1,36 +1,24 @@
-from schematics import Model
 from schematics.types import (
-    IntType,
     StringType,
 )
+
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 __all__ = ["Backup"]
 
 
-class Backup(Model):
-    # 기본 정보
-    name = StringType(required=True)
-    database = StringType(required=True)  # 원본 데이터베이스 경로
-    project_id = StringType(required=True)
-    location_id = StringType(required=True)
+class Backup(BaseResource):
+    full_name = StringType()
+    database_id = StringType()
+    database_uid = StringType(deserialize_from="databaseUid")
 
-    # 백업 상태
-    state = StringType(choices=["CREATING", "READY", "NOT_AVAILABLE"])
+    state = StringType()
 
-    # 시간 정보
-    create_time = StringType()
-    expire_time = StringType()
-    version_time = StringType()  # 백업된 데이터의 시점
-
-    # 백업 크기 및 통계
-    size_bytes = IntType()
-
-    # 메타데이터
-    uid = StringType()
+    snapshot_time = StringType(deserialize_from="snapshotTime")
+    expire_time = StringType(deserialize_from="expireTime")
 
     def reference(self):
-        backup_id = self.name.split("/")[-1] if "/" in self.name else self.name
         return {
-            "resource_id": self.name,
-            "external_link": f"https://console.cloud.google.com/firestore/locations/{self.location_id}/backups/{backup_id}?project={self.project_id}",
+            "resource_id": f"https://firestore.googleapis.com/v1/{self.full_name}",
+            "external_link": f"https://console.cloud.google.com/firestore/databases/{self.database_id}/disaster-recovery?project={self.project}",
         }

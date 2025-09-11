@@ -8,7 +8,6 @@ from spaceone.inventory.libs.schema.cloud_service import (
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
-    SizeField,
     TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout
@@ -24,8 +23,8 @@ backup_meta = CloudServiceMeta.set_layouts(
             "Backup Information",
             fields=[
                 TextDyField.data_source("Name", "data.name"),
-                TextDyField.data_source("Location", "data.location_id"),
-                TextDyField.data_source("Database", "data.database"),
+                TextDyField.data_source("Full Name", "data.full_name"),
+                TextDyField.data_source("Database ID", "data.database_id"),
                 EnumDyField.data_source(
                     "State",
                     "data.state",
@@ -35,11 +34,9 @@ backup_meta = CloudServiceMeta.set_layouts(
                         "red.500": ["NOT_AVAILABLE"],
                     },
                 ),
-                SizeField.data_source("Size", "data.size_bytes"),
-                DateTimeDyField.data_source("Created", "data.create_time"),
                 DateTimeDyField.data_source("Expires", "data.expire_time"),
-                DateTimeDyField.data_source("Version Time", "data.version_time"),
-                TextDyField.data_source("UID", "data.uid"),
+                DateTimeDyField.data_source("Snapshot Time", "data.snapshot_time"),
+                TextDyField.data_source("UID", "data.database_uid"),
             ],
         )
     ]
