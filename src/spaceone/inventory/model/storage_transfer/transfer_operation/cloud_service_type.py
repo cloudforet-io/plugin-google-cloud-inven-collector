@@ -11,7 +11,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
     SearchField,
-    SizeField,
     TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
@@ -56,18 +55,8 @@ cst_transfer_operation._metadata = CloudServiceTypeMeta.set_meta(
         DateTimeDyField.data_source("Start Time", "data.metadata.start_time"),
         DateTimeDyField.data_source("End Time", "data.metadata.end_time"),
         TextDyField.data_source("Duration", "data.duration"),
-        TextDyField.data_source(
-            "Objects Transferred", "data.metadata.counters.objects_copied_to_sink"
-        ),
-        SizeField.data_source(
-            "Bytes Transferred", "data.metadata.counters.bytes_copied_to_sink"
-        ),
-        TextDyField.data_source(
-            "Objects Failed", "data.metadata.counters.objects_from_source_failed"
-        ),
     ],
     search=[
-        SearchField.set(name="Operation Name", key="name"),
         SearchField.set(name="Transfer Job Name", key="data.transfer_job_name"),
         SearchField.set(
             name="Status",
@@ -93,17 +82,6 @@ cst_transfer_operation._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(
             name="End Time", key="data.metadata.end_time", data_type="datetime"
         ),
-        SearchField.set(
-            name="Objects Transferred",
-            key="data.metadata.counters.objects_copied_to_sink",
-            data_type="integer",
-        ),
-        SearchField.set(
-            name="Bytes Transferred",
-            key="data.metadata.counters.bytes_copied_to_sink",
-            data_type="integer",
-        ),
-        SearchField.set(name="Account ID", key="account"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

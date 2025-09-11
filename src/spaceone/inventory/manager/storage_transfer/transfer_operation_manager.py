@@ -72,12 +72,18 @@ class StorageTransferOperationManager(GoogleCloudManager):
                     # 1. Set Basic Information
                     ##################################
                     operation_name = operation.get("name", "")
-                    operation_simple_name = (
+                    operation_id = (
                         operation_name.split("/")[-1]
                         if "/" in operation_name
                         else operation_name
                     )
                     metadata = operation.get("metadata", {})
+                    transfer_job_name = metadata.get("transferJobName", "")
+                    transfer_job_id = (
+                        transfer_job_name.split("/")[-1]
+                        if "/" in transfer_job_name
+                        else transfer_job_name
+                    )
 
                     ##################################
                     # 2. Make Base Data
@@ -88,16 +94,13 @@ class StorageTransferOperationManager(GoogleCloudManager):
                     # 데이터 업데이트
                     operation.update(
                         {
-                            "name": operation_simple_name,
+                            "name": operation_id,
                             "full_name": operation_name,
                             "project": project_id,
-                            "transfer_job_name": metadata.get("transferJobName", ""),
+                            "transfer_job_id": transfer_job_id,
+                            "transfer_job_name": transfer_job_name,
                             "duration": duration,
                         }
-                    )
-
-                    self_link = (
-                        f"https://storagetransfer.googleapis.com/v1/{operation_name}"
                     )
 
                     operation_data = TransferOperation(operation, strict=False)
@@ -107,7 +110,7 @@ class StorageTransferOperationManager(GoogleCloudManager):
                     ##################################
                     operation_resource = TransferOperationResource(
                         {
-                            "name": operation_simple_name,
+                            "name": operation_id,
                             "account": project_id,
                             "region_code": "global",
                             "instance_type": metadata.get("status", ""),
@@ -115,9 +118,7 @@ class StorageTransferOperationManager(GoogleCloudManager):
                                 "bytesCopiedToSink", 0
                             ),
                             "data": operation_data,
-                            "reference": ReferenceModel(
-                                operation_data.reference(self_link=self_link)
-                            ),
+                            "reference": ReferenceModel(operation_data.reference()),
                         }
                     )
 
@@ -160,6 +161,24 @@ class StorageTransferOperationManager(GoogleCloudManager):
         return collected_cloud_services, error_responses
 
     @staticmethod
+    def _parse_iso_datetime(datetime_str: str) -> datetime:
+        # Z를 +00:00으로 변환
+        normalized_str = datetime_str.replace("Z", "+00:00")
+
+        # 나노초(9자리)를 마이크로초(6자리)로 변환
+        if "." in normalized_str and "+" in normalized_str:
+            # 소수점 부분과 타임존 부분 분리
+            datetime_part, tz_part = normalized_str.rsplit("+", 1)
+            if "." in datetime_part:
+                main_part, fractional_part = datetime_part.split(".", 1)
+                # 9자리 나노초를 6자리 마이크로초로 자르기
+                if len(fractional_part) > 6:
+                    fractional_part = fractional_part[:6]
+                normalized_str = f"{main_part}.{fractional_part}+{tz_part}"
+
+        return datetime.fromisoformat(normalized_str)
+
+    @staticmethod
     def _calculate_duration(metadata: Dict) -> str:
         """실행 시간을 계산합니다.
 
@@ -176,10 +195,14 @@ class StorageTransferOperationManager(GoogleCloudManager):
             return ""
 
         try:
-            start_time = datetime.fromisoformat(start_time_str.replace("Z", "+00:00"))
+            start_time = StorageTransferOperationManager._parse_iso_datetime(
+                start_time_str
+            )
 
             if end_time_str:
-                end_time = datetime.fromisoformat(end_time_str.replace("Z", "+00:00"))
+                end_time = StorageTransferOperationManager._parse_iso_datetime(
+                    end_time_str
+                )
                 duration = end_time - start_time
 
                 # 시간 포맷팅
@@ -202,11 +225,12 @@ class StorageTransferOperationManager(GoogleCloudManager):
                 minutes, seconds = divmod(remainder, 60)
 
                 if hours > 0:
-                    return f"{hours}h {minutes}m (ongoing)"
+                    return f"{hours}h {minutes}m"
                 elif minutes > 0:
-                    return f"{minutes}m {seconds}s (ongoing)"
+                    return f"{minutes}m {seconds}s"
                 else:
-                    return f"{seconds}s (ongoing)"
+                    return f"{seconds}s"
 
-        except Exception:
+        except Exception as e:
+            _LOGGER.warning(f"Failed to parse datetime: {e}")
             return ""
