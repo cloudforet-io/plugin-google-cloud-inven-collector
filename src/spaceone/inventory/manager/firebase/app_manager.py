@@ -138,14 +138,20 @@ class FirebaseManager(GoogleCloudManager):
         Returns:
             dict: 처리된 앱 데이터
         """
-        # 앱 설정 정보 구성 (플랫폼별)
-        app_config_data = self._build_app_config(app_data)
+        # name 필드에서 실제 프로젝트 ID 추출 (예: "projects/mkkang-project/androidApps/...")
+        actual_project_id = self._extract_project_id_from_name(app_data.get("name", ""))
         
-        # 최종 앱 데이터 구성 (기본 데이터만 사용)
+        # 추출 실패 시 경고 로그 출력
+        if not actual_project_id:
+            _LOGGER.warning(f"Failed to extract project ID from name: {app_data.get('name', 'N/A')}, using fallback: {project_id}")
+        
+        # 불필요한 expire_time 필터링 (기본값인 경우 제거)
+        filtered_app_data = self._filter_app_data(app_data)
+        
+        # 최종 앱 데이터 구성
         return {
-            **app_data,
-            "appConfig": app_config_data,
-            "namespace": project_id,  # Firebase 앱의 namespace는 프로젝트 ID
+            **filtered_app_data,
+            "projectId": actual_project_id or project_id,  # name에서 추출 실패 시 폴백 사용
         }
 
 
@@ -160,25 +166,64 @@ class FirebaseManager(GoogleCloudManager):
         Returns:
             dict: 기본 앱 데이터
         """
+        # name 필드에서 실제 프로젝트 ID 추출
+        actual_project_id = self._extract_project_id_from_name(app_data.get("name", ""))
+        
+        # 추출 실패 시 경고 로그 출력
+        if not actual_project_id:
+            _LOGGER.warning(f"Failed to extract project ID from name in fallback: {app_data.get('name', 'N/A')}, using fallback: {project_id}")
+        
+        # 불필요한 expire_time 필터링 (기본값인 경우 제거)
+        filtered_app_data = self._filter_app_data(app_data)
+        
         return {
-            **app_data,
-            "appConfig": {},
-            "namespace": project_id,
+            **filtered_app_data,
+            "projectId": actual_project_id or project_id,  # name에서 추출 실패 시 폴백 사용
             "error_fallback": True,  # 에러 발생 표시
         }
 
-    def _build_app_config(self, app_data: dict) -> dict:
-        """플랫폼별 앱 설정 정보를 구성합니다."""
-        platform = app_data.get("platform")
+
+    def _extract_project_id_from_name(self, name: str) -> str:
+        """
+        Firebase 앱의 name 필드에서 프로젝트 ID를 추출합니다.
         
-        if platform == "ANDROID":
-            return {"package_name": app_data.get("packageName")}
-        elif platform == "IOS":
-            return {"bundle_id": app_data.get("bundleId")}
-        elif platform == "WEB":
-            return {"web_id": app_data.get("webId")}
+        Args:
+            name: Firebase 앱의 name (예: "projects/mkkang-project/androidApps/...")
+            
+        Returns:
+            str: 추출된 프로젝트 ID (예: "mkkang-project")
+        """
+        if not name or not name.startswith("projects/"):
+            return ""
         
-        return {}
+        try:
+            # "projects/{project_id}/..." 형식에서 project_id 추출
+            parts = name.split("/")
+            if len(parts) >= 2:
+                return parts[1]  # projects/ 다음의 프로젝트 ID
+        except Exception as e:
+            _LOGGER.warning(f"Failed to extract project ID from name '{name}': {e}")
+        
+        return ""
+
+    def _filter_app_data(self, app_data: dict) -> dict:
+        """
+        Firebase 앱 데이터에서 불필요한 필드를 필터링합니다.
+        
+        Args:
+            app_data: 원본 앱 데이터
+            
+        Returns:
+            dict: 필터링된 앱 데이터
+        """
+        filtered_data = dict(app_data)
+        
+        # expire_time이 기본값(1970-01-01T00:00:00Z)인 경우 제거
+        expire_time = filtered_data.get("expireTime", "")
+        if expire_time == "1970-01-01T00:00:00Z":
+            filtered_data.pop("expireTime", None)
+        
+        return filtered_data
 
     def _create_app_response(self, app_data: dict, project_id: str) -> CloudServiceResponse:
         """

@@ -17,14 +17,6 @@ Firebase App Data Model
 """
 
 
-class AppConfig(Model):
-    """Firebase 앱 설정 정보"""
-
-    package_name = StringType(deserialize_from="packageName")
-    bundle_id = StringType(deserialize_from="bundleId")
-    web_id = StringType(deserialize_from="webId")
-
-
 class App(Model):
     """Firebase 앱 정보 모델"""
 
@@ -35,26 +27,25 @@ class App(Model):
     app_id = StringType(deserialize_from="appId")
     state = StringType()
     
-    # 설정 정보
-    app_config = ModelType(AppConfig, deserialize_from="appConfig")
+    # 플랫폼별 설정 정보 (조건부 포함)
+    package_name = StringType(deserialize_from="packageName", serialize_when_none=False)  # Android만
+    bundle_id = StringType(deserialize_from="bundleId", serialize_when_none=False)        # iOS만
+    web_id = StringType(deserialize_from="webId", serialize_when_none=False)              # Web만
     
     # API 메타데이터
-    etag = StringType()
     namespace = StringType()
     api_key_id = StringType(deserialize_from="apiKeyId")
-    expire_time = StringType(deserialize_from="expireTime")
+    expire_time = StringType(deserialize_from="expireTime", serialize_when_none=False)
     
-    # Firebase API 원본 필드들 (호환성 유지)
+    # 프로젝트 정보
     project_id = StringType(deserialize_from="projectId")
-    package_name = StringType(deserialize_from="packageName")  
-    bundle_id = StringType(deserialize_from="bundleId")
-    web_id = StringType(deserialize_from="webId")
 
     def reference(self):
         project_id = self.project_id or ""
+        app_id = self.app_id or ""
         return {
             "resource_id": self.app_id,
-            "external_link": f"https://console.firebase.google.com/project/{project_id}/settings/general",
+            "external_link": f"https://console.firebase.google.com/project/{project_id}/settings/general/{app_id}",
         }
 
 
@@ -75,19 +66,17 @@ firebase_app_meta = CloudServiceMeta.set_layouts(
                         "blue.500": ["WEB"],
                     },
                 ),
-                TextDyField.data_source("Resource Name", "data.name"),
                 TextDyField.data_source("Namespace", "data.namespace"),
                 BadgeDyField.data_source("State", "data.state"),
                 TextDyField.data_source("API Key ID", "data.api_key_id"),
-                TextDyField.data_source("Expire Time", "data.expire_time"),
             ],
         ),
         ItemDynamicLayout.set_fields(
-            "App Configuration",
+            "Platform Configuration",
             fields=[
-                TextDyField.data_source("Package Name", "data.app_config.package_name"),
-                TextDyField.data_source("Bundle ID", "data.app_config.bundle_id"),
-                TextDyField.data_source("Web ID", "data.app_config.web_id"),
+                TextDyField.data_source("Package Name", "data.package_name"),  # Android
+                TextDyField.data_source("Bundle ID", "data.bundle_id"),        # iOS
+                TextDyField.data_source("Web ID", "data.web_id"),              # Web
             ],
         ),
     ]
