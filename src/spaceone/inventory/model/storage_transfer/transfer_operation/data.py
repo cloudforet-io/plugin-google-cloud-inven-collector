@@ -3,7 +3,6 @@ from schematics.types import (
     BooleanType,
     DictType,
     IntType,
-    ListType,
     ModelType,
     StringType,
 )
@@ -39,11 +38,9 @@ class TransferCounters(Model):
     )
 
 
-class ErrorSummary(Model):
-    """에러 요약 정보"""
-
-    error_code = StringType(deserialize_from="errorCode")
-    error_count = IntType(deserialize_from="errorCount")
+class OperationError(Model):
+    code = IntType(serialize_when_none=False)  # google.rpc.Code enum 값
+    message = StringType(serialize_when_none=False)
 
 
 class OperationMetadata(Model):
@@ -66,9 +63,6 @@ class OperationMetadata(Model):
         )
     )
     counters = ModelType(TransferCounters, serialize_when_none=False)
-    error_breakdowns = ListType(
-        ModelType(ErrorSummary), deserialize_from="errorBreakdowns", default=[]
-    )
     transfer_job_name = StringType(deserialize_from="transferJobName")
 
 
@@ -78,14 +72,15 @@ class TransferOperation(BaseResource):
     metadata = ModelType(OperationMetadata, serialize_when_none=False)
     done = BooleanType(serialize_when_none=False)
     response = DictType(StringType, serialize_when_none=False)
-    error = DictType(StringType, serialize_when_none=False)
+    error = ModelType(OperationError, serialize_when_none=False)
 
-    # 표시용 정보
+    full_name = StringType()
     transfer_job_name = StringType(serialize_when_none=False)
-    duration = StringType(serialize_when_none=False)  # 실행 시간
+    transfer_job_id = StringType(serialize_when_none=False)
+    duration = StringType(serialize_when_none=False)
 
-    def reference(self, self_link):
+    def reference(self):
         return {
-            "resource_id": self_link,
-            "external_link": f"https://console.cloud.google.com/transfer/jobs?project={self.project}",
+            "resource_id": f"https://storagetransfer.googleapis.com/v1/{self.full_name}",
+            "external_link": f"https://console.cloud.google.com/transfer/jobs/transferJobs%2F{self.transfer_job_id}?project={self.project}",
         }

@@ -67,7 +67,7 @@ class StorageTransferManager(GoogleCloudManager):
                     # 1. Set Basic Information
                     ##################################
                     transfer_job_name = transfer_job.get("name", "")
-                    transfer_job_simple_name = (
+                    transfer_job_id = (
                         transfer_job_name.split("/")[-1]
                         if "/" in transfer_job_name
                         else transfer_job_name
@@ -76,10 +76,44 @@ class StorageTransferManager(GoogleCloudManager):
                     ##################################
                     # 2. Make Base Data
                     ##################################
-                    # 소스 및 싱크 타입 결정
+                    # 기본 정보 업데이트
+                    transfer_job.update(
+                        {
+                            "name": transfer_job_id,
+                            "full_name": transfer_job_name,
+                            "project": project_id,
+                        }
+                    )
+
+                    transfer_job.update(
+                        {
+                            "google_cloud_logging": self.set_google_cloud_logging(
+                                "StorageTransfer",
+                                "TransferJob",
+                                project_id,
+                                transfer_job_id,
+                            ),
+                        }
+                    )
+
+                    # TransferJob 객체 생성 (Union Field 제약 적용)
+                    transfer_job_data = TransferJob(transfer_job, strict=False)
+
+                    # Union Field 검증 및 소스/싱크 타입 결정
                     transfer_spec = transfer_job.get("transferSpec", {})
-                    source_type = self._determine_source_type(transfer_spec)
-                    sink_type = self._determine_sink_type(transfer_spec)
+                    if transfer_job_data.transfer_spec:
+                        # Union Field 기반 타입 결정 (우선순위 적용)
+                        source_type = (
+                            transfer_job_data.transfer_spec.get_source_type()
+                            or "Unknown"
+                        )
+                        sink_type = (
+                            transfer_job_data.transfer_spec.get_sink_type() or "Unknown"
+                        )
+                    else:
+                        # 기존 방식으로 폴백
+                        source_type = self._determine_source_type(transfer_spec)
+                        sink_type = self._determine_sink_type(transfer_spec)
 
                     # 스케줄 표시 문자열 생성
                     schedule_display = self._make_schedule_display(
@@ -91,49 +125,25 @@ class StorageTransferManager(GoogleCloudManager):
                         transfer_spec.get("transferOptions", {})
                     )
 
-                    # 데이터 업데이트
-                    transfer_job.update(
-                        {
-                            "name": transfer_job_simple_name,
-                            "full_name": transfer_job_name,
-                            "source_type": source_type,
-                            "sink_type": sink_type,
-                            "schedule_display": schedule_display,
-                            "transfer_options_display": transfer_options_display,
-                        }
+                    # 추가 표시 정보 업데이트
+                    transfer_job_data.source_type = source_type
+                    transfer_job_data.sink_type = sink_type
+                    transfer_job_data.schedule_display = schedule_display
+                    transfer_job_data.transfer_options_display = (
+                        transfer_options_display
                     )
-
-                    transfer_job.update(
-                        {
-                            "google_cloud_logging": self.set_google_cloud_logging(
-                                "StorageTransfer",
-                                "TransferJob",
-                                project_id,
-                                transfer_job_simple_name,
-                            ),
-                        }
-                    )
-
-                    self_link = (
-                        f"https://storagetransfer.googleapis.com/v1/{transfer_job_name}"
-                    )
-
-                    # No labels!!
-                    transfer_job_data = TransferJob(transfer_job, strict=False)
 
                     ##################################
                     # 3. Make Return Resource
                     ##################################
                     transfer_job_resource = TransferJobResource(
                         {
-                            "name": transfer_job_simple_name,
+                            "name": transfer_job_id,
                             "account": project_id,
                             "region_code": "global",  # Storage Transfer는 글로벌 서비스
                             "instance_type": source_type,
                             "data": transfer_job_data,
-                            "reference": ReferenceModel(
-                                transfer_job_data.reference(self_link=self_link)
-                            ),
+                            "reference": ReferenceModel(transfer_job_data.reference()),
                         }
                     )
 
@@ -184,15 +194,18 @@ class StorageTransferManager(GoogleCloudManager):
 
         Returns:
             소스 타입 문자열
+
+        Note:
+            이 메서드는 Union Field 기반 소스 타입 결정이 실패할 경우의 폴백용도로 사용됩니다.
         """
         if "gcsDataSource" in transfer_spec:
             return "GCS"
         elif "awsS3DataSource" in transfer_spec:
-            return "S3"
+            return "AWS_S3"
         elif "awsS3CompatibleDataSource" in transfer_spec:
-            return "S3 Compatible"
+            return "S3_COMPATIBLE"
         elif "azureBlobStorageDataSource" in transfer_spec:
-            return "Azure"
+            return "AZURE_BLOB"
         elif "httpDataSource" in transfer_spec:
             return "HTTP"
         elif "posixDataSource" in transfer_spec:
@@ -211,6 +224,9 @@ class StorageTransferManager(GoogleCloudManager):
 
         Returns:
             싱크 타입 문자열
+
+        Note:
+            이 메서드는 Union Field 기반 싱크 타입 결정이 실패할 경우의 폴백용도로 사용됩니다.
         """
         if "gcsDataSink" in transfer_spec:
             return "GCS"

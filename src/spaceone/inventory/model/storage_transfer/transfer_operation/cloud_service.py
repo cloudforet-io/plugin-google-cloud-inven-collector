@@ -13,7 +13,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
     ItemDynamicLayout,
-    TableDynamicLayout,
 )
 from spaceone.inventory.model.storage_transfer.transfer_operation.data import (
     TransferOperation,
@@ -74,13 +73,12 @@ transfer_counters_meta = ItemDynamicLayout.set_fields(
     ],
 )
 
-# TAB - Error Breakdowns
-error_breakdowns_meta = TableDynamicLayout.set_fields(
-    "Error Breakdowns",
-    root_path="data.metadata.error_breakdowns",
+# TAB - Operation Error
+operation_error_meta = ItemDynamicLayout.set_fields(
+    "Operation Error",
     fields=[
-        TextDyField.data_source("Error Code", "error_code"),
-        TextDyField.data_source("Error Count", "error_count"),
+        TextDyField.data_source("Error Code", "data.error.code"),
+        TextDyField.data_source("Error Message", "data.error.message"),
     ],
 )
 
@@ -88,7 +86,7 @@ transfer_operation_meta = CloudServiceMeta.set_layouts(
     [
         operation_configuration_meta,
         transfer_counters_meta,
-        error_breakdowns_meta,
+        operation_error_meta,
     ]
 )
 

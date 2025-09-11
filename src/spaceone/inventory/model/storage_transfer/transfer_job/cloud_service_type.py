@@ -11,7 +11,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
     SearchField,
-    SizeField,
     TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
@@ -51,25 +50,20 @@ cst_transfer_job._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Source Type", "data.source_type"),
         TextDyField.data_source("Sink Type", "data.sink_type"),
         TextDyField.data_source("Schedule", "data.schedule_display"),
-        EnumDyField.data_source(
-            "Last Execution Status",
-            "data.last_execution_status",
-            default_state={
-                "safe": ["SUCCESS"],
-                "warning": ["IN_PROGRESS", "PAUSED", "QUEUED"],
-                "alert": ["FAILED", "ABORTED"],
-            },
-        ),
-        TextDyField.data_source(
-            "Total Objects Transferred", "data.total_objects_transferred"
-        ),
-        SizeField.data_source(
-            "Total Bytes Transferred", "data.total_bytes_transferred"
-        ),
-        TextDyField.data_source("Total Objects Failed", "data.total_objects_failed"),
         TextDyField.data_source("Latest Operation", "data.latest_operation_name"),
         DateTimeDyField.data_source("Created", "data.creation_time"),
         DateTimeDyField.data_source("Last Modified", "data.last_modification_time"),
+        # Union Field 기반 활성 구성 정보
+        TextDyField.data_source(
+            "Active Source Details",
+            "data.active_source_details",
+            options={"is_optional": True},
+        ),
+        TextDyField.data_source(
+            "Active Sink Details",
+            "data.active_sink_details",
+            options={"is_optional": True},
+        ),
         # Optional fields
         TextDyField.data_source(
             "Pub/Sub Topic",
@@ -81,7 +75,6 @@ cst_transfer_job._metadata = CloudServiceTypeMeta.set_meta(
         ),
     ],
     search=[
-        SearchField.set(name="Transfer Job Name", key="name"),
         SearchField.set(
             name="Status",
             key="data.status",
@@ -93,34 +86,8 @@ cst_transfer_job._metadata = CloudServiceTypeMeta.set_meta(
         ),
         SearchField.set(name="Source Type", key="data.source_type"),
         SearchField.set(name="Sink Type", key="data.sink_type"),
-        SearchField.set(
-            name="Last Execution Status",
-            key="data.last_execution_status",
-            enums={
-                "SUCCESS": {"label": "Success"},
-                "FAILED": {"label": "Failed"},
-                "IN_PROGRESS": {"label": "In Progress"},
-                "PAUSED": {"label": "Paused"},
-                "ABORTED": {"label": "Aborted"},
-                "QUEUED": {"label": "Queued"},
-                "SUSPENDING": {"label": "Suspending"},
-            },
-        ),
-        SearchField.set(
-            name="Total Objects Transferred",
-            key="data.total_objects_transferred",
-            data_type="integer",
-        ),
-        SearchField.set(
-            name="Total Bytes Transferred",
-            key="data.total_bytes_transferred",
-            data_type="integer",
-        ),
-        SearchField.set(
-            name="Total Objects Failed",
-            key="data.total_objects_failed",
-            data_type="integer",
-        ),
+        SearchField.set(name="Schedule", key="data.schedule_display"),
+        SearchField.set(name="Latest Operation", key="data.latest_operation_name"),
         SearchField.set(
             name="Creation Time", key="data.creation_time", data_type="datetime"
         ),
@@ -129,10 +96,6 @@ cst_transfer_job._metadata = CloudServiceTypeMeta.set_meta(
             key="data.last_modification_time",
             data_type="datetime",
         ),
-        SearchField.set(
-            name="Pub/Sub Topic", key="data.notification_config.pubsub_topic"
-        ),
-        SearchField.set(name="Account ID", key="account"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
