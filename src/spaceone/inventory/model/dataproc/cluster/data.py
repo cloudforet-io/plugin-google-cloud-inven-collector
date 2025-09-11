@@ -33,6 +33,7 @@ class InstanceGroupConfig(Model):
     machine_type_uri = StringType()
     disk_config = ModelType(DiskConfig)
     is_preemptible = BooleanType()
+    preemptibility = StringType()  # 가변형 VM 여부 (PREEMPTIBLE/NON_PREEMPTIBLE)
     min_cpu_platform = StringType()
 
 
@@ -57,6 +58,14 @@ class SoftwareConfig(Model):
     optional_components = ListType(StringType())
 
 
+class LifecycleConfig(Model):
+    """Dataproc 클러스터의 생명주기 구성을 나타냅니다."""
+
+    auto_delete_time = StringType()
+    auto_delete_ttl = StringType()
+    idle_delete_ttl = StringType()
+
+
 class ClusterConfig(Model):
     """Dataproc 클러스터의 전체적인 구성을 나타냅니다."""
 
@@ -65,13 +74,12 @@ class ClusterConfig(Model):
     gce_cluster_config = ModelType(GceClusterConfig)
     master_config = ModelType(InstanceGroupConfig)
     worker_config = ModelType(InstanceGroupConfig)
-    secondary_worker_config = ModelType(InstanceGroupConfig)
     software_config = ModelType(SoftwareConfig)
     initialization_actions = ListType(DictType(StringType()))
     encryption_config = DictType(StringType())
     autoscaling_policy = StringType()
     security_config = DictType(StringType())
-    lifecycle_config = DictType(StringType())
+    lifecycle_config = ModelType(LifecycleConfig)
 
 
 class AutoscalingPolicy(Model):
@@ -79,7 +87,7 @@ class AutoscalingPolicy(Model):
 
     id = StringType()
     name = StringType()
-    secondary_worker_config = DictType(StringType())
+    worker_config = DictType(StringType())
     basic_algorithm = DictType(StringType())
 
 
@@ -150,6 +158,7 @@ class DataprocJob(Model):
 class DataprocCluster(Model):
     """Dataproc 클러스터 리소스의 기본 데이터 모델입니다."""
 
+    name = StringType()
     project_id = StringType()
     cluster_name = StringType()
     cluster_uuid = StringType()
@@ -171,6 +180,6 @@ class DataprocCluster(Model):
             리소스 ID와 외부 링크를 포함한 참조 정보
         """
         return {
-            "resource_id": str(self.cluster_uuid or ""),
-            "external_link": f"https://console.cloud.google.com/dataproc/clusters/details/{self.location}/{self.cluster_name}?project={self.project_id}",
+            "resource_id": f"https://dataproc.googleapis.com/v1/projects/{self.project_id}/regions/{self.location}/clusters/{self.cluster_name}",
+            "external_link": f"https://console.cloud.google.com/dataproc/clusters?project={self.project_id}",
         }

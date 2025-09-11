@@ -7,25 +7,29 @@ from spaceone.inventory.libs.schema.cloud_service import (
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
+    ListDyField,
     TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
     ItemDynamicLayout,
+    TableDynamicLayout,
 )
 from spaceone.inventory.model.cloud_run.worker_pool_v2.data import WorkerPool
 
 """
 Cloud Run Worker Pool
 """
-# TAB - Worker Pool
+# TAB - Worker Pool Overview
 worker_pool_meta = ItemDynamicLayout.set_fields(
-    "Worker Pool",
+    "Worker Pool Overview",
     fields=[
-        TextDyField.data_source("Name", "data.metadata.name"),
-        TextDyField.data_source("UID", "data.metadata.uid"),
-        TextDyField.data_source("Generation", "data.metadata.generation"),
-        DateTimeDyField.data_source("Create Time", "data.metadata.create_time"),
-        DateTimeDyField.data_source("Update Time", "data.metadata.update_time"),
+        TextDyField.data_source("ID", "data.uid"),
+        TextDyField.data_source("Name", "data.full_name"),
+        TextDyField.data_source("Generation", "data.generation"),
+        DateTimeDyField.data_source("Create Time", "data.create_time"),
+        DateTimeDyField.data_source("Update Time", "data.update_time"),
+        TextDyField.data_source("Creator", "data.creator"),
+        TextDyField.data_source("Last Modifier", "data.last_modifier"),
     ],
 )
 
@@ -37,10 +41,33 @@ worker_pool_status_meta = ItemDynamicLayout.set_fields(
     ],
 )
 
+# TAB - Revisions
+worker_pool_revisions = TableDynamicLayout.set_fields(
+    "Revisions",
+    "data.revisions",
+    fields=[
+        TextDyField.data_source("ID", "uid"),
+        TextDyField.data_source("Name", "name"),
+        TextDyField.data_source("Generation", "generation"),
+        DateTimeDyField.data_source("Create Time", "create_time"),
+        DateTimeDyField.data_source("Update Time", "update_time"),
+        ListDyField.data_source(
+            "Conditions",
+            "conditions",
+            default_badge={
+                "type": "outline",
+                "sub_key": "type",
+                "delimiter": " ",
+            },
+        ),
+    ],
+)
+
 cloud_run_worker_pool_meta = CloudServiceMeta.set_layouts(
     [
         worker_pool_meta,
         worker_pool_status_meta,
+        worker_pool_revisions,
     ]
 )
 

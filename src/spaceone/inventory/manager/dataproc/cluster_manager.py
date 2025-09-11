@@ -5,6 +5,7 @@ from spaceone.inventory.connector.dataproc.cluster_connector import (
     DataprocClusterConnector,
 )
 from spaceone.inventory.libs.manager import GoogleCloudManager
+from spaceone.inventory.libs.schema.base import ReferenceModel
 from spaceone.inventory.model.dataproc.cluster.cloud_service import (
     DataprocClusterResource,
     DataprocClusterResponse,
@@ -228,89 +229,163 @@ class DataprocClusterManager(GoogleCloudManager):
 
                 # 기본 클러스터 데이터 준비
                 cluster_data = {
-                    "clusterName": str(cluster.get("clusterName", "")),
-                    "projectId": str(cluster.get("projectId", project_id)),
-                    "clusterUuid": str(cluster.get("clusterUuid", "")),
+                    "name": str(cluster.get("clusterName", "")),  # name 필드로 매핑
+                    "cluster_name": str(cluster.get("clusterName", "")),
+                    "project_id": str(project_id),  # project_id를 명시적으로 설정
+                    "cluster_uuid": str(cluster.get("clusterUuid", "")),
                     "status": cluster.get("status", {}),
                     "labels": {k: str(v) for k, v in cluster.get("labels", {}).items()},
                     "location": location,
                 }
 
                 # 설정 정보 추가
-                if "config" in cluster:
-                    config = cluster["config"]
-                    cluster_data["config"] = {
-                        "configBucket": str(config.get("configBucket", "")),
-                        "tempBucket": str(config.get("tempBucket", "")),
+                config = cluster.get("config", {})
+                cluster_data["config"] = {
+                    "config_bucket": str(config.get("configBucket", "")),
+                    "temp_bucket": str(config.get("tempBucket", "")),
+                }
+
+                # GCE 클러스터 설정
+                if "gceClusterConfig" in config:
+                    gce_config = config["gceClusterConfig"]
+                    cluster_data["config"]["gce_cluster_config"] = {
+                        "zone_uri": str(gce_config.get("zoneUri", "")),
+                        "network_uri": str(gce_config.get("networkUri", "")),
+                        "subnetwork_uri": str(gce_config.get("subnetworkUri", "")),
+                        "internal_ip_only": str(gce_config.get("internalIpOnly", "")),
+                        "service_account": str(gce_config.get("serviceAccount", "")),
+                        "service_account_scopes": gce_config.get(
+                            "serviceAccountScopes", []
+                        ),
                     }
 
-                    # GCE 클러스터 설정
-                    if "gceClusterConfig" in config:
-                        gce_config = config["gceClusterConfig"]
-                        cluster_data["config"]["gceClusterConfig"] = {
-                            "zoneUri": str(gce_config.get("zoneUri", "")),
-                            "networkUri": str(gce_config.get("networkUri", "")),
-                            "subnetworkUri": str(gce_config.get("subnetworkUri", "")),
-                            "internalIpOnly": str(gce_config.get("internalIpOnly", "")),
-                            "serviceAccount": str(gce_config.get("serviceAccount", "")),
-                            "serviceAccountScopes": gce_config.get(
-                                "serviceAccountScopes", []
-                            ),
-                        }
+                # 인스턴스 그룹 설정
+                if "instanceGroupConfig" in config:
+                    instance_config = config["instanceGroupConfig"]
+                    cluster_data["config"]["instanceGroupConfig"] = {
+                        "numInstances": str(instance_config.get("numInstances", "")),
+                        "instanceNames": instance_config.get("instanceNames", []),
+                        "imageUri": str(instance_config.get("imageUri", "")),
+                        "machineTypeUri": str(
+                            instance_config.get("machineTypeUri", "")
+                        ),
+                        "diskConfig": instance_config.get("diskConfig", {}),
+                    }
 
-                    # 인스턴스 그룹 설정
-                    if "instanceGroupConfig" in config:
-                        instance_config = config["instanceGroupConfig"]
-                        cluster_data["config"]["instanceGroupConfig"] = {
-                            "numInstances": str(
-                                instance_config.get("numInstances", "")
-                            ),
-                            "instanceNames": instance_config.get("instanceNames", []),
-                            "imageUri": str(instance_config.get("imageUri", "")),
-                            "machineTypeUri": str(
-                                instance_config.get("machineTypeUri", "")
-                            ),
-                            "diskConfig": instance_config.get("diskConfig", {}),
-                        }
+                # 마스터 설정
+                master_config = config.get("masterConfig", {})
+                if master_config:
+                    cluster_data["config"]["master_config"] = {
+                        "num_instances": str(master_config.get("numInstances", "")),
+                        "instance_names": master_config.get("instanceNames", []),
+                        "image_uri": str(master_config.get("imageUri", "")),
+                        "machine_type_uri": str(
+                            master_config.get("machineTypeUri", "")
+                        ),
+                        "disk_config": master_config.get("diskConfig", {}),
+                        "preemptibility": str(
+                            master_config.get("preemptibility", "NON_PREEMPTIBLE")
+                        ),
+                    }
+                else:
+                    cluster_data["config"]["master_config"] = {
+                        "num_instances": "",
+                        "instance_names": [],
+                        "image_uri": "",
+                        "machine_type_uri": "",
+                        "disk_config": {},
+                        "preemptibility": "NON_PREEMPTIBLE",
+                    }
 
-                    # 마스터 설정
-                    if "masterConfig" in config:
-                        master_config = config["masterConfig"]
-                        cluster_data["config"]["masterConfig"] = {
-                            "numInstances": str(master_config.get("numInstances", "")),
-                            "instanceNames": master_config.get("instanceNames", []),
-                            "imageUri": str(master_config.get("imageUri", "")),
-                            "machineTypeUri": str(
-                                master_config.get("machineTypeUri", "")
-                            ),
-                            "diskConfig": master_config.get("diskConfig", {}),
-                        }
+                # 워커 설정
+                worker_config = config.get("workerConfig", {})
+                if worker_config:
+                    cluster_data["config"]["worker_config"] = {
+                        "num_instances": str(worker_config.get("numInstances", "")),
+                        "instance_names": worker_config.get("instanceNames", []),
+                        "image_uri": str(worker_config.get("imageUri", "")),
+                        "machine_type_uri": str(
+                            worker_config.get("machineTypeUri", "")
+                        ),
+                        "disk_config": worker_config.get("diskConfig", {}),
+                    }
+                else:
+                    cluster_data["config"]["worker_config"] = {
+                        "num_instances": "",
+                        "instance_names": [],
+                        "image_uri": "",
+                        "machine_type_uri": "",
+                        "disk_config": {},
+                    }
 
-                    # 워커 설정
-                    if "workerConfig" in config:
-                        worker_config = config["workerConfig"]
-                        cluster_data["config"]["workerConfig"] = {
-                            "numInstances": str(worker_config.get("numInstances", "")),
-                            "instanceNames": worker_config.get("instanceNames", []),
-                            "imageUri": str(worker_config.get("imageUri", "")),
-                            "machineTypeUri": str(
-                                worker_config.get("machineTypeUri", "")
-                            ),
-                            "diskConfig": worker_config.get("diskConfig", {}),
-                        }
+                # 소프트웨어 설정
+                software_config = config.get("softwareConfig", {})
+                if software_config:
+                    cluster_data["config"]["software_config"] = {
+                        "image_version": str(software_config.get("imageVersion", "")),
+                        "properties": software_config.get("properties", {}),
+                        "optional_components": software_config.get(
+                            "optionalComponents", []
+                        ),
+                    }
+                else:
+                    cluster_data["config"]["software_config"] = {
+                        "image_version": "",
+                        "properties": {},
+                        "optional_components": [],
+                    }
 
-                    # 소프트웨어 설정
-                    if "softwareConfig" in config:
-                        software_config = config["softwareConfig"]
-                        cluster_data["config"]["softwareConfig"] = {
-                            "imageVersion": str(
-                                software_config.get("imageVersion", "")
-                            ),
-                            "properties": software_config.get("properties", {}),
-                            "optionalComponents": software_config.get(
-                                "optionalComponents", []
-                            ),
-                        }
+                # Worker Config
+                worker_config = config.get("workerConfig", {})
+                if worker_config:
+                    cluster_data["config"]["worker_config"] = {
+                        "num_instances": str(worker_config.get("numInstances", "")),
+                        "instance_names": worker_config.get("instanceNames", []),
+                        "image_uri": str(worker_config.get("imageUri", "")),
+                        "machine_type_uri": str(
+                            worker_config.get("machineTypeUri", "")
+                        ),
+                        "disk_config": worker_config.get("diskConfig", {}),
+                        "is_preemptible": worker_config.get("isPreemptible", False),
+                        "min_cpu_platform": str(
+                            worker_config.get("minCpuPlatform", "")
+                        ),
+                        "preemptibility": str(
+                            worker_config.get("preemptibility", "NON_PREEMPTIBLE")
+                        ),
+                    }
+                else:
+                    cluster_data["config"]["worker_config"] = {
+                        "num_instances": "",
+                        "instance_names": [],
+                        "image_uri": "",
+                        "machine_type_uri": "",
+                        "disk_config": {},
+                        "is_preemptible": False,
+                        "min_cpu_platform": "",
+                        "preemptibility": "NON_PREEMPTIBLE",
+                    }
+
+                # Lifecycle Config (Scheduled Deletion)
+                lifecycle_config = config.get("lifecycleConfig", {})
+                if lifecycle_config:
+                    cluster_data["config"]["lifecycle_config"] = {
+                        "auto_delete_time": str(
+                            lifecycle_config.get("autoDeleteTime", "")
+                        ),
+                        "auto_delete_ttl": str(
+                            lifecycle_config.get("autoDeleteTtl", "")
+                        ),
+                        "idle_delete_ttl": str(
+                            lifecycle_config.get("idleDeleteTtl", "")
+                        ),
+                    }
+                else:
+                    cluster_data["config"]["lifecycle_config"] = {
+                        "auto_delete_time": "",
+                        "auto_delete_ttl": "",
+                        "idle_delete_ttl": "",
+                    }
 
                 # 메트릭 정보 추가
                 if "metrics" in cluster:
@@ -358,14 +433,11 @@ class DataprocClusterManager(GoogleCloudManager):
                 # DataprocClusterResource 생성
                 cluster_resource = DataprocClusterResource(
                     {
-                        "name": cluster_data.get("clusterName"),
+                        "name": cluster_data.get("name"),
                         "data": dataproc_cluster_data,
-                        "reference": {
-                            "resource_id": cluster.get("clusterUuid"),
-                            "external_link": f"https://console.cloud.google.com/dataproc/clusters/details/{location}/{cluster_name}?project={project_id}",
-                        },
                         "region_code": location,
                         "account": project_id,
+                        "reference": ReferenceModel(dataproc_cluster_data.reference()),
                     }
                 )
 

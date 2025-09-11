@@ -1,6 +1,5 @@
 import os
 
-from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
@@ -32,30 +31,26 @@ cst_worker_pool.labels = ["Serverless"]
 cst_worker_pool.is_primary = True
 cst_worker_pool.is_major = True
 cst_worker_pool.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Cloud-Run.svg",
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud-Run.svg",
 }
 
 cst_worker_pool._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         EnumDyField.data_source(
             "Status",
-            "data.status.conditions.0.status",
+            "data.terminal_condition.state",
             default_state={
-                "safe": ["True"],
-                "warning": ["False"],
-                "alert": ["Unknown"],
+                "safe": ["CONDITION_SUCCEEDED"],
+                "warning": ["CONDITION_PENDING"],
+                "alert": ["CONDITION_FAILED"],
             },
         ),
-        TextDyField.data_source("Location", "data.metadata.location"),
-        TextDyField.data_source("Project", "data.metadata.project"),
         TextDyField.data_source("Revision Count", "data.revision_count"),
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
-        SearchField.set(name="Worker Pool ID", key="data.metadata.uid"),
-        SearchField.set(name="Location", key="data.metadata.location"),
-        SearchField.set(name="Project", key="data.metadata.project"),
-        SearchField.set(name="Status", key="data.status.conditions.0.status"),
+        SearchField.set(name="Status", key="data.terminal_condition.state"),
+        SearchField.set(name="Revision Count", key="data.revision_count"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

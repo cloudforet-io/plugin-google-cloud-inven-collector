@@ -18,8 +18,7 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
     ItemDynamicLayout,
-    SimpleTableDynamicLayout,
-    TableDynamicLayout,
+    ListDynamicLayout,
 )
 from spaceone.inventory.model.dataproc.cluster.data import DataprocCluster
 
@@ -27,7 +26,7 @@ from spaceone.inventory.model.dataproc.cluster.data import DataprocCluster
 CLUSTER
 """
 cluster_info_meta = ItemDynamicLayout.set_fields(
-    "Cluster Info",
+    "Cluster Overview",
     fields=[
         TextDyField.data_source("Name", "data.cluster_name"),
         TextDyField.data_source("UUID", "data.cluster_uuid"),
@@ -46,8 +45,9 @@ cluster_info_meta = ItemDynamicLayout.set_fields(
     ],
 )
 
-cluster_config_meta = ItemDynamicLayout.set_fields(
-    "Configuration",
+# Configuration 섹션들을 개별적으로 정의
+cluster_basic_config_meta = ItemDynamicLayout.set_fields(
+    "Basic Configuration",
     fields=[
         TextDyField.data_source("Config Bucket", "data.config.config_bucket"),
         TextDyField.data_source("Temp Bucket", "data.config.temp_bucket"),
@@ -60,7 +60,7 @@ cluster_config_meta = ItemDynamicLayout.set_fields(
     ],
 )
 
-cluster_network_meta = ItemDynamicLayout.set_fields(
+cluster_network_config_meta = ItemDynamicLayout.set_fields(
     "Network Configuration",
     fields=[
         TextDyField.data_source("Zone", "data.config.gce_cluster_config.zone_uri"),
@@ -79,24 +79,71 @@ cluster_network_meta = ItemDynamicLayout.set_fields(
     ],
 )
 
-cluster_instances_meta = SimpleTableDynamicLayout.set_fields(
-    "Instance Configuration",
-    root_path="data.config",
+# Configuration을 ListDynamicLayout으로 통합
+cluster_config_meta = ListDynamicLayout.set_layouts(
+    "Configuration", layouts=[cluster_basic_config_meta, cluster_network_config_meta]
+)
+
+cluster_master_config_meta = ItemDynamicLayout.set_fields(
+    "Master Configuration",
     fields=[
-        TextDyField.data_source("Type", "instance_type"),
-        TextDyField.data_source("Instances", "num_instances"),
-        TextDyField.data_source("Machine Type", "machine_type_uri"),
-        TextDyField.data_source("Boot Disk Type", "disk_config.boot_disk_type"),
-        SizeField.data_source("Boot Disk Size", "disk_config.boot_disk_size_gb"),
+        TextDyField.data_source("Instances", "data.config.master_config.num_instances"),
+        TextDyField.data_source(
+            "Machine Type", "data.config.master_config.machine_type_uri"
+        ),
+        TextDyField.data_source("Image URI", "data.config.master_config.image_uri"),
+        TextDyField.data_source(
+            "Boot Disk Type", "data.config.master_config.disk_config.boot_disk_type"
+        ),
+        SizeField.data_source(
+            "Boot Disk Size", "data.config.master_config.disk_config.boot_disk_size_gb"
+        ),
+        TextDyField.data_source(
+            "Min CPU Platform", "data.config.master_config.min_cpu_platform"
+        ),
+        EnumDyField.data_source(
+            "Preemptibility",
+            "data.config.master_config.preemptibility",
+            default_state={
+                "safe": ["NON_PREEMPTIBLE"],
+                "warning": ["PREEMPTIBLE"],
+            },
+        ),
     ],
 )
 
-cluster_labels_meta = TableDynamicLayout.set_fields(
-    "Labels",
-    root_path="data.labels",
+cluster_worker_config_meta = ItemDynamicLayout.set_fields(
+    "Worker Configuration",
     fields=[
-        TextDyField.data_source("Key", "key"),
-        TextDyField.data_source("Value", "value"),
+        TextDyField.data_source("Instances", "data.config.worker_config.num_instances"),
+        TextDyField.data_source(
+            "Machine Type", "data.config.worker_config.machine_type_uri"
+        ),
+        TextDyField.data_source("Image URI", "data.config.worker_config.image_uri"),
+        TextDyField.data_source(
+            "Boot Disk Type", "data.config.worker_config.disk_config.boot_disk_type"
+        ),
+        SizeField.data_source(
+            "Boot Disk Size", "data.config.worker_config.disk_config.boot_disk_size_gb"
+        ),
+        TextDyField.data_source(
+            "Min CPU Platform", "data.config.worker_config.min_cpu_platform"
+        ),
+        EnumDyField.data_source(
+            "Preemptibility",
+            "data.config.worker_config.preemptibility",
+            default_state={
+                "safe": ["NON_PREEMPTIBLE"],
+                "warning": ["PREEMPTIBLE"],
+            },
+        ),
+    ],
+)
+
+cluster_labels_meta = ItemDynamicLayout.set_fields(
+    "Labels",
+    fields=[
+        ListDyField.data_source("Labels", "data.labels", options={"delimiter": " | "}),
     ],
 )
 
@@ -104,8 +151,8 @@ cluster_meta = CloudServiceMeta.set_layouts(
     [
         cluster_info_meta,
         cluster_config_meta,
-        cluster_network_meta,
-        cluster_instances_meta,
+        cluster_master_config_meta,
+        cluster_worker_config_meta,
         cluster_labels_meta,
     ]
 )
@@ -113,6 +160,7 @@ cluster_meta = CloudServiceMeta.set_layouts(
 
 class DataprocClusterResource(CloudServiceResource):
     cloud_service_type = StringType(default="Cluster")
+    cloud_service_group = StringType(default="Dataproc")
     data = ModelType(DataprocCluster)
     _metadata = ModelType(
         CloudServiceMeta, default=cluster_meta, serialized_name="metadata"

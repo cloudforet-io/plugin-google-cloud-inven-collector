@@ -8,7 +8,7 @@ from schematics.types import (
 
 class WorkerPool(Model):
     name = StringType()
-    display_name = StringType(deserialize_from="displayName")
+    full_name = StringType()
     uid = StringType()
     annotations = DictType(StringType, default={})
     create_time = StringType(deserialize_from="createTime")
@@ -18,4 +18,5 @@ class WorkerPool(Model):
     private_pool_v1_config = DictType(
         BaseType, deserialize_from="privatePoolV1Config", default={}
     )
+    disk_size_display = StringType()  # GB 단위로 표시
     etag = StringType()

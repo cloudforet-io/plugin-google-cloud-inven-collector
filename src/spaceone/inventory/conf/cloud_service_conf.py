@@ -34,7 +34,7 @@ CLOUD_SERVICE_GROUP_MAP = {
     ],
     "CloudFunctions": ["FunctionGen2Manager", "FunctionGen1Manager"],
     "Filestore": ["FilestoreInstanceManager"],
-    "Firebase": ["FirebaseProjectManager"],
+    "Firebase": ["FirebaseAppManager"],
     "Batch": ["BatchManager"],
     "CloudBuild": [
         "CloudBuildBuildV1Manager",
@@ -44,23 +44,20 @@ CLOUD_SERVICE_GROUP_MAP = {
         "CloudBuildRepositoryV2Manager",
     ],
     "CloudRun": [
-        # V1 API는 비활성화
+        # V1 API
         # "CloudRunServiceV1Manager",
         # "CloudRunJobV1Manager",
         # "CloudRunWorkerPoolV1Manager",
-        # "CloudRunDomainMappingV1Manager",
-        # "CloudRunRouteV1Manager",
-        # "CloudRunConfigurationV1Manager",
-        # V2 API 활성화
+        "CloudRunDomainMappingV1Manager",
+        "CloudRunRouteV1Manager",
+        "CloudRunConfigurationV1Manager",
+        # V2 API
         "CloudRunServiceV2Manager",
         "CloudRunJobV2Manager",
         "CloudRunWorkerPoolV2Manager",
         # "CloudRunOperationV2Manager",
     ],
-    "KubernetesEngine": [
-        "GKEClusterV1Manager",
-        "GKENodePoolV1Manager"
-    ],
+    "KubernetesEngine": ["GKEClusterV1Manager", "GKENodePoolV1Manager"],
     "AppEngine": [
         "AppEngineApplicationV1Manager",
         "AppEngineServiceV1Manager",
@@ -116,6 +113,28 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         }
     },
     "BigQuery": {},
+    "CloudBuild": {
+        "Build": {
+            "resource_type": "cloud_build",
+            "labels_key": "resource.labels.build_id",
+        },
+        "Trigger": {
+            "resource_type": "cloud_build_trigger",
+            "labels_key": "resource.labels.trigger_id",
+        },
+        "WorkerPool": {
+            "resource_type": "cloud_build_worker_pool",
+            "labels_key": "resource.labels.worker_pool_id",
+        },
+        "Connection": {
+            "resource_type": "cloud_build_connection",
+            "labels_key": "resource.labels.connection_id",
+        },
+        "Repository": {
+            "resource_type": "cloud_build_repository",
+            "labels_key": "resource.labels.repository_id",
+        },
+    },
     "CloudStorage": {
         "Bucket": {
             "resource_type": "gcs_bucket",
@@ -150,10 +169,10 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         }
     },
     "Firebase": {
-        "Project": {
-            "resource_type": "firebase_project",
-            "labels_key": "resource.labels.project_id",
-        }
+        "App": {
+            "resource_type": "firebase_app",
+            "labels_key": "resource.labels.app_id",
+        },
     },
     "Batch": {
         "Location": {
@@ -166,6 +185,18 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         },
     },
     "CloudRun": {
+        "Configuration": {
+            "resource_type": "cloud_run_configuration",
+            "labels_key": "resource.labels.configuration_name",
+        },
+        "Route": {
+            "resource_type": "cloud_run_route",
+            "labels_key": "resource.labels.route_name",
+        },
+        "DomainMapping": {
+            "resource_type": "cloud_run_domain_mapping",
+            "labels_key": "resource.labels.domain_mapping_name",
+        },
         "Service": {
             "resource_type": "cloud_run_service",
             "labels_key": "resource.labels.service_name",
@@ -178,10 +209,6 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
             "resource_type": "cloud_run_worker_pool",
             "labels_key": "resource.labels.worker_pool_name",
         },
-        # "DomainMapping": {
-        #     "resource_type": "cloud_run_domain_mapping",
-        #     "labels_key": "resource.labels.domain_mapping_name",
-        # },
     },
     "KubernetesEngine": {
         "Cluster": {
@@ -191,7 +218,7 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "NodePool": {
             "resource_type": "gke_nodepool",
             "labels_key": "resource.labels.nodepool_name",
-        }
+        },
     },
     "AppEngine": {
         "Application": {

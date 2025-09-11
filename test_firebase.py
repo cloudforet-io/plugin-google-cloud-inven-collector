@@ -6,7 +6,7 @@ Firebase 앱 목록 테스트 스크립트
 import json
 import os
 
-from spaceone.inventory.connector.firebase.project import FirebaseProjectConnector
+from spaceone.inventory.connector.firebase.firebase import FirebaseConnector
 
 
 def test_firebase_apps():
@@ -33,7 +33,7 @@ def test_firebase_apps():
             secret_data = json.load(f)
 
         # Firebase Project Connector 초기화
-        firebase_conn = FirebaseProjectConnector(secret_data=secret_data)
+        firebase_conn = FirebaseConnector(secret_data=secret_data)
 
         print("Firebase 프로젝트 정보를 가져오는 중...")
 

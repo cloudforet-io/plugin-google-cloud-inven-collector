@@ -23,7 +23,8 @@ Cloud Run Service
 service_overview = ItemDynamicLayout.set_fields(
     "Service Overview",
     fields=[
-        TextDyField.data_source("UID", "data.uid"),
+        TextDyField.data_source("ID", "data.uid"),
+        TextDyField.data_source("Name", "data.full_name"),
         TextDyField.data_source("Generation", "data.generation"),
         TextDyField.data_source("URI", "data.uri"),
         ListDyField.data_source("URLs", "data.urls"),
@@ -81,8 +82,8 @@ service_revisions = TableDynamicLayout.set_fields(
     "Revisions",
     "data.revisions",
     fields=[
+        TextDyField.data_source("ID", "uid"),
         TextDyField.data_source("Name", "name"),
-        TextDyField.data_source("UID", "uid"),
         TextDyField.data_source("Service", "service"),
         TextDyField.data_source("Generation", "generation"),
         DateTimeDyField.data_source("Create Time", "create_time"),

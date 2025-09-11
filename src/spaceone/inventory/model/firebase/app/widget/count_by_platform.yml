@@ -1,18 +1,18 @@
 ---
 cloud_service_group: Firebase
-cloud_service_type: Project
-name: Count By Account
+cloud_service_type: App
+name: Count By Platform
 query:
   aggregate:
     - group:
         keys:
           - name: name
-            key: account
+            key: data.platform
         fields:
           - name: value
             operator: count
   filter:
-    - key: account
+    - key: data.platform
       value: true
       operator: exists
 options:

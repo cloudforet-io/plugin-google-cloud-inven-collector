@@ -1,7 +1,7 @@
-from spaceone.inventory.model.firebase.project import (
-    Project,
-    ProjectResource,
-    ProjectResponse,
+from spaceone.inventory.model.firebase.app import (
+    App,
+    AppResource,
+    AppResponse,
 )
 
-__all__ = ["Project", "ProjectResource", "ProjectResponse"]
+__all__ = ["App", "AppResource", "AppResponse"]

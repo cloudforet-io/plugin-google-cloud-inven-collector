@@ -1,6 +1,6 @@
 ---
 cloud_service_group: Firebase
-cloud_service_type: Project
+cloud_service_type: App
 name: Total Count
 query:
   aggregate:

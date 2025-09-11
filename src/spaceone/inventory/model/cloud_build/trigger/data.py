@@ -11,6 +11,7 @@ from schematics.types import (
 class Trigger(Model):
     id = StringType()
     name = StringType()
+    full_name = StringType()
     description = StringType()
     tags = ListType(StringType, default=[])
     disabled = BooleanType(default=False)
@@ -30,6 +31,8 @@ class Trigger(Model):
     )
     build = DictType(BaseType, default={})
     autodetect = BooleanType(default=False)
+    autodetect_display = StringType()
+    disabled_display = StringType()
     create_time = StringType(
         deserialize_from="createTime"
     )  # DateTimeType 대신 StringType 사용

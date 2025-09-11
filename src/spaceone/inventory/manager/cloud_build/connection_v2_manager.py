@@ -86,17 +86,64 @@ class CloudBuildConnectionV2Manager(GoogleCloudManager):
                     if connection_id
                     else ""
                 )
+                full_name = connection.get("name", connection_name)
                 location_id = connection.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                # SCM 타입 자동 감지 및 username 추출
+                scm_type = "Unknown"
+                username = ""
+
+                if connection.get("githubConfig"):
+                    scm_type = "GitHub"
+                    github_config = connection.get("githubConfig", {})
+                    authorizer_credential = github_config.get(
+                        "authorizerCredential", {}
+                    )
+                    username = authorizer_credential.get("username", "")
+                elif connection.get("githubEnterpriseConfig"):
+                    scm_type = "GitHub Enterprise"
+                    github_enterprise_config = connection.get(
+                        "githubEnterpriseConfig", {}
+                    )
+                    authorizer_credential = github_enterprise_config.get(
+                        "authorizerCredential", {}
+                    )
+                    username = authorizer_credential.get("username", "")
+                elif connection.get("gitlabConfig"):
+                    scm_type = "GitLab"
+                    gitlab_config = connection.get("gitlabConfig", {})
+                    authorizer_credential = gitlab_config.get(
+                        "authorizerCredential", {}
+                    )
+                    username = authorizer_credential.get("username", "")
+                elif connection.get("bitbucketDataCenterConfig"):
+                    scm_type = "Bitbucket Data Center"
+                    bitbucket_config = connection.get("bitbucketDataCenterConfig", {})
+                    authorizer_credential = bitbucket_config.get(
+                        "authorizerCredential", {}
+                    )
+                    username = authorizer_credential.get("username", "")
+                elif connection.get("bitbucketCloudConfig"):
+                    scm_type = "Bitbucket Cloud"
+                    bitbucket_config = connection.get("bitbucketCloudConfig", {})
+                    authorizer_credential = bitbucket_config.get(
+                        "authorizerCredential", {}
+                    )
+                    username = authorizer_credential.get("username", "")
+
                 connection.update(
                     {
+                        "name": connection_name,
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "scm_type": scm_type,
+                        "username": username,
                     }
                 )
 
@@ -113,7 +160,7 @@ class CloudBuildConnectionV2Manager(GoogleCloudManager):
                         "data": connection_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": connection_data.name,
+                                "resource_id": f"https://cloudbuild.googleapis.com/v2/{connection_data.full_name}",
                                 "external_link": f"https://console.cloud.google.com/cloud-build/repositories/2nd-gen?project={project_id}",
                             }
                         ),

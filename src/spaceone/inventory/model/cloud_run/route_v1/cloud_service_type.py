@@ -1,15 +1,18 @@
 import os
 
-from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
-    # CloudServiceTypeResponse,
+    CloudServiceTypeResponse,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
-    EnumDyField,
     SearchField,
     TextDyField,
+)
+from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
+    CardWidget,
+    ChartWidget,
 )
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
@@ -27,44 +30,34 @@ cst_service.labels = ["Serverless"]
 cst_service.is_primary = True
 cst_service.is_major = True
 cst_service.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Cloud-Run.svg",
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud-Run.svg",
 }
 
 cst_service._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        EnumDyField.data_source(
-            "Status",
-            "data.status.conditions.0.status",
-            default_state={
-                "safe": ["True"],
-                "warning": ["False"],
-                "alert": ["Unknown"],
-            },
-        ),
-        TextDyField.data_source("Location", "data.location"),
-        TextDyField.data_source("Project", "data.project"),
         TextDyField.data_source("URL", "data.status.address.url"),
+        TextDyField.data_source("Namespace", "data.metadata.namespace"),
         TextDyField.data_source(
-            "Latest Ready Revision", "data.status.latest_ready_revision_name"
+            "Latest Ready Revision", "data.latest_ready_revision_name"
         ),
         TextDyField.data_source("Revision Count", "data.revision_count"),
     ],
     search=[
         SearchField.set(name="Name", key="data.metadata.name"),
-        SearchField.set(name="Service ID", key="data.metadata.uid"),
-        SearchField.set(name="Location", key="data.location"),
-        SearchField.set(name="Project", key="data.project"),
-        SearchField.set(name="Status", key="data.status.conditions.0.status"),
         SearchField.set(name="URL", key="data.status.address.url"),
+        SearchField.set(name="Namespace", key="data.metadata.namespace"),
+        SearchField.set(
+            name="Latest Ready Revision", key="data.latest_ready_revision_name"
+        ),
+        SearchField.set(name="Revision Count", key="data.revision_count"),
     ],
     widget=[
-        # CardWidget.set(**get_data_from_yaml(total_count_conf)),
-        # ChartWidget.set(**get_data_from_yaml(count_by_region_conf)),
-        # ChartWidget.set(**get_data_from_yaml(count_by_project_conf)),
+        CardWidget.set(**get_data_from_yaml(total_count_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_region_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_project_conf)),
     ],
 )
 
-# V1 API는 CloudServiceType 비활성화
 CLOUD_SERVICE_TYPES = [
-    # CloudServiceTypeResponse({"resource": cst_service}),
+    CloudServiceTypeResponse({"resource": cst_service}),
 ]

@@ -7,7 +7,6 @@ from spaceone.inventory.libs.schema.cloud_service import (
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
-    ListDyField,
     TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
@@ -23,16 +22,11 @@ trigger_overview = ItemDynamicLayout.set_fields(
     "Trigger Overview",
     fields=[
         TextDyField.data_source("ID", "data.id"),
-        TextDyField.data_source("Description", "data.description"),
+        TextDyField.data_source("Name", "data.full_name"),
         TextDyField.data_source("Disabled", "data.disabled"),
         TextDyField.data_source("Service Account", "data.service_account"),
-        TextDyField.data_source("Filename", "data.filename"),
-        TextDyField.data_source("Filter", "data.filter"),
         TextDyField.data_source("Autodetect", "data.autodetect"),
         DateTimeDyField.data_source("Create Time", "data.create_time"),
-        ListDyField.data_source("Tags", "data.tags"),
-        ListDyField.data_source("Ignored Files", "data.ignored_files"),
-        ListDyField.data_source("Included Files", "data.included_files"),
     ],
 )
 

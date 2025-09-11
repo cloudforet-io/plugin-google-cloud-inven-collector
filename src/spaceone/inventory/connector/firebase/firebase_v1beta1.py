@@ -4,11 +4,11 @@ import googleapiclient
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
-__all__ = ["FirebaseProjectConnector"]
+__all__ = ["FirebaseConnector"]
 _LOGGER = logging.getLogger(__name__)
 
 
-class FirebaseProjectConnector(GoogleCloudConnector):
+class FirebaseConnector(GoogleCloudConnector):
     google_client_service = "firebase"
     version = "v1beta1"
 
@@ -68,58 +68,57 @@ class FirebaseProjectConnector(GoogleCloudConnector):
 
     def get_firebase_project_info(self, **query):
         """
-        특정 프로젝트의 Firebase 프로젝트 정보를 조회합니다.
-        프로젝트 기준으로 Firebase 서비스 사용 여부를 확인합니다.
+        Firebase 앱 목록을 조회하고 서비스 사용 여부를 확인합니다.
 
         Args:
             **query: 추가 쿼리 파라미터
 
         Returns:
-            dict: Firebase 프로젝트 정보
+            dict: Firebase 앱 목록과 서비스 사용 여부
         """
         try:
-            # 1. Resource Manager로 프로젝트 기본 정보 확인
-            import googleapiclient.discovery
-
-            resource_manager = googleapiclient.discovery.build(
-                "cloudresourcemanager", "v1", credentials=self.credentials
-            )
-
-            project_info = (
-                resource_manager.projects().get(projectId=self.project_id).execute()
-            )
-
-            # 2. Firebase 앱들 조회
+            # Firebase 앱들 조회
             firebase_apps = self.list_firebase_apps()
 
-            # 3. Firebase 프로젝트 정보 구성
-            firebase_project = {
-                "projectId": self.project_id,
-                "displayName": project_info.get("name", ""),
-                "projectNumber": project_info.get("projectNumber", ""),
-                "state": project_info.get("lifecycleState", "ACTIVE"),
-                "name": f"projects/{self.project_id}",
+            return {
                 "firebaseApps": firebase_apps,
-                "appCount": len(firebase_apps),
-                "hasFirebaseServices": str(len(firebase_apps) > 0),
+                "hasFirebaseServices": len(firebase_apps) > 0,
             }
-
-            # 4. 플랫폼별 앱 통계 추가
-            platform_stats = {"IOS": 0, "ANDROID": 0, "WEB": 0}
-            for app in firebase_apps:
-                platform = app.get("platform", "PLATFORM_UNSPECIFIED")
-                if platform in platform_stats:
-                    platform_stats[platform] += 1
-
-            firebase_project["platformStats"] = platform_stats
-
-            return firebase_project
 
         except Exception as e:
             _LOGGER.error(
-                f"Failed to get Firebase project info for {self.project_id}: {e}"
+                f"Failed to get Firebase apps for {self.project_id}: {e}"
             )
             raise e
+
+    def get_app_details(self, app_name):
+        """
+        특정 Firebase 앱의 상세 정보를 가져옵니다.
+
+        Args:
+            app_name (str): Firebase 앱 이름 (projects/{project}/iosApps/{app-id} 형식)
+
+        Returns:
+            dict: 앱 상세 정보
+        """
+        try:
+            # 플랫폼에 따라 다른 API 엔드포인트 사용
+            if "/iosApps/" in app_name:
+                response = self.client.projects().iosApps().get(name=app_name).execute()
+            elif "/androidApps/" in app_name:
+                response = (
+                    self.client.projects().androidApps().get(name=app_name).execute()
+                )
+            elif "/webApps/" in app_name:
+                response = self.client.projects().webApps().get(name=app_name).execute()
+            else:
+                # 기본적으로 searchApps로 얻은 정보 반환
+                return {}
+
+            return response
+        except Exception as e:
+            _LOGGER.warning(f"Failed to get app details for {app_name}: {e}")
+            return {}
 
     def get_project(self, project_id):
         """

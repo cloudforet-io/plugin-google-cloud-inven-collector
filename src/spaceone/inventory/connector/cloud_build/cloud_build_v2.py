@@ -11,12 +11,22 @@ class CloudBuildV2Connector(GoogleCloudConnector):
     version = "v2"
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        try:
+            super().__init__(**kwargs)
+            _LOGGER.info("CloudBuildV2Connector initialized successfully")
+        except Exception as e:
+            _LOGGER.warning(f"Failed to initialize CloudBuildV2Connector: {str(e)}")
+            raise
 
-    def list_locations(self, parent, **query):
+    def list_locations(self, name, **query):
         locations = []
-        query.update({"name": parent})
-        request = self.client.projects().locations().list(**query)
+        query.update({"name": name})
+        _LOGGER.info(f"V2 API: Getting locations for name: {name}")
+        try:
+            request = self.client.projects().locations().list(**query)
+        except Exception as e:
+            _LOGGER.warning(f"V2 API: Failed to create request for locations: {e}")
+            return locations
 
         while request is not None:
             try:
@@ -31,7 +41,7 @@ class CloudBuildV2Connector(GoogleCloudConnector):
                     self.client.projects().locations().list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.warning(f"Failed to list locations: {e}")
+                _LOGGER.warning(f"V2 API: Failed to list locations: {e}")
                 break
 
         return locations
@@ -39,7 +49,11 @@ class CloudBuildV2Connector(GoogleCloudConnector):
     def list_connections(self, parent, **query):
         connections = []
         query.update({"parent": parent})
-        request = self.client.projects().locations().connections().list(**query)
+        try:
+            request = self.client.projects().locations().connections().list(**query)
+        except Exception as e:
+            _LOGGER.warning(f"V2 API: Failed to create request for connections: {e}")
+            return connections
 
         while request is not None:
             try:
@@ -52,7 +66,7 @@ class CloudBuildV2Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.warning(f"Failed to list connections: {e}")
+                _LOGGER.warning(f"V2 API: Failed to list connections: {e}")
                 break
 
         return connections
@@ -60,13 +74,18 @@ class CloudBuildV2Connector(GoogleCloudConnector):
     def list_repositories(self, parent, **query):
         repositories = []
         query.update({"parent": parent})
-        request = (
-            self.client.projects()
-            .locations()
-            .connections()
-            .repositories()
-            .list(**query)
-        )
+        _LOGGER.info(f"V2 API: Getting repositories for parent: {parent}")
+        try:
+            request = (
+                self.client.projects()
+                .locations()
+                .connections()
+                .repositories()
+                .list(**query)
+            )
+        except Exception as e:
+            _LOGGER.warning(f"V2 API: Failed to create request for repositories: {e}")
+            return repositories
 
         while request is not None:
             try:
@@ -80,7 +99,7 @@ class CloudBuildV2Connector(GoogleCloudConnector):
                     .list_next(request, response)
                 )
             except Exception as e:
-                _LOGGER.warning(f"Failed to list repositories: {e}")
+                _LOGGER.warning(f"V2 API: Failed to list repositories: {e}")
                 break
 
         return repositories

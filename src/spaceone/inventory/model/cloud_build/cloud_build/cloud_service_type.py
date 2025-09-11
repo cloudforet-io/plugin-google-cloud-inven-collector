@@ -9,7 +9,6 @@ from spaceone.inventory.libs.schema.cloud_service_type import (
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
-    ListDyField,
     SearchField,
     TextDyField,
 )
@@ -38,33 +37,39 @@ cst_build.tags = {
 
 cst_build._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Build ID", "data.full_name"),
+        TextDyField.data_source("Build ID", "data.id"),
         EnumDyField.data_source(
             "Status",
             "data.status",
             default_state={
                 "safe": ["SUCCESS"],
                 "warning": ["QUEUED", "WORKING"],
-                "alert": ["FAILURE", "INTERNAL_ERROR", "TIMEOUT", "CANCELLED", "EXPIRED"],
+                "alert": [
+                    "FAILURE",
+                    "INTERNAL_ERROR",
+                    "TIMEOUT",
+                    "CANCELLED",
+                    "EXPIRED",
+                ],
             },
         ),
         TextDyField.data_source("Build Trigger ID", "data.build_trigger_id"),
-        TextDyField.data_source("Service Account", "data.service_account"),
         DateTimeDyField.data_source("Create Time", "data.create_time"),
         DateTimeDyField.data_source("Start Time", "data.start_time"),
         DateTimeDyField.data_source("Finish Time", "data.finish_time"),
-        ListDyField.data_source("Images", "data.images"),
-        ListDyField.data_source("Tags", "data.tags"),
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
-        SearchField.set(name="Build ID", key="data.full_name"),
+        SearchField.set(name="Build ID", key="data.id"),
         SearchField.set(name="Status", key="data.status"),
         SearchField.set(name="Build Trigger ID", key="data.build_trigger_id"),
-        SearchField.set(name="Service Account", key="data.service_account"),
-        SearchField.set(name="Create Time", key="data.create_time", data_type="datetime"),
+        SearchField.set(
+            name="Create Time", key="data.create_time", data_type="datetime"
+        ),
         SearchField.set(name="Start Time", key="data.start_time", data_type="datetime"),
-        SearchField.set(name="Finish Time", key="data.finish_time", data_type="datetime"),
+        SearchField.set(
+            name="Finish Time", key="data.finish_time", data_type="datetime"
+        ),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

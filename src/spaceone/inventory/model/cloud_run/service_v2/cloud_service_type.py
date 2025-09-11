@@ -1,15 +1,20 @@
 import os
 
-from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeMeta,
     CloudServiceTypeResource,
     CloudServiceTypeResponse,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
+    DateTimeDyField,
     EnumDyField,
     SearchField,
     TextDyField,
+)
+from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
+    CardWidget,
+    ChartWidget,
 )
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
@@ -27,7 +32,7 @@ cst_service.labels = ["Serverless"]
 cst_service.is_primary = True
 cst_service.is_major = True
 cst_service.tags = {
-    "spaceone:icon": f"{ASSET_URL}/Cloud-Run.svg",
+    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Cloud-Run.svg",
 }
 
 cst_service._metadata = CloudServiceTypeMeta.set_meta(
@@ -41,8 +46,14 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
                 "alert": ["CONDITION_FAILED"],
             },
         ),
-        TextDyField.data_source("Location", "data.location"),
-        TextDyField.data_source("Project", "data.project"),
+        TextDyField.data_source("Deployment Type", "data.deployment_type"),
+        TextDyField.data_source("Requests per Second", "data.requests_per_second"),
+        TextDyField.data_source("Authentication", "data.authentication"),
+        TextDyField.data_source("Ingress", "data.ingress"),
+        DateTimeDyField.data_source(
+            "Last Deployment Time", "data.last_deployment_time"
+        ),
+        TextDyField.data_source("Deployer", "data.deployer"),
         TextDyField.data_source("URL", "data.uri"),
         TextDyField.data_source(
             "Latest Ready Revision", "data.latest_ready_revision_name"
@@ -51,17 +62,20 @@ cst_service._metadata = CloudServiceTypeMeta.set_meta(
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
-        SearchField.set(name="Service ID", key="data.uid"),
-        SearchField.set(name="Location", key="data.location"),
-        SearchField.set(name="Project", key="data.project"),
         SearchField.set(name="Status", key="data.terminal_condition.state"),
+        SearchField.set(name="Deployment Type", key="data.deployment_type"),
+        SearchField.set(name="Authentication", key="data.authentication"),
+        SearchField.set(name="Ingress", key="data.ingress"),
+        SearchField.set(name="Deployer", key="data.deployer"),
         SearchField.set(name="URL", key="data.uri"),
-        SearchField.set(name="Latest Ready Revision", key="data.latest_ready_revision_name"),
+        SearchField.set(
+            name="Latest Ready Revision", key="data.latest_ready_revision_name"
+        ),
     ],
     widget=[
-        # CardWidget.set(**get_data_from_yaml(total_count_conf)),
-        # ChartWidget.set(**get_data_from_yaml(count_by_region_conf)),
-        # ChartWidget.set(**get_data_from_yaml(count_by_project_conf)),
+        CardWidget.set(**get_data_from_yaml(total_count_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_region_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_project_conf)),
     ],
 )
 

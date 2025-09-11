@@ -21,15 +21,23 @@ CONFIGURATION V1
 configuration_v1_meta = CloudServiceMeta.set_layouts(
     [
         ItemDynamicLayout.set_fields(
-            "Configuration V1 Details",
+            "Configuration Details",
             fields=[
-                TextDyField.data_source("Kind", "data.kind"),
+                TextDyField.data_source("ID", "data.metadata.uid"),
+                TextDyField.data_source("Name", "data.full_name"),
                 TextDyField.data_source("API Version", "data.api_version"),
+                TextDyField.data_source("Kind", "data.kind"),
                 TextDyField.data_source("Namespace", "data.metadata.namespace"),
-                TextDyField.data_source("UID", "data.metadata.uid"),
-                DateTimeDyField.data_source("Created", "data.metadata.creation_timestamp"),
-                TextDyField.data_source("Latest Ready Revision", "data.status.latest_ready_revision_name"),
-                TextDyField.data_source("Latest Created Revision", "data.status.latest_created_revision_name"),
+                DateTimeDyField.data_source(
+                    "Created", "data.metadata.creation_timestamp"
+                ),
+                TextDyField.data_source(
+                    "Latest Ready Revision", "data.status.latestReadyRevisionName"
+                ),
+                TextDyField.data_source(
+                    "Latest Created Revision",
+                    "data.status.latestCreatedRevisionName",
+                ),
             ],
         ),
         ItemDynamicLayout.set_fields(
@@ -48,7 +56,9 @@ class ConfigurationV1Resource(CloudServiceResource):
     cloud_service_group = StringType(default="CloudRun")
     provider = StringType(default="google_cloud")
     data = ModelType(ConfigurationV1)
-    _metadata = ModelType(CloudServiceMeta, default=configuration_v1_meta, serialized_name="metadata")
+    _metadata = ModelType(
+        CloudServiceMeta, default=configuration_v1_meta, serialized_name="metadata"
+    )
 
 
 class ConfigurationV1Response(CloudServiceResponse):

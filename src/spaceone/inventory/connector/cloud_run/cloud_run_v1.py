@@ -14,6 +14,36 @@ class CloudRunV1Connector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def list_locations(self, name, **query):
+        """V1 API에서 locations 조회"""
+        locations = []
+        query.update({"name": name})
+        _LOGGER.info(f"V1 API: Getting locations for name: {name}")
+
+        try:
+            request = self.client.projects().locations().list(**query)
+        except Exception as e:
+            _LOGGER.warning(f"V1 API: Failed to create request for locations: {e}")
+            return locations
+
+        while request is not None:
+            try:
+                response = request.execute()
+                raw_locations = response.get("locations", [])
+                # global 위치는 제외
+                filtered_locations = [
+                    loc for loc in raw_locations if loc.get("locationId") != "global"
+                ]
+                locations.extend(filtered_locations)
+                request = (
+                    self.client.projects().locations().list_next(request, response)
+                )
+            except Exception as e:
+                _LOGGER.warning(f"V1 API: Failed to list locations: {e}")
+                break
+
+        return locations
+
     def list_domain_mappings(self, parent, **query):
         domain_mappings = []
         query.update({"parent": parent})
@@ -40,12 +70,12 @@ class CloudRunV1Connector(GoogleCloudConnector):
         """V1 API에서 services 조회 (namespace 기반)"""
         services = []
         query.update({"parent": parent})
-        
+
         while True:
             try:
                 response = self.client.namespaces().services().list(**query).execute()
                 services.extend(response.get("items", []))
-                
+
                 continue_token = response.get("metadata", {}).get("continue")
                 if continue_token:
                     query["continue"] = continue_token
@@ -54,19 +84,19 @@ class CloudRunV1Connector(GoogleCloudConnector):
             except Exception as e:
                 _LOGGER.warning(f"Failed to list services: {e}")
                 break
-                
+
         return services
 
     def list_jobs(self, parent, **query):
         """V1 API에서 jobs 조회 (제한적 지원, namespace 기반)"""
         jobs = []
         query.update({"parent": parent})
-        
+
         while True:
             try:
                 response = self.client.namespaces().jobs().list(**query).execute()
                 jobs.extend(response.get("items", []))
-                
+
                 continue_token = response.get("metadata", {}).get("continue")
                 if continue_token:
                     query["continue"] = continue_token
@@ -75,19 +105,19 @@ class CloudRunV1Connector(GoogleCloudConnector):
             except Exception as e:
                 _LOGGER.warning(f"Failed to list jobs: {e}")
                 break
-                
+
         return jobs
 
     def list_revisions(self, parent, **query):
         """V1 API에서 revisions 조회 (namespace 기반)"""
         revisions = []
         query.update({"parent": parent})
-        
+
         while True:
             try:
                 response = self.client.namespaces().revisions().list(**query).execute()
                 revisions.extend(response.get("items", []))
-                
+
                 continue_token = response.get("metadata", {}).get("continue")
                 if continue_token:
                     query["continue"] = continue_token
@@ -96,19 +126,19 @@ class CloudRunV1Connector(GoogleCloudConnector):
             except Exception as e:
                 _LOGGER.warning(f"Failed to list revisions: {e}")
                 break
-                
+
         return revisions
 
     def list_executions(self, parent, **query):
         """V1 API에서 executions 조회 (namespace 기반)"""
         executions = []
         query.update({"parent": parent})
-        
+
         while True:
             try:
                 response = self.client.namespaces().executions().list(**query).execute()
                 executions.extend(response.get("items", []))
-                
+
                 continue_token = response.get("metadata", {}).get("continue")
                 if continue_token:
                     query["continue"] = continue_token
@@ -117,19 +147,19 @@ class CloudRunV1Connector(GoogleCloudConnector):
             except Exception as e:
                 _LOGGER.warning(f"Failed to list executions: {e}")
                 break
-                
+
         return executions
 
     def list_tasks(self, parent, **query):
         """V1 API에서 tasks 조회 (namespace 기반)"""
         tasks = []
         query.update({"parent": parent})
-        
+
         while True:
             try:
                 response = self.client.namespaces().tasks().list(**query).execute()
                 tasks.extend(response.get("items", []))
-                
+
                 continue_token = response.get("metadata", {}).get("continue")
                 if continue_token:
                     query["continue"] = continue_token
@@ -138,19 +168,19 @@ class CloudRunV1Connector(GoogleCloudConnector):
             except Exception as e:
                 _LOGGER.warning(f"Failed to list tasks: {e}")
                 break
-                
+
         return tasks
 
     def list_routes(self, parent, **query):
         """V1 API에서 routes 조회 (namespace 기반)"""
         routes = []
         query.update({"parent": parent})
-        
+
         while True:
             try:
                 response = self.client.namespaces().routes().list(**query).execute()
                 routes.extend(response.get("items", []))
-                
+
                 continue_token = response.get("metadata", {}).get("continue")
                 if continue_token:
                     query["continue"] = continue_token
@@ -159,19 +189,21 @@ class CloudRunV1Connector(GoogleCloudConnector):
             except Exception as e:
                 _LOGGER.warning(f"Failed to list routes: {e}")
                 break
-                
+
         return routes
 
     def list_configurations(self, parent, **query):
         """V1 API에서 configurations 조회 (namespace 기반)"""
         configurations = []
         query.update({"parent": parent})
-        
+
         while True:
             try:
-                response = self.client.namespaces().configurations().list(**query).execute()
+                response = (
+                    self.client.namespaces().configurations().list(**query).execute()
+                )
                 configurations.extend(response.get("items", []))
-                
+
                 continue_token = response.get("metadata", {}).get("continue")
                 if continue_token:
                     query["continue"] = continue_token
@@ -180,19 +212,21 @@ class CloudRunV1Connector(GoogleCloudConnector):
             except Exception as e:
                 _LOGGER.warning(f"Failed to list configurations: {e}")
                 break
-                
+
         return configurations
 
     def list_worker_pools(self, parent, **query):
         """V1 API에서 worker pools 조회 (namespace 기반)"""
         worker_pools = []
         query.update({"parent": parent})
-        
+
         while True:
             try:
-                response = self.client.namespaces().workerpools().list(**query).execute()
+                response = (
+                    self.client.namespaces().workerpools().list(**query).execute()
+                )
                 worker_pools.extend(response.get("items", []))
-                
+
                 continue_token = response.get("metadata", {}).get("continue")
                 if continue_token:
                     query["continue"] = continue_token
@@ -201,5 +235,5 @@ class CloudRunV1Connector(GoogleCloudConnector):
             except Exception as e:
                 _LOGGER.warning(f"Failed to list worker pools: {e}")
                 break
-                
+
         return worker_pools

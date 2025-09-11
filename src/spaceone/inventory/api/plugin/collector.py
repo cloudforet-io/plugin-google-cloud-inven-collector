@@ -54,4 +54,4 @@ class Collector(BaseAPI, collector_pb2_grpc.CollectorServicer):
 
         with collector_svc:
             apps = collector_svc.get_firebase_projects(params)
-            return self.locator.get_info("FirebaseAppsInfo", apps)
+            return self.locator.get_info("DictInfo", apps)

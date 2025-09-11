@@ -37,7 +37,7 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
 
         collected_cloud_services = []
         error_responses = []
-        route_id = ""
+        route_name = ""
 
         secret_data = params["secret_data"]
         project_id = secret_data["project_id"]
@@ -55,13 +55,15 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
         try:
             namespace = f"namespaces/{project_id}"
             routes = cloud_run_v1_conn.list_routes(namespace)
-            
+
             for route in routes:
                 # V1에서는 location 정보가 metadata에 포함되어 있을 수 있음
                 location_id = (
-                    route.get("metadata", {}).get("labels", {}).get("cloud.googleapis.com/location") or
-                    route.get("metadata", {}).get("namespace", "").split("/")[-1] or
-                    "us-central1"  # default location
+                    route.get("metadata", {})
+                    .get("labels", {})
+                    .get("cloud.googleapis.com/location")
+                    or route.get("metadata", {}).get("namespace", "").split("/")[-1]
+                    or ""  # default location
                 )
                 route["_location"] = location_id
         except Exception as e:
@@ -73,48 +75,78 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
                 ##################################
                 # 1. Set Basic Information
                 ##################################
-                route_id = route.get("metadata", {}).get("name", "")
+                route_name = route.get("metadata", {}).get("name", "")
                 location_id = route.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
+                self_link = route.get("metadata", {}).get("selfLink", "")
+                # Remove the leading "/apis/serving.knative.dev/v1/" from selfLink for full_name
+                if self_link.startswith("/apis/serving.knative.dev/v1/"):
+                    full_name = self_link[len("/apis/serving.knative.dev/v1/") :]
+                else:
+                    full_name = self_link
 
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                # Latest Ready Revision 추출
+                latest_ready_revision_name = ""
+                revision_count = 0
+
+                status_traffic = route.get("status", {}).get("traffic", [])
+                for traffic_item in status_traffic:
+                    if traffic_item.get("latestRevision") is True:
+                        latest_ready_revision_name = traffic_item.get(
+                            "revisionName", ""
+                        )
+                    revision_count += 1
+
                 route.update(
                     {
+                        "name": route_name,
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "latest_ready_revision_name": latest_ready_revision_name,
+                        "revision_count": revision_count,
                     }
                 )
 
                 ##################################
                 # 3. Make Return Resource
                 ##################################
-                route_data = RouteV1(route, strict=False)
+                try:
+                    route_data = RouteV1(route, strict=False)
+                except Exception as e:
+                    _LOGGER.error(
+                        f"Route {route_name}: Failed to create RouteV1: {str(e)}"
+                    )
+                    continue
 
                 route_resource = RouteV1Resource(
                     {
-                        "name": route_id,
+                        "name": route_name,
                         "account": project_id,
                         "region_code": location_id,
                         "data": route_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": route_data.name,
-                                "external_link": f"https://console.cloud.google.com/run/routes/details/{location_id}/{route_id}?project={project_id}",
+                                "resource_id": f"https://run.googleapis.com{self_link}",
+                                "external_link": "",
                             }
                         ),
                     },
                     strict=False,
                 )
 
-                collected_cloud_services.append(RouteV1Response({"resource": route_resource}))
+                collected_cloud_services.append(
+                    RouteV1Response({"resource": route_resource})
+                )
 
             except Exception as e:
-                _LOGGER.error(f"Failed to process route {route_id}: {str(e)}")
+                _LOGGER.error(f"Failed to process route {route_name}: {str(e)}")
                 error_response = self.generate_resource_error_response(
-                    e, "Route", "CloudRun", route_id
+                    e, "Route", "CloudRun", route_name
                 )
                 error_responses.append(error_response)
 

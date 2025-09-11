@@ -37,7 +37,7 @@ cst_worker_pool.tags = {
 
 cst_worker_pool._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("UID", "data.uid"),
+        TextDyField.data_source("Worker Pool ID", "data.uid"),
         EnumDyField.data_source(
             "State",
             "data.state",
@@ -47,12 +47,19 @@ cst_worker_pool._metadata = CloudServiceTypeMeta.set_meta(
                 "alert": ["DELETING", "DELETED"],
             },
         ),
+        TextDyField.data_source(
+            "Machine Type", "data.private_pool_v1_config.workerConfig.machineType"
+        ),
+        TextDyField.data_source("Disk Size", "data.disk_size_display"),
+        TextDyField.data_source(
+            "Network", "data.private_pool_v1_config.networkConfig.egressOption"
+        ),
         DateTimeDyField.data_source("Create Time", "data.create_time"),
         DateTimeDyField.data_source("Update Time", "data.update_time"),
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
-        SearchField.set(name="UID", key="data.uid"),
+        SearchField.set(name="Worker Pool ID", key="data.uid"),
         SearchField.set(name="State", key="data.state"),
         SearchField.set(
             name="Create Time", key="data.create_time", data_type="datetime"

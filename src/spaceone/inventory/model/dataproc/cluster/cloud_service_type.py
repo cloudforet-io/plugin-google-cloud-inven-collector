@@ -51,7 +51,15 @@ cst_cluster._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source(
             "Worker Instances", "data.config.worker_config.num_instances"
         ),
-        TextDyField.data_source("Project", "data.project_id"),
+        EnumDyField.data_source(
+            "Preemptible VMs",
+            "data.config.master_config.preemptibility",
+            default_state={
+                "safe": ["NON_PREEMPTIBLE"],
+                "warning": ["PREEMPTIBLE"],
+            },
+        ),
+        TextDyField.data_source("Staging Bucket", "data.config.config_bucket"),
     ],
     search=[
         SearchField.set(name="Cluster Name", key="data.cluster_name"),
@@ -65,7 +73,7 @@ cst_cluster._metadata = CloudServiceTypeMeta.set_meta(
             name="Master Machine Type", key="data.config.master_config.machine_type_uri"
         ),
         SearchField.set(
-            name="Worker Machine Type", key="data.config.worker_config.machine_type_uri"
+            name="Worker Instances", key="data.config.worker_config.num_instances"
         ),
     ],
     widget=[

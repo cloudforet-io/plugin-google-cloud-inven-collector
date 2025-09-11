@@ -1,9 +1,11 @@
 import logging
 import time
 
-from spaceone.inventory.conf.cloud_service_conf import REGION_INFO
 from spaceone.inventory.connector.cloud_build.cloud_build_v1 import (
     CloudBuildV1Connector,
+)
+from spaceone.inventory.connector.cloud_build.cloud_build_v2 import (
+    CloudBuildV2Connector,
 )
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
@@ -52,25 +54,26 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
         cloud_build_v1_conn: CloudBuildV1Connector = self.locator.get_connector(
             self.connector_name, **params
         )
+        cloud_build_v2_conn: CloudBuildV2Connector = self.locator.get_connector(
+            "CloudBuildV2Connector", **params
+        )
 
         # Get lists that relate with triggers through Google Cloud API
         triggers = cloud_build_v1_conn.list_triggers()
 
-        # Get locations and regional triggers using REGION_INFO fallback
+        # Get locations using V2 API
         regional_triggers = []
         parent = f"projects/{project_id}"
-        
-        # V1에서는 locations API가 지원되지 않으므로 REGION_INFO를 사용
-        locations = [
-            {
-                "locationId": region_id,
-                "name": f"{parent}/locations/{region_id}",
-                "displayName": REGION_INFO[region_id]["name"]
-            }
-            for region_id in REGION_INFO.keys()
-            if region_id != "global"
-        ]
-        
+
+        try:
+            locations = cloud_build_v2_conn.list_locations(parent)
+            _LOGGER.info(f"V2 API: Found {len(locations)} locations for triggers")
+        except Exception as e:
+            _LOGGER.warning(
+                f"V2 API: Failed to get locations, falling back to empty list: {e}"
+            )
+            locations = []
+
         for location in locations:
             location_id = location.get("locationId", "")
             if location_id:
@@ -97,6 +100,7 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                 ##################################
                 trigger_id = trigger.get("id")
                 trigger_name = trigger.get("name", trigger_id)
+                full_name = trigger.get("resourceName", trigger_name)
                 location_id = trigger.get("_location", "global")
                 region = (
                     GoogleCloudManager.parse_region_from_zone(location_id)
@@ -107,11 +111,30 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                # Convert boolean values to user-friendly strings for display
+                autodetect = trigger.get("autodetect", False)
+                disabled = trigger.get("disabled", False)
+
+                # Convert autodetect to display string
+                if autodetect:
+                    autodetect_display = "Auto Detect"
+                else:
+                    autodetect_display = "Manual Config"
+
+                # Convert disabled to display string
+                if disabled:
+                    disabled_display = "Disabled"
+                else:
+                    disabled_display = "Enabled"
+
                 trigger.update(
                     {
+                        "full_name": full_name,
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "autodetect_display": autodetect_display,
+                        "disabled_display": disabled_display,
                     }
                 )
 
@@ -128,7 +151,7 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                         "data": trigger_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": trigger_data.id,
+                                "resource_id": f"https://cloudbuild.googleapis.com/v1/{trigger_data.full_name}",
                                 "external_link": f"https://console.cloud.google.com/cloud-build/triggers?project={project_id}",
                             }
                         ),
