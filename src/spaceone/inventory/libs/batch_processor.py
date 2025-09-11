@@ -189,18 +189,33 @@ class BatchJobProcessor:
         
         try:
             tasks = self.batch_connector.list_tasks(task_group_name)
-            return [
-                {
+            processed_tasks = []
+            for task in tasks:
+                status_events = task.get("status", {}).get("statusEvents", [])
+                
+                # 최신 이벤트 정보 추출 (eventTime 기준으로 최신)
+                last_event_type = ""
+                last_event_time = ""
+                if status_events:
+                    # eventTime 기준으로 정렬하여 최신 이벤트 찾기
+                    sorted_events = sorted(
+                        status_events,
+                        key=lambda x: x.get("eventTime", ""),
+                        reverse=True
+                    )
+                    latest_event = sorted_events[0]
+                    last_event_type = latest_event.get("type", "")
+                    last_event_time = latest_event.get("eventTime", "")
+                
+                processed_tasks.append({
                     "name": task.get("name", ""),
-                    "task_index": task.get("taskIndex", 0),
                     "state": task.get("status", {}).get("state", ""),
-                    "create_time": task.get("createTime", ""),
-                    "start_time": task.get("startTime", ""),
-                    "end_time": task.get("endTime", ""),
-                    "exit_code": task.get("status", {}).get("exitCode", 0),
-                }
-                for task in tasks
-            ]
+                    "status_events": status_events,
+                    "last_event_type": last_event_type,
+                    "last_event_time": last_event_time,
+                })
+            
+            return processed_tasks
         except Exception as e:
             _LOGGER.error(f"Failed to collect tasks for {task_group_name}: {e}", exc_info=True)
             return []

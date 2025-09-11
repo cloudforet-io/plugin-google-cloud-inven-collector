@@ -67,7 +67,7 @@ class StorageTransferAgentPoolManager(GoogleCloudManager):
                     # 1. Set Basic Information
                     ##################################
                     agent_pool_name = agent_pool.get("name", "")
-                    agent_pool_simple_name = (
+                    agent_pool_id = (
                         agent_pool_name.split("/")[-1]
                         if "/" in agent_pool_name
                         else agent_pool_name
@@ -79,12 +79,10 @@ class StorageTransferAgentPoolManager(GoogleCloudManager):
 
                     agent_pool.update(
                         {
-                            "name": agent_pool_simple_name,
+                            "name": agent_pool_id,
+                            "full_name": agent_pool_name,
                             "project": project_id,
                         }
-                    )
-                    self_link = (
-                        f"https://storagetransfer.googleapis.com/v1/{agent_pool_name}"
                     )
 
                     # No labels!!
@@ -95,14 +93,12 @@ class StorageTransferAgentPoolManager(GoogleCloudManager):
                     ##################################
                     agent_pool_resource = AgentPoolResource(
                         {
-                            "name": agent_pool_simple_name,
+                            "name": agent_pool_id,
                             "account": project_id,
                             "region_code": "global",
                             "instance_type": agent_pool.get("state", ""),
                             "data": agent_pool_data,
-                            "reference": ReferenceModel(
-                                agent_pool_data.reference(self_link=self_link)
-                            ),
+                            "reference": ReferenceModel(agent_pool_data.reference()),
                         }
                     )
 
@@ -118,7 +114,7 @@ class StorageTransferAgentPoolManager(GoogleCloudManager):
                         AgentPoolResponse({"resource": agent_pool_resource})
                     )
 
-                except Exception as e: 
+                except Exception as e:
                     _LOGGER.error(
                         f"Failed to process agent pool {agent_pool_name}: {e}",
                         exc_info=True,
