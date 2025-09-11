@@ -1,22 +1,28 @@
-id: metric
+---
 metric_id: metric-google-cloud-batch-job-count
-name: Batch Job Count
-description: Total number of Google Cloud Batch jobs
+name: Job Count
+metric_type: GAUGE
 resource_type: inventory.CloudService:google_cloud.Batch.Job
-labels_info:
-  - key: data.location_id
-    name: Location
-    reference:
-      resource_type: inventory.Region
-      foreign_key: region_code
-  - key: account
-    name: Account
-    reference:
-      resource_type: identity.ServiceAccount
-      foreign_key: account_id
-  - key: data.state
-    name: Status
-tags:
-  description: batch-job
-  icon: https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/google_cloud_batch.svg
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.state
+      name: Job State
+      search_key: data.state
+    - key: data.location_id
+      name: Location
+      search_key: data.location_id
+  fields:
+    value:
+      operator: count
+unit: Count
 namespace_id: ns-google-cloud-batch-job
+version: '1.1'
