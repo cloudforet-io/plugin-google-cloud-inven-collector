@@ -40,23 +40,22 @@ cst_agent_pool._metadata = CloudServiceTypeMeta.set_meta(
             "State",
             "data.state",
             default_state={
-                "safe": ["CONNECTED"],
-                "warning": ["CREATED", "INSTALLING"],
+                "safe": ["CREATED"],
+                "warning": ["CREATING"],
                 "alert": ["DELETING"],
             },
         ),
         TextDyField.data_source("Bandwidth Limit", "data.bandwidth_limit.limit_mbps"),
     ],
     search=[
-        SearchField.set(name="Agent Pool Name", key="name"),
         SearchField.set(name="Display Name", key="data.display_name"),
         SearchField.set(
             name="State",
             key="data.state",
             enums={
+                "STATE_UNSPECIFIED": {"label": "State Unspecified"},
+                "CREATING": {"label": "Creating"},
                 "CREATED": {"label": "Created"},
-                "INSTALLING": {"label": "Installing"},
-                "CONNECTED": {"label": "Connected"},
                 "DELETING": {"label": "Deleting"},
             },
         ),

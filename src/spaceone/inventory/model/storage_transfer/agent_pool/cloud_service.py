@@ -25,13 +25,14 @@ agent_pool_configuration_meta = ItemDynamicLayout.set_fields(
     "Configuration",
     fields=[
         TextDyField.data_source("Pool Name", "data.name"),
+        TextDyField.data_source("Full Name", "data.full_name"),
         TextDyField.data_source("Display Name", "data.display_name"),
         EnumDyField.data_source(
             "State",
             "data.state",
             default_state={
-                "safe": ["CONNECTED"],
-                "warning": ["CREATED", "INSTALLING"],
+                "safe": ["CREATED"],
+                "warning": ["CREATING"],
                 "alert": ["DELETING"],
             },
         ),
