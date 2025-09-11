@@ -1,0 +1,8 @@
+widget_type: "summary"
+title: "Total Jobs"
+icon: "ic_settings"
+options:
+  value_options:
+    key: ""
+    options:
+      default: 0

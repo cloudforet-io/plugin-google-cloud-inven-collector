@@ -53,29 +53,58 @@ class BatchJobProcessor:
         Returns:
             Dict: 처리된 Job 데이터
         """
-        # TaskGroup 처리
+        job_name = job.get("name", "")
+        task_groups_raw = job.get("taskGroups", [])
+        
+        # 디버깅: Job에 TaskGroup이 있는지 확인
+        # TaskGroup 정보가 없으면 추가 소스에서 확인
+        if len(task_groups_raw) == 0:
+            # Job spec에서 TaskGroup 확인
+            job_spec = job.get("spec", {})
+            if job_spec:
+                task_groups_raw = job_spec.get("taskGroups", [])
+            
+            # 여전히 없으면 상세 정보 가져오기 시도
+            if len(task_groups_raw) == 0:
+                try:
+                    detailed_job = self.batch_connector.get_job_details(job_name)
+                    if detailed_job:
+                        # 상세 정보에서 spec 확인 후 직접 taskGroups 확인
+                        detailed_spec = detailed_job.get("spec", {})
+                        if detailed_spec:
+                            task_groups_raw = detailed_spec.get("taskGroups", [])
+                        
+                        if len(task_groups_raw) == 0:
+                            task_groups_raw = detailed_job.get("taskGroups", [])
+                except Exception as e:
+                    _LOGGER.warning(f"Failed to get detailed job info for {job_name}: {e}")
+        
+        _LOGGER.debug(f"Processing job {job_name}: found {len(task_groups_raw)} task groups")
+        
+        # TaskGroup 처리 (Job 이름 전달)
         task_groups = self._process_task_groups(
-            job.get("taskGroups", []), job.get("allocationPolicy", {})
+            task_groups_raw, job.get("allocationPolicy", {}), job_name
         )
         
         # Job 기본 정보
         return {
-            "name": job.get("name", ""),
+            "name": job_name,
             "uid": job.get("uid", ""),
-            "displayName": job.get("displayName", ""),
+            "display_name": job.get("displayName", ""),
             "state": job.get("status", {}).get("state", ""),
-            "createTime": job.get("createTime", ""),
-            "updateTime": job.get("updateTime", ""),
-            "taskGroups": task_groups,
+            "create_time": job.get("createTime", ""),
+            "update_time": job.get("updateTime", ""),
+            "task_groups": task_groups,
         }
     
-    def _process_task_groups(self, task_groups_raw: List[Dict], allocation_policy: Dict) -> List[Dict]:
+    def _process_task_groups(self, task_groups_raw: List[Dict], allocation_policy: Dict, job_name: str) -> List[Dict]:
         """
         TaskGroup들을 효율적으로 처리합니다.
         
         Args:
             task_groups_raw: 원본 TaskGroup 목록
             allocation_policy: 할당 정책
+            job_name: Job의 전체 경로명
             
         Returns:
             List[Dict]: 처리된 TaskGroup 목록
@@ -88,7 +117,7 @@ class BatchJobProcessor:
         processed_groups = []
         for task_group in task_groups_raw:
             try:
-                processed_group = self._process_single_task_group(task_group, machine_type)
+                processed_group = self._process_single_task_group(task_group, machine_type, job_name)
                 processed_groups.append(processed_group)
             except Exception as e:
                 group_name = task_group.get("name", "unknown")
@@ -98,13 +127,14 @@ class BatchJobProcessor:
         
         return processed_groups
     
-    def _process_single_task_group(self, task_group: Dict, machine_type: str) -> Dict:
+    def _process_single_task_group(self, task_group: Dict, machine_type: str, job_name: str) -> Dict:
         """
         개별 TaskGroup을 처리합니다.
         
         Args:
             task_group: TaskGroup 데이터
             machine_type: 머신 타입
+            job_name: Job의 전체 경로명
             
         Returns:
             Dict: 처리된 TaskGroup 데이터
@@ -119,17 +149,28 @@ class BatchJobProcessor:
         
         compute_resource = task_spec.get("computeResource", {})
         
+        # TaskGroup 전체 경로 생성
+        task_group_name = task_group.get("name", "")
+        
+        # TaskGroup name이 이미 전체 경로인지 확인
+        if task_group_name and task_group_name.startswith("projects/"):
+            # 이미 전체 경로
+            full_task_group_path = task_group_name
+        else:
+            # 부분 경로이므로 job_name과 조합
+            full_task_group_path = f"{job_name}/taskGroups/{task_group_name}" if task_group_name else ""
+        
         # Tasks 수집 (최적화: 에러가 발생해도 계속 진행)
-        tasks = self._collect_tasks_safe(task_group.get("name", ""))
+        tasks = self._collect_tasks_safe(full_task_group_path)
         
         return {
-            "name": task_group.get("name", ""),
-            "taskCount": task_group.get("taskCount", "0"),
+            "name": task_group_name,
+            "task_count": task_group.get("taskCount", "0"),
             "parallelism": task_group.get("parallelism", ""),
-            "machineType": machine_type,
-            "imageUri": image_uri,
-            "cpuMilli": compute_resource.get("cpuMilli", ""),
-            "memoryMib": compute_resource.get("memoryMib", ""),
+            "machine_type": machine_type,
+            "image_uri": image_uri,
+            "cpu_milli": compute_resource.get("cpuMilli", ""),
+            "memory_mib": compute_resource.get("memoryMib", ""),
             "tasks": tasks,
         }
     
@@ -151,12 +192,12 @@ class BatchJobProcessor:
             return [
                 {
                     "name": task.get("name", ""),
-                    "taskIndex": task.get("taskIndex", 0),
+                    "task_index": task.get("taskIndex", 0),
                     "state": task.get("status", {}).get("state", ""),
-                    "createTime": task.get("createTime", ""),
-                    "startTime": task.get("startTime", ""),
-                    "endTime": task.get("endTime", ""),
-                    "exitCode": task.get("status", {}).get("exitCode", 0),
+                    "create_time": task.get("createTime", ""),
+                    "start_time": task.get("startTime", ""),
+                    "end_time": task.get("endTime", ""),
+                    "exit_code": task.get("status", {}).get("exitCode", 0),
                 }
                 for task in tasks
             ]
@@ -177,11 +218,11 @@ class BatchJobProcessor:
         return {
             "name": job.get("name", ""),
             "uid": job.get("uid", ""),
-            "displayName": job.get("displayName", ""),
+            "display_name": job.get("displayName", ""),
             "state": job.get("status", {}).get("state", "UNKNOWN"),
-            "createTime": job.get("createTime", ""),
-            "updateTime": job.get("updateTime", ""),
-            "taskGroups": [],
+            "create_time": job.get("createTime", ""),
+            "update_time": job.get("updateTime", ""),
+            "task_groups": [],
         }
     
     def _create_basic_task_group_data(self, task_group: Dict) -> Dict:
@@ -196,11 +237,11 @@ class BatchJobProcessor:
         """
         return {
             "name": task_group.get("name", ""),
-            "taskCount": task_group.get("taskCount", "0"),
+            "task_count": task_group.get("taskCount", "0"),
             "parallelism": task_group.get("parallelism", ""),
-            "machineType": "",
-            "imageUri": "",
-            "cpuMilli": "",
-            "memoryMib": "",
+            "machine_type": "",
+            "image_uri": "",
+            "cpu_milli": "",
+            "memory_mib": "",
             "tasks": [],
         }
