@@ -1,0 +1,12 @@
+widget_type: "chart"
+title: "Jobs by Region"
+icon: "ic_pie-chart"
+options:
+  chart_type: "DONUT"
+  legend:
+    enabled: true
+    show_at: "table"
+  value_options:
+    key: "region_code"
+    options:
+      default: 0
