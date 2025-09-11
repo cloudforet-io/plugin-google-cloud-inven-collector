@@ -44,8 +44,8 @@ cst_database._metadata = CloudServiceTypeMeta.set_meta(
             "Type",
             "data.type",
             default_badge={
-                "coral.600": ["FIRESTORE_NATIVE"],
-                "indigo.500": ["DATASTORE_MODE"],
+                "indigo.500": ["FIRESTORE_NATIVE"],
+                "coral.600": ["DATASTORE_MODE"],
             },
         ),
         EnumDyField.data_source(
