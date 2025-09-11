@@ -40,41 +40,83 @@ transfer_job_configuration_meta = ItemDynamicLayout.set_fields(
         TextDyField.data_source("Sink Type", "data.sink_type"),
         TextDyField.data_source("Schedule", "data.schedule_display"),
         TextDyField.data_source("Transfer Options", "data.transfer_options_display"),
+        TextDyField.data_source("Latest Operation", "data.latest_operation_name"),
         DateTimeDyField.data_source("Created", "data.creation_time"),
         DateTimeDyField.data_source("Last Modified", "data.last_modification_time"),
         DateTimeDyField.data_source("Deleted", "data.deletion_time"),
     ],
 )
 
-# TAB - Transfer Specification
-transfer_spec_meta = ItemDynamicLayout.set_fields(
-    "Transfer Specification",
+# TAB - Active Transfer Configuration (Union Field 기반)
+active_transfer_config_meta = ItemDynamicLayout.set_fields(
+    "Active Transfer Configuration",
     fields=[
+        # Active source/sink information
+        TextDyField.data_source("Active Source Type", "data.source_type"),
+        TextDyField.data_source("Active Source Details", "data.active_source_details"),
+        TextDyField.data_source("Active Sink Type", "data.sink_type"),
+        TextDyField.data_source("Active Sink Details", "data.active_sink_details"),
+        # Agent Pool information (POSIX transfers only)
         TextDyField.data_source(
-            "Source Agent Pool", "data.transfer_spec.source_agent_pool_name"
+            "Source Agent Pool",
+            "data.transfer_spec.source_agent_pool_name",
+            options={"is_optional": True},
         ),
         TextDyField.data_source(
-            "Sink Agent Pool", "data.transfer_spec.sink_agent_pool_name"
+            "Sink Agent Pool",
+            "data.transfer_spec.sink_agent_pool_name",
+            options={"is_optional": True},
+        ),
+    ],
+)
+
+# TAB - Complete Transfer Specification (모든 필드 표시)
+transfer_spec_meta = ItemDynamicLayout.set_fields(
+    "Complete Transfer Specification",
+    fields=[
+        # Union Field 그룹 1: Data Source (하나만 활성화)
+        TextDyField.data_source(
+            "GCS Data Source",
+            "data.transfer_spec.gcs_data_source",
+            options={"is_optional": True, "translation_id": "COMMON.GCS_SOURCE"},
         ),
         TextDyField.data_source(
-            "GCS Data Source", "data.transfer_spec.gcs_data_source"
-        ),
-        TextDyField.data_source("GCS Data Sink", "data.transfer_spec.gcs_data_sink"),
-        TextDyField.data_source(
-            "AWS S3 Data Source", "data.transfer_spec.aws_s3_data_source"
+            "AWS S3 Data Source",
+            "data.transfer_spec.aws_s3_data_source",
+            options={"is_optional": True},
         ),
         TextDyField.data_source(
             "Azure Blob Storage Data Source",
             "data.transfer_spec.azure_blob_storage_data_source",
+            options={"is_optional": True},
         ),
         TextDyField.data_source(
-            "HTTP Data Source", "data.transfer_spec.http_data_source"
+            "HTTP Data Source",
+            "data.transfer_spec.http_data_source",
+            options={"is_optional": True},
         ),
         TextDyField.data_source(
-            "POSIX Data Source", "data.transfer_spec.posix_data_source"
+            "POSIX Data Source",
+            "data.transfer_spec.posix_data_source",
+            options={"is_optional": True},
+        ),
+        # Union Field 그룹 2: Data Sink (하나만 활성화)
+        TextDyField.data_source(
+            "GCS Data Sink",
+            "data.transfer_spec.gcs_data_sink",
+            options={"is_optional": True, "translation_id": "COMMON.GCS_SINK"},
         ),
         TextDyField.data_source(
-            "POSIX Data Sink", "data.transfer_spec.posix_data_sink"
+            "POSIX Data Sink",
+            "data.transfer_spec.posix_data_sink",
+            options={"is_optional": True},
+        ),
+        # 기타 비-Union 필드들
+        TextDyField.data_source(
+            "Object Conditions", "data.transfer_spec.object_conditions"
+        ),
+        TextDyField.data_source(
+            "Transfer Manifest", "data.transfer_spec.transfer_manifest"
         ),
     ],
 )
@@ -112,6 +154,7 @@ logging_config_meta = ItemDynamicLayout.set_fields(
 transfer_job_meta = CloudServiceMeta.set_layouts(
     [
         transfer_job_configuration_meta,
+        active_transfer_config_meta,
         transfer_spec_meta,
         notification_config_meta,
         logging_config_meta,
