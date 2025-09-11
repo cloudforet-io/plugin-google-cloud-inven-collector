@@ -1,32 +1,26 @@
-from schematics import Model
 from schematics.types import (
     StringType,
 )
 
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
+
 __all__ = ["BackupSchedule"]
 
 
-class BackupSchedule(Model):
-    # 기본 정보
-    name = StringType(required=True)
-    database_id = StringType(required=True)
-    project_id = StringType(required=True)
+class BackupSchedule(BaseResource):
+    full_name = StringType()
+    database_id = StringType()
 
-    # 백업 설정
-    retention = StringType()  # "604800s" 형태의 보존 기간
+    retention = StringType()
 
-    # 스케줄 설정 (DailyRecurrence 또는 WeeklyRecurrence)
-    recurrence_type = StringType(choices=["DAILY", "WEEKLY"])
+    recurrence_type = StringType()
+    weekly_day = StringType()
 
-    # 시간 정보
-    create_time = StringType()
-    update_time = StringType()
-
-    # 메타데이터
-    uid = StringType()
+    create_time = StringType(deserialize_from="createTime")
+    update_time = StringType(deserialize_from="updateTime")
 
     def reference(self):
         return {
-            "resource_id": self.name,
-            "external_link": f"https://console.cloud.google.com/firestore/databases/{self.database_id}/backup-schedules?project={self.project_id}",
+            "resource_id": f"https://firestore.googleapis.com/v1/{self.full_name}",
+            "external_link": f"https://console.cloud.google.com/firestore/databases/{self.database_id}/disaster-recovery?project={self.project}",
         }

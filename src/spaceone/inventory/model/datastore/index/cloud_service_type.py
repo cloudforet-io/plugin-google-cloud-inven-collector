@@ -34,8 +34,6 @@ cst_index.provider = "google_cloud"
 cst_index.group = "Datastore"
 cst_index.labels = ["Database", "NoSQL", "Index"]
 cst_index.service_code = "Datastore"
-cst_index.is_primary = False
-cst_index.is_major = False
 cst_index.resource_type = "inventory.CloudService"
 cst_index.tags = {
     "spaceone:icon": f"{ASSET_URL}/Datastore.svg",

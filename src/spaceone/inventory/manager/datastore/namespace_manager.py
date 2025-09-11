@@ -1,4 +1,5 @@
 import logging
+import time
 
 from spaceone.inventory.connector.datastore.database_v1 import (
     DatastoreDatabaseV1Connector,
@@ -48,6 +49,7 @@ class DatastoreNamespaceManager(GoogleCloudManager):
                 성공한 리소스 응답 리스트와 에러 응답 리스트
         """
         _LOGGER.debug("** Datastore Namespace START **")
+        start_time = time.time()
 
         collected_cloud_services = []
         error_responses = []
@@ -130,7 +132,10 @@ class DatastoreNamespaceManager(GoogleCloudManager):
             )
             error_responses.append(error_response)
 
-        _LOGGER.debug("** Datastore Namespace END **")
+        # 수집 완료 로깅
+        _LOGGER.debug(
+            f"** Datastore Namespace Finished {time.time() - start_time} Seconds **"
+        )
         return collected_cloud_services, error_responses
 
     def _list_namespaces_for_databases(self, database_infos):

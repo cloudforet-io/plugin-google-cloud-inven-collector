@@ -33,6 +33,8 @@ cst_namespace.provider = "google_cloud"
 cst_namespace.group = "Datastore"
 cst_namespace.labels = ["Database", "NoSQL", "Namespace"]
 cst_namespace.service_code = "Datastore"
+cst_namespace.is_primary = False
+cst_namespace.is_major = True
 cst_namespace.resource_type = "inventory.CloudService"
 cst_namespace.tags = {
     "spaceone:icon": f"{ASSET_URL}/Datastore.svg",

@@ -78,7 +78,13 @@ CLOUD_SERVICE_GROUP_MAP = {
         "StorageTransferManager",
         "StorageTransferOperationManager",
     ],
-    "Firestore": ["FirestoreManager"],
+    "Firestore": [
+        "FirestoreDatabaseManager",
+        "FirestoreCollectionManager",
+        "FirestoreIndexManager",
+        "FirestoreBackupScheduleManager",
+        "FirestoreBackupManager",
+    ],
     "KMS": ["KMSKeyRingManager"],
     # "Recommender": ["RecommendationManager"],
 }

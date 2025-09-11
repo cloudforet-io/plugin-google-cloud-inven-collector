@@ -25,7 +25,9 @@ current_dir = os.path.abspath(os.path.dirname(__file__))
 
 total_count_conf = os.path.join(current_dir, "widget/total_count.yaml")
 count_by_state_conf = os.path.join(current_dir, "widget/count_by_state.yaml")
-count_by_query_scope_conf = os.path.join(current_dir, "widget/count_by_query_scope.yaml")
+count_by_query_scope_conf = os.path.join(
+    current_dir, "widget/count_by_query_scope.yaml"
+)
 
 # Cloud Service Type 리소스 정의
 cst_index = CloudServiceTypeResource()
@@ -34,7 +36,7 @@ cst_index.provider = "google_cloud"
 cst_index.group = "Firestore"
 cst_index.service_code = "Cloud Firestore"
 cst_index.is_primary = False
-cst_index.is_major = True
+cst_index.is_major = False
 cst_index.labels = ["Database", "Index"]
 cst_index.tags = {
     "spaceone:icon": f"{ASSET_URL}/Firestore.svg",
@@ -42,9 +44,7 @@ cst_index.tags = {
 
 cst_index._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Index Name", "data.name"),
         TextDyField.data_source("Database ID", "data.database_id"),
-        TextDyField.data_source("Project", "data.project_id"),
         TextDyField.data_source("Collection Group", "data.collection_group"),
         EnumDyField.data_source(
             "Query Scope",
@@ -65,9 +65,7 @@ cst_index._metadata = CloudServiceTypeMeta.set_meta(
         ),
     ],
     search=[
-        SearchField.set(name="Index Name", key="data.name"),
         SearchField.set(name="Database ID", key="data.database_id"),
-        SearchField.set(name="Project", key="data.project_id"),
         SearchField.set(name="Collection Group", key="data.collection_group"),
         SearchField.set(name="Query Scope", key="data.query_scope"),
         SearchField.set(name="State", key="data.state"),

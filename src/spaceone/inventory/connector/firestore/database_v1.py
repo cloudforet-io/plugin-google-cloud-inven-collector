@@ -2,6 +2,7 @@ import logging
 from typing import List
 
 from googleapiclient.errors import HttpError
+
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
 __all__ = ["FirestoreDatabaseConnector"]
@@ -79,7 +80,9 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                 all_databases = response.get("databases", [])
                 # FIRESTORE_NATIVE 타입만 필터링
                 firestore_databases = list(
-                    filter(lambda db: db.get("type") == "FIRESTORE_NATIVE", all_databases)
+                    filter(
+                        lambda db: db.get("type") == "FIRESTORE_NATIVE", all_databases
+                    )
                 )
                 database_list.extend(firestore_databases)
                 # 페이지네이션 처리 - list_next가 있는지 확인
@@ -107,10 +110,14 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                 )
                 return []
             else:
-                _LOGGER.error(f"HTTP error listing Firestore databases for project {self.project_id}: {e}")
+                _LOGGER.error(
+                    f"HTTP error listing Firestore databases for project {self.project_id}: {e}"
+                )
                 raise e
         except Exception as e:
-            _LOGGER.error(f"Error listing Firestore databases for project {self.project_id}: {e}")
+            _LOGGER.error(
+                f"Error listing Firestore databases for project {self.project_id}: {e}"
+            )
             raise e
 
     def list_indexes(self, database_name, **query):
@@ -166,7 +173,9 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                 )
                 return []
             else:
-                _LOGGER.error(f"HTTP error listing indexes for database {database_name}: {e}")
+                _LOGGER.error(
+                    f"HTTP error listing indexes for database {database_name}: {e}"
+                )
                 raise e
         except Exception as e:
             _LOGGER.error(f"Error listing indexes for database {database_name}: {e}")
@@ -277,9 +286,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                         }
                     )
 
-            _LOGGER.debug(
-                f"Retrieved {len(collections_with_docs)} collections with documents"
-            )
             return collections_with_docs
 
         except Exception as e:
@@ -321,9 +327,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                     # list_next가 없는 경우 첫 페이지만 처리
                     break
 
-            _LOGGER.debug(
-                f"Retrieved {len(backup_schedules)} backup schedules for {database_name}"
-            )
             return backup_schedules
 
         except Exception as e:
@@ -366,9 +369,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                     # list_next가 없는 경우 첫 페이지만 처리
                     break
 
-            _LOGGER.info(
-                f"Retrieved {len(backups)} backups from all locations for project {self.project_id}"
-            )
             return backups
 
         except Exception as e:
