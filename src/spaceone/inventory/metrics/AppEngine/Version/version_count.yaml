@@ -28,5 +28,5 @@ query_options:
     value:
       operator: count
 unit: Count
-namespace_id: ns-google-cloud-app-engine-version
+namespace_id: ns-google-cloud-appengine-version
 version: '1.0'
