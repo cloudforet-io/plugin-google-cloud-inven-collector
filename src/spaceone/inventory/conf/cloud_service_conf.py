@@ -25,6 +25,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "LoadBalancingManager",
         "RouteManager",
         "VPCNetworkManager",
+        "VPCSubnetManager",
     ],
     "PubSub": [
         "SchemaManager",

@@ -51,6 +51,7 @@ from .networking.firewall_manager import FirewallManager
 from .networking.load_balancing_manager import LoadBalancingManager
 from .networking.route_manager import RouteManager
 from .networking.vpc_network_manager import VPCNetworkManager
+from .networking.vpc_subnet_manager import VPCSubnetManager
 from .pub_sub.schema_manager import SchemaManager
 from .pub_sub.snapshot_manager import SnapshotManager
 from .pub_sub.subscription_manager import SubscriptionManager

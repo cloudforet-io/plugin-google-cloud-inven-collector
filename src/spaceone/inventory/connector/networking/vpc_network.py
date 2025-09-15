@@ -45,7 +45,7 @@ class VPCNetworkConnector(GoogleCloudConnector):
                     forwarding_rule_list.extend(
                         forwarding_rules_scoped_list.get("forwardingRules")
                     )
-            request = self.client.instances().aggregatedList_next(
+            request = self.client.forwardingRules().aggregatedList_next(
                 previous_request=request, previous_response=response
             )
 
@@ -80,20 +80,6 @@ class VPCNetworkConnector(GoogleCloudConnector):
 
         return address_list
 
-    def list_subnetworks(self, **query):
-        subnetworks_list = []
-        query = self.generate_query(**query)
-        request = self.client.subnetworks().aggregatedList(**query)
-        while request is not None:
-            response = request.execute()
-            for name, _subnetworks_list in response["items"].items():
-                if "subnetworks" in _subnetworks_list:
-                    subnetworks_list.extend(_subnetworks_list.get("subnetworks"))
-            request = self.client.addresses().aggregatedList_next(
-                previous_request=request, previous_response=response
-            )
-
-        return subnetworks_list
 
     def list_routes(self, **query):
         route_list = []
