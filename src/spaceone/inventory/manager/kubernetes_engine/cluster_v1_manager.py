@@ -161,7 +161,8 @@ class GKEClusterV1Manager(GoogleCloudManager):
         collected_cloud_services = []
         error_responses = []
 
-        # secret_data = params["secret_data"]  # 향후 사용 예정
+        secret_data = params["secret_data"]
+        project_id = secret_data["project_id"]
 
         # GKE 클러스터 목록 조회
         clusters = self.list_clusters(params)
@@ -289,6 +290,21 @@ class GKEClusterV1Manager(GoogleCloudManager):
                 if resource_limits:
                     cluster_data["resourceLimits"] = resource_limits
                     _LOGGER.info(f"Added {len(resource_limits)} resource limits to cluster {cluster_data.get('name')}")
+
+                # Stackdriver 정보 추가
+                google_cloud_monitoring_filters = [
+                    {"key": "resource.labels.cluster_name", "value": cluster.get("name")},
+                    {"key": "resource.labels.location", "value": cluster.get("location")},
+                ]
+                cluster_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
+                    project_id,
+                    "container.googleapis.com/cluster",
+                    cluster.get("name"),
+                    google_cloud_monitoring_filters,
+                )
+                cluster_data["google_cloud_logging"] = self.set_google_cloud_logging(
+                    "KubernetesEngine", "Cluster", project_id, cluster.get("name")
+                )
 
                 # GKECluster 모델 생성
                 gke_cluster_data = GKECluster(cluster_data, strict=False)

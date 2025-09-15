@@ -280,6 +280,23 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                         "volumes": resources.get("volumes", []),
                     }
 
+                # Stackdriver 정보 추가
+                google_cloud_monitoring_filters = [
+                    {"key": "resource.labels.service_id", "value": service_id},
+                    {"key": "resource.labels.version_id", "value": version_id},
+                    {"key": "resource.labels.instance_id", "value": instance_id},
+                    {"key": "resource.labels.project_id", "value": project_id},
+                ]
+                instance_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
+                    project_id,
+                    "appengine.googleapis.com/http/instance",
+                    instance_id,
+                    google_cloud_monitoring_filters,
+                )
+                instance_data["google_cloud_logging"] = self.set_google_cloud_logging(
+                    "AppEngine", "Instance", project_id, instance_id
+                )
+
                 # AppEngineInstance 모델 생성
                 app_engine_instance_data = AppEngineInstance(
                     instance_data, strict=False

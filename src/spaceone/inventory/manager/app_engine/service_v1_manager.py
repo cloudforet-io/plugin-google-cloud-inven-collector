@@ -214,6 +214,21 @@ class AppEngineServiceV1Manager(GoogleCloudManager):
                         "subnetworkName": str(network_data.get("subnetworkName", "")),
                     }
 
+                # Stackdriver 정보 추가
+                google_cloud_monitoring_filters = [
+                    {"key": "resource.labels.service_id", "value": service.get("id")},
+                    {"key": "resource.labels.project_id", "value": project_id},
+                ]
+                service_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
+                    project_id,
+                    "appengine.googleapis.com/http/service",
+                    service.get("id"),
+                    google_cloud_monitoring_filters,
+                )
+                service_data["google_cloud_logging"] = self.set_google_cloud_logging(
+                    "AppEngine", "Service", project_id, service.get("id")
+                )
+
                 # AppEngineService 모델 생성
                 app_engine_service_data = AppEngineService(service_data, strict=False)
 
