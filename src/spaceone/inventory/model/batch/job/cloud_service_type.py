@@ -28,7 +28,7 @@ cst_batch_job.is_primary = True
 cst_batch_job.is_major = True
 cst_batch_job.labels = ["Compute", "Container"]
 cst_batch_job.tags = {
-    "spaceone:icon": f"{ASSET_URL}/google_cloud_batch.svg",
+    "spaceone:icon": f"{ASSET_URL}/Batch.svg",
     "spaceone:display_name": "Google Cloud Batch Jobs",
     "spaceone:is_beta": "true",
 }
