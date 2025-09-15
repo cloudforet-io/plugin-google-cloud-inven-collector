@@ -1,0 +1,16 @@
+name: VPC Gateway Count by Region
+version: '1.0'
+description: Count VPC Gateways by region
+default_chart_type: COLUMN
+default_chart_options:
+  show_legend: true
+  legend_position: top
+dimensions:
+  - key: data.region
+    name: Region
+  - key: data.gateway_type
+    name: Gateway Type
+fields:
+  - key: _id
+    name: Count
+    operator: count

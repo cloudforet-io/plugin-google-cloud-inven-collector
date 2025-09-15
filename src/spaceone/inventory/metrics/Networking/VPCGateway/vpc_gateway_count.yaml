@@ -1,0 +1,30 @@
+key: vpc_gateway_count
+name: VPC Gateway Count
+unit:
+  x: "count"
+  y: "count"
+chart_type: COLUMN
+filters:
+  - name: "Gateway Type"
+    key: data.gateway_type
+    options:
+      - "NAT_GATEWAY"
+      - "VPN_GATEWAY"
+      - "TARGET_VPN_GATEWAY"
+query:
+  metric_query:
+    conditions:
+      - key: "cloud_service_type"
+        value: "VPCGateway"
+        operator: "eq"
+    aggregate:
+      group:
+        keys:
+          - key: data.gateway_type
+            name: "Gateway Type"
+          - key: data.region
+            name: "Region"
+        fields:
+          - operator: count
+            key: _id
+            name: "count"

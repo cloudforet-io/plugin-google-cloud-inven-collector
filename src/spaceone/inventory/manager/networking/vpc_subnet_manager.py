@@ -3,7 +3,7 @@ import logging
 from ipaddress import ip_address, IPv4Address
 
 from spaceone.inventory.libs.manager import GoogleCloudManager
-from spaceone.inventory.libs.schema.base import ReferenceModel
+from spaceone.inventory.libs.schema.base import ReferenceModel, reset_state_counters, log_state_summary
 from spaceone.inventory.connector.networking.vpc_subnet import VPCSubnetConnector
 from spaceone.inventory.model.networking.vpc_subnet.cloud_service_type import (
     CLOUD_SERVICE_TYPES,
@@ -36,6 +36,9 @@ class VPCSubnetManager(GoogleCloudManager):
             CloudServiceResponse/ErrorResourceResponse
         """
 
+        # v2.0 로깅 시스템: 상태 카운터 초기화
+        reset_state_counters()
+        
         collected_cloud_services = []
         error_responses = []
         subnet_id = ""
@@ -115,10 +118,14 @@ class VPCSubnetManager(GoogleCloudManager):
 
                 ##################################
                 # 5. Make Resource Response Object
+                # v2.0 로깅 시스템: SUCCESS 응답 생성
                 ##################################
-                collected_cloud_services.append(
-                    VPCSubnetResponse({"resource": subnet_resource})
+                subnet_response = VPCSubnetResponse.create_with_logging(
+                    state="SUCCESS",
+                    resource_type="inventory.CloudService",
+                    resource=subnet_resource,
                 )
+                collected_cloud_services.append(subnet_response)
             except Exception as e:
                 _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
                 error_response = self.generate_resource_error_response(
@@ -126,7 +133,10 @@ class VPCSubnetManager(GoogleCloudManager):
                 )
                 error_responses.append(error_response)
 
-        _LOGGER.debug(f"** VPC Subnet Finished {time.time() - start_time} Seconds **")
+        # v2.0 로깅 시스템: 수집 완료 시 상태 요약 로깅
+        log_state_summary()
+        _LOGGER.debug(f"** VPC Subnet Finished {time.time() - start_time:.2f} Seconds **")
+        _LOGGER.info(f"Collected {len(collected_cloud_services)} VPC Subnets")
         return collected_cloud_services, error_responses
 
     def _get_internal_ip_addresses_in_subnet(self, subnet, regional_address, network_name):

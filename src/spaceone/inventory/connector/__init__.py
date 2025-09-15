@@ -75,6 +75,7 @@ from spaceone.inventory.connector.networking.load_balancing import (
 from spaceone.inventory.connector.networking.route import RouteConnector
 from spaceone.inventory.connector.networking.vpc_network import VPCNetworkConnector
 from spaceone.inventory.connector.networking.vpc_subnet import VPCSubnetConnector
+from spaceone.inventory.connector.networking.vpc_gateway import VPCGatewayConnector
 from spaceone.inventory.connector.pub_sub.schema import SchemaConnector
 from spaceone.inventory.connector.pub_sub.snapshot import (
     SnapshotConnector as PubSubSnapshotConnector,
@@ -131,6 +132,7 @@ __all__ = [
     "RouteConnector",
     "VPCNetworkConnector",
     "VPCSubnetConnector",
+    "VPCGatewayConnector",
     "SchemaConnector",
     "SubscriptionConnector",
     "TopicConnector",
