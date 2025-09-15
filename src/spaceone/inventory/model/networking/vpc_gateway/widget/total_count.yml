@@ -1,12 +1,15 @@
-name: Total VPC Gateway Count
-version: '1.0'
-description: Total count of VPC Gateways
-default_chart_type: CARD
-default_chart_options:
-  icon: fas fa-network-wired
-  icon_color: "#60b2fc"
-dimensions: []
-fields:
-  - key: _id
-    name: Total Count
-    operator: count
+---
+cloud_service_group: Networking
+cloud_service_type: VPCGateway
+name: Total Count
+query:
+  aggregate:
+    - group:
+        fields:
+          - name: value
+            operator: count
+options:
+  value_options:
+    key: value
+    options:
+      default: 0

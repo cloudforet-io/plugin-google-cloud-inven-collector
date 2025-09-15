@@ -1,3 +1,10 @@
+import os
+
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
+from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
+    CardWidget,
+    ChartWidget,
+)
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     TextDyField,
     EnumDyField,
@@ -10,16 +17,18 @@ from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
     TableDynamicLayout,
     ListDynamicLayout,
 )
-from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
-    CardWidget,
-    ChartWidget,
-)
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeResource,
     CloudServiceTypeResponse,
     CloudServiceTypeMeta,
 )
-from spaceone.inventory.conf.cloud_service_conf import *
+from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
+
+current_dir = os.path.abspath(os.path.dirname(__file__))
+
+total_count_conf = os.path.join(current_dir, "widget/total_count.yml")
+count_by_region_conf = os.path.join(current_dir, "widget/count_by_region.yml")
+count_by_project_conf = os.path.join(current_dir, "widget/count_by_project.yml")
 
 """
 VPC Gateway
@@ -113,12 +122,13 @@ cst_vpc_gateway = CloudServiceTypeResource()
 cst_vpc_gateway.name = "VPCGateway"
 cst_vpc_gateway.provider = "google_cloud"
 cst_vpc_gateway.group = "Networking"
-cst_vpc_gateway.service_code = "VPC Gateway"
+cst_vpc_gateway.service_code = "Networking"
 cst_vpc_gateway.is_primary = True
 cst_vpc_gateway.is_major = True
 cst_vpc_gateway.labels = ["Networking", "Gateway"]
 cst_vpc_gateway.tags = {
-    "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/VPC.svg"
+    "spaceone:icon": f"{ASSET_URL}/VPC.svg",
+    "spaceone:display_name": "VPCGateway",
 }
 
 cst_vpc_gateway._metadata = CloudServiceTypeMeta.set_meta(
@@ -149,6 +159,11 @@ cst_vpc_gateway._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(
             name="Creation Time", key="data.creation_timestamp", data_type="datetime"
         ),
+    ],
+    widget=[
+        CardWidget.set(**get_data_from_yaml(total_count_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_region_conf)),
+        ChartWidget.set(**get_data_from_yaml(count_by_project_conf)),
     ],
 )
 

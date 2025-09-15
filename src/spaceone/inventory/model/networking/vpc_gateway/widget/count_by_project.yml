@@ -1,16 +1,18 @@
-name: VPC Gateway Count by Project
-version: '1.0'
-description: Count VPC Gateways by project
-default_chart_type: DONUT
-default_chart_options:
-  show_legend: true
-  legend_position: right
-dimensions:
-  - key: account
-    name: Project
-  - key: data.gateway_type
-    name: Gateway Type
-fields:
-  - key: _id
-    name: Count
-    operator: count
+---
+cloud_service_group: Networking
+cloud_service_type: VPCGateway
+name: Count by Project
+query:
+  aggregate:
+    - group:
+        keys:
+          - key: account
+            name: Project
+        fields:
+          - name: value
+            operator: count
+options:
+  value_options:
+    key: value
+    options:
+      default: 0

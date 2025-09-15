@@ -1,6 +1,6 @@
 import os
 
-from spaceone.inventory.libs.common_parser import *
+from spaceone.inventory.libs.common_parser import get_data_from_yaml
 from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeResource,
     CloudServiceTypeResponse,
@@ -14,11 +14,9 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     TextDyField,
     SearchField,
     DateTimeDyField,
-    ListDyField,
     EnumDyField,
-    SizeField,
 )
-from spaceone.inventory.conf.cloud_service_conf import *
+from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -74,7 +72,9 @@ cst_vpc_subnet._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Gateway", key="data.gateway_address"),
         SearchField.set(name="Purpose", key="data.purpose"),
         SearchField.set(name="State", key="data.state"),
-        SearchField.set(name="Creation Time", key="data.creation_timestamp"),
+        SearchField.set(
+            name="Creation Time", key="data.creation_timestamp", data_type="datetime"
+        ),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
