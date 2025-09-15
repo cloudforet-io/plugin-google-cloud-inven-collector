@@ -40,18 +40,3 @@ class Collector(BaseAPI, collector_pb2_grpc.CollectorServicer):
         with collector_svc:
             for resource in collector_svc.collect(params):
                 yield self.locator.get_info("ResourceInfo", resource)
-
-    def get_firebase_apps(self, request, context):
-        """
-        특정 프로젝트의 Firebase 앱들을 조회합니다.
-        Firebase Management API의 searchApps 엔드포인트를 사용합니다.
-        """
-        params, metadata = self.parse_request(request, context)
-
-        collector_svc: CollectorService = self.locator.get_service(
-            "CollectorService", metadata
-        )
-
-        with collector_svc:
-            apps = collector_svc.get_firebase_projects(params)
-            return self.locator.get_info("DictInfo", apps)
