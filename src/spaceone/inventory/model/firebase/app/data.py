@@ -27,10 +27,6 @@ class App(Model):
     app_id = StringType(deserialize_from="appId")
     state = StringType()
     
-    # 플랫폼별 설정 정보 (조건부 포함)
-    package_name = StringType(deserialize_from="packageName", serialize_when_none=False)  # Android만
-    bundle_id = StringType(deserialize_from="bundleId", serialize_when_none=False)        # iOS만
-    web_id = StringType(deserialize_from="webId", serialize_when_none=False)              # Web만
     
     # API 메타데이터
     namespace = StringType()
@@ -69,14 +65,6 @@ firebase_app_meta = CloudServiceMeta.set_layouts(
                 TextDyField.data_source("Namespace", "data.namespace"),
                 BadgeDyField.data_source("State", "data.state"),
                 TextDyField.data_source("API Key ID", "data.api_key_id"),
-            ],
-        ),
-        ItemDynamicLayout.set_fields(
-            "Platform Configuration",
-            fields=[
-                TextDyField.data_source("Package Name", "data.package_name"),  # Android
-                TextDyField.data_source("Bundle ID", "data.bundle_id"),        # iOS
-                TextDyField.data_source("Web ID", "data.web_id"),              # Web
             ],
         ),
     ]
