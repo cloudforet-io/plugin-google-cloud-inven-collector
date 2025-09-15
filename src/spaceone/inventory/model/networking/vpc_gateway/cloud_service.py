@@ -12,7 +12,8 @@ VPC Gateway Cloud Service
 """
 
 class VPCGatewayResource(CloudServiceResource):
-    cloud_service_type = StringType(default="VPCGateway")
+    cloud_service_group = "Networking"
+    cloud_service_type = "VPCGateway"
     data = ModelType(VPCGateway)
     _metadata = ModelType(CloudServiceMeta, serialize_when_none=False)
 

@@ -1,30 +1,22 @@
-key: vpc_gateway_count_by_region
+---
+metric_id: metric-google-cloud-net-vpc-gateway-count-by-region
 name: VPC Gateway Count by Region
-unit:
-  x: "count"
-  y: "count"
-chart_type: COLUMN
-filters:
-  - name: "Gateway Type"
-    key: data.gateway_type
-    options:
-      - "NAT_GATEWAY"
-      - "VPN_GATEWAY"
-      - "TARGET_VPN_GATEWAY"
-query:
-  metric_query:
-    conditions:
-      - key: "cloud_service_type"
-        value: "VPCGateway"
-        operator: "eq"
-    aggregate:
-      group:
-        keys:
-          - key: data.region
-            name: "Region"
-          - key: data.gateway_type
-            name: "Gateway Type"
-        fields:
-          - operator: count
-            key: _id
-            name: "count"
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Networking.VPCGateway
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: data.gateway_type
+      name: Gateway Type
+      search_key: data.gateway_type
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-networking-vpc-gateway
+version: '1.1'
