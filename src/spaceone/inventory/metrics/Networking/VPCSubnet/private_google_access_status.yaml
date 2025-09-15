@@ -1,0 +1,16 @@
+name: VPC Subnet Private Google Access Status
+namespace: VPCSubnet
+dimensions:
+  - key: project_id
+    value: data.project
+  - key: region
+    value: data.region
+  - key: subnet_name
+    value: data.name
+  - key: private_google_access_status
+    value: data.google_access
+metrics:
+  - key: private_google_access_enabled_count
+    value: 1
+    unit: Count
+    condition: data.google_access == "On"

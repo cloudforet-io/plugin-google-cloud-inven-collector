@@ -1,0 +1,16 @@
+name: VPC Subnet Flow Log Status
+namespace: VPCSubnet
+dimensions:
+  - key: project_id
+    value: data.project
+  - key: region
+    value: data.region
+  - key: subnet_name
+    value: data.name
+  - key: flow_log_status
+    value: data.flow_log
+metrics:
+  - key: flow_log_enabled_count
+    value: 1
+    unit: Count
+    condition: data.flow_log == "On"

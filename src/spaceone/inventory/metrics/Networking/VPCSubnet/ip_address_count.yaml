@@ -1,0 +1,13 @@
+name: VPC Subnet IP Address Count
+namespace: VPCSubnet
+dimensions:
+  - key: project_id
+    value: data.project
+  - key: region
+    value: data.region
+  - key: subnet_name
+    value: data.name
+metrics:
+  - key: ip_address_count
+    value: data.ip_address_data.length
+    unit: Count

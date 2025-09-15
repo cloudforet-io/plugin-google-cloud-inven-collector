@@ -1,0 +1,13 @@
+name: VPC Subnet Count
+namespace: VPCSubnet
+dimensions:
+  - key: project_id
+    value: data.project
+  - key: region
+    value: data.region
+  - key: vpc_network
+    value: data.network_display
+metrics:
+  - key: subnet_count
+    value: 1
+    unit: Count
