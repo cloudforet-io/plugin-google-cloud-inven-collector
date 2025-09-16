@@ -1,13 +1,28 @@
+---
+metric_id: metric-google-cloud-net-vpc-subnet-count
 name: VPC Subnet Count
-namespace: VPCSubnet
-dimensions:
-  - key: project_id
-    value: data.project
-  - key: region
-    value: data.region
-  - key: vpc_network
-    value: data.network_display
-metrics:
-  - key: subnet_count
-    value: 1
-    unit: Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Networking.VPCSubnet
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.network_display
+      name: VPC Network
+      search_key: data.network_display
+    - key: data.purpose
+      name: Purpose
+      search_key: data.purpose
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-networking-vpc-subnet
+version: '1.1'

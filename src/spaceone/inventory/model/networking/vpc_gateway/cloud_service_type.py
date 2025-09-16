@@ -125,7 +125,7 @@ cst_vpc_gateway.group = "Networking"
 cst_vpc_gateway.service_code = "Networking"
 cst_vpc_gateway.is_primary = True
 cst_vpc_gateway.is_major = True
-cst_vpc_gateway.labels = ["Networking", "Gateway"]
+cst_vpc_gateway.labels = ["Networking"]
 cst_vpc_gateway.tags = {
     "spaceone:icon": f"{ASSET_URL}/VPC.svg",
     "spaceone:display_name": "VPCGateway",

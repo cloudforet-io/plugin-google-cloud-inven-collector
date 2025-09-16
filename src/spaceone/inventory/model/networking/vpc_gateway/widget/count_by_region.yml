@@ -6,13 +6,15 @@ query:
   aggregate:
     - group:
         keys:
-          - key: data.region
-            name: Region
+          - name: name
+            key: region_code
         fields:
           - name: value
             operator: count
 options:
-  value_options:
-    key: value
-    options:
-      default: 0
+  chart_type: COLUMN
+  name_options:
+    key: name
+    reference:
+      resource_type: "inventory.Region"
+      reference_key: region_code

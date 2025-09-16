@@ -34,6 +34,7 @@ cst_vpc_subnet.is_major = True
 cst_vpc_subnet.labels = ["Networking"]
 cst_vpc_subnet.tags = {
     "spaceone:icon": f"{ASSET_URL}/VPC.svg",
+    "spaceone:display_name": "VPCSubnet",
 }
 
 cst_vpc_subnet._metadata = CloudServiceTypeMeta.set_meta(
