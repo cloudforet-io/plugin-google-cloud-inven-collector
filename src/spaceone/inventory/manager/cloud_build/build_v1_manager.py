@@ -129,6 +129,11 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                     else "global"
                 )
 
+                # Set up monitoring filters for Cloud Build
+                google_cloud_monitoring_filters = [
+                    {"key": "resource.labels.build_id", "value": build_id},
+                ]
+
                 ##################################
                 # 2. Make Base Data
                 ##################################
@@ -140,6 +145,15 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                         "name": build_name_short,  # 첫 8자리만 표시
                         "full_name": build_full_name,  # Set full path for Build ID column
                         "build_trigger_id": build_trigger_id,  # 빌드 ID만 표시
+                        "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                            project_id,
+                            "cloudbuild.googleapis.com/build",
+                            build_id,
+                            google_cloud_monitoring_filters,
+                        ),
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudBuild", "Build", project_id, build_id
+                        ),
                     }
                 )
 

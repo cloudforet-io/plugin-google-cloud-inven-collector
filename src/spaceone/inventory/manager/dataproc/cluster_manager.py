@@ -226,16 +226,34 @@ class DataprocClusterManager(GoogleCloudManager):
 
                 # 클러스터명 추출
                 cluster_name = cluster.get("clusterName", "")
+                cluster_uuid = cluster.get("clusterUuid", "")
+
+                # Set up monitoring filters for Dataproc Cluster
+                google_cloud_monitoring_filters = [
+                    {
+                        "key": "resource.labels.cluster_uuid",
+                        "value": cluster_uuid,
+                    },
+                ]
 
                 # 기본 클러스터 데이터 준비
                 cluster_data = {
                     "name": str(cluster.get("clusterName", "")),  # name 필드로 매핑
                     "cluster_name": str(cluster.get("clusterName", "")),
                     "project_id": str(project_id),  # project_id를 명시적으로 설정
-                    "cluster_uuid": str(cluster.get("clusterUuid", "")),
+                    "cluster_uuid": cluster_uuid,
                     "status": cluster.get("status", {}),
                     "labels": {k: str(v) for k, v in cluster.get("labels", {}).items()},
                     "location": location,
+                    "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                        project_id,
+                        "dataproc.googleapis.com/cluster",
+                        cluster_uuid,
+                        google_cloud_monitoring_filters,
+                    ),
+                    "google_cloud_logging": self.set_google_cloud_logging(
+                        "Dataproc", "Cluster", project_id, cluster_name
+                    ),
                 }
 
                 # 설정 정보 추가

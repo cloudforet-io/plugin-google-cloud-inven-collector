@@ -15,6 +15,13 @@ from schematics.types import (
     StringType,
 )
 
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
+)
+from spaceone.inventory.libs.schema.google_cloud_monitoring import (
+    GoogleCloudMonitoringModel,
+)
+
 
 class DiskConfig(Model):
     """Dataproc 클러스터 인스턴스의 디스크 구성을 나타냅니다."""
@@ -171,6 +178,12 @@ class DataprocCluster(Model):
     jobs = ListType(ModelType(DataprocJob))
     workflow_templates = ListType(ModelType(WorkflowTemplate))
     autoscaling_policies = ListType(ModelType(AutoscalingPolicy))
+    # Monitoring data
+    google_cloud_monitoring = ModelType(
+        GoogleCloudMonitoringModel, serialize_when_none=False
+    )
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)
 
     def reference(self) -> Dict[str, str]:
         """

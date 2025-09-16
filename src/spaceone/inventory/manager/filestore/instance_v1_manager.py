@@ -135,7 +135,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
                             ),
                             "google_cloud_monitoring": self.set_google_cloud_monitoring(
                                 project_id,
-                                "file.googleapis.com/nfs/server/free_raw_capacity_percent",
+                                "file.googleapis.com/nfs",
                                 instance_id,
                                 [
                                     {
