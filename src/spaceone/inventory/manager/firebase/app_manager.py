@@ -108,25 +108,13 @@ class FirebaseManager(GoogleCloudManager):
                     "full_name": app_data.get("displayName", app_id),
                     "google_cloud_monitoring": self.set_google_cloud_monitoring(
                         project_id,
-                        "firebaseappcheck.googleapis.com/resource",
+                        "firebaseappcheck.googleapis.com/resources",
                         app_id,
                         [
                             {
                                 "key": "resource.labels.resource_container",
                                 "value": project_id,
-                            },
-                            {
-                                "key": "resource.labels.location",
-                                "value": "global",
-                            },
-                            {
-                                "key": "resource.labels.service_id",
-                                "value": service_id,
-                            },
-                            {
-                                "key": "resource.labels.target_resource",
-                                "value": app_id,
-                            },
+                            }
                         ],
                     ),
                     "google_cloud_logging": self.set_google_cloud_logging(
