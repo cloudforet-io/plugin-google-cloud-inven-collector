@@ -2,7 +2,11 @@ import time
 import logging
 
 from spaceone.inventory.libs.manager import GoogleCloudManager
-from spaceone.inventory.libs.schema.base import ReferenceModel
+from spaceone.inventory.libs.schema.base import (
+    ReferenceModel,
+    reset_state_counters,
+    log_state_summary,
+)
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 from spaceone.inventory.connector.networking.vpc_gateway import VPCGatewayConnector
 from spaceone.inventory.model.networking.vpc_gateway.cloud_service_type import (
@@ -37,7 +41,7 @@ class VPCGatewayManager(GoogleCloudManager):
         """
 
         # v2.0 상태 추적 초기화
-        self.reset_state_counters()
+        reset_state_counters()
         
         collected_cloud_services = []
         error_responses = []
@@ -199,7 +203,7 @@ class VPCGatewayManager(GoogleCloudManager):
                 error_responses.append(error_response)
 
         # v2.0 수집 결과 요약 로깅
-        self.log_state_summary()
+        log_state_summary()
         
         _LOGGER.debug(f"** VPC Gateway Finished {time.time() - start_time} Seconds **")
         return collected_cloud_services, error_responses

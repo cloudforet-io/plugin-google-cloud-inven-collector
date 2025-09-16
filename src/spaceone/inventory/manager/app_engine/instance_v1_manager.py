@@ -18,7 +18,11 @@ from spaceone.inventory.model.app_engine.instance.data import (
 )
 from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_datetime
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
-from spaceone.inventory.libs.schema.base import BaseResponse
+from spaceone.inventory.libs.schema.base import (
+    BaseResponse,
+    reset_state_counters,
+    log_state_summary,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -196,7 +200,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
         _LOGGER.debug("** AppEngine Instance V1 START **")
 
         # 상태 카운터 초기화
-        self.reset_state_counters()
+        reset_state_counters()
 
         collected_cloud_services = []
         error_responses = []
@@ -404,7 +408,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
             error_responses.append(error_response)
 
         # 수집 결과 요약 로깅
-        self.log_state_summary()
+        log_state_summary()
         
         _LOGGER.debug("** AppEngine Instance V1 END **")
         return collected_cloud_services, error_responses
