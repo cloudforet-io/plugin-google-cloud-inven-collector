@@ -68,7 +68,6 @@ class VPCSubnetManager(GoogleCloudManager):
                 # 1. Set Basic Information
                 ##################################
                 subnet_id = subnet.get("id")
-                subnet_identifier = subnet.get("selfLink")
                 network_link = subnet.get("network", "")
                 network_name = network_lookup.get(network_link, "")
 
@@ -105,6 +104,8 @@ class VPCSubnetManager(GoogleCloudManager):
                     {
                         "name": _name,
                         "account": project_id,
+                        "cloud_service_group": "Networking",
+                        "cloud_service_type": "VPCSubnet",
                         "region_code": subnet_data.region,
                         "data": subnet_data,
                         "reference": ReferenceModel(subnet_data.reference()),
@@ -137,6 +138,7 @@ class VPCSubnetManager(GoogleCloudManager):
         log_state_summary()
         _LOGGER.debug(f"** VPC Subnet Finished {time.time() - start_time:.2f} Seconds **")
         _LOGGER.info(f"Collected {len(collected_cloud_services)} VPC Subnets")
+        
         return collected_cloud_services, error_responses
 
     def _get_internal_ip_addresses_in_subnet(self, subnet, regional_address, network_name):
