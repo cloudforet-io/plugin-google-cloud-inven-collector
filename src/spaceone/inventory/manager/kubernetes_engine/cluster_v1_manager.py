@@ -308,7 +308,7 @@ class GKEClusterV1Manager(GoogleCloudManager):
                 ]
                 cluster_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                     project_id,
-                    "container.googleapis.com/cluster",
+                    "kubernetes.io/cluster",
                     monitoring_resource_id,
                     google_cloud_monitoring_filters,
                 )

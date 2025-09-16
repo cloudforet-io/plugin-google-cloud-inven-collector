@@ -662,7 +662,7 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                     ]
                     node_pool_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                         project_id,
-                        "container.googleapis.com/node_pool",
+                        "kubernetes.io/node",
                         monitoring_resource_id,
                         google_cloud_monitoring_filters,
                     )
