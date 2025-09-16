@@ -211,7 +211,7 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                         "deployer": deployer,
                         "google_cloud_monitoring": self.set_google_cloud_monitoring(
                             project_id,
-                            "run.googleapis.com/container",
+                            "run.googleapis.com",
                             service_name,
                             google_cloud_monitoring_filters,
                         ),

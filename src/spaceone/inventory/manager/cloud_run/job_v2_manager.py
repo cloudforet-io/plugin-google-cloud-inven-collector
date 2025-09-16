@@ -155,7 +155,7 @@ class CloudRunJobV2Manager(GoogleCloudManager):
                         "region": region,
                         "google_cloud_monitoring": self.set_google_cloud_monitoring(
                             project_id,
-                            "run.googleapis.com/job",
+                            "run.googleapis.com",
                             job_name,
                             google_cloud_monitoring_filters,
                         ),
