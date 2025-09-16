@@ -247,7 +247,7 @@ class DataprocClusterManager(GoogleCloudManager):
                     "location": location,
                     "google_cloud_monitoring": self.set_google_cloud_monitoring(
                         project_id,
-                        "dataproc.googleapis.com/cluster",
+                        "dataproc.googleapis.com",
                         cluster_uuid,
                         google_cloud_monitoring_filters,
                     ),

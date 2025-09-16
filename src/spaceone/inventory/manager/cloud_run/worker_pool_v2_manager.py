@@ -139,7 +139,7 @@ class CloudRunWorkerPoolV2Manager(GoogleCloudManager):
                         "region": region,
                         "google_cloud_monitoring": self.set_google_cloud_monitoring(
                             project_id,
-                            "run.googleapis.com/container",
+                            "run.googleapis.com",
                             worker_pool_name,
                             google_cloud_monitoring_filters,
                         ),
