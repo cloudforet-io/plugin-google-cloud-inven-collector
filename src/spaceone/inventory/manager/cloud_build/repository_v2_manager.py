@@ -141,6 +141,9 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
                         "location": location_id,
                         "region": region,
                         "connection": connection_display_name,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudBuild", "Repository", project_id, repository_id
+                        ),
                     }
                 )
                 ##################################

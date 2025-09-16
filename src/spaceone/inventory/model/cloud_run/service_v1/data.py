@@ -8,6 +8,10 @@ from schematics.types import (
     StringType,
 )
 
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
+)
+
 
 class ObjectMeta(Model):
     name = StringType()
@@ -22,17 +26,19 @@ class ObjectMeta(Model):
 
 class ServiceSpec(Model):
     template = BaseType()  # RevisionTemplate - 복잡한 중첩 구조
-    traffic = BaseType()   # Traffic 배열
+    traffic = BaseType()  # Traffic 배열
 
 
 class ServiceStatus(Model):
     observed_generation = IntType(deserialize_from="observedGeneration")
     conditions = BaseType()  # 복잡한 조건 배열
-    latest_created_revision_name = StringType(deserialize_from="latestCreatedRevisionName")
+    latest_created_revision_name = StringType(
+        deserialize_from="latestCreatedRevisionName"
+    )
     latest_ready_revision_name = StringType(deserialize_from="latestReadyRevisionName")
     url = StringType()
-    address = BaseType()   # 주소 객체
-    traffic = BaseType()   # Traffic 배열
+    address = BaseType()  # 주소 객체
+    traffic = BaseType()  # Traffic 배열
 
 
 class ServiceV1(Model):
@@ -41,13 +47,15 @@ class ServiceV1(Model):
     metadata = ModelType(ObjectMeta)
     spec = ModelType(ServiceSpec)
     status = ModelType(ServiceStatus)
-    
+
     # Additional fields
     name = StringType()
     project = StringType()
     location = StringType()
     region = StringType()
-    
+
     # Revision info (populated by manager)
     revisions = BaseType(default=[])
     revision_count = IntType(default=0)
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)

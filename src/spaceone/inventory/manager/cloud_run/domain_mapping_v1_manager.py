@@ -87,6 +87,9 @@ class CloudRunDomainMappingV1Manager(GoogleCloudManager):
                         "location": location_id,
                         "region": region,
                         "self_link": self_link,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudRun", "DomainMapping", project_id, domain_mapping_id
+                        ),
                     }
                 )
 

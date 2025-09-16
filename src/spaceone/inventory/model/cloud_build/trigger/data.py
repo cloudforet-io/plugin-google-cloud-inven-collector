@@ -4,7 +4,12 @@ from schematics.types import (
     BooleanType,
     DictType,
     ListType,
+    ModelType,
     StringType,
+)
+
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
 )
 
 
@@ -40,3 +45,5 @@ class Trigger(Model):
     source_to_build = DictType(BaseType, deserialize_from="sourceToBuild", default={})
     git_file_source = DictType(BaseType, deserialize_from="gitFileSource", default={})
     approval_config = DictType(BaseType, deserialize_from="approvalConfig", default={})
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)

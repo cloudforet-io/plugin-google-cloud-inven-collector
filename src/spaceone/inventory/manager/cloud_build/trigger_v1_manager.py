@@ -135,6 +135,9 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                         "region": region,
                         "autodetect_display": autodetect_display,
                         "disabled_display": disabled_display,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudBuild", "Trigger", project_id, trigger_id
+                        ),
                     }
                 )
 
@@ -152,7 +155,8 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                         "reference": ReferenceModel(
                             {
                                 "resource_id": f"https://cloudbuild.googleapis.com/v1/{trigger_data.full_name}",
-                                "external_link": f"https://console.cloud.google.com/cloud-build/triggers?project={project_id}",
+                                # "external_link": f"https://console.cloud.google.com/cloud-build/triggers?project={project_id}",
+                                "external_link": f"https://console.cloud.google.com/cloud-build/triggers;region={region}/edit/{trigger_data.id}?project={project_id}",
                             }
                         ),
                     },

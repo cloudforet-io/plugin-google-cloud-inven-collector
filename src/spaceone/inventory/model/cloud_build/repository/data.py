@@ -1,7 +1,12 @@
 from schematics import Model
 from schematics.types import (
     DictType,
+    ModelType,
     StringType,
+)
+
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
 )
 
 
@@ -15,3 +20,5 @@ class Repository(Model):
     annotations = DictType(StringType, default={})
     etag = StringType()
     connection = StringType()
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)

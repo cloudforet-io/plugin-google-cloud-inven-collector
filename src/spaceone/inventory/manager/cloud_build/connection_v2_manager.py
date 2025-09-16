@@ -144,6 +144,9 @@ class CloudBuildConnectionV2Manager(GoogleCloudManager):
                         "region": region,
                         "scm_type": scm_type,
                         "username": username,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudBuild", "Connection", project_id, connection_id
+                        ),
                     }
                 )
 
