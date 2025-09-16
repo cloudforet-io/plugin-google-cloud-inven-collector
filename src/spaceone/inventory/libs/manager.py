@@ -154,37 +154,10 @@ class GoogleCloudManager(BaseManager):
 
     @staticmethod
     def set_google_cloud_monitoring(project_id, metric_type, resource_id, filters):
-        # Support legacy method (single metric_type)
-        if isinstance(metric_type, str):
-            return {
-                "name": f"projects/{project_id}",
-                "resource_id": resource_id,
-                "filters": [{"metric_type": metric_type, "labels": filters}],
-            }
-
-        # Support new method (multiple metric_types)
-        if isinstance(metric_type, list):
-            monitoring_filters = []
-            for i, mt in enumerate(metric_type):
-                # Use corresponding index if filters is nested list, otherwise use same filters
-                if isinstance(filters[0], list) and len(filters) > i:
-                    filter_labels = filters[i]
-                else:
-                    filter_labels = filters
-
-                monitoring_filters.append({"metric_type": mt, "labels": filter_labels})
-
-            return {
-                "name": f"projects/{project_id}",
-                "resource_id": resource_id,
-                "filters": monitoring_filters,
-            }
-
-        # Return default for exceptional cases
         return {
             "name": f"projects/{project_id}",
             "resource_id": resource_id,
-            "filters": [],
+            "filters": [{"metric_type": metric_type, "labels": filters}],
         }
 
     @staticmethod
