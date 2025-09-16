@@ -147,7 +147,10 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                         "build_trigger_id": build_trigger_id,  # 빌드 ID만 표시
                         "google_cloud_monitoring": self.set_google_cloud_monitoring(
                             project_id,
-                            "logging.googleapis.com",
+                            [
+                                "logging.googleapis.com/byte_count",
+                                "logging.googleapis.com/log_entry_count",
+                            ],
                             build_id,
                             google_cloud_monitoring_filters,
                         ),
