@@ -2,7 +2,12 @@ from schematics import Model
 from schematics.types import (
     BaseType,
     DictType,
+    ModelType,
     StringType,
+)
+
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
 )
 
 
@@ -20,3 +25,5 @@ class WorkerPool(Model):
     )
     disk_size_display = StringType()  # GB 단위로 표시
     etag = StringType()
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)

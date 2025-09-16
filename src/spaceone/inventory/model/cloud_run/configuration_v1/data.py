@@ -8,6 +8,10 @@ from schematics.types import (
     StringType,
 )
 
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
+)
+
 
 class ObjectMeta(Model):
     name = StringType()
@@ -45,3 +49,5 @@ class ConfigurationV1(Model):
     location = StringType()
     region = StringType()
     self_link = StringType()
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)

@@ -127,6 +127,9 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
                         "location": location_id,
                         "region": region,
                         "disk_size_display": disk_size_display,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudBuild", "WorkerPool", project_id, worker_pool_id
+                        ),
                     }
                 )
 
@@ -144,7 +147,8 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
                         "reference": ReferenceModel(
                             {
                                 "resource_id": f"https://cloudbuild.googleapis.com/v1/{worker_pool_data.full_name}",
-                                "external_link": f"https://console.cloud.google.com/cloud-build/worker-pools?project={project_id}",
+                                # "external_link": f"https://console.cloud.google.com/cloud-build/worker-pools?project={project_id}",
+                                "external_link": f"https://console.cloud.google.com/cloud-build/worker-pools/edit/{location_id}/{worker_pool_name}?project={project_id}",
                             }
                         ),
                     },

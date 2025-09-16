@@ -109,6 +109,9 @@ class CloudRunRouteV1Manager(GoogleCloudManager):
                         "region": region,
                         "latest_ready_revision_name": latest_ready_revision_name,
                         "revision_count": revision_count,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudRun", "Route", project_id, route.get("uid", "")
+                        ),
                     }
                 )
 

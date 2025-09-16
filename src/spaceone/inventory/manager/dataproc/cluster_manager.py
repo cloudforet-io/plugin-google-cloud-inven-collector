@@ -214,15 +214,7 @@ class DataprocClusterManager(GoogleCloudManager):
         for cluster in clusters:
             try:
                 # 클러스터 위치 정보 추출
-                location = ""
-                if "placement" in cluster and "zoneUri" in cluster["placement"]:
-                    zone_uri = cluster["placement"]["zoneUri"]
-                    location = zone_uri.split("/")[-1] if zone_uri else ""
-                elif "config" in cluster and "gceClusterConfig" in cluster["config"]:
-                    # zone 정보가 있으면 해당 지역을 추출
-                    zone_uri = cluster["config"]["gceClusterConfig"].get("zoneUri", "")
-                    if zone_uri:
-                        location = zone_uri.split("/")[-1]
+                location = cluster.get("labels", {}).get("goog-dataproc-location", "")
 
                 # 클러스터명 추출
                 cluster_name = cluster.get("clusterName", "")
@@ -298,7 +290,6 @@ class DataprocClusterManager(GoogleCloudManager):
                     mapped_disk_config = {
                         "boot_disk_size_gb": disk_config.get("bootDiskSizeGb"),
                         "boot_disk_type": disk_config.get("bootDiskType"),
-                        "num_local_ssds": disk_config.get("numLocalSsds"),
                     }
 
                     cluster_data["config"]["master_config"] = {
@@ -325,7 +316,6 @@ class DataprocClusterManager(GoogleCloudManager):
                         "disk_config": {
                             "boot_disk_size_gb": None,
                             "boot_disk_type": None,
-                            "num_local_ssds": None,
                         },
                         "min_cpu_platform": "",
                         "preemptibility": "NON_PREEMPTIBLE",
@@ -339,7 +329,6 @@ class DataprocClusterManager(GoogleCloudManager):
                     mapped_disk_config = {
                         "boot_disk_size_gb": disk_config.get("bootDiskSizeGb"),
                         "boot_disk_type": disk_config.get("bootDiskType"),
-                        "num_local_ssds": disk_config.get("numLocalSsds"),
                     }
 
                     cluster_data["config"]["worker_config"] = {
@@ -367,7 +356,6 @@ class DataprocClusterManager(GoogleCloudManager):
                         "disk_config": {
                             "boot_disk_size_gb": None,
                             "boot_disk_type": None,
-                            "num_local_ssds": None,
                         },
                         "min_cpu_platform": "",
                         "is_preemptible": False,
