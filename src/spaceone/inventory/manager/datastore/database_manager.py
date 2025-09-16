@@ -87,6 +87,20 @@ class DatastoreDatabaseManager(GoogleCloudManager):
                             "name": database_id,
                             "project": project_id,
                             "full_name": database_name,
+                            "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                                project_id,
+                                "datastore.googleapis.com/api/request_count",
+                                None,
+                                [
+                                    {
+                                        "key": "resource.labels.project_id",
+                                        "value": project_id,
+                                    }
+                                ],
+                            ),
+                            "google_cloud_logging": self.set_google_cloud_logging(
+                                "Datastore", "Database", project_id, database_id
+                            ),
                         }
                     )
 

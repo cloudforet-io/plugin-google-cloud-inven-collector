@@ -87,6 +87,17 @@ class StorageTransferManager(GoogleCloudManager):
 
                     transfer_job.update(
                         {
+                            "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                                project_id,
+                                "storagetransfer.googleapis.com/transferjob",
+                                transfer_job_id,
+                                [
+                                    {
+                                        "key": "resource.labels.job_id",
+                                        "value": transfer_job_id,
+                                    }
+                                ],
+                            ),
                             "google_cloud_logging": self.set_google_cloud_logging(
                                 "StorageTransfer",
                                 "TransferJob",
