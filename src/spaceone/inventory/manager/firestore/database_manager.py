@@ -90,7 +90,7 @@ class FirestoreDatabaseManager(GoogleCloudManager):
                             "full_name": database_name,
                             "google_cloud_monitoring": self.set_google_cloud_monitoring(
                                 project_id,
-                                "firestore.googleapis.com/storage/data_and_index_storage_bytes",
+                                "firestore.googleapis.com",
                                 database_id,
                                 [
                                     {

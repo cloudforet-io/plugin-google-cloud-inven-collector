@@ -89,12 +89,12 @@ class DatastoreDatabaseManager(GoogleCloudManager):
                             "full_name": database_name,
                             "google_cloud_monitoring": self.set_google_cloud_monitoring(
                                 project_id,
-                                "datastore.googleapis.com/api/request_count",
-                                None,
+                                "firestore.googleapis.com",
+                                database_id,
                                 [
                                     {
-                                        "key": "resource.labels.project_id",
-                                        "value": project_id,
+                                        "key": "resource.labels.database_id",
+                                        "value": database_id,
                                     }
                                 ],
                             ),
