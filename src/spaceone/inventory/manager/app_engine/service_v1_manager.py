@@ -220,11 +220,11 @@ class AppEngineServiceV1Manager(GoogleCloudManager):
                     _LOGGER.warning(f"Service missing ID, skipping monitoring setup: {service}")
                     service_id = "unknown"
                 
-                # Google Cloud Monitoring 리소스 ID: {project_id}:{service_id}
-                monitoring_resource_id = f"{project_id}:{service_id}"
+                # Google Cloud Monitoring/Logging 리소스 ID: App Engine Service의 경우 module_id (service_id) 사용
+                monitoring_resource_id = service_id
                 
                 google_cloud_monitoring_filters = [
-                    {"key": "resource.labels.service_id", "value": service_id},
+                    {"key": "resource.labels.module_id", "value": service_id},
                     {"key": "resource.labels.project_id", "value": project_id},
                 ]
                 service_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(

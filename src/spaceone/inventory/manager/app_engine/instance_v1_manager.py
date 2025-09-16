@@ -240,13 +240,23 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     instance_id = instance.get("id")
 
                                     if not instance_id:
+                                        _LOGGER.warning(f"Instance without ID found in service {service_id}, version {version_id}")
                                         continue
 
-                                    # 인스턴스 상세 정보 조회 (향후 사용 예정)
-                                    # instance_details = self.get_instance_details(service_id, version_id, instance_id, params)
+                                    _LOGGER.debug(f"Processing instance {instance_id} for service {service_id}, version {version_id}")
 
-                                    # 메트릭 정보 조회 (향후 사용 예정)
-                                    # metrics = self.get_instance_metrics(service_id, version_id, instance_id, params)
+                                    # 인스턴스 상세 정보 조회
+                                    instance_details = self.get_instance_details(service_id, version_id, instance_id, params)
+                                    if instance_details:
+                                        # 상세 정보로 기본 정보 업데이트
+                                        instance.update(instance_details)
+                                        _LOGGER.debug(f"Enhanced instance {instance_id} with detailed information")
+
+                                    # 메트릭 정보 조회
+                                    metrics = self.get_instance_metrics(service_id, version_id, instance_id, params)
+                                    if metrics:
+                                        instance["metrics"] = metrics
+                                        _LOGGER.debug(f"Added metrics to instance {instance_id}")
 
                                     # 기본 인스턴스 데이터 준비
                                     instance_data = {
@@ -263,7 +273,19 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                         "cpu_usage": instance.get("cpuUsage"),
                                         "create_time": convert_datetime(instance.get("createTime")),
                                         "update_time": convert_datetime(instance.get("updateTime")),
+                                        "start_time": convert_datetime(instance.get("startTime")),
                                     }
+
+                                    # 수집된 메트릭 정보 추가
+                                    if "metrics" in instance:
+                                        metrics_data = instance["metrics"]
+                                        instance_data.update({
+                                            "memory_usage_enhanced": metrics_data.get("memory_usage", ""),
+                                            "cpu_usage_enhanced": metrics_data.get("cpu_usage", ""),
+                                            "request_count_enhanced": metrics_data.get("request_count", ""),
+                                            "availability": metrics_data.get("availability", ""),
+                                            "app_engine_release": metrics_data.get("app_engine_release", ""),
+                                        })
 
                                     # VM Details 추가
                                     if "vmDetails" in instance:
@@ -314,11 +336,11 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                         _LOGGER.warning(f"Instance missing ID, skipping monitoring setup: service={service_id}, version={version_id}")
                                         instance_id = "unknown"
                                     
-                                    # Google Cloud Monitoring 리소스 ID: {project_id}:{service_id}:{version_id}:{instance_id}
-                                    monitoring_resource_id = f"{project_id}:{service_id}:{version_id}:{instance_id}"
+                                    # Google Cloud Monitoring/Logging 리소스 ID: App Engine Instance의 경우 instance_id 사용
+                                    monitoring_resource_id = instance_id
                                     
                                     google_cloud_monitoring_filters = [
-                                        {"key": "resource.labels.service_id", "value": service_id},
+                                        {"key": "resource.labels.module_id", "value": service_id},
                                         {"key": "resource.labels.version_id", "value": version_id},
                                         {"key": "resource.labels.instance_id", "value": instance_id},
                                         {"key": "resource.labels.project_id", "value": project_id},
@@ -361,11 +383,12 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     instance_response = BaseResponse.create_with_logging(
                                         resource=instance_resource,
                                         resource_type="Instance", 
-                                        resource_name=instance_data.get("name"),
+                                        resource_name=f"{instance_data.get('name')} ({instance_id})",
                                         status="SUCCESS"
                                     )
 
                                     collected_cloud_services.append(instance_response)
+                                    _LOGGER.info(f"Successfully collected App Engine instance: {instance_id} (status: {instance_data.get('vm_status', 'unknown')})")
 
                                 except Exception as e:
                                     _LOGGER.error(f"[collect_cloud_service] Instance {instance_id} => {e}", exc_info=True)
@@ -411,4 +434,5 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
         log_state_summary()
         
         _LOGGER.debug("** AppEngine Instance V1 END **")
+        _LOGGER.info(f"Collected {len(collected_cloud_services)} App Engine instances, {len(error_responses)} errors")
         return collected_cloud_services, error_responses

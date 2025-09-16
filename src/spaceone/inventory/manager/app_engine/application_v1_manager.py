@@ -246,8 +246,8 @@ class AppEngineApplicationV1Manager(GoogleCloudManager):
 
                 # Stackdriver 정보 추가
                 app_id = application.get("id", "default")
-                # Google Cloud Monitoring 리소스 ID: {project_id}
-                monitoring_resource_id = f"{project_id}"
+                # Google Cloud Monitoring/Logging 리소스 ID: App Engine의 경우 module_id (app_id) 사용
+                monitoring_resource_id = app_id
                 
                 google_cloud_monitoring_filters = [
                     {"key": "resource.labels.project_id", "value": project_id},

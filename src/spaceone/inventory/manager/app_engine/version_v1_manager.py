@@ -267,11 +267,11 @@ class AppEngineVersionV1Manager(GoogleCloudManager):
                         _LOGGER.warning(f"Version missing ID, skipping monitoring setup: service={service_id}")
                         version_id = "unknown"
                     
-                    # Google Cloud Monitoring 리소스 ID: {project_id}:{service_id}:{version_id}
-                    monitoring_resource_id = f"{project_id}:{service_id}:{version_id}"
+                    # Google Cloud Monitoring/Logging 리소스 ID: App Engine Version의 경우 version_id 사용
+                    monitoring_resource_id = version_id
                     
                     google_cloud_monitoring_filters = [
-                        {"key": "resource.labels.service_id", "value": service_id},
+                        {"key": "resource.labels.module_id", "value": service_id},
                         {"key": "resource.labels.version_id", "value": version_id},
                         {"key": "resource.labels.project_id", "value": project_id},
                     ]
