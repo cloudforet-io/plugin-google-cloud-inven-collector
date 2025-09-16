@@ -281,6 +281,10 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                     }
 
                 # Stackdriver 정보 추가
+                if not instance_id:
+                    _LOGGER.warning(f"Instance missing ID, skipping monitoring setup: service={service_id}, version={version_id}")
+                    instance_id = "unknown"
+                
                 google_cloud_monitoring_filters = [
                     {"key": "resource.labels.service_id", "value": service_id},
                     {"key": "resource.labels.version_id", "value": version_id},

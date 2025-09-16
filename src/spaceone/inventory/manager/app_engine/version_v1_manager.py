@@ -262,19 +262,24 @@ class AppEngineVersionV1Manager(GoogleCloudManager):
                         }
 
                     # Stackdriver 정보 추가
+                    version_id = version.get("id")
+                    if not version_id:
+                        _LOGGER.warning(f"Version missing ID, skipping monitoring setup: service={service_id}")
+                        version_id = "unknown"
+                    
                     google_cloud_monitoring_filters = [
                         {"key": "resource.labels.service_id", "value": service_id},
-                        {"key": "resource.labels.version_id", "value": version.get("id")},
+                        {"key": "resource.labels.version_id", "value": version_id},
                         {"key": "resource.labels.project_id", "value": project_id},
                     ]
                     version_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                         project_id,
                         "appengine.googleapis.com/http/version",
-                        version.get("id"),
+                        version_id,
                         google_cloud_monitoring_filters,
                     )
                     version_data["google_cloud_logging"] = self.set_google_cloud_logging(
-                        "AppEngine", "Version", project_id, version.get("id")
+                        "AppEngine", "Version", project_id, version_id
                     )
 
                     # AppEngineVersion 모델 생성

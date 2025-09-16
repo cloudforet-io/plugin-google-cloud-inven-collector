@@ -247,15 +247,16 @@ class AppEngineApplicationV1Manager(GoogleCloudManager):
                 # Stackdriver 정보 추가
                 google_cloud_monitoring_filters = [
                     {"key": "resource.labels.project_id", "value": project_id},
+                    {"key": "resource.labels.module_id", "value": application.get("id", "default")},
                 ]
                 app_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                     project_id,
                     "appengine.googleapis.com/application",
-                    app_data.get("projectId"),
+                    application.get("id", "default"),
                     google_cloud_monitoring_filters,
                 )
                 app_data["google_cloud_logging"] = self.set_google_cloud_logging(
-                    "AppEngine", "Application", project_id, app_data.get("projectId")
+                    "AppEngine", "Application", project_id, application.get("id", "default")
                 )
 
                 # AppEngineApplication 모델 생성

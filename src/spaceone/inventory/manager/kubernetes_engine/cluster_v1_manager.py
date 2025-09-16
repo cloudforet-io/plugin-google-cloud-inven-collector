@@ -292,18 +292,25 @@ class GKEClusterV1Manager(GoogleCloudManager):
                     _LOGGER.info(f"Added {len(resource_limits)} resource limits to cluster {cluster_data.get('name')}")
 
                 # Stackdriver 정보 추가
+                cluster_name = cluster.get("name")
+                cluster_location = cluster.get("location")
+                
+                if not cluster_name:
+                    _LOGGER.warning(f"Cluster missing name, skipping monitoring setup: {cluster}")
+                    cluster_name = "unknown"
+                
                 google_cloud_monitoring_filters = [
-                    {"key": "resource.labels.cluster_name", "value": cluster.get("name")},
-                    {"key": "resource.labels.location", "value": cluster.get("location")},
+                    {"key": "resource.labels.cluster_name", "value": cluster_name},
+                    {"key": "resource.labels.location", "value": cluster_location or "unknown"},
                 ]
                 cluster_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                     project_id,
                     "container.googleapis.com/cluster",
-                    cluster.get("name"),
+                    cluster_name,
                     google_cloud_monitoring_filters,
                 )
                 cluster_data["google_cloud_logging"] = self.set_google_cloud_logging(
-                    "KubernetesEngine", "Cluster", project_id, cluster.get("name")
+                    "KubernetesEngine", "Cluster", project_id, cluster_name
                 )
 
                 # GKECluster 모델 생성
