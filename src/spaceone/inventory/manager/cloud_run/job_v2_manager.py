@@ -141,6 +141,11 @@ class CloudRunJobV2Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                # Set up monitoring filters for Cloud Run Job
+                google_cloud_monitoring_filters = [
+                    {"key": "resource.labels.job_name", "value": job_name},
+                ]
+
                 job.update(
                     {
                         "name": job_name,
@@ -148,6 +153,15 @@ class CloudRunJobV2Manager(GoogleCloudManager):
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                            project_id,
+                            "run.googleapis.com/job",
+                            job_name,
+                            google_cloud_monitoring_filters,
+                        ),
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudRun", "Job", project_id, job_name
+                        ),
                     }
                 )
 
