@@ -119,17 +119,23 @@ class VPCGateway(BaseResource):
 
     def reference(self):
         if self.gateway_type == "NAT_GATEWAY":
+            # NAT Gateway의 경우 router_self_link 또는 name을 사용
+            resource_id = self.router_self_link or f"projects/{self.project}/regions/{self.region}/routers/{self.router_name}"
             return {
-                "resource_id": self.router_self_link,
+                "resource_id": resource_id,
                 "external_link": f"https://console.cloud.google.com/net-services/nat/list?project={self.project}",
             }
         elif self.gateway_type in ["VPN_GATEWAY", "TARGET_VPN_GATEWAY"]:
+            # VPN Gateway의 경우 self_link 또는 name을 사용
+            resource_id = getattr(self, 'self_link', None) or f"projects/{self.project}/regions/{self.region}/vpnGateways/{self.name}"
             return {
-                "resource_id": self.self_link,
+                "resource_id": resource_id,
                 "external_link": f"https://console.cloud.google.com/net-security/vpn/list?project={self.project}",
             }
+        # 기본값
+        resource_id = getattr(self, 'self_link', None) or f"projects/{self.project}/regions/{self.region}/gateways/{self.name}"
         return {
-            "resource_id": self.self_link,
+            "resource_id": resource_id,
             "external_link": f"https://console.cloud.google.com/networking?project={self.project}",
         }
 

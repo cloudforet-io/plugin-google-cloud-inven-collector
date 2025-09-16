@@ -39,7 +39,6 @@ cst_vpc_subnet.tags = {
 
 cst_vpc_subnet._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("Region", "data.region"),
         TextDyField.data_source("VPC Network", "data.network_display"),
         TextDyField.data_source("IP Address Range", "data.ip_cidr_range"),

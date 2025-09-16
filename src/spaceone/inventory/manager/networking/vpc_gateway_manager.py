@@ -57,6 +57,7 @@ class VPCGatewayManager(GoogleCloudManager):
 
         # NAT Gateway 수집
         nat_gateways = vpc_gateway_conn.list_nat_gateways()
+        _LOGGER.info(f"Found {len(nat_gateways)} NAT Gateways in project {project_id}")
         _LOGGER.debug(f"** NAT Gateways: {len(nat_gateways)} **")
 
         for nat_gateway in nat_gateways:
@@ -70,7 +71,7 @@ class VPCGatewayManager(GoogleCloudManager):
                 
                 # NAT Gateway 데이터 구성
                 nat_gateway.update({
-                    "gateway_type": "NAT_GATEWAY",
+                    "gateway_type": nat_gateway.get("type", "NAT_GATEWAY"),
                     "project": project_id,
                     "nat_subnetworks": nat_gateway.get("subnetworks", []),
                     "nat_log_config": nat_gateway.get("log_config"),
@@ -118,6 +119,7 @@ class VPCGatewayManager(GoogleCloudManager):
 
         # VPN Gateway 수집
         vpn_gateways = vpc_gateway_conn.list_vpn_gateways()
+        _LOGGER.info(f"Found {len(vpn_gateways)} VPN Gateways in project {project_id}")
         _LOGGER.debug(f"** VPN Gateways: {len(vpn_gateways)} **")
 
         for vpn_gateway in vpn_gateways:
@@ -131,7 +133,7 @@ class VPCGatewayManager(GoogleCloudManager):
                 
                 # VPN Gateway 데이터 구성
                 vpn_gateway.update({
-                    "gateway_type": "VPN_GATEWAY",
+                    "gateway_type": vpn_gateway.get("type", "VPN_GATEWAY"),
                     "project": project_id,
                 })
 

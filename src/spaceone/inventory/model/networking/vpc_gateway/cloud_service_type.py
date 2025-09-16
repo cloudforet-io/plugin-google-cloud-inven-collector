@@ -133,7 +133,6 @@ cst_vpc_gateway.tags = {
 
 cst_vpc_gateway._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Gateway Name", "data.name"),
         EnumDyField.data_source(
             "Gateway Type",
             "data.gateway_type",
