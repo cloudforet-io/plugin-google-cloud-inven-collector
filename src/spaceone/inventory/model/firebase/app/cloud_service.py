@@ -1,6 +1,7 @@
 from schematics.types import ModelType, PolyModelType, StringType
 
 from spaceone.inventory.libs.schema.cloud_service import (
+    BaseResource,
     CloudServiceMeta,
     CloudServiceResource,
     CloudServiceResponse,
