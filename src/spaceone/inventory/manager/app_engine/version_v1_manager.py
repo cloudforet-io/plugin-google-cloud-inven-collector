@@ -277,7 +277,7 @@ class AppEngineVersionV1Manager(GoogleCloudManager):
                     ]
                     version_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                         project_id,
-                        "appengine.googleapis.com/http/version",
+                        "appengine.googleapis.com/system",
                         monitoring_resource_id,
                         google_cloud_monitoring_filters,
                     )

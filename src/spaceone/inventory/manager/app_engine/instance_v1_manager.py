@@ -12,13 +12,13 @@ from spaceone.inventory.model.app_engine.instance.cloud_service_type import (
 
 from spaceone.inventory.model.app_engine.instance.cloud_service import (
     AppEngineInstanceResource,
-    AppEngineInstanceResponse,
 )
 from spaceone.inventory.model.app_engine.instance.data import (
     AppEngineInstance,
 )
 from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_datetime
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
+from spaceone.inventory.libs.schema.base import BaseResponse
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -195,6 +195,9 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
         """
         _LOGGER.debug("** AppEngine Instance V1 START **")
 
+        # 상태 카운터 초기화
+        self.reset_state_counters()
+
         collected_cloud_services = []
         error_responses = []
 
@@ -244,33 +247,33 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     # 기본 인스턴스 데이터 준비
                                     instance_data = {
                                         "name": str(instance.get("name", "")),
-                                        "projectId": str(project_id),  # secret_data에서 가져온 project_id 사용
-                                        "serviceId": str(service_id),
-                                        "versionId": str(version_id),
-                                        "id": str(instance_id),
-                                        "vmStatus": str(instance.get("vmStatus", "")),
-                                        "vmDebugEnabled": instance.get("vmDebugEnabled"),
-                                        "vmLiveness": str(instance.get("vmLiveness", "")),
-                                        "requestCount": instance.get("requestCount"),
-                                        "memoryUsage": instance.get("memoryUsage"),
-                                        "cpuUsage": instance.get("cpuUsage"),
-                                        "createTime": convert_datetime(instance.get("createTime")),
-                                        "updateTime": convert_datetime(instance.get("updateTime")),
+                                        "project_id": str(project_id),  # secret_data에서 가져온 project_id 사용
+                                        "service_id": str(service_id),
+                                        "version_id": str(version_id),
+                                        "instance_id": str(instance_id),
+                                        "vm_status": str(instance.get("vmStatus", "")),
+                                        "vm_debug_enabled": instance.get("vmDebugEnabled"),
+                                        "vm_liveness": str(instance.get("vmLiveness", "")),
+                                        "request_count": instance.get("requestCount"),
+                                        "memory_usage": instance.get("memoryUsage"),
+                                        "cpu_usage": instance.get("cpuUsage"),
+                                        "create_time": convert_datetime(instance.get("createTime")),
+                                        "update_time": convert_datetime(instance.get("updateTime")),
                                     }
 
                                     # VM Details 추가
                                     if "vmDetails" in instance:
                                         vm_details = instance["vmDetails"]
-                                        instance_data["vmDetails"] = {
-                                            "vmZoneName": str(vm_details.get("vmZoneName", "")),
-                                            "vmId": str(vm_details.get("vmId", "")),
-                                            "vmIp": str(vm_details.get("vmIp", "")),
-                                            "vmName": str(vm_details.get("vmName", "")),
+                                        instance_data["vm_details"] = {
+                                            "vm_zone_name": str(vm_details.get("vmZoneName", "")),
+                                            "vm_id": str(vm_details.get("vmId", "")),
+                                            "vm_ip": str(vm_details.get("vmIp", "")),
+                                            "vm_name": str(vm_details.get("vmName", "")),
                                         }
 
                                     # App Engine Release 추가
                                     if "appEngineRelease" in instance:
-                                        instance_data["appEngineRelease"] = str(
+                                        instance_data["app_engine_release"] = str(
                                             instance["appEngineRelease"]
                                         )
 
@@ -286,10 +289,10 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     if "network" in instance:
                                         network = instance["network"]
                                         instance_data["network"] = {
-                                            "forwardedPorts": str(network.get("forwardedPorts", "")),
-                                            "instanceTag": str(network.get("instanceTag", "")),
+                                            "forwarded_ports": str(network.get("forwardedPorts", "")),
+                                            "instance_tag": str(network.get("instanceTag", "")),
                                             "name": str(network.get("name", "")),
-                                            "subnetworkName": str(network.get("subnetworkName", "")),
+                                            "subnetwork_name": str(network.get("subnetworkName", "")),
                                         }
 
                                     # Resources 추가
@@ -297,8 +300,8 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                         resources = instance["resources"]
                                         instance_data["resources"] = {
                                             "cpu": resources.get("cpu"),
-                                            "diskGb": resources.get("diskGb"),
-                                            "memoryGb": resources.get("memoryGb"),
+                                            "disk_gb": resources.get("diskGb"),
+                                            "memory_gb": resources.get("memoryGb"),
                                             "volumes": resources.get("volumes", []),
                                         }
 
@@ -318,7 +321,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     ]
                                     instance_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                                         project_id,
-                                        "appengine.googleapis.com/http/flex",
+                                        "appengine.googleapis.com/system",
                                         monitoring_resource_id,
                                         google_cloud_monitoring_filters,
                                     )
@@ -341,7 +344,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                                 "external_link": f"https://console.cloud.google.com/appengine/instances?project={project_id}&serviceId={service_id}&versionId={version_id}",
                                             },
                                             "region_code": "global",  # App Engine은 global 리소스
-                                            "account": instance_data.get("projectId"),
+                                            "account": instance_data.get("project_id"),
                                         }
                                     )
 
@@ -350,38 +353,58 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     ##################################
                                     self.set_region_code("global")
 
-                                    # AppEngineInstanceResponse 생성
-                                    instance_response = AppEngineInstanceResponse(
-                                        {"resource": instance_resource}
+                                    # BaseResponse를 사용한 로깅 기반 응답 생성
+                                    instance_response = BaseResponse.create_with_logging(
+                                        resource=instance_resource,
+                                        resource_type="Instance", 
+                                        resource_name=instance_data.get("name"),
+                                        status="SUCCESS"
                                     )
 
                                     collected_cloud_services.append(instance_response)
 
                                 except Exception as e:
                                     _LOGGER.error(f"[collect_cloud_service] Instance {instance_id} => {e}", exc_info=True)
-                                    error_responses.append(
-                                        self.generate_error_response(
-                                            e, self.cloud_service_group, "Instance"
-                                        )
+                                    error_response = ErrorResourceResponse.create_with_logging(
+                                        error=e,
+                                        resource_type="Instance",
+                                        resource_name=instance_id or "unknown",
+                                        status="FAILURE"
                                     )
+                                    error_responses.append(error_response)
 
                         except Exception as e:
                             _LOGGER.error(f"[collect_cloud_service] Version {service_id}/{version_id} => {e}", exc_info=True)
-                            error_responses.append(
-                                self.generate_error_response(e, self.cloud_service_group, "Instance")
+                            error_response = ErrorResourceResponse.create_with_logging(
+                                error=e,
+                                resource_type="Instance",
+                                resource_name=f"{service_id}/{version_id}",
+                                status="FAILURE"
                             )
+                            error_responses.append(error_response)
 
                 except Exception as e:
                     _LOGGER.error(f"[collect_cloud_service] Service {service_id} => {e}", exc_info=True)
-                    error_responses.append(
-                        self.generate_error_response(e, self.cloud_service_group, "Instance")
+                    error_response = ErrorResourceResponse.create_with_logging(
+                        error=e,
+                        resource_type="Instance",
+                        resource_name=service_id or "unknown",
+                        status="FAILURE"
                     )
+                    error_responses.append(error_response)
 
         except Exception as e:
             _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
-            error_responses.append(
-                self.generate_error_response(e, self.cloud_service_group, "Instance")
+            error_response = ErrorResourceResponse.create_with_logging(
+                error=e,
+                resource_type="Instance",
+                resource_name="AppEngine Instance Collection",
+                status="FAILURE"
             )
+            error_responses.append(error_response)
 
+        # 수집 결과 요약 로깅
+        self.log_state_summary()
+        
         _LOGGER.debug("** AppEngine Instance V1 END **")
         return collected_cloud_services, error_responses

@@ -96,6 +96,7 @@ class VPCGateway(BaseResource):
     region = StringType()
     status = StringType()
     network = StringType()
+    network_name = StringType()
     description = StringType()
     
     # NAT Gateway 관련 필드
@@ -109,13 +110,24 @@ class VPCGateway(BaseResource):
     nat_subnetworks = ListType(ModelType(NATSubnetwork), default=[])
     nat_log_config = ModelType(NATLogConfig)
     
+    # 타임아웃 관련 필드
+    icmp_idle_timeout_sec = IntType()
+    tcp_established_idle_timeout_sec = IntType()
+    tcp_transitory_idle_timeout_sec = IntType()
+    tcp_time_wait_timeout_sec = IntType()
+    udp_idle_timeout_sec = IntType()
+    timeouts = DictType(StringType(), default={})
+    
     # VPN Gateway 관련 필드
     vpn_interfaces = ListType(ModelType(VPNGatewayInterface), default=[])
+    vpn_interfaces_display = ListType(DictType(StringType()), default=[])
     forwarding_rules = ListType(StringType(), default=[])
     tunnels = ListType(StringType(), default=[])
     
     # 공통 필드
     creation_timestamp = DateTimeType(deserialize_from="creationTimestamp")
+    self_link = StringType()
+    type = StringType()
 
     def reference(self):
         if self.gateway_type == "NAT_GATEWAY":

@@ -14,20 +14,20 @@ query_options:
     - key: account
       name: Project ID
       search_key: account
-    - key: data.instance.vm_status
+    - key: data.vm_status
       name: VM Status
-      search_key: data.instance.vm_status
+      search_key: data.vm_status
       default: true
-    - key: data.instance.vm_debug_enabled
+    - key: data.vm_debug_enabled
       name: Debug Enabled
-      search_key: data.instance.vm_debug_enabled
-    - key: data.instance.vm_liveness
+      search_key: data.vm_debug_enabled
+    - key: data.vm_liveness
       name: Liveness
-      search_key: data.instance.vm_liveness
+      search_key: data.vm_liveness
   fields:
     value:
       operator: sum
-      key: data.instance.request_count
+      key: data.request_count
 unit: Count
 namespace_id: ns-google-cloud-appengine-instance
 version: '1.1'

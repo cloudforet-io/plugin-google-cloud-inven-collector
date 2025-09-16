@@ -798,7 +798,7 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                             "data": gke_node_group_data,
                             "reference": {
                                 "resource_id": f"{cluster_name}/{location}/{node_pool_name}",
-                                "external_link": f"https://console.cloud.google.com/kubernetes/clusters/details/{location}/{cluster_name}/nodepools/{node_pool_name}?project={project_id}",
+                                "external_link": f"https://console.cloud.google.com/kubernetes/clusters/details/{location}/{cluster_name}/nodes?project={project_id}",
                             },
                             "region_code": location,
                             "account": project_id,
