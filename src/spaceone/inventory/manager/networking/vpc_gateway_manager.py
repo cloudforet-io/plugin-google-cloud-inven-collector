@@ -2,7 +2,7 @@ import time
 import logging
 
 from spaceone.inventory.libs.manager import GoogleCloudManager
-from spaceone.inventory.libs.schema.base import ReferenceModel, reset_state_counters, log_state_summary
+from spaceone.inventory.libs.schema.base import ReferenceModel
 from spaceone.inventory.connector.networking.vpc_gateway import VPCGatewayConnector
 from spaceone.inventory.model.networking.vpc_gateway.cloud_service_type import (
     CLOUD_SERVICE_TYPES,
@@ -21,10 +21,8 @@ class VPCGatewayManager(GoogleCloudManager):
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params):
-        """VPC Gateway 정보를 수집합니다."""
         _LOGGER.debug("** VPC Gateway START **")
         start_time = time.time()
-        
         """
         Args:
             params:
@@ -37,9 +35,6 @@ class VPCGatewayManager(GoogleCloudManager):
             CloudServiceResponse/ErrorResourceResponse
         """
 
-        # v2.0 로깅 시스템: 상태 카운터 초기화
-        reset_state_counters()
-        
         collected_cloud_services = []
         error_responses = []
         gateway_id = ""
@@ -55,39 +50,46 @@ class VPCGatewayManager(GoogleCloudManager):
             self.connector_name, **params
         )
 
-        # NAT Gateway 수집
+        # Get lists that relate with gateways through Google Cloud API
         nat_gateways = vpc_gateway_conn.list_nat_gateways()
-        _LOGGER.info(f"Found {len(nat_gateways)} NAT Gateways in project {project_id}")
-        _LOGGER.debug(f"** NAT Gateways: {len(nat_gateways)} **")
+        vpn_gateways = vpc_gateway_conn.list_vpn_gateways()
 
+        # Process NAT Gateways
         for nat_gateway in nat_gateways:
             try:
-                gateway_id = nat_gateway.get("name", "")
-                
                 ##################################
                 # 1. Set Basic Information
                 ##################################
+                gateway_id = nat_gateway.get("name", "")
                 region = self.match_region_info(nat_gateway.get("region", "global"))
                 
-                # NAT Gateway 데이터 구성
+                # 네트워크 정보 파싱
+                network_name = self._get_network_name_from_url(nat_gateway.get("network", ""))
+                
                 nat_gateway.update({
-                    "gateway_type": nat_gateway.get("type", "NAT_GATEWAY"),
+                    "gateway_type": "NAT_GATEWAY",
                     "project": project_id,
-                    "nat_subnetworks": nat_gateway.get("subnetworks", []),
+                    "network_name": network_name,
+                    "nat_subnetworks": self._process_nat_subnetworks(nat_gateway.get("subnetworks", [])),
                     "nat_log_config": nat_gateway.get("log_config"),
+                    "timeouts": self._get_nat_timeouts(nat_gateway),
                 })
 
-                # No labels for NAT Gateway
+                # No labels
                 _name = nat_gateway.get("name", "")
 
+                ##################################
+                # 2. Make Base Data
+                ##################################
                 vpc_gateway_data = VPCGateway(nat_gateway, strict=False)
 
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 vpc_gateway_resource = VPCGatewayResource(
                     {
                         "name": _name,
                         "account": project_id,
-                        "cloud_service_group": "Networking",
-                        "cloud_service_type": "VPCGateway",
                         "region_code": region.get("region_code"),
                         "data": vpc_gateway_data,
                         "reference": ReferenceModel(vpc_gateway_data.reference()),
@@ -101,53 +103,53 @@ class VPCGatewayManager(GoogleCloudManager):
 
                 ##################################
                 # 5. Make Resource Response Object
-                # v2.0 로깅 시스템: SUCCESS 응답 생성
+                # List of VPCGatewayResponse Object
                 ##################################
-                vpc_gateway_response = VPCGatewayResponse.create_with_logging(
-                    state="SUCCESS",
-                    resource_type="inventory.CloudService",
-                    resource=vpc_gateway_resource,
+                collected_cloud_services.append(
+                    VPCGatewayResponse({"resource": vpc_gateway_resource})
                 )
-                collected_cloud_services.append(vpc_gateway_response)
 
             except Exception as e:
-                _LOGGER.error(f"Error processing NAT Gateway {gateway_id}: {str(e)}")
+                _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
                 error_response = self.generate_resource_error_response(
                     e, "Networking", "VPCGateway", gateway_id
                 )
                 error_responses.append(error_response)
 
-        # VPN Gateway 수집
-        vpn_gateways = vpc_gateway_conn.list_vpn_gateways()
-        _LOGGER.info(f"Found {len(vpn_gateways)} VPN Gateways in project {project_id}")
-        _LOGGER.debug(f"** VPN Gateways: {len(vpn_gateways)} **")
-
+        # Process VPN Gateways
         for vpn_gateway in vpn_gateways:
             try:
-                gateway_id = vpn_gateway.get("name", "")
-                
                 ##################################
                 # 1. Set Basic Information
                 ##################################
+                gateway_id = vpn_gateway.get("name", "")
                 region = self.match_region_info(vpn_gateway.get("region", "global"))
                 
-                # VPN Gateway 데이터 구성
+                # 네트워크 정보 파싱
+                network_name = self._get_network_name_from_url(vpn_gateway.get("network", ""))
+                
                 vpn_gateway.update({
                     "gateway_type": vpn_gateway.get("type", "VPN_GATEWAY"),
                     "project": project_id,
+                    "network_name": network_name,
+                    "vpn_interfaces_display": self._process_vpn_interfaces(vpn_gateway.get("vpnInterfaces", [])),
                 })
 
-                # No labels for VPN Gateway
+                # No labels
                 _name = vpn_gateway.get("name", "")
 
+                ##################################
+                # 2. Make Base Data
+                ##################################
                 vpc_gateway_data = VPCGateway(vpn_gateway, strict=False)
 
+                ##################################
+                # 3. Make Return Resource
+                ##################################
                 vpc_gateway_resource = VPCGatewayResource(
                     {
                         "name": _name,
                         "account": project_id,
-                        "cloud_service_group": "Networking",
-                        "cloud_service_type": "VPCGateway",
                         "region_code": region.get("region_code"),
                         "data": vpc_gateway_data,
                         "reference": ReferenceModel(vpc_gateway_data.reference()),
@@ -161,37 +163,80 @@ class VPCGatewayManager(GoogleCloudManager):
 
                 ##################################
                 # 5. Make Resource Response Object
-                # v2.0 로깅 시스템: SUCCESS 응답 생성
+                # List of VPCGatewayResponse Object
                 ##################################
-                vpc_gateway_response = VPCGatewayResponse.create_with_logging(
-                    state="SUCCESS",
-                    resource_type="inventory.CloudService",
-                    resource=vpc_gateway_resource,
+                collected_cloud_services.append(
+                    VPCGatewayResponse({"resource": vpc_gateway_resource})
                 )
-                collected_cloud_services.append(vpc_gateway_response)
 
             except Exception as e:
-                _LOGGER.error(f"Error processing VPN Gateway {gateway_id}: {str(e)}")
+                _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
                 error_response = self.generate_resource_error_response(
                     e, "Networking", "VPCGateway", gateway_id
                 )
                 error_responses.append(error_response)
 
-        # v2.0 로깅 시스템: 수집 완료 시 상태 요약 로깅
-        log_state_summary()
-        _LOGGER.debug(f"** VPC Gateway Finished {time.time() - start_time:.2f} Seconds **")
-        _LOGGER.info(f"Collected {len(collected_cloud_services)} VPC Gateways")
-        
+        _LOGGER.debug(f"** VPC Gateway Finished {time.time() - start_time} Seconds **")
         return collected_cloud_services, error_responses
 
-    def get_network_name_from_url(self, network_url):
+    def _get_network_name_from_url(self, network_url):
         """네트워크 URL에서 네트워크 이름을 추출합니다."""
         if network_url:
-            return network_url.split("/")[-1]
+            return self.get_param_in_url(network_url, "networks")
         return ""
+
+    def _process_nat_subnetworks(self, subnetworks):
+        """NAT 서브네트워크 정보를 처리합니다."""
+        processed_subnetworks = []
+        for subnetwork in subnetworks:
+            subnetwork_name = self.get_param_in_url(subnetwork.get("name", ""), "subnetworks")
+            processed_data = {
+                "name": subnetwork_name,
+                "source_ip_ranges_to_nat": subnetwork.get("sourceIpRangesToNat", []),
+                "secondary_ip_range_names": subnetwork.get("secondaryIpRangeNames", []),
+            }
+            processed_subnetworks.append(processed_data)
+        return processed_subnetworks
+
+    def _process_vpn_interfaces(self, vpn_interfaces):
+        """VPN 인터페이스 정보를 처리합니다."""
+        processed_interfaces = []
+        for interface in vpn_interfaces:
+            interface_data = {
+                "id": interface.get("id"),
+                "ip_address": interface.get("ipAddress"),
+                "interconnect_attachment": interface.get("interconnectAttachment", ""),
+            }
+            processed_interfaces.append(interface_data)
+        return processed_interfaces
+
+    def _get_nat_timeouts(self, nat_gateway):
+        """NAT Gateway의 타임아웃 설정을 정리하여 반환합니다."""
+        timeouts = {}
+        
+        if "icmpIdleTimeoutSec" in nat_gateway:
+            timeouts["icmp_idle_timeout"] = f"{nat_gateway['icmpIdleTimeoutSec']}s"
+        
+        if "tcpEstablishedIdleTimeoutSec" in nat_gateway:
+            timeouts["tcp_established_idle_timeout"] = f"{nat_gateway['tcpEstablishedIdleTimeoutSec']}s"
+            
+        if "tcpTransitoryIdleTimeoutSec" in nat_gateway:
+            timeouts["tcp_transitory_idle_timeout"] = f"{nat_gateway['tcpTransitoryIdleTimeoutSec']}s"
+            
+        if "tcpTimeWaitTimeoutSec" in nat_gateway:
+            timeouts["tcp_time_wait_timeout"] = f"{nat_gateway['tcpTimeWaitTimeoutSec']}s"
+            
+        if "udpIdleTimeoutSec" in nat_gateway:
+            timeouts["udp_idle_timeout"] = f"{nat_gateway['udpIdleTimeoutSec']}s"
+            
+        return timeouts
+
+    def get_network_name_from_url(self, network_url):
+        """네트워크 URL에서 네트워크 이름을 추출합니다. (하위 호환성)"""
+        return self._get_network_name_from_url(network_url)
 
     def extract_router_name_from_self_link(self, self_link):
         """Self Link에서 라우터 이름을 추출합니다."""
         if self_link:
-            return self_link.split("/")[-1]
+            return self.get_param_in_url(self_link, "routers")
         return ""
