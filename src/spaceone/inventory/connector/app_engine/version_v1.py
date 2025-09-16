@@ -173,10 +173,21 @@ class AppEngineVersionV1Connector(GoogleCloudConnector):
                 "instance_count": len(instances),
                 "memory_usage": 0,
                 "cpu_usage": 0,
-                "request_count": 0
+                "request_count": 0,
+                "running_instances": 0,
+                "idle_instances": 0,
+                "total_memory_gb": 0,
+                "total_cpu_cores": 0
             }
             
             for instance in instances:
+                # 인스턴스 상태별 카운트
+                vm_status = instance.get("vmStatus", "")
+                if vm_status == "RUNNING":
+                    metrics["running_instances"] += 1
+                elif vm_status == "IDLE":
+                    metrics["idle_instances"] += 1
+                
                 # 메모리 사용량 합계
                 memory_usage = instance.get("memoryUsage", 0)
                 if isinstance(memory_usage, (int, float)):
@@ -191,7 +202,22 @@ class AppEngineVersionV1Connector(GoogleCloudConnector):
                 request_count = instance.get("requestCount", 0)
                 if isinstance(request_count, (int, float)):
                     metrics["request_count"] += request_count
+                
+                # 리소스 정보 추가
+                resources = instance.get("resources", {})
+                if resources:
+                    memory_gb = resources.get("memoryGb", 0)
+                    cpu_cores = resources.get("cpu", 0)
+                    if isinstance(memory_gb, (int, float)):
+                        metrics["total_memory_gb"] += memory_gb
+                    if isinstance(cpu_cores, (int, float)):
+                        metrics["total_cpu_cores"] += cpu_cores
             
+            # 메트릭 값들을 문자열로 변환 (SpaceONE 호환성)
+            for key, value in metrics.items():
+                metrics[key] = str(value)
+            
+            _LOGGER.info(f"Retrieved version metrics for {version_id}: {metrics['instance_count']} instances")
             return metrics
         except Exception as e:
             _LOGGER.error(f"Failed to get App Engine version metrics for {version_id} (v1): {e}")

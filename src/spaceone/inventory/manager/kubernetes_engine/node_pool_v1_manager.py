@@ -200,14 +200,36 @@ class GKENodePoolV1Manager(GoogleCloudManager):
             Exception: GKE API 호출 중 오류 발생 시.
         """
         try:
-            # 임시 메트릭 데이터 반환
+            # 실제 노드풀 정보를 기반으로 메트릭 계산
+            node_pool_connector: GKENodePoolV1Connector = self.locator.get_connector(
+                self.connector_name, **params
+            )
+            
+            # 노드풀 상세 정보 조회
+            node_pool_info = node_pool_connector.get_node_pool(cluster_name, location, node_pool_name)
+            
+            if not node_pool_info:
+                _LOGGER.warning(f"No node pool info found for {node_pool_name}")
+                return {}
+            
+            # 실제 메트릭 계산
+            initial_node_count = node_pool_info.get("initialNodeCount", 0)
+            current_node_count = node_pool_info.get("currentNodeCount", initial_node_count)
+            
+            # 노드 설정에서 리소스 정보 추출
+            node_config = node_pool_info.get("config", {})
+            machine_type = node_config.get("machineType", "")
+            disk_size_gb = node_config.get("diskSizeGb", 0)
+            
             metrics = {
-                "cpu_usage": "0.0",
-                "memory_usage": "0.0",
-                "disk_usage": "0.0",
-                "node_count": "0",
+                "node_count": str(current_node_count),
+                "initial_node_count": str(initial_node_count),
+                "machine_type": machine_type,
+                "disk_size_gb": str(disk_size_gb),
+                "status": node_pool_info.get("status", "UNKNOWN"),
             }
-            _LOGGER.info(f"Retrieved metrics for node pool {node_pool_name} (v1)")
+            
+            _LOGGER.info(f"Retrieved metrics for node pool {node_pool_name} (v1): {current_node_count} nodes")
             return metrics
         except Exception as e:
             _LOGGER.error(f"Failed to get metrics for node pool {node_pool_name} (v1): {e}")

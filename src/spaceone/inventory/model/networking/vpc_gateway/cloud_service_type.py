@@ -1,6 +1,6 @@
 import os
 
-from spaceone.inventory.libs.common_parser import get_data_from_yaml
+from spaceone.inventory.libs.common_parser import *
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
     CardWidget,
     ChartWidget,
@@ -22,7 +22,7 @@ from spaceone.inventory.libs.schema.cloud_service_type import (
     CloudServiceTypeResponse,
     CloudServiceTypeMeta,
 )
-from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
+from spaceone.inventory.conf.cloud_service_conf import *
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -118,20 +118,20 @@ vpc_gateway_meta_layouts = ListDynamicLayout.set_layouts(
     ]
 )
 
-cst_vpc_gateway = CloudServiceTypeResource()
-cst_vpc_gateway.name = "VPCGateway"
-cst_vpc_gateway.provider = "google_cloud"
-cst_vpc_gateway.group = "Networking"
-cst_vpc_gateway.service_code = "Networking"
-cst_vpc_gateway.is_primary = True
-cst_vpc_gateway.is_major = True
-cst_vpc_gateway.labels = ["Networking"]
-cst_vpc_gateway.tags = {
+cst_gateway = CloudServiceTypeResource()
+cst_gateway.name = "VPCGateway"
+cst_gateway.provider = "google_cloud"
+cst_gateway.group = "Networking"
+cst_gateway.service_code = "Networking"
+cst_gateway.is_primary = True
+cst_gateway.is_major = True
+cst_gateway.labels = ["Networking"]
+cst_gateway.tags = {
     "spaceone:icon": f"{ASSET_URL}/VPC.svg",
     "spaceone:display_name": "VPCGateway",
 }
 
-cst_vpc_gateway._metadata = CloudServiceTypeMeta.set_meta(
+cst_gateway._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         EnumDyField.data_source(
             "Gateway Type",
@@ -145,14 +145,22 @@ cst_vpc_gateway._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Region", "data.region"),
         TextDyField.data_source("Network", "data.network"),
         TextDyField.data_source("Status", "data.status"),
-        DateTimeDyField.data_source("Created", "data.creation_timestamp"),
+        # is_optional - Default
+        TextDyField.data_source(
+            "Description", "data.description", options={"is_optional": True}
+        ),
+        TextDyField.data_source(
+            "Router Name", "data.router_name", options={"is_optional": True}
+        ),
+        DateTimeDyField.data_source("Creation Time", "data.creation_timestamp"),
     ],
     search=[
-        SearchField.set(name="Gateway Name", key="data.name"),
+        SearchField.set(name="Name", key="data.name"),
         SearchField.set(name="Gateway Type", key="data.gateway_type"),
         SearchField.set(name="Region", key="data.region"),
         SearchField.set(name="Network", key="data.network"),
         SearchField.set(name="Status", key="data.status"),
+        SearchField.set(name="Description", key="data.description"),
         SearchField.set(name="Router Name", key="data.router_name"),
         SearchField.set(name="Project", key="data.project"),
         SearchField.set(
@@ -167,5 +175,5 @@ cst_vpc_gateway._metadata = CloudServiceTypeMeta.set_meta(
 )
 
 CLOUD_SERVICE_TYPES = [
-    CloudServiceTypeResponse({"resource": cst_vpc_gateway}),
+    CloudServiceTypeResponse({"resource": cst_gateway}),
 ]

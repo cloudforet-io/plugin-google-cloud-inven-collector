@@ -25,6 +25,7 @@ class VPCGatewayConnector(GoogleCloudConnector):
             while request is not None:
                 response = request.execute()
                 for region_key, routers_scoped_list in response.get("items", {}).items():
+                    
                     if "routers" in routers_scoped_list:
                         # region_key에서 실제 region 이름 추출 (예: "regions/us-central1")
                         region_name = self._extract_region_from_key(region_key)
