@@ -35,7 +35,9 @@ class FilestoreInstanceManager(GoogleCloudManager):
     cloud_service_types = CLOUD_SERVICE_TYPES
     instance_conn = None
 
-    def collect_cloud_service(self, params) -> Tuple[List[FilestoreInstanceResponse], List]:
+    def collect_cloud_service(
+        self, params
+    ) -> Tuple[List[FilestoreInstanceResponse], List]:
         """
         Filestore 인스턴스 리소스를 수집합니다 (v1 API).
 
@@ -74,55 +76,83 @@ class FilestoreInstanceManager(GoogleCloudManager):
                     # 1. Set Basic Information
                     ##################################
                     instance_name = filestore_instance.get("name", "")
-                    instance_id = instance_name.split("/")[-1] if "/" in instance_name else instance_name
+                    instance_id = (
+                        instance_name.split("/")[-1]
+                        if "/" in instance_name
+                        else instance_name
+                    )
                     location = filestore_instance.get("location", "")
 
                     ##################################
                     # 2. Make Base Data
                     ##################################
                     # 파일 공유 정보 처리 및 용량 계산
-                    unified_file_shares, total_capacity_gb = self._process_file_shares_directly(
-                        filestore_instance.get("fileShares", [])
+                    unified_file_shares, total_capacity_gb = (
+                        self._process_file_shares_directly(
+                            filestore_instance.get("fileShares", [])
+                        )
                     )
 
                     # 기본 정보 추출
-                    labels = self.convert_labels_format(filestore_instance.get("labels", {}))
-                    
+                    labels = self.convert_labels_format(
+                        filestore_instance.get("labels", {})
+                    )
+
                     # 네트워크 및 스냅샷 정보 수집
-                    networks = self._process_networks(filestore_instance.get("networks", []))
+                    networks = self._process_networks(
+                        filestore_instance.get("networks", [])
+                    )
                     snapshots = self._collect_snapshots(instance_name, instance_id)
 
                     # 원본 데이터 기반으로 업데이트
-                    filestore_instance.update({
-                        "project": project_id,
-                        "name": instance_id,
-                        "full_name": instance_name,
-                        "instance_id": instance_id,
-                        "location": location,
-                        "networks": networks,
-                        "unified_file_shares": unified_file_shares,
-                        "snapshots": snapshots,
-                        "labels": labels,
-                        "stats": {
-                            "total_capacity_gb": str(total_capacity_gb),  # StringType 필드이므로 문자열로 변환
-                            "file_share_count": str(len(unified_file_shares)),
-                            "snapshot_count": str(len(snapshots)),
-                            "network_count": str(len(networks)),
-                        },
-                        "custom_performance_supported": str(filestore_instance.get("customPerformanceSupported", False)).lower() if filestore_instance.get("customPerformanceSupported") is not None else None,
-                        "performance_limits": self._process_performance_limits(filestore_instance.get("performanceLimits", {})),
-                        "google_cloud_monitoring": self.set_google_cloud_monitoring(
-                            project_id,
-                            "file.googleapis.com/instance",
-                            instance_id,
-                            [{"key": "resource.labels.instance_id", "value": instance_id}],
-                        ),
-                        "google_cloud_logging": self.set_google_cloud_logging(
-                            "Filestore", "Instance", project_id, instance_id
-                        ),
-                    })
+                    filestore_instance.update(
+                        {
+                            "project": project_id,
+                            "name": instance_id,
+                            "full_name": instance_name,
+                            "instance_id": instance_id,
+                            "location": location,
+                            "networks": networks,
+                            "unified_file_shares": unified_file_shares,
+                            "snapshots": snapshots,
+                            "labels": labels,
+                            "stats": {
+                                "total_capacity_gb": str(total_capacity_gb),
+                                "file_share_count": str(len(unified_file_shares)),
+                                "snapshot_count": str(len(snapshots)),
+                                "network_count": str(len(networks)),
+                            },
+                            "custom_performance_supported": str(
+                                filestore_instance.get(
+                                    "customPerformanceSupported", False
+                                )
+                            ).lower()
+                            if filestore_instance.get("customPerformanceSupported")
+                            is not None
+                            else None,
+                            "performance_limits": self._process_performance_limits(
+                                filestore_instance.get("performanceLimits", {})
+                            ),
+                            "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                                project_id,
+                                "file.googleapis.com/nfs/server/free_raw_capacity_percent",
+                                instance_id,
+                                [
+                                    {
+                                        "key": "resource.labels.instance_name",
+                                        "value": instance_id,
+                                    }
+                                ],
+                            ),
+                            "google_cloud_logging": self.set_google_cloud_logging(
+                                "Filestore", "Instance", project_id, instance_id
+                            ),
+                        }
+                    )
 
-                    instance_data = FilestoreInstanceData(filestore_instance, strict=False)
+                    instance_data = FilestoreInstanceData(
+                        filestore_instance, strict=False
+                    )
 
                     ##################################
                     # 3. Make Return Resource
@@ -174,7 +204,6 @@ class FilestoreInstanceManager(GoogleCloudManager):
         )
         return collected_cloud_services, error_responses
 
-
     def _process_networks(self, networks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """네트워크 정보를 처리합니다."""
         network_info = []
@@ -199,27 +228,35 @@ class FilestoreInstanceManager(GoogleCloudManager):
         for file_share in file_shares:
             capacity_gb = int(file_share.get("capacityGb", 0))
             total_capacity_gb += capacity_gb
-            
-            unified_shares.append({
-                "name": file_share.get("name", ""),
-                "capacity_gb": str(capacity_gb),  # StringType 필드이므로 문자열로 변환
-                "source_backup": file_share.get("sourceBackup", ""),
-                "nfs_export_options": file_share.get("nfsExportOptions", []),
-                "data_source": "Basic",
-            })
+
+            unified_shares.append(
+                {
+                    "name": file_share.get("name", ""),
+                    "capacity_gb": str(
+                        capacity_gb
+                    ),  # StringType 필드이므로 문자열로 변환
+                    "source_backup": file_share.get("sourceBackup", ""),
+                    "nfs_export_options": file_share.get("nfsExportOptions", []),
+                    "data_source": "Basic",
+                }
+            )
 
         return unified_shares, total_capacity_gb
 
-    def _process_performance_limits(self, performance_limits: Dict[str, Any]) -> Dict[str, str]:
+    def _process_performance_limits(
+        self, performance_limits: Dict[str, Any]
+    ) -> Dict[str, str]:
         """성능 제한 정보를 처리합니다."""
         if not performance_limits:
             return None
-            
+
         return {
             "max_read_iops": performance_limits.get("maxReadIops") or None,
             "max_write_iops": performance_limits.get("maxWriteIops") or None,
-            "max_read_throughput_bps": performance_limits.get("maxReadThroughputBps") or None,
-            "max_write_throughput_bps": performance_limits.get("maxWriteThroughputBps") or None,
+            "max_read_throughput_bps": performance_limits.get("maxReadThroughputBps")
+            or None,
+            "max_write_throughput_bps": performance_limits.get("maxWriteThroughputBps")
+            or None,
             "max_iops": performance_limits.get("maxIops") or None,
         }
 
@@ -237,12 +274,16 @@ class FilestoreInstanceManager(GoogleCloudManager):
                 # (name, description, state, createTime, labels)
                 name = snapshot.get("name", "")
                 snapshot_id = name.split("/")[-1] if "/" in name else name
-                snapshot.update({
-                    "name": snapshot_id,
-                    "full_name": name,
-                    "create_time": snapshot.get("createTime", ""),
-                    "labels": self.convert_labels_format(snapshot.get("labels", {}))
-                })
+                snapshot.update(
+                    {
+                        "name": snapshot_id,
+                        "full_name": name,
+                        "create_time": snapshot.get("createTime", ""),
+                        "labels": self.convert_labels_format(
+                            snapshot.get("labels", {})
+                        ),
+                    }
+                )
                 snapshots.append(snapshot)
 
         except Exception as e:
