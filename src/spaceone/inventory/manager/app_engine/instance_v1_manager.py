@@ -306,10 +306,17 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     # Availability 추가
                                     if "availability" in instance:
                                         availability = instance["availability"]
-                                        instance_data["availability"] = {
-                                            "liveness": str(availability.get("liveness", "")),
-                                            "readiness": str(availability.get("readiness", "")),
-                                        }
+                                        if isinstance(availability, dict):
+                                            instance_data["availability"] = {
+                                                "liveness": str(availability.get("liveness", "")),
+                                                "readiness": str(availability.get("readiness", "")),
+                                            }
+                                        else:
+                                            # availability가 문자열이거나 다른 타입인 경우
+                                            instance_data["availability"] = {
+                                                "liveness": str(availability),
+                                                "readiness": "",
+                                            }
 
                                     # Network 추가
                                     if "network" in instance:
@@ -381,10 +388,9 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
 
                                     # BaseResponse를 사용한 로깅 기반 응답 생성
                                     instance_response = BaseResponse.create_with_logging(
-                                        resource=instance_resource,
-                                        resource_type="Instance", 
-                                        resource_name=f"{instance_data.get('name')} ({instance_id})",
-                                        status="SUCCESS"
+                                        state="SUCCESS",
+                                        resource_type="inventory.CloudService",
+                                        resource=instance_resource
                                     )
 
                                     collected_cloud_services.append(instance_response)
@@ -393,40 +399,56 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                 except Exception as e:
                                     _LOGGER.error(f"[collect_cloud_service] Instance {instance_id} => {e}", exc_info=True)
                                     error_response = ErrorResourceResponse.create_with_logging(
-                                        error=e,
-                                        resource_type="Instance",
-                                        resource_name=instance_id or "unknown",
-                                        status="FAILURE"
+                                        error_message=str(e),
+                                        error_code="INSTANCE_COLLECTION_ERROR",
+                                        resource_type="inventory.ErrorResource",
+                                        additional_data={
+                                            "cloud_service_group": "AppEngine",
+                                            "cloud_service_type": "Instance",
+                                            "resource_id": instance_id or "unknown"
+                                        }
                                     )
                                     error_responses.append(error_response)
 
                         except Exception as e:
                             _LOGGER.error(f"[collect_cloud_service] Version {service_id}/{version_id} => {e}", exc_info=True)
                             error_response = ErrorResourceResponse.create_with_logging(
-                                error=e,
-                                resource_type="Instance",
-                                resource_name=f"{service_id}/{version_id}",
-                                status="FAILURE"
+                                error_message=str(e),
+                                error_code="VERSION_COLLECTION_ERROR",
+                                resource_type="inventory.ErrorResource",
+                                additional_data={
+                                    "cloud_service_group": "AppEngine",
+                                    "cloud_service_type": "Instance",
+                                    "resource_id": f"{service_id}/{version_id}"
+                                }
                             )
                             error_responses.append(error_response)
 
                 except Exception as e:
                     _LOGGER.error(f"[collect_cloud_service] Service {service_id} => {e}", exc_info=True)
                     error_response = ErrorResourceResponse.create_with_logging(
-                        error=e,
-                        resource_type="Instance",
-                        resource_name=service_id or "unknown",
-                        status="FAILURE"
+                        error_message=str(e),
+                        error_code="SERVICE_COLLECTION_ERROR",
+                        resource_type="inventory.ErrorResource",
+                        additional_data={
+                            "cloud_service_group": "AppEngine",
+                            "cloud_service_type": "Instance",
+                            "resource_id": service_id or "unknown"
+                        }
                     )
                     error_responses.append(error_response)
 
         except Exception as e:
             _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
             error_response = ErrorResourceResponse.create_with_logging(
-                error=e,
-                resource_type="Instance",
-                resource_name="AppEngine Instance Collection",
-                status="FAILURE"
+                error_message=str(e),
+                error_code="COLLECTION_ERROR",
+                resource_type="inventory.ErrorResource",
+                additional_data={
+                    "cloud_service_group": "AppEngine",
+                    "cloud_service_type": "Instance",
+                    "resource_id": "AppEngine Instance Collection"
+                }
             )
             error_responses.append(error_response)
 
