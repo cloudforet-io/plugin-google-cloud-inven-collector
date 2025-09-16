@@ -66,6 +66,42 @@ class NetworkConfig(Model):
     enable_private_nodes = BooleanType(deserialize_from="enablePrivateNodes")
 
 
+class NodeInfo(Model):
+    name = StringType()
+    status = StringType()
+    machine_type = StringType(deserialize_from="machineType")
+    zone = StringType()
+    internal_ip = StringType(deserialize_from="internalIP")
+    external_ip = StringType(deserialize_from="externalIP")
+    create_time = StringType(deserialize_from="createTime")
+    labels = DictType(StringType)
+    taints = ListType(StringType)
+
+
+class InstanceGroupInfo(Model):
+    name = StringType()
+    type = StringType()
+    location = StringType()
+    self_link = StringType(deserialize_from="selfLink")
+    creation_timestamp = StringType(deserialize_from="creationTimestamp")
+    description = StringType()
+    network = StringType()
+    subnetwork = StringType()
+    zone = StringType()
+    region = StringType()
+    size = IntType()
+    named_ports = ListType(DictType(StringType), deserialize_from="namedPorts")
+    instances = ListType(ModelType(NodeInfo))
+
+
+class Metrics(Model):
+    node_count = StringType(deserialize_from="node_count")
+    initial_node_count = StringType(deserialize_from="initial_node_count")
+    machine_type = StringType(deserialize_from="machine_type")
+    disk_size_gb = StringType(deserialize_from="disk_size_gb")
+    status = StringType()
+
+
 class NodePool(CloudServiceResource):
     name = StringType()
     cluster_name = StringType()
@@ -90,6 +126,12 @@ class NodePool(CloudServiceResource):
     api_version = StringType()
     google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
     google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)
+    
+    # Additional fields for extended node pool information
+    nodes = ListType(ModelType(NodeInfo), serialize_when_none=False)
+    instance_groups = ListType(ModelType(InstanceGroupInfo), serialize_when_none=False)
+    metrics = ModelType(Metrics, serialize_when_none=False)
+    total_groups = IntType(serialize_when_none=False)
 
     def reference(self, region_code):
         return {
