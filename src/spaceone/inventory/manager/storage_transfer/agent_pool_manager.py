@@ -85,6 +85,28 @@ class StorageTransferAgentPoolManager(GoogleCloudManager):
                         }
                     )
 
+                    agent_pool.update(
+                        {
+                            "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                                project_id,
+                                "storagetransfer.googleapis.com/agent",
+                                agent_pool_id,
+                                [
+                                    {
+                                        "key": "resource.labels.agent_pool",
+                                        "value": agent_pool_id,
+                                    }
+                                ],
+                            ),
+                            "google_cloud_logging": self.set_google_cloud_logging(
+                                "StorageTransfer",
+                                "AgentPool",
+                                project_id,
+                                agent_pool_id,
+                            ),
+                        }
+                    )
+
                     # No labels!!
                     agent_pool_data = AgentPool(agent_pool, strict=False)
 
