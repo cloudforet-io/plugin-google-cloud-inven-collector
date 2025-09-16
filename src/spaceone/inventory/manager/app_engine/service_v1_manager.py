@@ -229,7 +229,7 @@ class AppEngineServiceV1Manager(GoogleCloudManager):
                 ]
                 service_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                     project_id,
-                    "appengine.googleapis.com/http/service",
+                    "appengine.googleapis.com/system",
                     monitoring_resource_id,
                     google_cloud_monitoring_filters,
                 )

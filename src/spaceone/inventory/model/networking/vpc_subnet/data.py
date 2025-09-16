@@ -102,5 +102,5 @@ class VPCSubnet(BaseResource):
     def reference(self):
         return {
             "resource_id": self.self_link,
-            "external_link": f"https://console.cloud.google.com/networking/subnets/details/{self.region}/{self.name}?project={self.project}",
+            "external_link": f"https://console.cloud.google.com/networking/networks/details/default?project={self.project}&pageTab=SUBNETS",
         }
