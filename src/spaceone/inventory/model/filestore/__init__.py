@@ -8,7 +8,6 @@ from spaceone.inventory.model.filestore.instance.cloud_service_type import (
 from spaceone.inventory.model.filestore.instance.data import (
     FilestoreInstanceData,
     Network,
-    Snapshot,
     Stats,
     UnifiedFileShare,
 )
@@ -20,6 +19,5 @@ __all__ = [
     "FilestoreInstanceData",
     "Network",
     "UnifiedFileShare",
-    "Snapshot",
     "Stats",
 ]

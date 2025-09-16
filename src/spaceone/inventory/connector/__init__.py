@@ -1,3 +1,15 @@
+from spaceone.inventory.connector.app_engine.application_v1 import (
+    AppEngineApplicationV1Connector,
+)
+from spaceone.inventory.connector.app_engine.instance_v1 import (
+    AppEngineInstanceV1Connector,
+)
+from spaceone.inventory.connector.app_engine.service_v1 import (
+    AppEngineServiceV1Connector,
+)
+from spaceone.inventory.connector.app_engine.version_v1 import (
+    AppEngineVersionV1Connector,
+)
 from spaceone.inventory.connector.batch.batch_v1 import BatchV1Connector
 from spaceone.inventory.connector.bigquery.sql_workspace import SQLWorkspaceConnector
 from spaceone.inventory.connector.cloud_build.cloud_build_v1 import (
@@ -32,6 +44,9 @@ from spaceone.inventory.connector.compute_engine.snapshot import (
     SnapshotConnector as ComputeEngineSnapshotConnector,
 )
 from spaceone.inventory.connector.compute_engine.vm_instance import VMInstanceConnector
+from spaceone.inventory.connector.dataproc.cluster_connector import (
+    DataprocClusterConnector,
+)
 from spaceone.inventory.connector.datastore.database_v1 import (
     DatastoreDatabaseV1Connector,
 )
@@ -39,8 +54,8 @@ from spaceone.inventory.connector.datastore.index_v1 import DatastoreIndexV1Conn
 from spaceone.inventory.connector.datastore.namespace_v1 import (
     DatastoreNamespaceV1Connector,
 )
-from spaceone.inventory.connector.dataproc.cluster_connector import (
-    DataprocClusterConnector,
+from spaceone.inventory.connector.filestore.backup_v1 import (
+    FilestoreBackupConnector,
 )
 from spaceone.inventory.connector.filestore.instance_v1 import (
     FilestoreInstanceConnector,
@@ -48,11 +63,14 @@ from spaceone.inventory.connector.filestore.instance_v1 import (
 from spaceone.inventory.connector.filestore.instance_v1beta1 import (
     FilestoreInstanceV1Beta1Connector,
 )
+from spaceone.inventory.connector.filestore.snapshot_v1 import (
+    FilestoreSnapshotConnector,
+)
 from spaceone.inventory.connector.firebase.firebase_v1beta1 import FirebaseConnector
-from spaceone.inventory.connector.kms.kms_v1 import KMSConnector
 from spaceone.inventory.connector.firestore.database_v1 import (
     FirestoreDatabaseConnector,
 )
+from spaceone.inventory.connector.kms.kms_v1 import KMSConnector
 from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import (
     GKEClusterV1Connector,
 )
@@ -85,14 +103,10 @@ from spaceone.inventory.connector.recommender.insight import InsightConnector
 from spaceone.inventory.connector.recommender.recommendation import (
     RecommendationConnector,
 )
-from spaceone.inventory.connector.app_engine.application_v1 import AppEngineApplicationV1Connector
-from spaceone.inventory.connector.app_engine.service_v1 import AppEngineServiceV1Connector
-from spaceone.inventory.connector.app_engine.version_v1 import AppEngineVersionV1Connector
-from spaceone.inventory.connector.app_engine.instance_v1 import AppEngineInstanceV1Connector
-
 from spaceone.inventory.connector.storage_transfer.storage_transfer_v1 import (
     StorageTransferConnector,
 )
+
 __all__ = [
     "BatchV1Connector",
     "SQLWorkspaceConnector",

@@ -33,8 +33,10 @@ from .dataproc.cluster_manager import DataprocClusterManager
 from .datastore.database_manager import DatastoreDatabaseManager
 from .datastore.index_manager import DatastoreIndexManager
 from .datastore.namespace_manager import DatastoreNamespaceManager
+from .filestore.backup_v1_manager import FilestoreBackupManager
 from .filestore.instance_v1_manager import FilestoreInstanceManager
 from .filestore.instance_v1beta1_manager import FilestoreInstanceV1Beta1Manager
+from .filestore.snapshot_v1_manager import FilestoreSnapshotManager
 from .firebase.app_manager import FirebaseManager as FirebaseAppManager
 from .firestore.backup_manager import FirestoreBackupManager
 from .firestore.backup_schedule_manager import FirestoreBackupScheduleManager
