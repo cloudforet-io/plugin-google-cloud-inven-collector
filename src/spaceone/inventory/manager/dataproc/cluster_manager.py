@@ -243,7 +243,7 @@ class DataprocClusterManager(GoogleCloudManager):
                     "project_id": str(project_id),  # project_id를 명시적으로 설정
                     "cluster_uuid": cluster_uuid,
                     "status": cluster.get("status", {}),
-                    "labels": {k: str(v) for k, v in cluster.get("labels", {}).items()},
+                    "labels": self._get_labels(labels=cluster.get("labels", {})),
                     "location": location,
                     "google_cloud_monitoring": self.set_google_cloud_monitoring(
                         project_id,
@@ -293,6 +293,14 @@ class DataprocClusterManager(GoogleCloudManager):
                 # 마스터 설정
                 master_config = config.get("masterConfig", {})
                 if master_config:
+                    # disk_config 매핑 수정
+                    disk_config = master_config.get("diskConfig", {})
+                    mapped_disk_config = {
+                        "boot_disk_size_gb": disk_config.get("bootDiskSizeGb"),
+                        "boot_disk_type": disk_config.get("bootDiskType"),
+                        "num_local_ssds": disk_config.get("numLocalSsds"),
+                    }
+
                     cluster_data["config"]["master_config"] = {
                         "num_instances": str(master_config.get("numInstances", "")),
                         "instance_names": master_config.get("instanceNames", []),
@@ -300,7 +308,10 @@ class DataprocClusterManager(GoogleCloudManager):
                         "machine_type_uri": str(
                             master_config.get("machineTypeUri", "")
                         ),
-                        "disk_config": master_config.get("diskConfig", {}),
+                        "disk_config": mapped_disk_config,
+                        "min_cpu_platform": str(
+                            master_config.get("minCpuPlatform", "")
+                        ),
                         "preemptibility": str(
                             master_config.get("preemptibility", "NON_PREEMPTIBLE")
                         ),
@@ -311,13 +322,26 @@ class DataprocClusterManager(GoogleCloudManager):
                         "instance_names": [],
                         "image_uri": "",
                         "machine_type_uri": "",
-                        "disk_config": {},
+                        "disk_config": {
+                            "boot_disk_size_gb": None,
+                            "boot_disk_type": None,
+                            "num_local_ssds": None,
+                        },
+                        "min_cpu_platform": "",
                         "preemptibility": "NON_PREEMPTIBLE",
                     }
 
                 # 워커 설정
                 worker_config = config.get("workerConfig", {})
                 if worker_config:
+                    # disk_config 매핑 수정
+                    disk_config = worker_config.get("diskConfig", {})
+                    mapped_disk_config = {
+                        "boot_disk_size_gb": disk_config.get("bootDiskSizeGb"),
+                        "boot_disk_type": disk_config.get("bootDiskType"),
+                        "num_local_ssds": disk_config.get("numLocalSsds"),
+                    }
+
                     cluster_data["config"]["worker_config"] = {
                         "num_instances": str(worker_config.get("numInstances", "")),
                         "instance_names": worker_config.get("instanceNames", []),
@@ -325,7 +349,14 @@ class DataprocClusterManager(GoogleCloudManager):
                         "machine_type_uri": str(
                             worker_config.get("machineTypeUri", "")
                         ),
-                        "disk_config": worker_config.get("diskConfig", {}),
+                        "disk_config": mapped_disk_config,
+                        "min_cpu_platform": str(
+                            worker_config.get("minCpuPlatform", "")
+                        ),
+                        "is_preemptible": worker_config.get("isPreemptible", False),
+                        "preemptibility": str(
+                            worker_config.get("preemptibility", "NON_PREEMPTIBLE")
+                        ),
                     }
                 else:
                     cluster_data["config"]["worker_config"] = {
@@ -333,7 +364,14 @@ class DataprocClusterManager(GoogleCloudManager):
                         "instance_names": [],
                         "image_uri": "",
                         "machine_type_uri": "",
-                        "disk_config": {},
+                        "disk_config": {
+                            "boot_disk_size_gb": None,
+                            "boot_disk_type": None,
+                            "num_local_ssds": None,
+                        },
+                        "min_cpu_platform": "",
+                        "is_preemptible": False,
+                        "preemptibility": "NON_PREEMPTIBLE",
                     }
 
                 # 소프트웨어 설정
@@ -351,37 +389,6 @@ class DataprocClusterManager(GoogleCloudManager):
                         "image_version": "",
                         "properties": {},
                         "optional_components": [],
-                    }
-
-                # Worker Config
-                worker_config = config.get("workerConfig", {})
-                if worker_config:
-                    cluster_data["config"]["worker_config"] = {
-                        "num_instances": str(worker_config.get("numInstances", "")),
-                        "instance_names": worker_config.get("instanceNames", []),
-                        "image_uri": str(worker_config.get("imageUri", "")),
-                        "machine_type_uri": str(
-                            worker_config.get("machineTypeUri", "")
-                        ),
-                        "disk_config": worker_config.get("diskConfig", {}),
-                        "is_preemptible": worker_config.get("isPreemptible", False),
-                        "min_cpu_platform": str(
-                            worker_config.get("minCpuPlatform", "")
-                        ),
-                        "preemptibility": str(
-                            worker_config.get("preemptibility", "NON_PREEMPTIBLE")
-                        ),
-                    }
-                else:
-                    cluster_data["config"]["worker_config"] = {
-                        "num_instances": "",
-                        "instance_names": [],
-                        "image_uri": "",
-                        "machine_type_uri": "",
-                        "disk_config": {},
-                        "is_preemptible": False,
-                        "min_cpu_platform": "",
-                        "preemptibility": "NON_PREEMPTIBLE",
                     }
 
                 # Lifecycle Config (Scheduled Deletion)
@@ -479,3 +486,10 @@ class DataprocClusterManager(GoogleCloudManager):
 
         logger.debug("** Dataproc Cluster END **")
         return collected_cloud_services, error_responses
+
+    @staticmethod
+    def _get_labels(labels):
+        changed_labels = []
+        for label_key, label_value in labels.items():
+            changed_labels.append({"key": label_key, "value": label_value})
+        return changed_labels
