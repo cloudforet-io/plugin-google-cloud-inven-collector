@@ -308,7 +308,7 @@ class GKEClusterV1Manager(GoogleCloudManager):
                 ]
                 cluster_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                     project_id,
-                    "kubernetes.io/cluster",
+                    "kubernetes.io/container",
                     monitoring_resource_id,
                     google_cloud_monitoring_filters,
                 )
@@ -326,10 +326,10 @@ class GKEClusterV1Manager(GoogleCloudManager):
                         "data": gke_cluster_data,
                         "reference": {
                             "resource_id": cluster.get("selfLink"),
-                            "external_link": f"https://console.cloud.google.com/kubernetes/clusters/details/{cluster.get('location')}/{cluster.get('name')}?project={cluster.get('projectId')}",
+                            "external_link": f"https://console.cloud.google.com/kubernetes/clusters/details/{cluster.get('location')}/{cluster.get('name')}?project={project_id}",
                         },
                         "region_code": cluster.get("location"),
-                        "account": cluster.get("projectId"),
+                        "account": project_id,
                     }
                 )
 
