@@ -244,6 +244,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                         continue
 
                                     _LOGGER.debug(f"Processing instance {instance_id} for service {service_id}, version {version_id}")
+                                    _LOGGER.debug(f"Raw instance data: {instance}")
 
                                     # 인스턴스 상세 정보 조회
                                     instance_details = self.get_instance_details(service_id, version_id, instance_id, params)
@@ -258,85 +259,100 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                         instance["metrics"] = metrics
                                         _LOGGER.debug(f"Added metrics to instance {instance_id}")
 
-                                    # 기본 인스턴스 데이터 준비
+                                    _LOGGER.debug(f"Final instance data after enhancements: {instance}")
+
+                                    # 기본 인스턴스 데이터 준비 - API 응답 구조와 정확히 일치하도록 수정
                                     instance_data = {
-                                        "name": str(instance.get("name", "")),
+                                        # 기본 정보 - API 응답에서 직접 매핑
+                                        "name": str(instance.get("name", instance_id)),  # name이 없으면 instance_id 사용
                                         "project_id": str(project_id),  # secret_data에서 가져온 project_id 사용
                                         "service_id": str(service_id),
-                                        "version_id": str(version_id),
-                                        "instance_id": str(instance_id),
-                                        "vm_status": str(instance.get("vmStatus", "")),
-                                        "vm_debug_enabled": instance.get("vmDebugEnabled"),
+                                        "version_id": str(version_id), 
+                                        "instance_id": str(instance_id),  # API에서 'id' 필드
+                                        
+                                        # VM 상태 정보
+                                        "vm_status": str(instance.get("vmStatus", "UNKNOWN")),
+                                        "vm_debug_enabled": bool(instance.get("vmDebugEnabled", False)),
                                         "vm_liveness": str(instance.get("vmLiveness", "")),
-                                        "request_count": instance.get("requestCount"),
-                                        "memory_usage": instance.get("memoryUsage"),
-                                        "cpu_usage": instance.get("cpuUsage"),
-                                        "create_time": convert_datetime(instance.get("createTime")),
-                                        "update_time": convert_datetime(instance.get("updateTime")),
-                                        "start_time": convert_datetime(instance.get("startTime")),
+                                        
+                                        # 사용량 정보
+                                        "request_count": int(instance.get("requests", instance.get("requestCount", 0)) or 0),
+                                        "memory_usage": float(instance.get("memoryUsage", 0) or 0),
+                                        "cpu_usage": float(instance.get("averageLatency", instance.get("cpuUsage", 0)) or 0),
+                                        
+                                        # 시간 정보
+                                        "create_time": convert_datetime(instance.get("startTime", instance.get("createTime"))),
+                                        "update_time": convert_datetime(instance.get("updateTime", "")),
+                                        "start_time": convert_datetime(instance.get("startTime", "")),
                                     }
 
-                                    # 수집된 메트릭 정보 추가
+                                    # 수집된 메트릭 정보 추가 (기존 availability는 덮어쓰지 않음)
                                     if "metrics" in instance:
                                         metrics_data = instance["metrics"]
-                                        instance_data.update({
+                                        enhanced_metrics = {
                                             "memory_usage_enhanced": metrics_data.get("memory_usage", ""),
                                             "cpu_usage_enhanced": metrics_data.get("cpu_usage", ""),
                                             "request_count_enhanced": metrics_data.get("request_count", ""),
-                                            "availability": metrics_data.get("availability", ""),
-                                            "app_engine_release": metrics_data.get("app_engine_release", ""),
-                                        })
+                                            "app_engine_release_enhanced": metrics_data.get("app_engine_release", ""),
+                                        }
+                                        instance_data.update(enhanced_metrics)
 
-                                    # VM Details 추가
+                                    # VM Details 추가 - 딕셔너리 타입 검증 후 전달
                                     if "vmDetails" in instance:
                                         vm_details = instance["vmDetails"]
-                                        instance_data["vm_details"] = {
-                                            "vm_zone_name": str(vm_details.get("vmZoneName", "")),
-                                            "vm_id": str(vm_details.get("vmId", "")),
-                                            "vm_ip": str(vm_details.get("vmIp", "")),
-                                            "vm_name": str(vm_details.get("vmName", "")),
-                                        }
+                                        if isinstance(vm_details, dict):
+                                            instance_data["vm_details"] = vm_details
+                                        else:
+                                            _LOGGER.warning(f"vmDetails is not a dict for instance {instance_id}: {type(vm_details)}")
 
                                     # App Engine Release 추가
                                     if "appEngineRelease" in instance:
-                                        instance_data["app_engine_release"] = str(
-                                            instance["appEngineRelease"]
-                                        )
+                                        instance_data["app_engine_release"] = str(instance["appEngineRelease"])
 
-                                    # Availability 추가
+                                    # Availability 추가 - 타입에 따라 적절히 변환
                                     if "availability" in instance:
                                         availability = instance["availability"]
+                                        _LOGGER.debug(f"Processing availability for {instance_id}: {availability} (type: {type(availability)})")
+                                        
                                         if isinstance(availability, dict):
+                                            # 이미 딕셔너리 형태면 그대로 사용
+                                            instance_data["availability"] = availability
+                                        elif isinstance(availability, str):
+                                            # 문자열이면 liveness 필드로 매핑
                                             instance_data["availability"] = {
-                                                "liveness": str(availability.get("liveness", "")),
-                                                "readiness": str(availability.get("readiness", "")),
+                                                "liveness": availability,
+                                                "readiness": ""
                                             }
                                         else:
-                                            # availability가 문자열이거나 다른 타입인 경우
+                                            # 다른 타입이면 문자열로 변환하여 liveness에 설정
                                             instance_data["availability"] = {
                                                 "liveness": str(availability),
-                                                "readiness": "",
+                                                "readiness": ""
                                             }
+                                    else:
+                                        # availability 필드가 없는 경우 기본값 설정
+                                        instance_data["availability"] = {
+                                            "liveness": "",
+                                            "readiness": ""
+                                        }
 
-                                    # Network 추가
+                                    # Network 추가 - 딕셔너리 타입 검증 후 전달  
                                     if "network" in instance:
                                         network = instance["network"]
-                                        instance_data["network"] = {
-                                            "forwarded_ports": str(network.get("forwardedPorts", "")),
-                                            "instance_tag": str(network.get("instanceTag", "")),
-                                            "name": str(network.get("name", "")),
-                                            "subnetwork_name": str(network.get("subnetworkName", "")),
-                                        }
+                                        if isinstance(network, dict):
+                                            instance_data["network"] = network
+                                        else:
+                                            _LOGGER.warning(f"network is not a dict for instance {instance_id}: {type(network)}")
 
-                                    # Resources 추가
+                                    # Resources 추가 - 딕셔너리 타입 검증 후 전달
                                     if "resources" in instance:
                                         resources = instance["resources"]
-                                        instance_data["resources"] = {
-                                            "cpu": resources.get("cpu"),
-                                            "disk_gb": resources.get("diskGb"),
-                                            "memory_gb": resources.get("memoryGb"),
-                                            "volumes": resources.get("volumes", []),
-                                        }
+                                        if isinstance(resources, dict):
+                                            instance_data["resources"] = resources
+                                        else:
+                                            _LOGGER.warning(f"resources is not a dict for instance {instance_id}: {type(resources)}")
+
+                                    _LOGGER.debug(f"Created instance_data for {instance_id}: {instance_data}")
 
                                     # Stackdriver 정보 추가
                                     if not instance_id:
@@ -366,6 +382,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     app_engine_instance_data = AppEngineInstance(
                                         instance_data, strict=False
                                     )
+                                    _LOGGER.debug(f"Created AppEngineInstance model for {instance_id}: {app_engine_instance_data}")
 
                                     # AppEngineInstanceResource 생성
                                     instance_resource = AppEngineInstanceResource(
@@ -380,6 +397,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                             "account": instance_data.get("project_id"),
                                         }
                                     )
+                                    _LOGGER.debug(f"Created AppEngineInstanceResource for {instance_id}")
 
                                     ##################################
                                     # 4. Make Collected Region Code
@@ -395,6 +413,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
 
                                     collected_cloud_services.append(instance_response)
                                     _LOGGER.info(f"Successfully collected App Engine instance: {instance_id} (status: {instance_data.get('vm_status', 'unknown')})")
+                                    _LOGGER.info(f"Instance response data - Service ID: {instance_data.get('service_id')}, Version ID: {instance_data.get('version_id')}, VM Status: {instance_data.get('vm_status')}")
 
                                 except Exception as e:
                                     _LOGGER.error(f"[collect_cloud_service] Instance {instance_id} => {e}", exc_info=True)

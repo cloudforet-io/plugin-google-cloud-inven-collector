@@ -24,8 +24,8 @@ class VMDetails(Model):
 
 class Availability(Model):
     """AppEngine Availability 모델"""
-    liveness = StringType(serialize_when_none=False)
-    readiness = StringType(serialize_when_none=False)
+    liveness = StringType(serialize_when_none=False, default="")
+    readiness = StringType(serialize_when_none=False, default="")
 
 
 class Network(Model):
@@ -47,18 +47,19 @@ class Resources(Model):
 class AppEngineInstance(BaseResource):
     """AppEngine Instance 데이터 모델"""
     name = StringType(serialize_when_none=False)
-    project_id = StringType(deserialize_from="projectId", serialize_when_none=False)
-    service_id = StringType(deserialize_from="serviceId", serialize_when_none=False)
-    version_id = StringType(deserialize_from="versionId", serialize_when_none=False)
-    instance_id = StringType(deserialize_from="id", serialize_when_none=False)
-    vm_status = StringType(deserialize_from="vmStatus", serialize_when_none=False)
-    vm_debug_enabled = BooleanType(deserialize_from="vmDebugEnabled", serialize_when_none=False)
-    vm_liveness = StringType(deserialize_from="vmLiveness", serialize_when_none=False)
-    request_count = IntType(deserialize_from="requestCount", serialize_when_none=False)
-    memory_usage = FloatType(deserialize_from="memoryUsage", serialize_when_none=False)
-    cpu_usage = FloatType(deserialize_from="cpuUsage", serialize_when_none=False)
-    create_time = StringType(deserialize_from="createTime", serialize_when_none=False)
-    update_time = StringType(deserialize_from="updateTime", serialize_when_none=False)
+    project_id = StringType(serialize_when_none=False)
+    service_id = StringType(serialize_when_none=False)
+    version_id = StringType(serialize_when_none=False)
+    instance_id = StringType(serialize_when_none=False)
+    vm_status = StringType(serialize_when_none=False)
+    vm_debug_enabled = BooleanType(serialize_when_none=False)
+    vm_liveness = StringType(serialize_when_none=False)
+    request_count = IntType(serialize_when_none=False)
+    memory_usage = FloatType(serialize_when_none=False)
+    cpu_usage = FloatType(serialize_when_none=False)
+    create_time = StringType(serialize_when_none=False)
+    update_time = StringType(serialize_when_none=False)
+    start_time = StringType(serialize_when_none=False)
     
     # VM Details
     vm_details = ModelType(VMDetails, deserialize_from="vmDetails", serialize_when_none=False)

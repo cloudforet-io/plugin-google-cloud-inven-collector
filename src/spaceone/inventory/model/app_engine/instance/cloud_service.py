@@ -42,6 +42,7 @@ app_engine_instance = ItemDynamicLayout.set_fields(
         TextDyField.data_source("CPU Usage", "data.cpu_usage"),
         DateTimeDyField.data_source("Created", "data.create_time"),
         DateTimeDyField.data_source("Updated", "data.update_time"),
+        DateTimeDyField.data_source("Started", "data.start_time"),
     ],
 )
 
