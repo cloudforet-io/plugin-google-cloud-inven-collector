@@ -27,4 +27,4 @@ query_options:
       key: data.service.version_count
 unit: Count
 namespace_id: ns-google-cloud-appengine-service
-version: '1.0'
+version: '1.1'
