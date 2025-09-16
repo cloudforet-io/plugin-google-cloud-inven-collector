@@ -170,7 +170,7 @@ class DataprocCluster(Model):
     cluster_name = StringType()
     cluster_uuid = StringType()
     config = ModelType(ClusterConfig)
-    labels = DictType(StringType())
+    labels = ListType(DictType(StringType()))
     status = ModelType(ClusterStatus)
     status_history = ListType(ModelType(ClusterStatus))
     metrics = ModelType(ClusterMetrics)

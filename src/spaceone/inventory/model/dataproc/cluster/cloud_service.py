@@ -142,8 +142,10 @@ cluster_worker_config_meta = ItemDynamicLayout.set_fields(
 
 cluster_labels_meta = ItemDynamicLayout.set_fields(
     "Labels",
+    root_path="data.labels",
     fields=[
-        ListDyField.data_source("Labels", "data.labels", options={"delimiter": " | "}),
+        TextDyField.data_source("Key", "key"),
+        TextDyField.data_source("Value", "value"),
     ],
 )
 
