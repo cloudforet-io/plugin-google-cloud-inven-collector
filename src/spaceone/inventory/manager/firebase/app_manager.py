@@ -20,7 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class FirebaseManager(GoogleCloudManager):
     """
-    Firebase App Manager (Filestore 방식과 동일한 단순 모니터링 적용)
+    Firebase App Manager (Firestore Database 방식과 동일한 구조)
     """
 
     connector_name = "FirebaseConnector"
@@ -87,42 +87,43 @@ class FirebaseManager(GoogleCloudManager):
         self, app_data: dict, project_id: str, firebase_connector: FirebaseConnector
     ) -> AppResponse:
         """
-        개별 Firebase 앱을 처리합니다 (Filestore 방식과 동일).
+        개별 Firebase 앱을 처리합니다 (Firestore Database 방식과 동일).
         """
         app_id = app_data.get("appId", "")
 
         try:
-            # 1. Google Cloud Monitoring/Logging 정보 생성 (Filestore 방식과 동일)
-            google_cloud_monitoring = self.set_google_cloud_monitoring(
-                project_id,
-                "firebaseappcheck.googleapis.com/",
-                app_id,
-                [
-                    {
-                        "key": "resource.labels.resource_container",
-                        "value": project_id,
-                    },
-                    {
-                        "key": "resource.labels.location", 
-                        "value": "global",
-                    },
-                    {
-                        "key": "resource.labels.service_id",
-                        "value": "firebaseappcheck",
-                    },
-                ],
-            )
-
-            google_cloud_logging = self.set_google_cloud_logging(
-                "Firebase", "App", project_id, app_id
-            )
-
-            # 3. 앱 데이터에 모니터링 정보 추가 (Filestore 방식과 동일)
+            # 플랫폼 기반으로 적절한 service_id 결정 (Firebase App Check 실제 서비스들)
+            platform = app_data.get("platform", "WEB")
+            service_id_map = {
+                "IOS": "oauth2.googleapis.com",  # Google Identity for iOS (공식 지원)
+                "ANDROID": "firestore.googleapis.com",  # Cloud Firestore (공식 지원)
+                "WEB": "firebasestorage.googleapis.com",  # Cloud Storage for Firebase (공식 지원)
+            }
+            service_id = service_id_map.get(platform, "firestore.googleapis.com")
+            
             app_data.update(
                 {
-                    "project_id": project_id,
-                    "google_cloud_monitoring": google_cloud_monitoring,
-                    "google_cloud_logging": google_cloud_logging,
+                    "name": app_id,
+                    "project": project_id,
+                    "full_name": app_data.get("displayName", app_id),
+                    "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                        project_id,
+                        "firebaseappcheck.googleapis.com/resources",
+                        app_id,
+                        [
+                            {
+                                "key": "resource.labels.resource_container",
+                                "value": project_id,
+                            },
+                            {
+                                "key": "metric.labels.app_id",
+                                "value": app_id,
+                            },
+                        ],
+                    ),
+                    "google_cloud_logging": self.set_google_cloud_logging(
+                        "Firebase", "App", project_id, app_id
+                    ),
                 }
             )
 

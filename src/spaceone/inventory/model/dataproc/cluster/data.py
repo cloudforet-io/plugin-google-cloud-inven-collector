@@ -28,7 +28,6 @@ class DiskConfig(Model):
 
     boot_disk_type = StringType()
     boot_disk_size_gb = IntType()
-    num_local_ssds = IntType()
 
 
 class InstanceGroupConfig(Model):
@@ -194,5 +193,6 @@ class DataprocCluster(Model):
         """
         return {
             "resource_id": f"https://dataproc.googleapis.com/v1/projects/{self.project_id}/regions/{self.location}/clusters/{self.cluster_name}",
-            "external_link": f"https://console.cloud.google.com/dataproc/clusters?project={self.project_id}",
+            # "external_link": f"https://console.cloud.google.com/dataproc/clusters?project={self.project_id}",
+            "external_link": f"https://console.cloud.google.com/dataproc/clusters/{self.cluster_name}/monitoring?region={self.location}&project={self.project_id}",
         }

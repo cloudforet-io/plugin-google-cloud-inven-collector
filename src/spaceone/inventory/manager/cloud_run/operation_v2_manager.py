@@ -122,6 +122,9 @@ class CloudRunOperationV2Manager(GoogleCloudManager):
                     "status": "Completed" if operation.get("done") else "Running",
                     "progress": 100 if operation.get("done") else 50,
                     "create_time": operation.get("metadata", {}).get("createTime"),
+                    "google_cloud_logging": self.set_google_cloud_logging(
+                        "CloudRun", "Operation", project_id, operation_id
+                    ),
                     "end_time": operation.get("metadata", {}).get("endTime")
                     if operation.get("done")
                     else None,

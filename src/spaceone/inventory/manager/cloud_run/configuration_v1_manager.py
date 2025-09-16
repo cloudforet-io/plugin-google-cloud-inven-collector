@@ -98,6 +98,9 @@ class CloudRunConfigurationV1Manager(GoogleCloudManager):
                         "location": location_id,
                         "region": region,
                         "self_link": self_link,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudRun", "Configuration", project_id, configuration_id
+                        ),
                     }
                 )
 
