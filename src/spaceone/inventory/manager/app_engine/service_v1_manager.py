@@ -187,7 +187,7 @@ class AppEngineServiceV1Manager(GoogleCloudManager):
                 # 기본 서비스 데이터 준비
                 service_data = {
                     "name": str(service.get("name", "")),
-                    "projectId": str(service.get("projectId", "")),
+                    "projectId": str(project_id),  # secret_data에서 가져온 project_id 사용
                     "id": str(service.get("id", "")),
                     "servingStatus": str(service.get("servingStatus", "")),
                     "createTime": convert_datetime(service.get("createTime")),
@@ -220,6 +220,9 @@ class AppEngineServiceV1Manager(GoogleCloudManager):
                     _LOGGER.warning(f"Service missing ID, skipping monitoring setup: {service}")
                     service_id = "unknown"
                 
+                # Google Cloud Monitoring 리소스 ID: {project_id}:{service_id}
+                monitoring_resource_id = f"{project_id}:{service_id}"
+                
                 google_cloud_monitoring_filters = [
                     {"key": "resource.labels.service_id", "value": service_id},
                     {"key": "resource.labels.project_id", "value": project_id},
@@ -227,11 +230,11 @@ class AppEngineServiceV1Manager(GoogleCloudManager):
                 service_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                     project_id,
                     "appengine.googleapis.com/http/service",
-                    service_id,
+                    monitoring_resource_id,
                     google_cloud_monitoring_filters,
                 )
                 service_data["google_cloud_logging"] = self.set_google_cloud_logging(
-                    "AppEngine", "Service", project_id, service_id
+                    "AppEngine", "Service", project_id, monitoring_resource_id
                 )
 
                 # AppEngineService 모델 생성

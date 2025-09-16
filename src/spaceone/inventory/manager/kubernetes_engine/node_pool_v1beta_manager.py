@@ -634,7 +634,7 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                     cluster_name = node_group.get("clusterName")
                     location = node_group.get("clusterLocation")
                     node_pool_name = node_group.get("name")
-                    project_id = node_group.get("projectId")
+                    # project_id는 secret_data에서 가져온 값을 사용 (API 응답에는 포함되지 않음)
 
                     if not all([cluster_name, location, node_pool_name]):
                         _LOGGER.warning(f"Skipping node group due to missing required fields: {node_group.get('name', 'unknown')} (v1beta1)")
@@ -770,6 +770,9 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                             node_group_data["instance_groups"].append(group_info)
 
                     # Stackdriver 정보 추가
+                    # Google Cloud Monitoring 리소스 ID: {project_id}:{location}:{cluster_name}:{node_pool_name}
+                    monitoring_resource_id = f"{project_id}:{location}:{cluster_name}:{node_pool_name}"
+                    
                     google_cloud_monitoring_filters = [
                         {"key": "resource.labels.cluster_name", "value": cluster_name},
                         {"key": "resource.labels.location", "value": location},
@@ -778,11 +781,11 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                     node_group_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                         project_id,
                         "container.googleapis.com/node_pool",
-                        node_pool_name,
+                        monitoring_resource_id,
                         google_cloud_monitoring_filters,
                     )
                     node_group_data["google_cloud_logging"] = self.set_google_cloud_logging(
-                        "KubernetesEngine", "NodePool", project_id, node_pool_name
+                        "KubernetesEngine", "NodePool", project_id, monitoring_resource_id
                     )
 
                     # GKENodeGroup 모델 생성

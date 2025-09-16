@@ -652,6 +652,9 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                         node_pool_data["total_groups"] = nodes_info["total_groups"]
 
                     # Stackdriver 정보 추가
+                    # Google Cloud Monitoring 리소스 ID: {project_id}:{location}:{cluster_name}:{node_pool_name}
+                    monitoring_resource_id = f"{project_id}:{location}:{cluster_name}:{node_pool_name}"
+                    
                     google_cloud_monitoring_filters = [
                         {"key": "resource.labels.cluster_name", "value": cluster_name},
                         {"key": "resource.labels.location", "value": location},
@@ -660,11 +663,11 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                     node_pool_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                         project_id,
                         "container.googleapis.com/node_pool",
-                        node_pool_name,
+                        monitoring_resource_id,
                         google_cloud_monitoring_filters,
                     )
                     node_pool_data["google_cloud_logging"] = self.set_google_cloud_logging(
-                        "KubernetesEngine", "NodePool", project_id, node_pool_name
+                        "KubernetesEngine", "NodePool", project_id, monitoring_resource_id
                     )
 
                     # NodePool 모델 생성

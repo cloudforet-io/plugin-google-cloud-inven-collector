@@ -179,7 +179,7 @@ class GKEClusterV1Manager(GoogleCloudManager):
                     "name": str(cluster.get("name", "")),
                     "description": str(cluster.get("description", "")),
                     "location": str(cluster.get("location", "")),
-                    "projectId": str(cluster.get("projectId", "")),
+                    "projectId": str(project_id),  # secret_data에서 가져온 project_id 사용
                     "status": str(cluster.get("status", "")),
                     "currentMasterVersion": str(
                         cluster.get("currentMasterVersion", "")
@@ -299,6 +299,9 @@ class GKEClusterV1Manager(GoogleCloudManager):
                     _LOGGER.warning(f"Cluster missing name, skipping monitoring setup: {cluster}")
                     cluster_name = "unknown"
                 
+                # Google Cloud Monitoring 리소스 ID: {project_id}:{location}:{cluster_name}
+                monitoring_resource_id = f"{project_id}:{cluster_location or 'unknown'}:{cluster_name}"
+                
                 google_cloud_monitoring_filters = [
                     {"key": "resource.labels.cluster_name", "value": cluster_name},
                     {"key": "resource.labels.location", "value": cluster_location or "unknown"},
@@ -306,11 +309,11 @@ class GKEClusterV1Manager(GoogleCloudManager):
                 cluster_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                     project_id,
                     "container.googleapis.com/cluster",
-                    cluster_name,
+                    monitoring_resource_id,
                     google_cloud_monitoring_filters,
                 )
                 cluster_data["google_cloud_logging"] = self.set_google_cloud_logging(
-                    "KubernetesEngine", "Cluster", project_id, cluster_name
+                    "KubernetesEngine", "Cluster", project_id, monitoring_resource_id
                 )
 
                 # GKECluster 모델 생성

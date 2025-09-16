@@ -206,7 +206,7 @@ class AppEngineVersionV1Manager(GoogleCloudManager):
                     # 기본 버전 데이터 준비
                     version_data = {
                         "name": str(version.get("name", "")),
-                        "projectId": str(version.get("projectId", "")),
+                        "projectId": str(project_id),  # secret_data에서 가져온 project_id 사용
                         "serviceId": str(service_id),
                         "id": str(version.get("id", "")),
                         "servingStatus": str(version.get("servingStatus", "")),
@@ -267,6 +267,9 @@ class AppEngineVersionV1Manager(GoogleCloudManager):
                         _LOGGER.warning(f"Version missing ID, skipping monitoring setup: service={service_id}")
                         version_id = "unknown"
                     
+                    # Google Cloud Monitoring 리소스 ID: {project_id}:{service_id}:{version_id}
+                    monitoring_resource_id = f"{project_id}:{service_id}:{version_id}"
+                    
                     google_cloud_monitoring_filters = [
                         {"key": "resource.labels.service_id", "value": service_id},
                         {"key": "resource.labels.version_id", "value": version_id},
@@ -275,11 +278,11 @@ class AppEngineVersionV1Manager(GoogleCloudManager):
                     version_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                         project_id,
                         "appengine.googleapis.com/http/version",
-                        version_id,
+                        monitoring_resource_id,
                         google_cloud_monitoring_filters,
                     )
                     version_data["google_cloud_logging"] = self.set_google_cloud_logging(
-                        "AppEngine", "Version", project_id, version_id
+                        "AppEngine", "Version", project_id, monitoring_resource_id
                     )
 
                     # AppEngineVersion 모델 생성
