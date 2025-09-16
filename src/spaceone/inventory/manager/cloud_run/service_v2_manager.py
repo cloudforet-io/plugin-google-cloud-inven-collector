@@ -187,6 +187,11 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                 # Extract last deployment time
                 last_deployment_time = service.get("updateTime", "")
 
+                # Set up monitoring filters for Cloud Run Service
+                google_cloud_monitoring_filters = [
+                    {"key": "resource.labels.service_name", "value": service_name},
+                ]
+
                 service.update(
                     {
                         "name": service_name,
@@ -204,6 +209,15 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                         "ingress": ingress,
                         "last_deployment_time": last_deployment_time,
                         "deployer": deployer,
+                        "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                            project_id,
+                            "run.googleapis.com/container",
+                            service_name,
+                            google_cloud_monitoring_filters,
+                        ),
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudRun", "Service", project_id, service_name
+                        ),
                     }
                 )
 

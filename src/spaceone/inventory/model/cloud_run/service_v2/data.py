@@ -9,6 +9,13 @@ from schematics.types import (
     StringType,
 )
 
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
+)
+from spaceone.inventory.libs.schema.google_cloud_monitoring import (
+    GoogleCloudMonitoringModel,
+)
+
 
 class Condition(Model):
     type = StringType()
@@ -78,3 +85,9 @@ class Service(Model):
     authentication = StringType(default="")
     last_deployment_time = DateTimeType(deserialize_from="lastDeploymentTime")
     deployer = StringType(default="")
+    # Monitoring data
+    google_cloud_monitoring = ModelType(
+        GoogleCloudMonitoringModel, serialize_when_none=False
+    )
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)

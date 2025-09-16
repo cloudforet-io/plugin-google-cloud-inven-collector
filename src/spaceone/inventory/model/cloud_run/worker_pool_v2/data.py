@@ -8,6 +8,13 @@ from schematics.types import (
     StringType,
 )
 
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
+)
+from spaceone.inventory.libs.schema.google_cloud_monitoring import (
+    GoogleCloudMonitoringModel,
+)
+
 
 class Condition(Model):
     type = StringType()
@@ -52,3 +59,9 @@ class WorkerPool(Model):
     etag = StringType()
     revisions = ListType(ModelType(Revision), default=[])
     revision_count = IntType(default=0)
+    # Monitoring data
+    google_cloud_monitoring = ModelType(
+        GoogleCloudMonitoringModel, serialize_when_none=False
+    )
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)

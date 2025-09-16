@@ -122,6 +122,14 @@ class CloudRunWorkerPoolV2Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                # Set up monitoring filters for Cloud Run WorkerPool
+                google_cloud_monitoring_filters = [
+                    {
+                        "key": "resource.labels.worker_pool_name",
+                        "value": worker_pool_name,
+                    },
+                ]
+
                 worker_pool.update(
                     {
                         "name": worker_pool_name,
@@ -129,6 +137,15 @@ class CloudRunWorkerPoolV2Manager(GoogleCloudManager):
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                            project_id,
+                            "run.googleapis.com/container",
+                            worker_pool_name,
+                            google_cloud_monitoring_filters,
+                        ),
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudRun", "WorkerPool", project_id, worker_pool_name
+                        ),
                     }
                 )
 
