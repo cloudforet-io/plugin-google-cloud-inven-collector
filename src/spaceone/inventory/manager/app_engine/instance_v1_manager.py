@@ -370,7 +370,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     ]
                                     instance_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                                         project_id,
-                                        "appengine.googleapis.com/system",
+                                        "appengine.googleapis.com/flex/instance",
                                         monitoring_resource_id,
                                         google_cloud_monitoring_filters,
                                     )

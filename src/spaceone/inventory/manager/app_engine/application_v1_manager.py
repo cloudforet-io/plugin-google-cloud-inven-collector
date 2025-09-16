@@ -251,7 +251,6 @@ class AppEngineApplicationV1Manager(GoogleCloudManager):
                 
                 google_cloud_monitoring_filters = [
                     {"key": "resource.labels.project_id", "value": project_id},
-                    {"key": "resource.labels.module_id", "value": app_id},
                 ]
                 app_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
                     project_id,
