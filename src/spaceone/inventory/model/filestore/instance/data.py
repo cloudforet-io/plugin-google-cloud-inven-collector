@@ -21,7 +21,7 @@ class Network(Model):
 
 class PerformanceLimits(Model):
     """성능 제한 정보 모델"""
-    
+
     max_read_iops = StringType(serialize_when_none=False)
     max_write_iops = StringType(serialize_when_none=False)
     max_read_throughput_bps = StringType(serialize_when_none=False)
@@ -42,23 +42,11 @@ class UnifiedFileShare(Model):
     data_source = StringType()  # "Basic" 또는 "Detailed" 표시
 
 
-class Snapshot(Model):
-    """스냅샷 정보 모델"""
-
-    name = StringType()
-    full_name = StringType()
-    description = StringType()
-    state = StringType()
-    create_time = StringType()
-    labels = ListType(DictType(StringType), default=[])
-
-
 class Stats(Model):
     """통계 정보 모델"""
 
     total_capacity_gb = StringType()
     file_share_count = StringType()
-    snapshot_count = StringType()
     network_count = StringType()
 
 
@@ -77,10 +65,9 @@ class FilestoreInstanceData(BaseResource):
     networks = ListType(ModelType(Network))
 
     # 파일 공유 정보 (통합)
-    unified_file_shares = ListType(ModelType(UnifiedFileShare), serialize_when_none=False)
-
-    # 스냅샷 정보
-    snapshots = ListType(ModelType(Snapshot))
+    unified_file_shares = ListType(
+        ModelType(UnifiedFileShare), serialize_when_none=False
+    )
 
     # 라벨 정보
     labels = ListType(DictType(StringType), default=[])
@@ -90,14 +77,13 @@ class FilestoreInstanceData(BaseResource):
 
     # 통계 정보s
     stats = ModelType(Stats)
-    
+
     # 인스턴스 레벨 성능 및 용량 정보
     protocol = StringType(serialize_when_none=False)
     custom_performance_supported = StringType(serialize_when_none=False)
     performance_limits = ModelType(PerformanceLimits, serialize_when_none=False)
 
     def reference(self):
-
         return {
             "resource_id": f"https://file.googleapis.com/v1/{self.full_name}",
             "external_link": f"https://console.cloud.google.com/filestore/instances/locations/{self.location}/id/{self.instance_id}?project={self.project}",

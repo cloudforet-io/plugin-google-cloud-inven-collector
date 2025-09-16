@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, List
 
 from googleapiclient.errors import HttpError
+
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
 _LOGGER = logging.getLogger(__name__)
@@ -13,7 +14,8 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
 
     Filestore 인스턴스 관련 API 호출을 담당하는 클래스
     - 인스턴스 목록 조회 (v1 API)
-    - 인스턴스 스냅샷 조회 (v1 API)
+
+    Note: 스냅샷 조회는 별도 FilestoreSnapshotConnector에서 처리
     """
 
     google_client_service = "file"
@@ -89,71 +91,14 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
                 )
                 return []
             else:
-                _LOGGER.error(f"HTTP error listing Filestore instances for project {self.project_id}: {e}")
+                _LOGGER.error(
+                    f"HTTP error listing Filestore instances for project {self.project_id}: {e}"
+                )
                 raise e
         except Exception as e:
-            _LOGGER.error(f"Error listing Filestore instances for project {self.project_id}: {e}")
-            raise e from e
-
-    def list_snapshots_for_instance(
-        self, instance_name: str, **query
-    ) -> List[Dict[str, Any]]:
-        """
-        특정 인스턴스의 스냅샷 목록을 조회합니다.
-        Google Cloud Filestore v1 API를 사용합니다.
-
-        Args:
-            instance_name: 인스턴스 이름
-                (projects/{project}/locations/{location}/instances/{instance})
-            **query: 추가 쿼리 파라미터
-
-        Returns:
-            스냅샷 목록
-        """
-        try:
-            snapshots = []
-            request = (
-                self.client.projects()
-                .locations()
-                .instances()
-                .snapshots()
-                .list(parent=instance_name, **query)
+            _LOGGER.error(
+                f"Error listing Filestore instances for project {self.project_id}: {e}"
             )
-
-            while request is not None:
-                response = request.execute()
-
-                # 응답에서 스냅샷 목록 추출
-                if "snapshots" in response:
-                    snapshots.extend(response["snapshots"])
-
-                # 다음 페이지가 있는지 확인
-                request = (
-                    self.client.projects()
-                    .locations()
-                    .instances()
-                    .snapshots()
-                    .list_next(previous_request=request, previous_response=response)
-                )
-
-            return snapshots
-
-        except HttpError as e:
-            if e.resp.status == 404:
-                _LOGGER.warning(
-                    f"Filestore snapshot service not available for instance {instance_name} "
-                )
-                return []
-            elif e.resp.status == 403:
-                _LOGGER.warning(
-                    f"Filestore API not enabled or insufficient permissions for instance {instance_name}, "
-                )
-                return []
-            else:
-                _LOGGER.error(f"HTTP error listing snapshots for instance {instance_name}: {e}")
-                raise e
-        except Exception as e:
-            _LOGGER.error(f"Error listing snapshots for instance {instance_name}: {e}")
             raise e from e
 
     def _extract_location_from_instance_name(self, instance_name: str) -> str:

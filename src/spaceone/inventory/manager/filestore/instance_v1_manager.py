@@ -26,9 +26,9 @@ class FilestoreInstanceManager(GoogleCloudManager):
     Filestore 인스턴스 리소스를 수집하고 처리하는 매니저 클래스 (v1 API 전용)
     - 인스턴스 목록 수집 (v1 API)
     - 인스턴스 상세 정보 처리 (v1 API)
-    - 스냅샷 정보 수집 (v1 API)
 
     Note: 파일 공유 상세 정보(v1beta1 API)는 별도 매니저에서 처리
+    Note: 스냅샷 정보는 별도 FilestoreSnapshotManager에서 처리
     """
 
     connector_name = "FilestoreInstanceConnector"
@@ -98,11 +98,10 @@ class FilestoreInstanceManager(GoogleCloudManager):
                         filestore_instance.get("labels", {})
                     )
 
-                    # 네트워크 및 스냅샷 정보 수집
+                    # 네트워크 정보 수집
                     networks = self._process_networks(
                         filestore_instance.get("networks", [])
                     )
-                    snapshots = self._collect_snapshots(instance_name, instance_id)
 
                     # 원본 데이터 기반으로 업데이트
                     filestore_instance.update(
@@ -114,12 +113,10 @@ class FilestoreInstanceManager(GoogleCloudManager):
                             "location": location,
                             "networks": networks,
                             "unified_file_shares": unified_file_shares,
-                            "snapshots": snapshots,
                             "labels": labels,
                             "stats": {
                                 "total_capacity_gb": str(total_capacity_gb),
                                 "file_share_count": str(len(unified_file_shares)),
-                                "snapshot_count": str(len(snapshots)),
                                 "network_count": str(len(networks)),
                             },
                             "custom_performance_supported": str(
@@ -259,36 +256,3 @@ class FilestoreInstanceManager(GoogleCloudManager):
             or None,
             "max_iops": performance_limits.get("maxIops") or None,
         }
-
-    def _collect_snapshots(
-        self, instance_name: str, instance_id: str
-    ) -> List[Dict[str, Any]]:
-        """인스턴스의 스냅샷 정보를 수집합니다 (v1 API)."""
-        snapshots = []
-        try:
-            instance_snapshots = self.instance_conn.list_snapshots_for_instance(
-                instance_name
-            )
-
-            for snapshot in instance_snapshots:
-                # (name, description, state, createTime, labels)
-                name = snapshot.get("name", "")
-                snapshot_id = name.split("/")[-1] if "/" in name else name
-                snapshot.update(
-                    {
-                        "name": snapshot_id,
-                        "full_name": name,
-                        "create_time": snapshot.get("createTime", ""),
-                        "labels": self.convert_labels_format(
-                            snapshot.get("labels", {})
-                        ),
-                    }
-                )
-                snapshots.append(snapshot)
-
-        except Exception as e:
-            _LOGGER.warning(
-                f"Failed to collect snapshots for instance {instance_id}: {e}"
-            )
-
-        return snapshots

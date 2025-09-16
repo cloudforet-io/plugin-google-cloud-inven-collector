@@ -1,0 +1,18 @@
+widget_type: chart
+name: Count by Region
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: region_code
+            key: region_code
+        fields:
+          - name: value
+            key: data.count
+            operator: sum
+  filter: []
+labels: []
+options:
+  chart_type: donut
+  legend:
+    visible: true

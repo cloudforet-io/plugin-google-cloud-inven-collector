@@ -1,0 +1,18 @@
+widget_type: chart
+name: Count by State
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: state
+            key: data.state
+        fields:
+          - name: value
+            key: data.count
+            operator: sum
+  filter: []
+labels: []
+options:
+  chart_type: donut
+  legend:
+    visible: true

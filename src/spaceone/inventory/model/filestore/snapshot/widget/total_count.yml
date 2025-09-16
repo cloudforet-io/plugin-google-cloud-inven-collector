@@ -1,0 +1,24 @@
+widget_type: summary
+name: Total Count
+query:
+  aggregate:
+    - group:
+        keys:
+          - name: provider
+            key: provider
+          - name: cloud_service_group
+            key: cloud_service_group
+          - name: cloud_service_type
+            key: cloud_service_type
+        fields:
+          - name: value
+            key: data.count
+            operator: sum
+  filter: []
+labels: []
+options:
+  icon_url: https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/filestore.svg
+  value_options:
+    key: value
+    options:
+      default: 0

@@ -33,7 +33,11 @@ CLOUD_SERVICE_GROUP_MAP = {
         "TopicManager",
     ],
     "CloudFunctions": ["FunctionGen2Manager", "FunctionGen1Manager"],
-    "Filestore": ["FilestoreInstanceManager"],
+    "Filestore": [
+        "FilestoreInstanceManager",
+        "FilestoreSnapshotManager",
+        "FilestoreBackupManager",
+    ],
     "Firebase": ["FirebaseAppManager"],
     "Batch": ["BatchManager"],
     "CloudBuild": [
@@ -166,7 +170,15 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         "Instance": {
             "resource_type": "filestore_instance",
             "labels_key": "resource.labels.instance_id",
-        }
+        },
+        "Snapshot": {
+            "resource_type": "filestore_snapshot",
+            "labels_key": "resource.labels.snapshot_id",
+        },
+        "Backup": {
+            "resource_type": "filestore_backup",
+            "labels_key": "resource.labels.backup_id",
+        },
     },
     "Firebase": {
         "App": {
