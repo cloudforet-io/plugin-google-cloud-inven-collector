@@ -6,7 +6,7 @@ Firebase 앱 목록 테스트 스크립트
 import json
 import os
 
-from spaceone.inventory.connector.firebase.firebase import FirebaseConnector
+from spaceone.inventory.connector.firebase.firebase_v1beta1 import FirebaseConnector
 
 
 def test_firebase_apps():
