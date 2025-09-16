@@ -15,6 +15,9 @@ class FirebaseConnector(GoogleCloudConnector):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # secret_data 저장 (Analytics API 접근 시 사용)
+        self.secret_data = kwargs.get("secret_data", {})
+
         # Firebase Management API에 필요한 스코프 추가
         firebase_scopes = [
             "https://www.googleapis.com/auth/firebase",
@@ -138,3 +141,79 @@ class FirebaseConnector(GoogleCloudConnector):
         except Exception as e:
             _LOGGER.error(f"Failed to get Firebase project {project_id}: {e}")
             raise e
+
+    def get_analytics_details(self, project_id):
+        """
+        Firebase 프로젝트의 Google Analytics 연결 정보를 가져옵니다.
+        
+        Args:
+            project_id (str): Firebase 프로젝트 ID
+            
+        Returns:
+            dict: Analytics 연결 정보 (있는 경우)
+        """
+        try:
+            # Firebase Management API에서 Analytics 정보 조회
+            # projects/{project}/analyticsDetails 엔드포인트 시도
+            response = (
+                self.client.projects().get(name=f"projects/{project_id}").execute()
+            )
+            
+            # Analytics 관련 정보가 있는지 확인
+            _LOGGER.debug(f"Checking for Analytics details in project {project_id}")
+            
+            # 가능한 Analytics 정보 경로들 탐색
+            analytics_paths = [
+                "analyticsProperty",
+                "googleAnalyticsProperty", 
+                "resources.analyticsProperty",
+                "resources.googleAnalyticsProperty"
+            ]
+            
+            for path in analytics_paths:
+                current_data = response
+                keys = path.split('.')
+                
+                try:
+                    for key in keys:
+                        current_data = current_data.get(key, {})
+                    
+                    if current_data and isinstance(current_data, str):
+                        _LOGGER.info(f"Found Analytics property at {path}: {current_data}")
+                        return {"analyticsProperty": current_data}
+                        
+                except (AttributeError, TypeError):
+                    continue
+            
+            _LOGGER.warning(f"No Analytics property found for project {project_id}")
+            return {}
+            
+        except Exception as e:
+            _LOGGER.warning(f"Failed to get Analytics details for {project_id}: {e}")
+            return {}
+
+    def list_available_resources(self, project_id):
+        """
+        Firebase 프로젝트의 사용 가능한 모든 리소스 타입을 나열합니다.
+        
+        Args:
+            project_id (str): Firebase 프로젝트 ID
+            
+        Returns:
+            dict: 사용 가능한 리소스 정보
+        """
+        try:
+            # 기본 프로젝트 정보
+            project_info = self.get_project(project_id)
+            
+            # 추가로 확인할 수 있는 리소스들
+            available_resources = {
+                "project_info": project_info,
+                "analytics_details": self.get_analytics_details(project_id)
+            }
+            
+            return available_resources
+            
+        except Exception as e:
+            _LOGGER.error(f"Failed to list available resources for {project_id}: {e}")
+            return {}
