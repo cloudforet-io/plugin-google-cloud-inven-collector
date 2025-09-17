@@ -18,20 +18,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
 )
 from spaceone.inventory.model.filestore.instance.data import FilestoreInstanceData
 
-"""
-Filestore Instance Cloud Service 모델 정의
-
-Google Cloud Filestore 인스턴스 리소스를 SpaceONE에서 표현하기 위한 모델을 정의합니다.
-- FilestoreInstanceResource: Filestore 인스턴스 리소스 데이터 구조
-- FilestoreInstanceResponse: Filestore 인스턴스 응답 형식
-"""
-
-"""
-Filestore Instance UI 메타데이터 레이아웃 정의
-
-SpaceONE 콘솔에서 Filestore 인스턴스 정보를 표시하기 위한 UI 레이아웃을 정의합니다.
-"""
-
 # TAB - Instance Details
 filestore_instance_details = ItemDynamicLayout.set_fields(
     "Instance Details",
@@ -95,7 +81,7 @@ filestore_networks = TableDynamicLayout.set_fields(
     ],
 )
 
-# TAB - File Shares (통합: 기본 정보 + 상세 정보)
+# TAB - File Shares
 filestore_file_shares = TableDynamicLayout.set_fields(
     "File Shares",
     root_path="data.unified_file_shares",
@@ -145,7 +131,7 @@ filestore_labels = TableDynamicLayout.set_fields(
     ],
 )
 
-# Unified metadata layout (통합된 File Shares 탭 사용)
+# Unified metadata layout
 filestore_instance_meta = CloudServiceMeta.set_layouts(
     [
         filestore_instance_details,
@@ -156,13 +142,6 @@ filestore_instance_meta = CloudServiceMeta.set_layouts(
         filestore_labels,
     ]
 )
-
-"""
-Filestore Instance 리소스 모델
-
-Google Cloud Filestore 인스턴스의 모든 정보를 포함하는 리소스 모델입니다.
-CloudServiceResource의 기본 구조를 상속받아 사용합니다.
-"""
 
 
 class FilestoreResource(CloudServiceResource):
@@ -178,10 +157,4 @@ class FilestoreInstanceResource(FilestoreResource):
 
 
 class FilestoreInstanceResponse(CloudServiceResponse):
-    """
-    Filestore Instance 응답 모델
-
-    Filestore 인스턴스 수집 결과를 반환하는 응답 모델입니다.
-    """
-
     resource = PolyModelType(FilestoreInstanceResource)

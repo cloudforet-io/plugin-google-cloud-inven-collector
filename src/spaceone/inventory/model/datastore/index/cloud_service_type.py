@@ -17,17 +17,13 @@ from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
     ChartWidget,
 )
 
-"""
-Google Cloud Datastore Index 서비스 타입을 SpaceONE에서 표현하기 위한 모델을 정의합니다.
-"""
-
 current_dir = os.path.abspath(os.path.dirname(__file__))
 
 total_count_conf = os.path.join(current_dir, "widget/total_count.yml")
 count_by_state_conf = os.path.join(current_dir, "widget/count_by_state.yml")
 count_by_kind_conf = os.path.join(current_dir, "widget/count_by_kind.yml")
 
-# Cloud Service Type 리소스 정의
+# Cloud Service Type resource definition
 cst_index = CloudServiceTypeResource()
 cst_index.name = "Index"
 cst_index.provider = "google_cloud"
@@ -40,7 +36,6 @@ cst_index.tags = {
     "spaceone:display_name": "Datastore Index",
 }
 
-# 메타데이터 설정
 cst_index._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source("Kind", "data.kind"),
@@ -69,7 +64,6 @@ cst_index._metadata = CloudServiceTypeMeta.set_meta(
     ],
 )
 
-# Cloud Service Type 목록
 CLOUD_SERVICE_TYPES = [
     CloudServiceTypeResponse({"resource": cst_index}),
 ]

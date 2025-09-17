@@ -10,7 +10,7 @@ Google Cloud Filestore 백업의 상세 데이터를 표현하기 위한 schemat
 
 
 class FilestoreBackupData(BaseResource):
-    """Filestore 백업 데이터 모델"""
+    """Filestore Backup data model"""
 
     full_name = StringType()
     backup_id = StringType()

@@ -30,7 +30,7 @@ class Database(BaseResource):
     etag = StringType()
 
     def reference(self):
-        # database_id가 "(default)"인 경우 "-default-"로 변환
+        # database_id is "(default)" then convert to "-default-"
         url_database_id = "-default-" if self.name == "(default)" else self.name
 
         return {

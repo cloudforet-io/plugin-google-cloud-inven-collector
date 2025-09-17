@@ -16,7 +16,7 @@ class Labels(Model):
 
 
 class TransferCounters(Model):
-    """전송 카운터 정보"""
+    """Transfer counter information"""
 
     objects_found_from_source = IntType(
         deserialize_from="objectsFoundFromSource", serialize_when_none=False
@@ -44,7 +44,7 @@ class OperationError(Model):
 
 
 class OperationMetadata(Model):
-    """Operation의 metadata 정보"""
+    """Operation metadata information"""
 
     type = StringType(deserialize_from="@type", serialize_when_none=False)
     name = StringType()
@@ -67,7 +67,7 @@ class OperationMetadata(Model):
 
 
 class TransferOperation(BaseResource):
-    """Storage Transfer Operation 모델"""
+    """Storage Transfer Operation model"""
 
     metadata = ModelType(OperationMetadata, serialize_when_none=False)
     done = BooleanType(serialize_when_none=False)

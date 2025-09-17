@@ -17,33 +17,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class DatastoreIndexManager(GoogleCloudManager):
-    """
-    Google Cloud Datastore Index Manager
-
-    Datastore Index 리소스를 수집하고 처리하는 매니저 클래스
-    - Index 목록 수집 (프로젝트 레벨)
-    - Index 상세 정보 처리
-    - 리소스 응답 생성
-
-    주의: Datastore Admin API 한계로 인해 다중 데이터베이스 지원이 제한됨
-    """
-
     connector_name = "DatastoreIndexV1Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params):
-        """
-        Datastore Index 리소스를 수집합니다.
-
-        Args:
-            params (dict): 수집 파라미터
-                - secret_data: 인증 정보
-                - options: 옵션 설정
-
-        Returns:
-            Tuple[List[DatastoreIndexResponse], List[ErrorResourceResponse]]:
-                성공한 리소스 응답 리스트와 에러 응답 리스트
-        """
         _LOGGER.debug("** Datastore Index START **")
         start_time = time.time()
 
@@ -62,11 +39,11 @@ class DatastoreIndexManager(GoogleCloudManager):
                 self.connector_name, **params
             )
 
-            # 모든 index 조회 (프로젝트 레벨)
+            # Get all indexes (project level)
             indexes = index_conn.list_indexes()
             _LOGGER.info(f"Found {len(indexes)} total indexes")
 
-            # 각 index에 대해 리소스 생성
+            # Create resources for each index
             for index in indexes:
                 try:
                     ##################################
@@ -77,7 +54,6 @@ class DatastoreIndexManager(GoogleCloudManager):
                     ##################################
                     # 2. Make Base Data
                     ##################################
-                    # Properties 분석
                     properties = index.get("properties", [])
                     property_count = len(properties)
                     sorted_properties = []
@@ -91,7 +67,6 @@ class DatastoreIndexManager(GoogleCloudManager):
                         else:
                             unsorted_properties.append(prop_name)
 
-                    # 추가 처리된 정보 업데이트
                     index.update(
                         {
                             "property_count": property_count,
@@ -142,7 +117,6 @@ class DatastoreIndexManager(GoogleCloudManager):
             )
             error_responses.append(error_response)
 
-        # 수집 완료 로깅
         _LOGGER.debug(
             f"** Datastore Namespace Finished {time.time() - start_time} Seconds **"
         )

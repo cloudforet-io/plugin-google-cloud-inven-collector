@@ -16,18 +16,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
 )
 from spaceone.inventory.model.filestore.snapshot.data import FilestoreSnapshotData
 
-"""
-Filestore Snapshot Cloud Service 모델 정의
-
-SpaceONE의 Cloud Service 형태로 Filestore 스냅샷 리소스를 표현하기 위한 모델입니다.
-"""
-
-"""
-Filestore Snapshot UI 메타데이터 레이아웃 정의
-
-SpaceONE 콘솔에서 Filestore 스냅샷 정보를 표시하기 위한 UI 레이아웃을 정의합니다.
-"""
-
 # TAB - Snapshot Details
 filestore_snapshot_details = ItemDynamicLayout.set_fields(
     "Snapshot Details",
@@ -65,8 +53,6 @@ filestore_snapshot_meta = CloudServiceMeta.set_layouts(
 
 
 class FilestoreSnapshotResource(CloudServiceResource):
-    """Filestore 스냅샷 리소스 모델"""
-
     cloud_service_type = StringType(default="Snapshot")
     cloud_service_group = StringType(default="Filestore")
     data = ModelType(FilestoreSnapshotData)
@@ -76,6 +62,4 @@ class FilestoreSnapshotResource(CloudServiceResource):
 
 
 class FilestoreSnapshotResponse(CloudServiceResponse):
-    """Filestore 스냅샷 응답 모델"""
-
     resource = ModelType(FilestoreSnapshotResource)

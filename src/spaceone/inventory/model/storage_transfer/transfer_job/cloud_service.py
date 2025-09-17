@@ -47,7 +47,7 @@ transfer_job_configuration_meta = ItemDynamicLayout.set_fields(
     ],
 )
 
-# TAB - Active Transfer Configuration (Union Field 기반)
+# TAB - Active Transfer Configuration (Union Field based)
 active_transfer_config_meta = ItemDynamicLayout.set_fields(
     "Active Transfer Configuration",
     fields=[
@@ -70,11 +70,11 @@ active_transfer_config_meta = ItemDynamicLayout.set_fields(
     ],
 )
 
-# TAB - Complete Transfer Specification (모든 필드 표시)
+# TAB - Complete Transfer Specification (All fields displayed)
 transfer_spec_meta = ItemDynamicLayout.set_fields(
     "Complete Transfer Specification",
     fields=[
-        # Union Field 그룹 1: Data Source (하나만 활성화)
+        # Union Field group 1: Data Source (Only one can be activated)
         TextDyField.data_source(
             "GCS Data Source",
             "data.transfer_spec.gcs_data_source",
@@ -100,7 +100,7 @@ transfer_spec_meta = ItemDynamicLayout.set_fields(
             "data.transfer_spec.posix_data_source",
             options={"is_optional": True},
         ),
-        # Union Field 그룹 2: Data Sink (하나만 활성화)
+        # Union Field group 2: Data Sink (Only one can be activated)
         TextDyField.data_source(
             "GCS Data Sink",
             "data.transfer_spec.gcs_data_sink",
@@ -111,7 +111,7 @@ transfer_spec_meta = ItemDynamicLayout.set_fields(
             "data.transfer_spec.posix_data_sink",
             options={"is_optional": True},
         ),
-        # 기타 비-Union 필드들
+        # Other non-Union fields
         TextDyField.data_source(
             "Object Conditions", "data.transfer_spec.object_conditions"
         ),

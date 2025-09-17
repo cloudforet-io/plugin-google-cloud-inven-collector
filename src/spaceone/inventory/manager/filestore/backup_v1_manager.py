@@ -20,14 +20,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FilestoreBackupManager(GoogleCloudManager):
-    """
-    Google Cloud Filestore Backup Manager (v1 API)
-
-    Filestore 백업 리소스를 수집하고 처리하는 매니저 클래스 (v1 API 전용)
-    - 모든 리전의 백업 목록 수집 (v1 API)
-    - 백업 상세 정보 처리 (v1 API)
-    """
-
     connector_name = "FilestoreBackupConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
     backup_conn = None
@@ -35,17 +27,6 @@ class FilestoreBackupManager(GoogleCloudManager):
     def collect_cloud_service(
         self, params
     ) -> Tuple[List[FilestoreBackupResponse], List]:
-        """
-        Filestore 백업 리소스를 수집합니다 (v1 API).
-
-        Args:
-            params: 수집 파라미터
-                - secret_data: 인증 정보
-                - options: 옵션 설정
-
-        Returns:
-            성공한 리소스 응답 리스트와 에러 응답 리스트
-        """
         _LOGGER.debug("** Filestore Backup START **")
         start_time = time.time()
 
@@ -83,12 +64,10 @@ class FilestoreBackupManager(GoogleCloudManager):
                     ##################################
                     # 2. Make Base Data
                     ##################################
-                    # 기본 정보 추출
                     labels = self.convert_labels_format(
                         filestore_backup.get("labels", {})
                     )
 
-                    # 소스 인스턴스 정보 처리
                     source_instance = filestore_backup.get("sourceInstance", "")
                     source_instance_id = (
                         source_instance.split("/")[-1]
@@ -96,7 +75,6 @@ class FilestoreBackupManager(GoogleCloudManager):
                         else source_instance
                     )
 
-                    # 원본 데이터 기반으로 업데이트
                     filestore_backup.update(
                         {
                             "project": project_id,

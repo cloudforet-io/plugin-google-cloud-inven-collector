@@ -22,18 +22,7 @@ class Labels(Model):
 
 
 class TransferSpec(Model):
-    """전송 사양 정보 (Union Field 제약 적용)
-
-    Union Fields:
-    - data_source: 정확히 하나의 소스만 지정 가능
-      (gcs_data_source, aws_s3_data_source, http_data_source,
-       azure_blob_storage_data_source, posix_data_source)
-
-    - data_sink: 정확히 하나의 싱크만 지정 가능
-      (gcs_data_sink, posix_data_sink)
-    """
-
-    # Union field data_source - 정확히 하나만 설정 가능
+    # Union field data_source - Only one can be set
     gcs_data_source = DictType(
         StringType, deserialize_from="gcsDataSource", serialize_when_none=False
     )
@@ -52,7 +41,7 @@ class TransferSpec(Model):
         StringType, deserialize_from="posixDataSource", serialize_when_none=False
     )
 
-    # Union field data_sink - 정확히 하나만 설정 가능
+    # Union field data_sink - Only one can be set
     gcs_data_sink = DictType(
         StringType, deserialize_from="gcsDataSink", serialize_when_none=False
     )
@@ -60,7 +49,7 @@ class TransferSpec(Model):
         StringType, deserialize_from="posixDataSink", serialize_when_none=False
     )
 
-    # 기타 비-Union 필드들
+    # Other non-Union fields
     object_conditions = DictType(
         StringType, deserialize_from="objectConditions", serialize_when_none=False
     )
@@ -77,23 +66,23 @@ class TransferSpec(Model):
         deserialize_from="sinkAgentPoolName", serialize_when_none=False
     )
 
-    # 소스 우선순위 정의 (높은 숫자가 높은 우선순위)
+    # Source priority definition (higher number has higher priority)
     SOURCE_PRIORITY = {
-        "gcs_data_source": 5,  # 가장 안정적이고 일반적
-        "aws_s3_data_source": 4,  # 클라우드 간 마이그레이션 주요 케이스
-        "posix_data_source": 3,  # 온프레미스 연동
-        "azure_blob_storage_data_source": 2,  # 멀티클라우드 시나리오
-        "http_data_source": 1,  # 특수 케이스
+        "gcs_data_source": 5,  # Most stable and common
+        "aws_s3_data_source": 4,  # Cloud-to-cloud migration main case
+        "posix_data_source": 3,  # On-premise connection
+        "azure_blob_storage_data_source": 2,  # Multi-cloud scenario
+        "http_data_source": 1,  # Special case
     }
 
-    # 싱크 우선순위 정의
+    # Sink priority definition (higher number has higher priority)
     SINK_PRIORITY = {
-        "gcs_data_sink": 2,  # 주요 대상
-        "posix_data_sink": 1,  # 특수 케이스
+        "gcs_data_sink": 2,  # Main target
+        "posix_data_sink": 1,  # Special case
     }
 
     def get_active_source(self) -> Tuple[Optional[str], Optional[Dict[str, Any]]]:
-        """활성화된 소스를 우선순위에 따라 반환"""
+        """Return active source based on priority"""
         sources = {
             "gcs_data_source": self.gcs_data_source,
             "aws_s3_data_source": self.aws_s3_data_source,
@@ -108,7 +97,7 @@ class TransferSpec(Model):
             return None, None
 
         if len(active_sources) > 1:
-            # 경고 로그 출력
+            # Warning log output
             source_names = list(active_sources.keys())
             _LOGGER.warning(
                 f"Multiple data sources detected: {source_names}. "
@@ -116,7 +105,7 @@ class TransferSpec(Model):
                 f"Selecting highest priority source based on common usage patterns."
             )
 
-        # 우선순위가 가장 높은 소스 선택
+        # Select source with highest priority
         selected_source = max(
             active_sources.keys(), key=lambda x: self.SOURCE_PRIORITY.get(x, 0)
         )
@@ -129,7 +118,7 @@ class TransferSpec(Model):
         return selected_source, active_sources[selected_source]
 
     def get_active_sink(self) -> Tuple[Optional[str], Optional[Dict[str, Any]]]:
-        """활성화된 싱크를 우선순위에 따라 반환"""
+        """Return active sink based on priority"""
         sinks = {
             "gcs_data_sink": self.gcs_data_sink,
             "posix_data_sink": self.posix_data_sink,
@@ -155,7 +144,7 @@ class TransferSpec(Model):
         return selected_sink, active_sinks[selected_sink]
 
     def get_source_type(self) -> Optional[str]:
-        """현재 활성화된 소스 타입 반환"""
+        """Return active source type"""
         source_name, _ = self.get_active_source()
 
         if source_name is None:
@@ -173,7 +162,7 @@ class TransferSpec(Model):
         return source_type_map.get(source_name)
 
     def get_sink_type(self) -> Optional[str]:
-        """현재 활성화된 싱크 타입 반환"""
+        """Return active sink type"""
         sink_name, _ = self.get_active_sink()
 
         if sink_name is None:
@@ -188,16 +177,14 @@ class TransferSpec(Model):
         return sink_type_map.get(sink_name)
 
     def validate_union_fields_with_warnings(self) -> Dict[str, Any]:
-        """Union Field 제약을 검증하되, 위반 시 경고만 로그"""
+        """Validate Union Field constraint, but log only warnings"""
 
-        # 소스 검증
         source_name, source_data = self.get_active_source()
         if source_name is None:
             _LOGGER.error(
                 "No data source specified - this may cause transfer job failure"
             )
 
-        # 싱크 검증
         sink_name, sink_data = self.get_active_sink()
         if sink_name is None:
             _LOGGER.error(
@@ -279,7 +266,7 @@ class TransferSpec(Model):
 
 
 class Schedule(Model):
-    """전송 스케줄 정보"""
+    """Transfer schedule information"""
 
     schedule_start_date = DictType(
         StringType, deserialize_from="scheduleStartDate", serialize_when_none=False
@@ -296,7 +283,7 @@ class Schedule(Model):
 
 
 class NotificationConfig(Model):
-    """알림 설정 정보"""
+    """Notification configuration information"""
 
     pubsub_topic = StringType(deserialize_from="pubsubTopic")
     event_types = ListType(StringType, deserialize_from="eventTypes", default=[])
@@ -306,7 +293,7 @@ class NotificationConfig(Model):
 
 
 class LoggingConfig(Model):
-    """로깅 설정 정보"""
+    """Logging configuration information"""
 
     log_actions = ListType(StringType, deserialize_from="logActions", default=[])
     log_action_states = ListType(
@@ -318,7 +305,7 @@ class LoggingConfig(Model):
 
 
 class TransferJob(BaseResource):
-    """Storage Transfer Job 메인 모델 (Union Field 제약 적용)"""
+    """Storage Transfer Job main model (Union Field constraint applied)"""
 
     full_name = StringType()
     description = StringType(serialize_when_none=False)

@@ -18,12 +18,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
     ChartWidget,
 )
 
-"""
-Filestore Snapshot Cloud Service Type 정의
-
-SpaceONE에서 Filestore 스냅샷 리소스를 표시하기 위한 메타데이터 및 레이아웃을 정의합니다.
-"""
-
 current_dir = os.path.abspath(os.path.dirname(__file__))
 
 total_count_conf = os.path.join(current_dir, "widget/total_count.yml")

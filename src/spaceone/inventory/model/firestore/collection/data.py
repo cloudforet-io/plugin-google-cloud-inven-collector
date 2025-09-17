@@ -7,7 +7,7 @@ __all__ = ["FirestoreCollection", "DocumentInfo"]
 
 
 class DocumentInfo(Model):
-    """컬렉션 내 문서 정보"""
+    """Document information in collection"""
 
     document_id = StringType()
     document_name = StringType()

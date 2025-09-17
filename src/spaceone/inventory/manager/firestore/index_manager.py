@@ -20,32 +20,11 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FirestoreIndexManager(GoogleCloudManager):
-    """
-    Google Cloud Firestore Index Manager
-
-    Firestore Index 리소스를 수집하고 처리하는 매니저 클래스
-    - Index 목록 수집 (__로 시작하는 필드 제외)
-    - Index 상세 정보 처리
-    - 리소스 응답 생성
-    """
-
     connector_name = "FirestoreDatabaseConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
     firestore_conn = None
 
     def collect_cloud_service(self, params) -> Tuple[List[IndexResponse], List]:
-        """
-        Firestore Index 리소스를 수집합니다.
-
-        Args:
-            params (dict): 수집 파라미터
-                - secret_data: 인증 정보
-                - options: 옵션 설정
-
-        Returns:
-            Tuple[List[IndexResponse], List[ErrorResourceResponse]]:
-                성공한 리소스 응답 리스트와 에러 응답 리스트
-        """
         _LOGGER.debug("** Firestore Index START **")
         start_time = time.time()
 
@@ -64,11 +43,11 @@ class FirestoreIndexManager(GoogleCloudManager):
                 self.locator.get_connector(self.connector_name, **params)
             )
 
-            # 데이터베이스 목록 조회
+            # Get database list
             databases = self.firestore_conn.list_databases()
             _LOGGER.info(f"Found {len(databases)} Firestore databases")
 
-            # 순차 처리: 데이터베이스별 인덱스 수집
+            # Sequential processing: collect indexes for each database
             for database in databases:
                 try:
                     ##################################
@@ -119,7 +98,6 @@ class FirestoreIndexManager(GoogleCloudManager):
             )
             error_responses.append(error_response)
 
-        # 수집 완료 로깅
         _LOGGER.debug(
             f"** Firestore Index Finished {time.time() - start_time} Seconds **"
         )
@@ -133,7 +111,7 @@ class FirestoreIndexManager(GoogleCloudManager):
         project_id: str,
         region_code: str,
     ) -> List[IndexResponse]:
-        """데이터베이스의 모든 인덱스 리소스를 생성합니다."""
+        """Create all index resources for the database"""
         index_responses = []
 
         try:
@@ -146,24 +124,24 @@ class FirestoreIndexManager(GoogleCloudManager):
                         index_name.split("/")[-1] if "/" in index_name else index_name
                     )
 
-                    # __로 시작하는 필드 제외
+                    # Exclude fields that start with __
                     original_fields = index.get("fields", [])
                     filtered_fields = FirestoreIndex.filter_internal_fields(
                         original_fields
                     )
 
-                    # 필터링 후 필드가 없으면 인덱스 제외
+                    # If no fields after filtering, exclude the index
                     if not filtered_fields:
                         continue
 
-                    # 컬렉션 그룹 추출
+                    # Extract collection group
                     collection_group = ""
                     if "/collectionGroups/" in index_name:
                         collection_group = index_name.split("/collectionGroups/")[
                             1
                         ].split("/")[0]
 
-                    # 필드를 문자열 요약으로 변환
+                    # Convert fields to string summary
                     field_strings = []
                     for field in filtered_fields:
                         field_path = field.get("fieldPath", "")
