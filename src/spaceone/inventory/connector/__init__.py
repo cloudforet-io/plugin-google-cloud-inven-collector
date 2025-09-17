@@ -132,6 +132,8 @@ __all__ = [
     "DatastoreNamespaceV1Connector",
     "FilestoreInstanceConnector",
     "FilestoreInstanceV1Beta1Connector",
+    "FilestoreSnapshotConnector",
+    "FilestoreBackupConnector",
     "FirebaseConnector",
     "KMSConnector",
     "GKEClusterV1Connector",
