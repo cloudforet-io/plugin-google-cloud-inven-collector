@@ -20,25 +20,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class StorageTransferManager(GoogleCloudManager):
-    """Storage Transfer Job 리소스 관리자"""
-
     connector_name = "StorageTransferConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params) -> Tuple[List[TransferJobResponse], List]:
-        """Storage Transfer Job 리소스를 수집합니다.
-
-        Args:
-            params: 수집 파라미터
-                - options: 수집 옵션
-                - schema: 스키마 정보
-                - secret_data: 인증 정보
-                - filter: 필터 조건
-                - zones: 대상 영역
-
-        Returns:
-            수집된 CloudService 응답과 에러 응답의 튜플
-        """
         _LOGGER.info("** Storage Transfer Job START **")
         start_time = time.time()
 
@@ -76,7 +61,6 @@ class StorageTransferManager(GoogleCloudManager):
                     ##################################
                     # 2. Make Base Data
                     ##################################
-                    # 기본 정보 업데이트
                     transfer_job.update(
                         {
                             "name": transfer_job_id,
@@ -107,13 +91,11 @@ class StorageTransferManager(GoogleCloudManager):
                         }
                     )
 
-                    # TransferJob 객체 생성 (Union Field 제약 적용)
                     transfer_job_data = TransferJob(transfer_job, strict=False)
 
-                    # Union Field 검증 및 소스/싱크 타입 결정
                     transfer_spec = transfer_job.get("transferSpec", {})
                     if transfer_job_data.transfer_spec:
-                        # Union Field 기반 타입 결정 (우선순위 적용)
+                        # Union Field based type determination (priority applied)
                         source_type = (
                             transfer_job_data.transfer_spec.get_source_type()
                             or "Unknown"
@@ -122,21 +104,20 @@ class StorageTransferManager(GoogleCloudManager):
                             transfer_job_data.transfer_spec.get_sink_type() or "Unknown"
                         )
                     else:
-                        # 기존 방식으로 폴백
+                        # Fallback to original method
                         source_type = self._determine_source_type(transfer_spec)
                         sink_type = self._determine_sink_type(transfer_spec)
 
-                    # 스케줄 표시 문자열 생성
+                    # Create schedule display string
                     schedule_display = self._make_schedule_display(
                         transfer_job.get("schedule", {})
                     )
 
-                    # Transfer options 표시 문자열 생성
+                    # Transfer options display string creation
                     transfer_options_display = self._make_transfer_options_display(
                         transfer_spec.get("transferOptions", {})
                     )
 
-                    # 추가 표시 정보 업데이트
                     transfer_job_data.source_type = source_type
                     transfer_job_data.sink_type = sink_type
                     transfer_job_data.schedule_display = schedule_display
@@ -151,7 +132,7 @@ class StorageTransferManager(GoogleCloudManager):
                         {
                             "name": transfer_job_id,
                             "account": project_id,
-                            "region_code": "global",  # Storage Transfer는 글로벌 서비스
+                            "region_code": "global",
                             "instance_type": source_type,
                             "data": transfer_job_data,
                             "reference": ReferenceModel(transfer_job_data.reference()),
@@ -189,7 +170,6 @@ class StorageTransferManager(GoogleCloudManager):
             )
             error_responses.append(error_response)
 
-        # 수집 완료 로깅
         _LOGGER.debug(
             f"** Storage Transfer Job Finished {time.time() - start_time} Seconds **"
         )
@@ -198,17 +178,7 @@ class StorageTransferManager(GoogleCloudManager):
 
     @staticmethod
     def _determine_source_type(transfer_spec: Dict) -> str:
-        """전송 사양에서 소스 타입을 결정합니다.
-
-        Args:
-            transfer_spec: 전송 사양 딕셔너리
-
-        Returns:
-            소스 타입 문자열
-
-        Note:
-            이 메서드는 Union Field 기반 소스 타입 결정이 실패할 경우의 폴백용도로 사용됩니다.
-        """
+        """Determine source type from transfer specification"""
         if "gcsDataSource" in transfer_spec:
             return "GCS"
         elif "awsS3DataSource" in transfer_spec:
@@ -228,17 +198,7 @@ class StorageTransferManager(GoogleCloudManager):
 
     @staticmethod
     def _determine_sink_type(transfer_spec: Dict) -> str:
-        """전송 사양에서 싱크 타입을 결정합니다.
-
-        Args:
-            transfer_spec: 전송 사양 딕셔너리
-
-        Returns:
-            싱크 타입 문자열
-
-        Note:
-            이 메서드는 Union Field 기반 싱크 타입 결정이 실패할 경우의 폴백용도로 사용됩니다.
-        """
+        """Determine sink type from transfer specification"""
         if "gcsDataSink" in transfer_spec:
             return "GCS"
         elif "posixDataSink" in transfer_spec:
@@ -248,20 +208,13 @@ class StorageTransferManager(GoogleCloudManager):
 
     @staticmethod
     def _make_schedule_display(schedule: Dict) -> str:
-        """스케줄 정보를 표시용 문자열로 변환합니다.
-
-        Args:
-            schedule: 스케줄 정보 딕셔너리
-
-        Returns:
-            표시용 스케줄 문자열
-        """
+        """Convert schedule information to display string"""
         if not schedule:
             return "One-time"
 
         repeat_interval = schedule.get("repeatInterval")
         if repeat_interval:
-            # 예: "86400s" -> "Daily"
+            # Example: "86400s" -> "Daily"
             if repeat_interval == "86400s":
                 return "Daily"
             elif repeat_interval == "604800s":
@@ -284,14 +237,7 @@ class StorageTransferManager(GoogleCloudManager):
 
     @staticmethod
     def _format_date_dict(date_dict: Dict) -> str:
-        """날짜 딕셔너리를 YYYY-MM-DD 형태의 문자열로 변환합니다.
-
-        Args:
-            date_dict: {"year": int, "month": int, "day": int} 형태의 딕셔너리
-
-        Returns:
-            YYYY-MM-DD 형태의 날짜 문자열
-        """
+        """Convert date dictionary to YYYY-MM-DD format string"""
         if not date_dict or not isinstance(date_dict, dict):
             return "Unknown"
 
@@ -306,14 +252,7 @@ class StorageTransferManager(GoogleCloudManager):
 
     @staticmethod
     def _make_transfer_options_display(transfer_options: Dict) -> str:
-        """전송 옵션을 표시용 문자열로 변환합니다.
-
-        Args:
-            transfer_options: 전송 옵션 딕셔너리
-
-        Returns:
-            표시용 전송 옵션 문자열
-        """
+        """Convert transfer options to display string"""
         if not transfer_options:
             return "Default"
 

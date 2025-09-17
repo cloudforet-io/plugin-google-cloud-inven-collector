@@ -19,31 +19,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class DatastoreDatabaseManager(GoogleCloudManager):
-    """
-    Google Cloud Datastore Database Manager
-
-    Datastore Database 리소스를 수집하고 처리하는 매니저 클래스
-    - Database 목록 수집 (DATASTORE_MODE만)
-    - Database 상세 정보 처리
-    - 리소스 응답 생성
-    """
-
     connector_name = "DatastoreDatabaseV1Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params):
-        """
-        Datastore Database 리소스를 수집합니다.
-
-        Args:
-            params (dict): 수집 파라미터
-                - secret_data: 인증 정보
-                - options: 옵션 설정
-
-        Returns:
-            Tuple[List[DatastoreDatabaseResponse], List[ErrorResourceResponse]]:
-                성공한 리소스 응답 리스트와 에러 응답 리스트
-        """
         _LOGGER.debug("** Datastore Database START **")
         start_time = time.time()
 
@@ -145,7 +124,6 @@ class DatastoreDatabaseManager(GoogleCloudManager):
             )
             error_responses.append(error_response)
 
-        # 수집 완료 로깅
         _LOGGER.debug(
             f"** Datastore Database Finished {time.time() - start_time} Seconds **"
         )

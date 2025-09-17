@@ -11,23 +11,21 @@ Google Cloud Datastore Index의 상세 데이터를 표현하기 위한 schemati
 
 
 class IndexProperty(Model):
-    """Index Property 정보 모델"""
+    """Index Property information model"""
 
     name = StringType()
     direction = StringType()
 
 
 class DatastoreIndexData(BaseResource):
-    """Datastore Index 데이터 모델"""
+    """Datastore Index data model"""
 
-    # API 응답 필드들
     index_id = StringType(deserialize_from="indexId")
     kind = StringType()
     ancestor = StringType()
     state = StringType()
     properties = ListType(ModelType(IndexProperty))
 
-    # 처리된 필드들 (매니저에서 추가)
     property_count = IntType()
     sorted_properties = ListType(StringType())
     unsorted_properties = ListType(StringType())

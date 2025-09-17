@@ -3,15 +3,9 @@ from schematics.types import DictType, ListType, ModelType, StringType
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
-"""
-Filestore Instance Data 모델 정의
-
-Google Cloud Filestore 인스턴스의 상세 데이터를 표현하기 위한 schematics 모델입니다.
-"""
-
 
 class Network(Model):
-    """네트워크 정보 모델"""
+    """Network information model"""
 
     network = StringType()
     modes = ListType(StringType())
@@ -20,7 +14,7 @@ class Network(Model):
 
 
 class PerformanceLimits(Model):
-    """성능 제한 정보 모델"""
+    """Performance limit information model"""
 
     max_read_iops = StringType(serialize_when_none=False)
     max_write_iops = StringType(serialize_when_none=False)
@@ -30,7 +24,7 @@ class PerformanceLimits(Model):
 
 
 class UnifiedFileShare(Model):
-    """통합 파일 공유 정보 모델 (기본 + 상세 정보)"""
+    """Unified file share information model"""
 
     name = StringType()
     mount_name = StringType(serialize_when_none=False)
@@ -43,7 +37,7 @@ class UnifiedFileShare(Model):
 
 
 class Stats(Model):
-    """통계 정보 모델"""
+    """Statistics information model"""
 
     total_capacity_gb = StringType()
     file_share_count = StringType()
@@ -51,34 +45,27 @@ class Stats(Model):
 
 
 class FilestoreInstanceData(BaseResource):
-    """Filestore 인스턴스 데이터 모델"""
+    """Filestore Instance data model"""
 
-    # 기본 정보
-    full_name = StringType()  # reference 메서드용 전체 경로
+    full_name = StringType()
     instance_id = StringType()
     state = StringType()
     description = StringType()
     location = StringType()
     tier = StringType()
 
-    # 네트워크 정보
     networks = ListType(ModelType(Network))
 
-    # 파일 공유 정보 (통합)
     unified_file_shares = ListType(
         ModelType(UnifiedFileShare), serialize_when_none=False
     )
 
-    # 라벨 정보
     labels = ListType(DictType(StringType), default=[])
 
-    # 시간 정보
     create_time = StringType(deserialize_from="createTime")
 
-    # 통계 정보s
     stats = ModelType(Stats)
 
-    # 인스턴스 레벨 성능 및 용량 정보
     protocol = StringType(serialize_when_none=False)
     custom_performance_supported = StringType(serialize_when_none=False)
     performance_limits = ModelType(PerformanceLimits, serialize_when_none=False)

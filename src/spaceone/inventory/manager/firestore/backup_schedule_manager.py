@@ -20,15 +20,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FirestoreBackupScheduleManager(GoogleCloudManager):
-    """
-    Google Cloud Firestore BackupSchedule Manager
-
-    Firestore BackupSchedule 리소스를 수집하고 처리하는 매니저 클래스
-    - BackupSchedule 목록 수집 (데이터베이스별)
-    - BackupSchedule 상세 정보 처리
-    - 리소스 응답 생성
-    """
-
     connector_name = "FirestoreDatabaseConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
     firestore_conn = None
@@ -36,18 +27,6 @@ class FirestoreBackupScheduleManager(GoogleCloudManager):
     def collect_cloud_service(
         self, params
     ) -> Tuple[List[BackupScheduleResponse], List]:
-        """
-        Firestore BackupSchedule 리소스를 수집합니다.
-
-        Args:
-            params (dict): 수집 파라미터
-                - secret_data: 인증 정보
-                - options: 옵션 설정
-
-        Returns:
-            Tuple[List[BackupScheduleResponse], List[ErrorResourceResponse]]:
-                성공한 리소스 응답 리스트와 에러 응답 리스트
-        """
         _LOGGER.debug("** Firestore BackupSchedule START **")
         start_time = time.time()
 
@@ -66,11 +45,11 @@ class FirestoreBackupScheduleManager(GoogleCloudManager):
                 self.locator.get_connector(self.connector_name, **params)
             )
 
-            # 데이터베이스 목록 조회
+            # Get database list
             databases = self.firestore_conn.list_databases()
             _LOGGER.info(f"Found {len(databases)} Firestore databases")
 
-            # 순차 처리: 데이터베이스별 백업 스케줄 수집
+            # Sequential processing: collect backup schedules for each database
             for database in databases:
                 try:
                     ##################################
@@ -123,7 +102,6 @@ class FirestoreBackupScheduleManager(GoogleCloudManager):
             )
             error_responses.append(error_response)
 
-        # 수집 완료 로깅
         _LOGGER.debug(
             f"** Firestore BackupSchedule Finished {time.time() - start_time} Seconds **"
         )
@@ -137,7 +115,7 @@ class FirestoreBackupScheduleManager(GoogleCloudManager):
         project_id: str,
         region_code: str,
     ) -> List[BackupScheduleResponse]:
-        """데이터베이스의 모든 백업 스케줄 리소스를 생성합니다."""
+        """Create all backup schedule resources for the database"""
         backup_schedule_responses = []
 
         try:
@@ -200,18 +178,7 @@ class FirestoreBackupScheduleManager(GoogleCloudManager):
         return backup_schedule_responses
 
     def _determine_recurrence_info(self, backup_schedule: dict) -> dict:
-        """BackupSchedule의 recurrence 정보를 결정합니다.
-
-        Args:
-            backup_schedule: 백업 스케줄 딕셔너리
-
-        Returns:
-            dict: {
-                "type": "DAILY" 또는 "WEEKLY",
-                "weekly_day": Weekly인 경우 요일 정보 (예: "SUNDAY")
-            }
-        """
-        # dailyRecurrence 또는 weeklyRecurrence 필드 확인
+        # Check dailyRecurrence or weeklyRecurrence field
         if backup_schedule.get("dailyRecurrence"):
             return {"type": "DAILY"}
         elif weekly_recurrence := backup_schedule.get("weeklyRecurrence"):

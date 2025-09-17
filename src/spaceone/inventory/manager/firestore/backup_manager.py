@@ -20,31 +20,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FirestoreBackupManager(GoogleCloudManager):
-    """
-    Google Cloud Firestore Backup Manager
-
-    Firestore Backup 리소스를 수집하고 처리하는 매니저 클래스
-    - Backup 목록 수집 (모든 위치에서)
-    - Backup 상세 정보 처리
-    - 리소스 응답 생성
-    """
-
     connector_name = "FirestoreDatabaseConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params) -> Tuple[List[BackupResponse], List]:
-        """
-        Firestore Backup 리소스를 수집합니다.
-
-        Args:
-            params (dict): 수집 파라미터
-                - secret_data: 인증 정보
-                - options: 옵션 설정
-
-        Returns:
-            Tuple[List[BackupResponse], List[ErrorResourceResponse]]:
-                성공한 리소스 응답 리스트와 에러 응답 리스트
-        """
         _LOGGER.debug("** Firestore Backup START **")
         start_time = time.time()
 
@@ -85,7 +64,6 @@ class FirestoreBackupManager(GoogleCloudManager):
                         else backup_name
                     )
 
-                    # 백업 이름에서 위치 ID 추출
                     location_id = self._extract_location_from_backup_name(backup_name)
 
                     backup.update(
@@ -136,7 +114,6 @@ class FirestoreBackupManager(GoogleCloudManager):
             )
             error_responses.append(error_response)
 
-        # 수집 완료 로깅
         _LOGGER.debug(
             f"** Firestore Backup Finished {time.time() - start_time} Seconds **"
         )
@@ -145,14 +122,7 @@ class FirestoreBackupManager(GoogleCloudManager):
 
     @staticmethod
     def _extract_location_from_backup_name(backup_name: str) -> str:
-        """백업 이름에서 위치 ID 추출
-
-        Args:
-            backup_name: projects/{project}/locations/{location}/backups/{backup} 형식
-
-        Returns:
-            str: 위치 ID (예: us-central1)
-        """
+        """Extract location ID from backup name"""
         if "/locations/" in backup_name and "/backups/" in backup_name:
             # projects/{project}/locations/{location}/backups/{backup} 형식에서 location 추출
             parts = backup_name.split("/locations/")[1].split("/backups/")[0]

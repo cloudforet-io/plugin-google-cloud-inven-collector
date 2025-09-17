@@ -23,32 +23,11 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FirestoreCollectionManager(GoogleCloudManager):
-    """
-    Google Cloud Firestore Collection Manager
-
-    Firestore Collection 리소스를 수집하고 처리하는 매니저 클래스
-    - Collection 목록 수집 (재귀적으로 하위 컬렉션까지)
-    - Collection별 문서 정보 수집
-    - 리소스 응답 생성
-    """
-
     connector_name = "FirestoreDatabaseConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
     firestore_conn = None
 
     def collect_cloud_service(self, params) -> Tuple[List[CollectionResponse], List]:
-        """
-        Firestore Collection 리소스를 수집합니다.
-
-        Args:
-            params (dict): 수집 파라미터
-                - secret_data: 인증 정보
-                - options: 옵션 설정
-
-        Returns:
-            Tuple[List[CollectionResponse], List[ErrorResourceResponse]]:
-                성공한 리소스 응답 리스트와 에러 응답 리스트
-        """
         _LOGGER.debug("** Firestore Collection START **")
         start_time = time.time()
 
@@ -67,11 +46,11 @@ class FirestoreCollectionManager(GoogleCloudManager):
                 self.locator.get_connector(self.connector_name, **params)
             )
 
-            # 데이터베이스 목록 조회
+            # Get database list
             databases = self.firestore_conn.list_databases()
             _LOGGER.info(f"Found {len(databases)} Firestore databases")
 
-            # 순차 처리: 데이터베이스별 컬렉션 수집
+            # Sequential processing: collect collections for each database
             for database in databases:
                 try:
                     ##################################
@@ -124,7 +103,6 @@ class FirestoreCollectionManager(GoogleCloudManager):
             )
             error_responses.append(error_response)
 
-        # 수집 완료 로깅
         _LOGGER.debug(
             f"** Firestore Collection Finished {time.time() - start_time} Seconds **"
         )
@@ -138,16 +116,16 @@ class FirestoreCollectionManager(GoogleCloudManager):
         project_id: str,
         region_code: str,
     ) -> List[CollectionResponse]:
-        """데이터베이스의 모든 컬렉션 리소스를 생성합니다."""
+        """Create all collection resources for the database"""
         collection_responses = []
 
         try:
-            # 모든 컬렉션을 재귀적으로 수집
+            # Collect all collections recursively
             all_collections = self._collect_all_collections_recursively(
                 database_name, "", 0
             )
 
-            # 각 컬렉션별로 리소스 생성
+            # Create resources for each collection
             for collection_info in all_collections:
                 try:
                     collection_id = collection_info["id"]
@@ -159,7 +137,7 @@ class FirestoreCollectionManager(GoogleCloudManager):
                     )
                     display_name = f"{database_id}/{collection_path}"
 
-                    # 문서 정보 변환
+                    # Process document information
                     document_infos = self._process_documents(documents)
 
                     collection_data_dict = {
@@ -204,13 +182,13 @@ class FirestoreCollectionManager(GoogleCloudManager):
         return collection_responses
 
     def _process_documents(self, documents: List[dict]) -> List[DocumentInfo]:
-        """문서 정보를 처리합니다."""
+        """Process document information"""
         document_infos = []
         for doc in documents:
             try:
                 doc_id = self._extract_document_id(doc.get("name", ""))
 
-                # 복잡한 fields 구조를 문자열 요약으로 변환
+                # Convert complex fields structure to string summary
                 raw_fields = doc.get("fields", {})
                 fields_summary = (
                     ", ".join(
@@ -243,11 +221,11 @@ class FirestoreCollectionManager(GoogleCloudManager):
         parent_document_path: str,
         depth_level: int,
     ) -> List[dict]:
-        """모든 컬렉션을 재귀적으로 수집 (최적화: 중복 호출 제거)"""
+        """Collect all collections recursively"""
         all_collections = []
 
         try:
-            # 컬렉션 ID + 문서들을 한 번에 조회 (중복 호출 제거)
+            # Collect collection ID + documents at once
             collections_with_docs = self.firestore_conn.list_collections_with_documents(
                 database_name, parent_document_path
             )
@@ -256,7 +234,7 @@ class FirestoreCollectionManager(GoogleCloudManager):
                 collection_id = collection_info["collection_id"]
                 documents = collection_info["documents"]
 
-                # 컬렉션 경로 생성
+                # Create collection path
                 if parent_document_path:
                     collection_path = f"{parent_document_path}/{collection_id}"
                 else:
@@ -271,13 +249,13 @@ class FirestoreCollectionManager(GoogleCloudManager):
                 }
                 all_collections.append(collection_data)
 
-                # 각 문서에 대해 하위 컬렉션 확인 (재귀)
+                # Check subcollections for each document (recursive)
                 for document in documents:
                     document_path = self._extract_document_path(
                         document.get("name", "")
                     )
 
-                    # 깊이 제한 (무한 재귀 방지)
+                    # Depth limit (prevent infinite recursion)
                     if depth_level < 10:
                         sub_collections = self._collect_all_collections_recursively(
                             database_name, document_path, depth_level + 1
@@ -293,13 +271,13 @@ class FirestoreCollectionManager(GoogleCloudManager):
 
     @staticmethod
     def _extract_document_path(document_name: str) -> str:
-        """문서 이름에서 경로 추출"""
+        """Extract document path from document name"""
         if "/documents/" in document_name:
             return document_name.split("/documents/")[-1]
         return document_name
 
     @staticmethod
     def _extract_document_id(document_name: str) -> str:
-        """문서 이름에서 ID만 추출"""
+        """Extract document ID from document name"""
         document_path = FirestoreCollectionManager._extract_document_path(document_name)
         return document_path.split("/")[-1] if "/" in document_path else document_path

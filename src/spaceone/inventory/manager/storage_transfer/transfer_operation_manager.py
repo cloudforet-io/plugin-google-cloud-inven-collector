@@ -23,27 +23,12 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class StorageTransferOperationManager(GoogleCloudManager):
-    """Storage Transfer Operation 리소스 관리자"""
-
     connector_name = "StorageTransferConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(
         self, params
     ) -> Tuple[List[TransferOperationResponse], List]:
-        """Storage Transfer Operation 리소스를 수집합니다.
-
-        Args:
-            params: 수집 파라미터
-                - options: 수집 옵션
-                - schema: 스키마 정보
-                - secret_data: 인증 정보
-                - filter: 필터 조건
-                - zones: 대상 영역
-
-        Returns:
-            수집된 CloudService 응답과 에러 응답의 튜플
-        """
         _LOGGER.debug("** Storage Transfer Operation START **")
         start_time = time.time()
 
@@ -88,10 +73,9 @@ class StorageTransferOperationManager(GoogleCloudManager):
                     ##################################
                     # 2. Make Base Data
                     ##################################
-                    # Duration 계산
+                    # Calculate Duration
                     duration = self._calculate_duration(metadata)
 
-                    # 데이터 업데이트
                     operation.update(
                         {
                             "name": operation_id,
@@ -153,7 +137,6 @@ class StorageTransferOperationManager(GoogleCloudManager):
             )
             error_responses.append(error_response)
 
-        # 수집 완료 로깅
         _LOGGER.debug(
             f"** Storage Transfer Operation Finished {time.time() - start_time} Seconds **"
         )
@@ -162,16 +145,16 @@ class StorageTransferOperationManager(GoogleCloudManager):
 
     @staticmethod
     def _parse_iso_datetime(datetime_str: str) -> datetime:
-        # Z를 +00:00으로 변환
+        # Convert Z to +00:00
         normalized_str = datetime_str.replace("Z", "+00:00")
 
-        # 나노초(9자리)를 마이크로초(6자리)로 변환
+        # Convert nanoseconds (9 digits) to microseconds (6 digits)
         if "." in normalized_str and "+" in normalized_str:
-            # 소수점 부분과 타임존 부분 분리
+            # Separate decimal part and timezone part
             datetime_part, tz_part = normalized_str.rsplit("+", 1)
             if "." in datetime_part:
                 main_part, fractional_part = datetime_part.split(".", 1)
-                # 9자리 나노초를 6자리 마이크로초로 자르기
+                # Convert 9-digit nanoseconds to 6-digit microseconds
                 if len(fractional_part) > 6:
                     fractional_part = fractional_part[:6]
                 normalized_str = f"{main_part}.{fractional_part}+{tz_part}"
@@ -180,14 +163,7 @@ class StorageTransferOperationManager(GoogleCloudManager):
 
     @staticmethod
     def _calculate_duration(metadata: Dict) -> str:
-        """실행 시간을 계산합니다.
-
-        Args:
-            metadata: 메타데이터 딕셔너리
-
-        Returns:
-            실행 시간 문자열
-        """
+        """Calculate execution time"""
         start_time_str = metadata.get("startTime")
         end_time_str = metadata.get("endTime")
 
@@ -205,7 +181,7 @@ class StorageTransferOperationManager(GoogleCloudManager):
                 )
                 duration = end_time - start_time
 
-                # 시간 포맷팅
+                # Format time
                 total_seconds = int(duration.total_seconds())
                 hours, remainder = divmod(total_seconds, 3600)
                 minutes, seconds = divmod(remainder, 60)
@@ -217,7 +193,7 @@ class StorageTransferOperationManager(GoogleCloudManager):
                 else:
                     return f"{seconds}s"
             else:
-                # 진행 중인 작업
+                # In progress job
                 now = datetime.now(start_time.tzinfo)
                 duration = now - start_time
                 total_seconds = int(duration.total_seconds())

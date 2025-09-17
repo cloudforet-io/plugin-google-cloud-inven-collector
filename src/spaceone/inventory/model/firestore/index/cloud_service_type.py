@@ -18,7 +18,7 @@ from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
 )
 
 """
-Google Cloud Firestore Index 서비스 타입을 SpaceONE에서 표현하기 위한 모델을 정의합니다.
+Google Cloud Firestore Index
 """
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
@@ -29,7 +29,7 @@ count_by_query_scope_conf = os.path.join(
     current_dir, "widget/count_by_query_scope.yaml"
 )
 
-# Cloud Service Type 리소스 정의
+# Cloud Service Type resource definition
 cst_index = CloudServiceTypeResource()
 cst_index.name = "Index"
 cst_index.provider = "google_cloud"

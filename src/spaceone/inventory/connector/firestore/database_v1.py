@@ -15,30 +15,21 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._database_clients = {}  # 데이터베이스별 클라이언트 캐시
+        self._database_clients = {}
 
     def _get_admin_client(self, database_id="(default)"):
-        """Firestore Admin SDK 클라이언트를 lazy loading으로 초기화합니다.
-
-        Args:
-            database_id: 데이터베이스 ID (기본값: "(default)")
-
-        Returns:
-            Admin SDK 클라이언트 (데이터베이스별 캐시됨)
-        """
-        # 데이터베이스별 클라이언트 캐싱
         if database_id not in self._database_clients:
             try:
                 from google.cloud import firestore
 
-                # 데이터베이스별 클라이언트 생성
+                # Create a client for each database
                 if database_id == "(default)":
-                    # 기본 데이터베이스 클라이언트
+                    # Create a client for the default database
                     client = firestore.Client(
                         project=self.project_id, credentials=self.credentials
                     )
                 else:
-                    # 특정 데이터베이스 클라이언트
+                    # Create a client for a specific database
                     client = firestore.Client(
                         project=self.project_id,
                         database=database_id,
@@ -62,14 +53,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
         return self._database_clients[database_id]
 
     def list_databases(self, **query):
-        """Firestore 데이터베이스 목록을 조회합니다.
-
-        Args:
-            **query: 추가 쿼리 파라미터
-
-        Returns:
-            List[dict]: 데이터베이스 목록
-        """
         database_list = []
         query.update({"parent": f"projects/{self.project_id}"})
 
@@ -78,14 +61,13 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
             while request is not None:
                 response = request.execute()
                 all_databases = response.get("databases", [])
-                # FIRESTORE_NATIVE 타입만 필터링
+                # Filter out FIRESTORE_NATIVE type
                 firestore_databases = list(
                     filter(
                         lambda db: db.get("type") == "FIRESTORE_NATIVE", all_databases
                     )
                 )
                 database_list.extend(firestore_databases)
-                # 페이지네이션 처리 - list_next가 있는지 확인
                 try:
                     request = (
                         self.client.projects()
@@ -93,7 +75,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                         .list_next(previous_request=request, previous_response=response)
                     )
                 except AttributeError:
-                    # list_next가 없는 경우 첫 페이지만 처리
                     break
 
             return database_list
@@ -121,15 +102,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
             raise e
 
     def list_indexes(self, database_name, **query):
-        """데이터베이스의 인덱스 목록을 조회합니다.
-
-        Args:
-            database_name: 데이터베이스 이름
-            **query: 추가 쿼리 파라미터
-
-        Returns:
-            List[dict]: 인덱스 목록
-        """
         indexes = []
         parent = f"{database_name}/collectionGroups/-"
 
@@ -146,7 +118,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
             while request is not None:
                 response = request.execute()
                 indexes.extend(response.get("indexes", []))
-                # 페이지네이션 처리 - list_next가 있는지 확인
                 try:
                     request = (
                         self.client.projects()
@@ -156,7 +127,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                         .list_next(previous_request=request, previous_response=response)
                     )
                 except AttributeError:
-                    # list_next가 없는 경우 첫 페이지만 처리
                     break
 
             return indexes
@@ -182,18 +152,17 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
             raise e
 
     def list_collections_with_documents(self, database_name, parent="", **query):
-        """컬렉션 ID와 각 컬렉션의 문서들을 한 번에 조회합니다. (최적화된 통합 메서드)
-
-        이 메서드는 기존 list_collection_ids + list_documents의 중복 호출을 방지하여
-        동일한 parent에 대한 admin_client.document() 호출을 최적화합니다.
+        """
+        This method optimizes the combined method of list_collection_ids + list_documents
+        to avoid duplicate calls to admin_client.document() for the same parent.
 
         Args:
-            database_name: 데이터베이스 이름
-            parent: 부모 문서 경로 (빈 문자열이면 최상위)
-            **query: 추가 쿼리 파라미터
+            database_name: Database name
+            parent: Parent document path (empty string for top level)
+            **query: Additional query parameters
 
         Returns:
-            List[dict]: 컬렉션 정보와 문서들을 포함한 딕셔너리 목록
+            List[dict]: List of dictionaries containing collection information and documents
             [
                 {
                     "collection_id": str,
@@ -202,25 +171,23 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
             ]
         """
         try:
-            # 데이터베이스 ID 추출
             database_id = "(default)"
             if "/databases/" in database_name:
                 database_id = database_name.split("/databases/")[-1]
 
-            # 🎯 최적화: 데이터베이스별 캐시된 클라이언트 사용
             admin_client = self._get_admin_client(database_id)
 
             collections_with_docs = []
             page_size = query.get("pageSize", 100)
 
             if not parent:
-                # 최상위 컬렉션들 처리
+                # Handle top level collections
                 collections = admin_client.collections()
 
                 for collection in collections:
                     collection_id = collection.id
 
-                    # 해당 컬렉션의 문서들 조회
+                    # Get documents for the collection
                     documents = []
                     try:
                         docs_stream = collection.limit(page_size).stream()
@@ -249,16 +216,16 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                     )
 
             else:
-                # 하위 컬렉션들 처리 (단일 document() 호출로 최적화)
-                parent_doc_ref = admin_client.document(parent)  # 한 번만 호출!
+                # Handle subcollections (optimized with single document() call)
+                parent_doc_ref = admin_client.document(parent)
 
-                # 하위 컬렉션들 조회
+                # Get subcollections
                 subcollections = parent_doc_ref.collections()
 
                 for collection in subcollections:
                     collection_id = collection.id
 
-                    # 해당 컬렉션의 문서들 조회 (이미 얻은 collection 참조 사용)
+                    # Get documents for the collection (using the already obtained collection reference)
                     documents = []
                     try:
                         docs_stream = collection.limit(page_size).stream()
@@ -295,15 +262,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
             return []
 
     def list_backup_schedules(self, database_name: str, **query) -> List[dict]:
-        """데이터베이스의 백업 스케줄 목록을 조회합니다.
-
-        Args:
-            database_name: 데이터베이스 이름 (projects/{project}/databases/{database} 형식)
-            **query: 추가 쿼리 파라미터
-
-        Returns:
-            List[dict]: 백업 스케줄 목록
-        """
         backup_schedules = []
 
         try:
@@ -315,7 +273,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                 response = request.execute()
                 backup_schedules.extend(response.get("backupSchedules", []))
 
-                # 페이지네이션 처리
                 try:
                     request = (
                         self.client.projects()
@@ -324,7 +281,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                         .list_next(previous_request=request, previous_response=response)
                     )
                 except AttributeError:
-                    # list_next가 없는 경우 첫 페이지만 처리
                     break
 
             return backup_schedules
@@ -334,20 +290,10 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
             return []
 
     def list_all_backups(self, **query) -> List[dict]:
-        """프로젝트의 모든 위치에서 백업 목록을 조회합니다.
-
-        location='-'를 사용하여 모든 위치의 백업을 한 번에 효율적으로 조회합니다.
-
-        Args:
-            **query: 추가 쿼리 파라미터
-
-        Returns:
-            List[dict]: 모든 위치의 백업 목록
-        """
         backups = []
 
         try:
-            # location='-'를 사용하여 모든 위치의 백업을 한 번에 조회
+            # Use location='-' to retrieve backups from all locations at once
             parent = f"projects/{self.project_id}/locations/-"
             query.update({"parent": parent})
 
@@ -357,7 +303,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                 response = request.execute()
                 backups.extend(response.get("backups", []))
 
-                # 페이지네이션 처리
                 try:
                     request = (
                         self.client.projects()
@@ -366,7 +311,6 @@ class FirestoreDatabaseConnector(GoogleCloudConnector):
                         .list_next(previous_request=request, previous_response=response)
                     )
                 except AttributeError:
-                    # list_next가 없는 경우 첫 페이지만 처리
                     break
 
             return backups
