@@ -74,43 +74,6 @@ class LogConfigSubnet(Model):
     filter_expr = StringType(deserialize_from="filterExpr", serialize_when_none=False)
 
 
-class Subnetwork(Model):
-    id = StringType()
-    name = StringType()
-    description = StringType()
-    network = StringType()
-    region = StringType()
-    google_access = StringType(choices=("On", "Off"))
-    flow_log = StringType(choices=("On", "Off"))
-    ip_cidr_range = StringType(deserialize_from="ipCidrRange")
-    gateway_address = StringType(deserialize_from="gatewayAddress")
-    secondary_ip_ranges = ListType(
-        ModelType(SecondaryIpRanges), default=[], serialize_when_none=False
-    )
-    self_link = StringType(deserialize_from="selfLink")
-    fingerprint = StringType()
-    enable_flow_logs = BooleanType(
-        deserialize_from="enableFlowLogs", serialize_when_none=False
-    )
-    private_ipv6_google_access = StringType(
-        deserialize_from="privateIpv6GoogleAccess", serialize_when_none=False
-    )
-    ipv6_cidr_range = StringType(
-        deserialize_from="ipv6CidrRange", serialize_when_none=False
-    )
-    purpose = StringType(
-        choices=("PRIVATE_RFC_1918", "INTERNAL_HTTPS_LOAD_BALANCER"),
-        serialize_when_none=False,
-    )
-    role = StringType(choices=("ACTIVE", "BACKUP"), serialize_when_none=False)
-    state = StringType(choices=("READY", "DRAINING"), serialize_when_none=False)
-    log_config = ModelType(LogConfigSubnet, serialize_when_none=False)
-    creation_timestamp = DateTimeType(deserialize_from="creationTimestamp")
-
-
-class SubnetworkConfig(Model):
-    total_number = IntType(default=0)
-    subnets = ListType(ModelType(Subnetwork), default=[])
 
 
 class Route(Model):
@@ -256,7 +219,6 @@ class VPCNetwork(BaseResource):
     routing_config = ModelType(VPNRoutingConfig, deserialize_from="routingConfig")
     global_dynamic_route = StringType(choices=("On", "Off"))
     dynamic_routing_mode = StringType(choices=("Regional", "Global"))
-    subnetwork_data = ModelType(SubnetworkConfig, default=[])
     ip_address_data = ListType(ModelType(IPAddress), default=[])
     firewall_data = ModelType(FirewallConfig, default=[])
     route_data = ModelType(RouteConfig, default=[])

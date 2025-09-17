@@ -50,8 +50,6 @@ class CloudRunDomainMappingV1Manager(GoogleCloudManager):
             self.connector_name, **params
         )
 
-        # Get lists that relate with domain mappings through Google Cloud API
-        # Domain mappings are global resources in Cloud Run v1
         try:
             domain_mappings = cloud_run_v1_conn.list_domain_mappings(
                 f"namespaces/{project_id}"
@@ -87,6 +85,9 @@ class CloudRunDomainMappingV1Manager(GoogleCloudManager):
                         "location": location_id,
                         "region": region,
                         "self_link": self_link,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudRun", "DomainMapping", project_id, domain_mapping_id
+                        ),
                     }
                 )
 

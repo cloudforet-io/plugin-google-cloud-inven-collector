@@ -116,6 +116,31 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
             _LOGGER.error(f"Failed to list GKE operations (v1beta1): {e}")
             return []
 
+    def get_resource_limits(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """GKE 리소스 제한 정보를 조회합니다.
+
+        Args:
+            params: 조회에 필요한 파라미터 딕셔너리.
+
+        Returns:
+            GKE 리소스 제한 목록.
+
+        Raises:
+            Exception: GKE API 호출 중 오류 발생 시.
+        """
+        try:
+            cluster_connector: GKEClusterV1BetaConnector = self.locator.get_connector(
+                self.connector_name, **params
+            )
+
+            # Container Engine 관련 할당량 조회
+            resource_limits = cluster_connector.get_container_engine_quotas()
+            _LOGGER.info(f"Found {len(resource_limits)} GKE resource limits")
+            return resource_limits
+        except Exception as e:
+            _LOGGER.error(f"Failed to get GKE resource limits: {e}")
+            return []
+
     def list_fleets(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         """GKE Fleet 목록을 조회합니다 (v1beta1 API).
 
@@ -183,10 +208,14 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
         collected_cloud_services = []
         error_responses = []
 
-        # secret_data = params["secret_data"]  # 향후 사용 예정
+        secret_data = params["secret_data"]
+        project_id = secret_data["project_id"]
 
         # GKE 클러스터 목록 조회
         clusters = self.list_clusters(params)
+        
+        # GKE 리소스 제한 정보 조회
+        resource_limits = self.get_resource_limits(params)
 
         for cluster in clusters:
             try:
@@ -222,7 +251,7 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
                     "name": str(cluster.get("name", "")),
                     "description": str(cluster.get("description", "")),
                     "location": str(cluster.get("location", "")),
-                    "projectId": str(cluster.get("projectId", "")),
+                    "projectId": str(project_id),  # secret_data에서 가져온 project_id 사용
                     "status": str(cluster.get("status", "")),
                     "currentMasterVersion": str(
                         cluster.get("currentMasterVersion", "")
@@ -329,6 +358,11 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
 
                 # NodePool 정보는 별도의 NodePoolManager에서 처리
 
+                # ResourceLimit 정보 추가
+                if resource_limits:
+                    cluster_data["resourceLimits"] = resource_limits
+                    _LOGGER.info(f"Added {len(resource_limits)} resource limits to cluster {cluster_data.get('name')}")
+
                 # v1beta1 전용 정보 추가
                 if fleet_info:
                     cluster_data["fleet_info"] = {
@@ -342,6 +376,31 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
                         "state": str(membership_info.get("state", {})),
                     }
 
+                # Stackdriver 정보 추가
+                cluster_name = cluster.get("name")
+                cluster_location = cluster.get("location")
+                
+                if not cluster_name:
+                    _LOGGER.warning(f"Cluster missing name, skipping monitoring setup: {cluster}")
+                    cluster_name = "unknown"
+                
+                # Google Cloud Monitoring 리소스 ID: {project_id}:{location}:{cluster_name}
+                monitoring_resource_id = f"{project_id}:{cluster_location or 'unknown'}:{cluster_name}"
+                
+                google_cloud_monitoring_filters = [
+                    {"key": "resource.labels.cluster_name", "value": cluster_name},
+                    {"key": "resource.labels.location", "value": cluster_location or "unknown"},
+                ]
+                cluster_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
+                    project_id,
+                    "kubernetes.io/container",
+                    monitoring_resource_id,
+                    google_cloud_monitoring_filters,
+                )
+                cluster_data["google_cloud_logging"] = self.set_google_cloud_logging(
+                    "KubernetesEngine", "Cluster", project_id, monitoring_resource_id
+                )
+
                 # GKECluster 모델 생성
                 gke_cluster_data = GKECluster(cluster_data, strict=False)
 
@@ -352,10 +411,10 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
                         "data": gke_cluster_data,
                         "reference": {
                             "resource_id": cluster.get("selfLink"),
-                            "external_link": f"https://console.cloud.google.com/kubernetes/clusters/details/{cluster.get('location')}/{cluster.get('name')}?project={cluster.get('projectId')}",
+                            "external_link": f"https://console.cloud.google.com/kubernetes/clusters/details/{cluster.get('location')}/{cluster.get('name')}?project={project_id}",
                         },
                         "region_code": cluster.get("location"),
-                        "account": cluster.get("projectId"),
+                        "account": project_id,
                     }
                 )
 
@@ -372,7 +431,15 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
             except Exception as e:
                 _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
                 error_responses.append(
-                    self.generate_error_response(e, self.cloud_service_group, "Cluster")
+                    ErrorResourceResponse(
+                        {
+                            "message": str(e),
+                            "resource": {
+                                "cloud_service_group": self.cloud_service_group,
+                                "cloud_service_type": "Cluster",
+                            },
+                        }
+                    )
                 )
 
         _LOGGER.debug("** GKE Cluster V1Beta END **")

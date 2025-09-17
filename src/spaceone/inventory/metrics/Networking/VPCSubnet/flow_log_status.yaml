@@ -1,0 +1,28 @@
+---
+metric_id: metric-google-cloud-net-vpc-subnet-flow-log-status
+name: VPC Subnet Flow Log Status
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Networking.VPCSubnet
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.name
+      name: Subnet Name
+      search_key: data.name
+    - key: data.flow_log
+      name: Flow Log Status
+      search_key: data.flow_log
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-networking-vpc-subnet
+version: '1.1'

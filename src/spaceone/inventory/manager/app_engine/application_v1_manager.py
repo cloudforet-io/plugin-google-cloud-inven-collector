@@ -192,7 +192,7 @@ class AppEngineApplicationV1Manager(GoogleCloudManager):
                 # 기본 애플리케이션 데이터 준비
                 app_data = {
                     "name": str(application.get("name", "")),
-                    "projectId": str(application.get("projectId", "")),
+                    "projectId": str(project_id),  # secret_data에서 가져온 project_id 사용
                     "locationId": str(application.get("locationId", "")),
                     "servingStatus": str(application.get("servingStatus", "")),
                     "defaultHostname": str(application.get("defaultHostname", "")),
@@ -243,6 +243,24 @@ class AppEngineApplicationV1Manager(GoogleCloudManager):
                                 "service": str(rule.get("service", "")),
                             }
                         )
+
+                # Stackdriver 정보 추가
+                app_id = application.get("id", "default")
+                # Google Cloud Monitoring/Logging 리소스 ID: App Engine의 경우 module_id (app_id) 사용
+                monitoring_resource_id = app_id
+                
+                google_cloud_monitoring_filters = [
+                    {"key": "resource.labels.project_id", "value": project_id},
+                ]
+                app_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
+                    project_id,
+                    "appengine.googleapis.com/system",
+                    monitoring_resource_id,
+                    google_cloud_monitoring_filters,
+                )
+                app_data["google_cloud_logging"] = self.set_google_cloud_logging(
+                    "AppEngine", "Application", project_id, monitoring_resource_id
+                )
 
                 # AppEngineApplication 모델 생성
                 app_engine_app_data = AppEngineApplication(app_data, strict=False)

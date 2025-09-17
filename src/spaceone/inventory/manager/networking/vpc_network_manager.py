@@ -22,7 +22,7 @@ class VPCNetworkManager(GoogleCloudManager):
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params):
-        _LOGGER.debug(f"** VPC Network START **")
+        _LOGGER.debug("** VPC Network START **")
         start_time = time.time()
         """
         Args:
@@ -51,10 +51,9 @@ class VPCNetworkManager(GoogleCloudManager):
             self.connector_name, **params
         )
 
-        # Get lists that relate with snapshots through Google Cloud API
+        # Get lists that relate with networks through Google Cloud API
         networks = vpc_conn.list_networks()
         firewalls = vpc_conn.list_firewall()
-        subnets = vpc_conn.list_subnetworks()
         routes = vpc_conn.list_routes()
         regional_address = vpc_conn.list_regional_addresses()
 
@@ -69,7 +68,6 @@ class VPCNetworkManager(GoogleCloudManager):
                     network_identifier, firewalls
                 )
                 matched_route = self.get_matched_route(network_identifier, routes)
-                matched_subnets = self._get_matched_subnets(network_identifier, subnets)
                 region = self.match_region_info("global")
                 peerings = self.get_peering(network)
 
@@ -99,10 +97,6 @@ class VPCNetworkManager(GoogleCloudManager):
                         "firewall_data": {
                             "total_number": len(matched_firewall),
                             "firewall": matched_firewall,
-                        },
-                        "subnetwork_data": {
-                            "total_number": len(matched_subnets),
-                            "subnets": matched_subnets,
                         },
                     }
                 )
@@ -153,18 +147,18 @@ class VPCNetworkManager(GoogleCloudManager):
     def get_internal_ip_address_in_use(self, network, regional_address):
         all_internal_addresses = []
 
-        for ip_address in regional_address:
-            ip_type = ip_address.get("addressType", "")
-            subnetwork = ip_address.get("subnetwork", "")
+        for ip_addr in regional_address:
+            ip_type = ip_addr.get("addressType", "")
+            subnetwork = ip_addr.get("subnetwork", "")
 
             if ip_type == "INTERNAL" and subnetwork in network.get("subnetworks", []):
-                url_region = ip_address.get("region")
-                users = ip_address.get("users")
-                ip_address.update(
+                url_region = ip_addr.get("region")
+                users = ip_addr.get("users")
+                ip_addr.update(
                     {
                         "subnet_name": network.get("name"),
                         "ip_version_display": self._valid_ip_address(
-                            ip_address.get("address")
+                            ip_addr.get("address")
                         ),
                         "region": (
                             self.get_param_in_url(url_region, "regions")
@@ -176,7 +170,7 @@ class VPCNetworkManager(GoogleCloudManager):
                     }
                 )
 
-                all_internal_addresses.append(IPAddress(ip_address, strict=False))
+                all_internal_addresses.append(IPAddress(ip_addr, strict=False))
 
         return all_internal_addresses
 
@@ -258,23 +252,6 @@ class VPCNetworkManager(GoogleCloudManager):
                 route_vos.append(route)
         return route_vos
 
-    def _get_matched_subnets(self, network, subnets):
-        matched_subnet = []
-        for subnet in subnets:
-            if network == subnet.get("network", ""):
-                log_config = subnet.get("logConfig", {})
-                url_region = subnet.get("region")
-                subnet.update(
-                    {
-                        "region": self.get_param_in_url(url_region, "regions"),
-                        "google_access": (
-                            "On" if subnet.get("privateIpGoogleAccess") else "Off"
-                        ),
-                        "flow_log": "On" if log_config.get("enable") else "Off",
-                    }
-                )
-                matched_subnet.append(subnet)
-        return matched_subnet
 
     @staticmethod
     def _get_matched_firewalls(network, firewalls):

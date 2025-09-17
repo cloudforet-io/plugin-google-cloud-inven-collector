@@ -58,7 +58,6 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
             "CloudBuildV2Connector", **params
         )
 
-        # Get lists that relate with worker pools through Google Cloud API using V2 locations
         all_worker_pools = []
         parent = f"projects/{project_id}"
 
@@ -109,13 +108,11 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                # diskSizeGb를 GB 단위로 표시
                 private_pool_config = worker_pool.get("privatePoolV1Config", {})
                 worker_config = private_pool_config.get("workerConfig", {})
                 disk_size_gb = worker_config.get("diskSizeGb")
                 disk_size_display = ""
                 if disk_size_gb is not None:
-                    # 숫자든 문자열이든 GB 단위로 표시
                     disk_size_str = str(disk_size_gb)
                     disk_size_display = f"{disk_size_str} GB"
 
@@ -127,6 +124,9 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
                         "location": location_id,
                         "region": region,
                         "disk_size_display": disk_size_display,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudBuild", "WorkerPool", project_id, worker_pool_id
+                        ),
                     }
                 )
 
@@ -144,7 +144,7 @@ class CloudBuildWorkerPoolV1Manager(GoogleCloudManager):
                         "reference": ReferenceModel(
                             {
                                 "resource_id": f"https://cloudbuild.googleapis.com/v1/{worker_pool_data.full_name}",
-                                "external_link": f"https://console.cloud.google.com/cloud-build/worker-pools?project={project_id}",
+                                "external_link": f"https://console.cloud.google.com/cloud-build/worker-pools/edit/{location_id}/{worker_pool_name}?project={project_id}",
                             }
                         ),
                     },

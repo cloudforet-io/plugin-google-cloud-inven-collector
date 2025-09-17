@@ -8,6 +8,10 @@ from schematics.types import (
     StringType,
 )
 
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
+)
+
 
 class ObjectMeta(Model):
     name = StringType()
@@ -36,14 +40,18 @@ class JobV1(Model):
     kind = StringType()
     metadata = ModelType(ObjectMeta)
     spec = BaseType()  # 전체 spec을 BaseType으로 처리하여 복잡한 중첩 구조 문제 해결
-    status = BaseType()  # 전체 status를 BaseType으로 처리하여 복잡한 중첩 구조 문제 해결
-    
+    status = (
+        BaseType()
+    )  # 전체 status를 BaseType으로 처리하여 복잡한 중첩 구조 문제 해결
+
     # Additional fields
     name = StringType()
     project = StringType()
     location = StringType()
     region = StringType()
-    
+
     # Execution info (populated by manager)
     executions = BaseType(default=[])
     execution_count = IntType(default=0)
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)

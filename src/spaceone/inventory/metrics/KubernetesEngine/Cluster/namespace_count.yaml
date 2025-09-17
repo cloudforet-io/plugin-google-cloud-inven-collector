@@ -18,9 +18,13 @@ query_options:
       name: Cluster Status
       search_key: data.cluster.status
       default: true
+    - key: data.cluster.location
+      name: Location
+      search_key: data.cluster.location
   fields:
     value:
-      operator: count
+      key: data.cluster.namespace_count
+      operator: sum
 unit: Count
 namespace_id: ns-google-cloud-gke-cluster
-version: '1.0'
+version: '1.1'

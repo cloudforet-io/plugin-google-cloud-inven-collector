@@ -1,0 +1,18 @@
+---
+cloud_service_group: Networking
+cloud_service_type: VPCGateway
+name: Count by Project
+query:
+  aggregate:
+    - group:
+        keys:
+          - key: account
+            name: Project
+        fields:
+          - name: value
+            operator: count
+options:
+  value_options:
+    key: value
+    options:
+      default: 0

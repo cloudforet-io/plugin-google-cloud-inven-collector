@@ -3,7 +3,12 @@ from schematics.types import (
     BaseType,
     BooleanType,
     DictType,
+    ModelType,
     StringType,
+)
+
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
 )
 
 
@@ -32,3 +37,5 @@ class Connection(Model):
     etag = StringType()
     scm_type = StringType()
     username = StringType()
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)

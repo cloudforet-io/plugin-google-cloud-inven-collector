@@ -57,9 +57,7 @@ cst_firebase_app._metadata = CloudServiceTypeMeta.set_meta(
                 "alert": ["DELETED"],
             },
         ),
-        TextDyField.data_source("Project ID", "data.project_info.project_id"),
-        TextDyField.data_source("Project Name", "data.project_info.display_name"),
-    ],
+     ],
     search=[
         SearchField.set(name="App ID", key="data.app_id"),
         SearchField.set(name="Display Name", key="data.display_name"),
@@ -81,7 +79,6 @@ cst_firebase_app._metadata = CloudServiceTypeMeta.set_meta(
                 "DELETED": {"label": "Deleted"},
             }
         ),
-        SearchField.set(name="Project ID", key="data.project_info.project_id"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),

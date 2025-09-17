@@ -104,6 +104,8 @@ class ErrorResource(Model):
     cloud_service_group = StringType(default="ComputeEngine", serialize_when_none=False)
     cloud_service_type = StringType(default="Instance", serialize_when_none=False)
     resource_id = StringType(serialize_when_none=False)
+    account = StringType(serialize_when_none=False)
+    error_message = StringType(serialize_when_none=False)
 
 
 class ErrorResourceResponse(CloudServiceResponse):

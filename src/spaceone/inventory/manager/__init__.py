@@ -37,7 +37,7 @@ from .filestore.backup_v1_manager import FilestoreBackupManager
 from .filestore.instance_v1_manager import FilestoreInstanceManager
 from .filestore.instance_v1beta1_manager import FilestoreInstanceV1Beta1Manager
 from .filestore.snapshot_v1_manager import FilestoreSnapshotManager
-from .firebase.app_manager import FirebaseManager as FirebaseAppManager
+from .firebase.app_manager import FirebaseManager
 from .firestore.backup_manager import FirestoreBackupManager
 from .firestore.backup_schedule_manager import FirestoreBackupScheduleManager
 from .firestore.collection_manager import FirestoreCollectionManager
@@ -53,6 +53,8 @@ from .networking.firewall_manager import FirewallManager
 from .networking.load_balancing_manager import LoadBalancingManager
 from .networking.route_manager import RouteManager
 from .networking.vpc_network_manager import VPCNetworkManager
+from .networking.vpc_subnet_manager import VPCSubnetManager
+from .networking.vpc_gateway_manager import VPCGatewayManager
 from .pub_sub.schema_manager import SchemaManager
 from .pub_sub.snapshot_manager import SnapshotManager
 from .pub_sub.subscription_manager import SubscriptionManager

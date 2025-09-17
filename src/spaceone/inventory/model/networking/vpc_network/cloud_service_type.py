@@ -30,6 +30,7 @@ cst_network.provider = "google_cloud"
 cst_network.group = "Networking"
 cst_network.service_code = "Networking"
 cst_network.is_primary = True
+cst_network.is_major = True
 cst_network.labels = ["Networking"]
 cst_network.tags = {
     "spaceone:icon": f"{ASSET_URL}/VPC.svg",

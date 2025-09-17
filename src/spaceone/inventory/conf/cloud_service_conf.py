@@ -25,6 +25,8 @@ CLOUD_SERVICE_GROUP_MAP = {
         "LoadBalancingManager",
         "RouteManager",
         "VPCNetworkManager",
+        "VPCSubnetManager",
+        "VPCGatewayManager",
     ],
     "PubSub": [
         "SchemaManager",
@@ -38,7 +40,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "FilestoreSnapshotManager",
         "FilestoreBackupManager",
     ],
-    "Firebase": ["FirebaseAppManager"],
+    "Firebase": ["FirebaseManager"],
     "Batch": ["BatchManager"],
     "CloudBuild": [
         "CloudBuildBuildV1Manager",
@@ -187,10 +189,6 @@ CLOUD_LOGGING_RESOURCE_TYPE_MAP = {
         },
     },
     "Batch": {
-        "Location": {
-            "resource_type": "batch_location",
-            "labels_key": "resource.labels.location_id",
-        },
         "Job": {
             "resource_type": "batch_job",
             "labels_key": "resource.labels.job_id",

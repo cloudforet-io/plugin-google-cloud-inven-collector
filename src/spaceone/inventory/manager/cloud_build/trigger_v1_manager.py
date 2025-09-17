@@ -58,10 +58,8 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
             "CloudBuildV2Connector", **params
         )
 
-        # Get lists that relate with triggers through Google Cloud API
         triggers = cloud_build_v1_conn.list_triggers()
 
-        # Get locations using V2 API
         regional_triggers = []
         parent = f"projects/{project_id}"
 
@@ -91,7 +89,6 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                     )
                     continue
 
-        # Combine all triggers
         all_triggers = triggers + regional_triggers
         for trigger in all_triggers:
             try:
@@ -111,17 +108,14 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                # Convert boolean values to user-friendly strings for display
                 autodetect = trigger.get("autodetect", False)
                 disabled = trigger.get("disabled", False)
 
-                # Convert autodetect to display string
                 if autodetect:
                     autodetect_display = "Auto Detect"
                 else:
                     autodetect_display = "Manual Config"
 
-                # Convert disabled to display string
                 if disabled:
                     disabled_display = "Disabled"
                 else:
@@ -135,6 +129,9 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                         "region": region,
                         "autodetect_display": autodetect_display,
                         "disabled_display": disabled_display,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudBuild", "Trigger", project_id, trigger_id
+                        ),
                     }
                 )
 
@@ -152,7 +149,7 @@ class CloudBuildTriggerV1Manager(GoogleCloudManager):
                         "reference": ReferenceModel(
                             {
                                 "resource_id": f"https://cloudbuild.googleapis.com/v1/{trigger_data.full_name}",
-                                "external_link": f"https://console.cloud.google.com/cloud-build/triggers?project={project_id}",
+                                "external_link": f"https://console.cloud.google.com/cloud-build/triggers;region={region}/edit/{trigger_data.id}?project={project_id}",
                             }
                         ),
                     },

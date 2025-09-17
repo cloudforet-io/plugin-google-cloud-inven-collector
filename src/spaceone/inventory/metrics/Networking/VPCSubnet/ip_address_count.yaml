@@ -1,0 +1,26 @@
+---
+metric_id: metric-google-cloud-net-vpc-subnet-ip-address-count
+name: VPC Subnet IP Address Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Networking.VPCSubnet
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.name
+      name: Subnet Name
+      search_key: data.name
+  fields:
+    value:
+      key: data.ip_address_data
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-networking-vpc-subnet
+version: '1.1'

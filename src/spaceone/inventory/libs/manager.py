@@ -1,18 +1,21 @@
-import math
+import ipaddress
 import json
 import logging
-import ipaddress
+import math
 from urllib.parse import urlparse
 
+from googleapiclient.errors import HttpError
+
 from spaceone.core.manager import BaseManager
-from spaceone.inventory.conf.cloud_service_conf import CLOUD_LOGGING_RESOURCE_TYPE_MAP
+from spaceone.inventory.conf.cloud_service_conf import (
+    CLOUD_LOGGING_RESOURCE_TYPE_MAP,
+    REGION_INFO,
+)
 from spaceone.inventory.libs.connector import GoogleCloudConnector
-from spaceone.inventory.libs.schema.region import RegionResource, RegionResponse
 from spaceone.inventory.libs.schema.cloud_service import (
     ErrorResourceResponse,
 )
-from spaceone.inventory.conf.cloud_service_conf import REGION_INFO, ASSET_URL
-from googleapiclient.errors import HttpError
+from spaceone.inventory.libs.schema.region import RegionResource, RegionResponse
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,13 +54,13 @@ class GoogleCloudManager(BaseManager):
                 if "spaceone:icon" in _tags:
                     _icon = _tags["spaceone:icon"]
                     _tags["spaceone:icon"] = (
-                        f'{options["custom_asset_url"]}/{_icon.split("/")[-1]}'
+                        f"{options['custom_asset_url']}/{_icon.split('/')[-1]}"
                     )
 
             yield cloud_service_type
 
     def collect_cloud_service(self, params) -> list:
-        raise NotImplemented
+        raise NotImplementedError
 
     def collect_resources(self, params) -> list:
         total_resources = []

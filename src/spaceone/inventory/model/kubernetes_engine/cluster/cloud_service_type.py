@@ -22,7 +22,6 @@ count_by_region_conf = os.path.join(current_dir, "widget/count_by_region.yml")
 count_by_account_conf = os.path.join(current_dir, "widget/count_by_account.yml")
 count_by_status_conf = os.path.join(current_dir, "widget/count_by_status.yml")
 count_by_version_conf = os.path.join(current_dir, "widget/count_by_version.yml")
-total_node_count_conf = os.path.join(current_dir, "widget/total_node_count.yml")
 
 # GKE Cluster (unified for v1 and v1beta)
 cst_gke_cluster = CloudServiceTypeResource()
@@ -56,6 +55,7 @@ cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("API Version", "data.api_version"),
         TextDyField.data_source("Fleet Info", "data.fleet_info"),
         TextDyField.data_source("Membership Info", "data.membership_info"),
+        TextDyField.data_source("Resource Limits Count", "data.resource_limits"),
     ],
     search=[
         SearchField.set(name="Cluster Name", key="data.name"),
@@ -70,10 +70,10 @@ cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="API Version", key="data.api_version"),
         SearchField.set(name="Fleet Info", key="data.fleet_info"),
         SearchField.set(name="Membership Info", key="data.membership_info"),
+        SearchField.set(name="Resource Limits", key="data.resource_limits"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
-        CardWidget.set(**get_data_from_yaml(total_node_count_conf)),
         ChartWidget.set(**get_data_from_yaml(count_by_region_conf)),
         ChartWidget.set(**get_data_from_yaml(count_by_account_conf)),
         ChartWidget.set(**get_data_from_yaml(count_by_status_conf)),

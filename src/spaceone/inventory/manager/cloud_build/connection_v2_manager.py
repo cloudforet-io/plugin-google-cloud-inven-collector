@@ -52,7 +52,6 @@ class CloudBuildConnectionV2Manager(GoogleCloudManager):
             self.connector_name, **params
         )
 
-        # Get lists that relate with connections through Google Cloud API
         all_connections = []
         try:
             parent = f"projects/{project_id}"
@@ -144,6 +143,9 @@ class CloudBuildConnectionV2Manager(GoogleCloudManager):
                         "region": region,
                         "scm_type": scm_type,
                         "username": username,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudBuild", "Connection", project_id, connection_id
+                        ),
                     }
                 )
 

@@ -53,7 +53,6 @@ class CloudRunJobV2Manager(GoogleCloudManager):
             "CloudRunV1Connector", **params
         )
 
-        # Get lists that relate with jobs through Google Cloud API
         all_jobs = []
         parent = f"projects/{project_id}"
 
@@ -75,18 +74,15 @@ class CloudRunJobV2Manager(GoogleCloudManager):
                         jobs = cloud_run_v2_conn.list_jobs(parent)
                         for job in jobs:
                             job["_location"] = location_id
-                            # Get executions for each job
                             job_name = job.get("name")
                             if job_name:
                                 try:
                                     executions = cloud_run_v2_conn.list_job_executions(
                                         job_name
                                     )
-                                    # Get tasks for each execution
                                     for execution in executions:
                                         execution_name = execution.get("name")
                                         if execution_name:
-                                            # Extract execution name from full path for display
                                             if "/executions/" in execution_name:
                                                 execution_display_name = (
                                                     execution_name.split(
@@ -141,6 +137,10 @@ class CloudRunJobV2Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
+                google_cloud_monitoring_filters = [
+                    {"key": "resource.labels.job_name", "value": job_name},
+                ]
+
                 job.update(
                     {
                         "name": job_name,
@@ -148,6 +148,15 @@ class CloudRunJobV2Manager(GoogleCloudManager):
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                            project_id,
+                            "run.googleapis.com",
+                            job_name,
+                            google_cloud_monitoring_filters,
+                        ),
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudRun", "Job", project_id, job_name
+                        ),
                     }
                 )
 

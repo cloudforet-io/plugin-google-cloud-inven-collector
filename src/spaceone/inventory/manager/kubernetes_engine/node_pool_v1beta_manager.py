@@ -250,14 +250,36 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
             Exception: GKE API 호출 중 오류 발생 시.
         """
         try:
-            # 임시 메트릭 데이터 반환
+            # 실제 노드풀 정보를 기반으로 메트릭 계산
+            node_pool_connector: GKENodePoolV1BetaConnector = self.locator.get_connector(
+                self.connector_name, **params
+            )
+            
+            # 노드풀 상세 정보 조회
+            node_pool_info = node_pool_connector.get_node_pool(cluster_name, location, node_pool_name)
+            
+            if not node_pool_info:
+                _LOGGER.warning(f"No node pool info found for {node_pool_name}")
+                return {}
+            
+            # 실제 메트릭 계산
+            initial_node_count = node_pool_info.get("initialNodeCount", 0)
+            current_node_count = node_pool_info.get("currentNodeCount", initial_node_count)
+            
+            # 노드 설정에서 리소스 정보 추출
+            node_config = node_pool_info.get("config", {})
+            machine_type = node_config.get("machineType", "")
+            disk_size_gb = node_config.get("diskSizeGb", 0)
+            
             metrics = {
-                "cpu_usage": "0.0",
-                "memory_usage": "0.0",
-                "disk_usage": "0.0",
-                "node_count": "0",
+                "node_count": str(current_node_count),
+                "initial_node_count": str(initial_node_count),
+                "machine_type": machine_type,
+                "disk_size_gb": str(disk_size_gb),
+                "status": node_pool_info.get("status", "UNKNOWN"),
             }
-            _LOGGER.info(f"Retrieved metrics for node pool {node_pool_name} (v1beta1)")
+            
+            _LOGGER.info(f"Retrieved metrics for node pool {node_pool_name} (v1beta1): {current_node_count} nodes")
             return metrics
         except Exception as e:
             _LOGGER.error(f"Failed to get metrics for node pool {node_pool_name} (v1beta1): {e}")
@@ -612,7 +634,7 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                     cluster_name = node_group.get("clusterName")
                     location = node_group.get("clusterLocation")
                     node_pool_name = node_group.get("name")
-                    project_id = node_group.get("projectId")
+                    # project_id는 secret_data에서 가져온 값을 사용 (API 응답에는 포함되지 않음)
 
                     if not all([cluster_name, location, node_pool_name]):
                         _LOGGER.warning(f"Skipping node group due to missing required fields: {node_group.get('name', 'unknown')} (v1beta1)")
@@ -692,6 +714,11 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                         node_group_data["metrics"] = metrics
 
                     # 노드 정보 추가
+                    if nodes_info:
+                        node_group_data["total_nodes"] = nodes_info["total_nodes"]
+                        node_group_data["total_groups"] = nodes_info["total_groups"]
+
+                    # 노드 정보 추가
                     if nodes:
                         node_group_data["nodes"] = []
                         for node in nodes:
@@ -742,6 +769,25 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                                 node_info["instances"].append(instance_info)
                             node_group_data["instance_groups"].append(group_info)
 
+                    # Stackdriver 정보 추가
+                    # Google Cloud Monitoring 리소스 ID: {project_id}:{location}:{cluster_name}:{node_pool_name}
+                    monitoring_resource_id = f"{project_id}:{location}:{cluster_name}:{node_pool_name}"
+                    
+                    google_cloud_monitoring_filters = [
+                        {"key": "resource.labels.cluster_name", "value": cluster_name},
+                        {"key": "resource.labels.location", "value": location},
+                        {"key": "resource.labels.node_pool_name", "value": node_pool_name},
+                    ]
+                    node_group_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
+                        project_id,
+                        "kubernetes.io/node",
+                        monitoring_resource_id,
+                        google_cloud_monitoring_filters,
+                    )
+                    node_group_data["google_cloud_logging"] = self.set_google_cloud_logging(
+                        "KubernetesEngine", "NodePool", project_id, monitoring_resource_id
+                    )
+
                     # GKENodeGroup 모델 생성
                     gke_node_group_data = GKENodeGroup(node_group_data, strict=False)
 
@@ -752,7 +798,7 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                             "data": gke_node_group_data,
                             "reference": {
                                 "resource_id": f"{cluster_name}/{location}/{node_pool_name}",
-                                "external_link": f"https://console.cloud.google.com/kubernetes/clusters/details/{location}/{cluster_name}/nodepools/{node_pool_name}?project={project_id}",
+                                "external_link": f"https://console.cloud.google.com/kubernetes/clusters/details/{location}/{cluster_name}/nodes?project={project_id}",
                             },
                             "region_code": location,
                             "account": project_id,
@@ -775,7 +821,15 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                 except Exception as e:
                     _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
                     error_responses.append(
-                        self.generate_error_response(e, self.cloud_service_group, "NodeGroup")
+                        ErrorResourceResponse(
+                            {
+                                "message": str(e),
+                                "resource": {
+                                    "cloud_service_group": self.cloud_service_group,
+                                    "cloud_service_type": "NodePool",
+                                },
+                            }
+                        )
                     )
 
             _LOGGER.info(f"Successfully collected {len(collected_cloud_services)} node group resources (v1beta1)")
@@ -783,7 +837,15 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
         except Exception as e:
             _LOGGER.error(f"Failed to collect cloud services (v1beta1): {e}", exc_info=True)
             error_responses.append(
-                self.generate_error_response(e, self.cloud_service_group, "NodeGroup")
+                ErrorResourceResponse(
+                    {
+                        "message": str(e),
+                        "resource": {
+                            "cloud_service_group": self.cloud_service_group,
+                            "cloud_service_type": "NodePool",
+                        },
+                    }
+                )
             )
 
         _LOGGER.info("** GKE Node Pool V1Beta END **")

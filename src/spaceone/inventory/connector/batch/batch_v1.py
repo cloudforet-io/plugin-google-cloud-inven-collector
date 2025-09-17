@@ -19,8 +19,7 @@ class BatchV1Connector(GoogleCloudConnector):
 
     def list_all_jobs(self, **query) -> List[Dict]:
         """
-        모든 Location의 Job 목록을 글로벌로 조회합니다.
-        locations/- 패턴을 사용하여 한번에 모든 location의 jobs를 가져옵니다.
+        모든 Batch Job 목록을 조회합니다.
 
         Args:
             **query: 추가 쿼리 파라미터

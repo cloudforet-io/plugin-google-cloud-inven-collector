@@ -133,15 +133,47 @@ class AppEngineInstanceV1Connector(GoogleCloudConnector):
             if not instance_info:
                 return None
             
+            # 기본 메트릭 정보
             metrics = {
                 "memory_usage": instance_info.get("memoryUsage", 0),
                 "cpu_usage": instance_info.get("cpuUsage", 0),
                 "request_count": instance_info.get("requestCount", 0),
                 "vm_status": instance_info.get("vmStatus", ""),
                 "vm_debug_enabled": instance_info.get("vmDebugEnabled", False),
-                "vm_liveness": instance_info.get("vmLiveness", "")
+                "vm_liveness": instance_info.get("vmLiveness", ""),
+                "availability": instance_info.get("availability", ""),
+                "start_time": instance_info.get("startTime", ""),
+                "app_engine_release": instance_info.get("appEngineRelease", "")
             }
             
+            # 리소스 정보 추가
+            resources = instance_info.get("resources", {})
+            if resources:
+                metrics.update({
+                    "allocated_memory_gb": resources.get("memoryGb", 0),
+                    "allocated_cpu_cores": resources.get("cpu", 0),
+                    "allocated_disk_gb": resources.get("diskGb", 0)
+                })
+            
+            # VM 상세 정보 추가
+            vm_details = instance_info.get("vmDetails", {})
+            if vm_details:
+                metrics.update({
+                    "vm_zone_name": vm_details.get("vmZoneName", ""),
+                    "vm_id": vm_details.get("vmId", ""),
+                    "vm_name": vm_details.get("vmName", "")
+                })
+            
+            # 메트릭 값들을 문자열로 변환 (SpaceONE 호환성)
+            for key, value in metrics.items():
+                if isinstance(value, (int, float)):
+                    metrics[key] = str(value)
+                elif isinstance(value, bool):
+                    metrics[key] = str(value).lower()
+                else:
+                    metrics[key] = str(value)
+            
+            _LOGGER.info(f"Retrieved instance metrics for {instance_id}: status={metrics['vm_status']}")
             return metrics
         except Exception as e:
             _LOGGER.error(f"Failed to get App Engine instance metrics for {instance_id} (v1): {e}")

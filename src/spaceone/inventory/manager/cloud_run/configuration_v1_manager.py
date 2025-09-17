@@ -50,14 +50,11 @@ class CloudRunConfigurationV1Manager(GoogleCloudManager):
             self.connector_name, **params
         )
 
-        # Get lists that relate with configurations through Google Cloud API
-        # V1은 namespace 기반이므로 단일 namespace로 모든 리소스 조회 가능
         try:
             namespace = f"namespaces/{project_id}"
             configurations = cloud_run_v1_conn.list_configurations(namespace)
 
             for configuration in configurations:
-                # V1에서는 location 정보가 metadata에 포함되어 있을 수 있음
                 location_id = (
                     configuration.get("metadata", {})
                     .get("labels", {})
@@ -81,7 +78,7 @@ class CloudRunConfigurationV1Manager(GoogleCloudManager):
                 location_id = configuration.get("_location", "")
                 region = self.parse_region_from_zone(location_id) if location_id else ""
                 self_link = configuration.get("metadata", {}).get("selfLink", "")
-                # Remove the leading "/apis/serving.knative.dev/v1/" from selfLink for full_name
+
                 if self_link.startswith("/apis/serving.knative.dev/v1/"):
                     full_name = self_link[len("/apis/serving.knative.dev/v1/") :]
                 else:
@@ -98,6 +95,9 @@ class CloudRunConfigurationV1Manager(GoogleCloudManager):
                         "location": location_id,
                         "region": region,
                         "self_link": self_link,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudRun", "Configuration", project_id, configuration_id
+                        ),
                     }
                 )
 

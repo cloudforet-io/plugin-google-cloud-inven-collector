@@ -8,6 +8,10 @@ from schematics.types import (
     StringType,
 )
 
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
+)
+
 
 class ObjectMeta(Model):
     name = StringType()
@@ -36,13 +40,15 @@ class WorkerPoolV1(Model):
     metadata = ModelType(ObjectMeta)
     spec = ModelType(WorkerPoolSpec)
     status = ModelType(WorkerPoolStatus)
-    
+
     # Additional fields
     name = StringType()
     project = StringType()
     location = StringType()
     region = StringType()
-    
+
     # Revision info (populated by manager)
     revisions = BaseType(default=[])
     revision_count = IntType(default=0)
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)

@@ -50,32 +50,35 @@ class CloudRunWorkerPoolV1Manager(GoogleCloudManager):
             self.connector_name, **params
         )
 
-        # Get lists that relate with worker pools through Google Cloud API
-        # V1은 namespace 기반이므로 단일 namespace로 모든 리소스 조회 가능
         try:
             namespace = f"namespaces/{project_id}"
             worker_pools = cloud_run_v1_conn.list_worker_pools(namespace)
-            
+
             for worker_pool in worker_pools:
-                # V1에서는 location 정보가 metadata에 포함되어 있을 수 있음
                 location_id = (
-                    worker_pool.get("metadata", {}).get("labels", {}).get("cloud.googleapis.com/location") or
-                    worker_pool.get("metadata", {}).get("namespace", "").split("/")[-1] or
-                    "us-central1"  # default location
+                    worker_pool.get("metadata", {})
+                    .get("labels", {})
+                    .get("cloud.googleapis.com/location")
+                    or worker_pool.get("metadata", {})
+                    .get("namespace", "")
+                    .split("/")[-1]
+                    or "us-central1"  # default location
                 )
                 worker_pool["_location"] = location_id
-                
-                # Get revisions for each worker pool (V1에서는 workerPool 라벨 사용)
+
+                # Get revisions for each worker pool
                 try:
                     revisions = cloud_run_v1_conn.list_revisions(namespace)
-                    # Filter revisions for this worker pool - 올바른 라벨 사용
                     worker_pool_name = worker_pool.get("metadata", {}).get("name", "")
                     worker_pool_revisions = [
-                        rev for rev in revisions
-                        if rev.get("metadata", {}).get("labels", {}).get("run.googleapis.com/workerPool") == worker_pool_name
+                        rev
+                        for rev in revisions
+                        if rev.get("metadata", {})
+                        .get("labels", {})
+                        .get("run.googleapis.com/workerPool")
+                        == worker_pool_name
                     ]
-                    
-                    # 복잡한 중첩 구조 대신 필요한 정보만 추출하여 단순화
+
                     simplified_revisions = []
                     for rev in worker_pool_revisions:
                         metadata = rev.get("metadata", {})
@@ -86,23 +89,27 @@ class CloudRunWorkerPoolV1Manager(GoogleCloudManager):
                             "generation": metadata.get("generation"),
                             "create_time": metadata.get("creationTimestamp"),
                             "update_time": status.get("lastTransitionTime"),
-                            "worker_pool": metadata.get("labels", {}).get("run.googleapis.com/workerPool"),
+                            "worker_pool": metadata.get("labels", {}).get(
+                                "run.googleapis.com/workerPool"
+                            ),
                             "conditions": [
                                 {
                                     "type": cond.get("type"),
                                     "status": cond.get("status"),
-                                    "reason": cond.get("reason")
+                                    "reason": cond.get("reason"),
                                 }
                                 for cond in status.get("conditions", [])
                                 if isinstance(cond, dict)
-                            ]
+                            ],
                         }
                         simplified_revisions.append(simplified_revision)
-                    
+
                     worker_pool["revisions"] = simplified_revisions
                     worker_pool["revision_count"] = len(simplified_revisions)
                 except Exception as e:
-                    _LOGGER.warning(f"Failed to get revisions for worker pool: {str(e)}")
+                    _LOGGER.warning(
+                        f"Failed to get revisions for worker pool: {str(e)}"
+                    )
                     worker_pool["revisions"] = []
                     worker_pool["revision_count"] = 0
         except Exception as e:
@@ -126,6 +133,9 @@ class CloudRunWorkerPoolV1Manager(GoogleCloudManager):
                         "project": project_id,
                         "location": location_id,
                         "region": region,
+                        "google_cloud_logging": self.set_google_cloud_logging(
+                            "CloudRun", "WorkerPool", project_id, worker_pool_id
+                        ),
                     }
                 )
 
@@ -142,7 +152,10 @@ class CloudRunWorkerPoolV1Manager(GoogleCloudManager):
                         "data": worker_pool_data,
                         "reference": ReferenceModel(
                             {
-                                "resource_id": getattr(worker_pool_data, 'metadata', {}).get('uid') or worker_pool_id,
+                                "resource_id": getattr(
+                                    worker_pool_data, "metadata", {}
+                                ).get("uid")
+                                or worker_pool_id,
                                 "external_link": f"https://console.cloud.google.com/run/workerpools/details/{location_id}/{worker_pool_id}?project={project_id}",
                             }
                         ),
@@ -155,12 +168,16 @@ class CloudRunWorkerPoolV1Manager(GoogleCloudManager):
                 )
 
             except Exception as e:
-                _LOGGER.error(f"Failed to process worker pool {worker_pool_id}: {str(e)}")
+                _LOGGER.error(
+                    f"Failed to process worker pool {worker_pool_id}: {str(e)}"
+                )
                 error_response = self.generate_resource_error_response(
                     e, "WorkerPoolV1", "CloudRun", worker_pool_id
                 )
                 error_responses.append(error_response)
 
-        _LOGGER.debug(f"** Cloud Run WorkerPool V1 END ** ({time.time() - start_time:.2f}s)")
+        _LOGGER.debug(
+            f"** Cloud Run WorkerPool V1 END ** ({time.time() - start_time:.2f}s)"
+        )
 
         return collected_cloud_services, error_responses

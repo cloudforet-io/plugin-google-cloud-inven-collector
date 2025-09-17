@@ -30,18 +30,18 @@ class DataprocClusterManager(GoogleCloudManager):
 
     def list_clusters(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
-        Dataproc 클러스터 목록을 조회합니다.
+        Retrieve a list of Dataproc clusters.
 
         Args:
-            params: 커넥터에 전달할 파라미터
-                - secret_data: Google Cloud 인증 정보
-                - options: 추가 옵션
+            params: Parameters to pass to the connector
+                - secret_data: Google Cloud authentication information
+                - options: Additional options
 
         Returns:
-            Dataproc 클러스터 리소스의 리스트
+            List of Dataproc cluster resources
 
         Raises:
-            Exception: 커넥터 초기화 실패 시
+            Exception: When connector initialization fails
         """
         if not params or "secret_data" not in params:
             raise ValueError("secret_data is required in params")
@@ -65,15 +65,15 @@ class DataprocClusterManager(GoogleCloudManager):
         self, cluster_name: str, region: str, params: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        특정 Dataproc 클러스터 정보를 조회합니다.
+        Retrieve specific Dataproc cluster information.
 
         Args:
-            cluster_name (str): 클러스터의 이름.
-            region (str): 클러스터가 위치한 리전.
-            params (dict): 커넥터에 전달할 파라미터.
+            cluster_name (str): The name of the cluster.
+            region (str): The region where the cluster is located.
+            params (dict): Parameters to pass to the connector.
 
         Returns:
-            dict: 발견된 경우 클러스터 리소스, 그렇지 않으면 빈 딕셔너리.
+            dict: Cluster resource if found, otherwise empty dictionary.
         """
         cluster_connector: DataprocClusterConnector = self.locator.get_connector(
             self.connector_name, **params
@@ -95,15 +95,15 @@ class DataprocClusterManager(GoogleCloudManager):
         params: Dict[str, Any] = None,
     ) -> List[Dict[str, Any]]:
         """
-        Dataproc 작업 목록을 조회합니다.
+        Retrieve a list of Dataproc jobs.
 
         Args:
-            region (str, optional): 작업을 필터링할 리전.
-            cluster_name (str, optional): 작업을 필터링할 클러스터의 이름.
-            params (dict, optional): 커넥터에 전달할 파라미터.
+            region (str, optional): Region to filter jobs.
+            cluster_name (str, optional): Name of the cluster to filter jobs.
+            params (dict, optional): Parameters to pass to the connector.
 
         Returns:
-            list: Dataproc 작업 리소스의 리스트.
+            list: List of Dataproc job resources.
         """
         if params is None:
             params = {}
@@ -125,13 +125,13 @@ class DataprocClusterManager(GoogleCloudManager):
 
     def list_workflow_templates(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
-        Dataproc 워크플로 템플릿 목록을 조회합니다.
+        Retrieve a list of Dataproc workflow templates.
 
         Args:
-            params (dict): 커넥터에 전달할 파라미터.
+            params (dict): Parameters to pass to the connector.
 
         Returns:
-            list: Dataproc 워크플로 템플릿 리소스의 리스트.
+            list: List of Dataproc workflow template resources.
         """
         cluster_connector: DataprocClusterConnector = self.locator.get_connector(
             self.connector_name, **params
@@ -147,13 +147,13 @@ class DataprocClusterManager(GoogleCloudManager):
 
     def list_autoscaling_policies(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
-        Dataproc 오토스케일링 정책 목록을 조회합니다.
+        Retrieve a list of Dataproc autoscaling policies.
 
         Args:
-            params (dict): 커넥터에 전달할 파라미터.
+            params (dict): Parameters to pass to the connector.
 
         Returns:
-            list: Dataproc 오토스케일링 정책 리소스의 리스트.
+            list: List of Dataproc autoscaling policy resources.
         """
         cluster_connector: DataprocClusterConnector = self.locator.get_connector(
             self.connector_name, **params
@@ -171,18 +171,18 @@ class DataprocClusterManager(GoogleCloudManager):
         self, params: Dict[str, Any]
     ) -> Tuple[List[DataprocClusterResponse], List[Dict[str, Any]]]:
         """
-        Dataproc 클러스터 정보를 수집하여 Cloud Service 리소스로 변환합니다.
+        Collect Dataproc cluster information and convert to Cloud Service resources.
 
         Args:
-            params: 수집 프로세스를 위한 파라미터
-                - secret_data: Google Cloud 인증 정보
-                - options: 추가 수집 옵션
+            params: Parameters for the collection process
+                - secret_data: Google Cloud authentication information
+                - options: Additional collection options
 
         Returns:
-            수집된 Cloud Service 응답 리스트와 에러 응답 리스트의 튜플
+            Tuple of collected Cloud Service response list and error response list
 
         Raises:
-            ValueError: 필수 파라미터가 누락된 경우
+            ValueError: When required parameters are missing
         """
         logger.debug("** Dataproc Cluster START **")
 
@@ -198,7 +198,7 @@ class DataprocClusterManager(GoogleCloudManager):
         if not project_id:
             raise ValueError("project_id is required in secret_data")
 
-        # Dataproc 클러스터 목록 조회
+        # Retrieve Dataproc cluster list
         try:
             clusters = self.list_clusters(params)
             if not clusters:
@@ -213,39 +213,49 @@ class DataprocClusterManager(GoogleCloudManager):
 
         for cluster in clusters:
             try:
-                # 클러스터 위치 정보 추출
-                location = ""
-                if "placement" in cluster and "zoneUri" in cluster["placement"]:
-                    zone_uri = cluster["placement"]["zoneUri"]
-                    location = zone_uri.split("/")[-1] if zone_uri else ""
-                elif "config" in cluster and "gceClusterConfig" in cluster["config"]:
-                    # zone 정보가 있으면 해당 지역을 추출
-                    zone_uri = cluster["config"]["gceClusterConfig"].get("zoneUri", "")
-                    if zone_uri:
-                        location = zone_uri.split("/")[-1]
+                # Extract cluster location information
+                location = cluster.get("labels", {}).get("goog-dataproc-location", "")
 
-                # 클러스터명 추출
+                # Extract cluster name
                 cluster_name = cluster.get("clusterName", "")
+                cluster_uuid = cluster.get("clusterUuid", "")
 
-                # 기본 클러스터 데이터 준비
+                # Set up monitoring filters for Dataproc Cluster
+                google_cloud_monitoring_filters = [
+                    {
+                        "key": "resource.labels.cluster_uuid",
+                        "value": cluster_uuid,
+                    },
+                ]
+
+                # Prepare basic cluster data
                 cluster_data = {
-                    "name": str(cluster.get("clusterName", "")),  # name 필드로 매핑
+                    "name": str(cluster.get("clusterName", "")),  # Map to name field
                     "cluster_name": str(cluster.get("clusterName", "")),
-                    "project_id": str(project_id),  # project_id를 명시적으로 설정
-                    "cluster_uuid": str(cluster.get("clusterUuid", "")),
+                    "project_id": str(project_id),  # Explicitly set project_id
+                    "cluster_uuid": cluster_uuid,
                     "status": cluster.get("status", {}),
-                    "labels": {k: str(v) for k, v in cluster.get("labels", {}).items()},
+                    "labels": self._get_labels(labels=cluster.get("labels", {})),
                     "location": location,
+                    "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                        project_id,
+                        "dataproc.googleapis.com",
+                        cluster_uuid,
+                        google_cloud_monitoring_filters,
+                    ),
+                    "google_cloud_logging": self.set_google_cloud_logging(
+                        "Dataproc", "Cluster", project_id, cluster_name
+                    ),
                 }
 
-                # 설정 정보 추가
+                # Add configuration information
                 config = cluster.get("config", {})
                 cluster_data["config"] = {
                     "config_bucket": str(config.get("configBucket", "")),
                     "temp_bucket": str(config.get("tempBucket", "")),
                 }
 
-                # GCE 클러스터 설정
+                # GCE cluster configuration
                 if "gceClusterConfig" in config:
                     gce_config = config["gceClusterConfig"]
                     cluster_data["config"]["gce_cluster_config"] = {
@@ -259,7 +269,7 @@ class DataprocClusterManager(GoogleCloudManager):
                         ),
                     }
 
-                # 인스턴스 그룹 설정
+                # Instance group configuration
                 if "instanceGroupConfig" in config:
                     instance_config = config["instanceGroupConfig"]
                     cluster_data["config"]["instanceGroupConfig"] = {
@@ -272,9 +282,16 @@ class DataprocClusterManager(GoogleCloudManager):
                         "diskConfig": instance_config.get("diskConfig", {}),
                     }
 
-                # 마스터 설정
+                # Master configuration
                 master_config = config.get("masterConfig", {})
                 if master_config:
+                    # Fix disk_config mapping
+                    disk_config = master_config.get("diskConfig", {})
+                    mapped_disk_config = {
+                        "boot_disk_size_gb": disk_config.get("bootDiskSizeGb"),
+                        "boot_disk_type": disk_config.get("bootDiskType"),
+                    }
+
                     cluster_data["config"]["master_config"] = {
                         "num_instances": str(master_config.get("numInstances", "")),
                         "instance_names": master_config.get("instanceNames", []),
@@ -282,7 +299,10 @@ class DataprocClusterManager(GoogleCloudManager):
                         "machine_type_uri": str(
                             master_config.get("machineTypeUri", "")
                         ),
-                        "disk_config": master_config.get("diskConfig", {}),
+                        "disk_config": mapped_disk_config,
+                        "min_cpu_platform": str(
+                            master_config.get("minCpuPlatform", "")
+                        ),
                         "preemptibility": str(
                             master_config.get("preemptibility", "NON_PREEMPTIBLE")
                         ),
@@ -293,13 +313,24 @@ class DataprocClusterManager(GoogleCloudManager):
                         "instance_names": [],
                         "image_uri": "",
                         "machine_type_uri": "",
-                        "disk_config": {},
+                        "disk_config": {
+                            "boot_disk_size_gb": None,
+                            "boot_disk_type": None,
+                        },
+                        "min_cpu_platform": "",
                         "preemptibility": "NON_PREEMPTIBLE",
                     }
 
-                # 워커 설정
+                # Worker configuration
                 worker_config = config.get("workerConfig", {})
                 if worker_config:
+                    # Fix disk_config mapping
+                    disk_config = worker_config.get("diskConfig", {})
+                    mapped_disk_config = {
+                        "boot_disk_size_gb": disk_config.get("bootDiskSizeGb"),
+                        "boot_disk_type": disk_config.get("bootDiskType"),
+                    }
+
                     cluster_data["config"]["worker_config"] = {
                         "num_instances": str(worker_config.get("numInstances", "")),
                         "instance_names": worker_config.get("instanceNames", []),
@@ -307,7 +338,14 @@ class DataprocClusterManager(GoogleCloudManager):
                         "machine_type_uri": str(
                             worker_config.get("machineTypeUri", "")
                         ),
-                        "disk_config": worker_config.get("diskConfig", {}),
+                        "disk_config": mapped_disk_config,
+                        "min_cpu_platform": str(
+                            worker_config.get("minCpuPlatform", "")
+                        ),
+                        "is_preemptible": worker_config.get("isPreemptible", False),
+                        "preemptibility": str(
+                            worker_config.get("preemptibility", "NON_PREEMPTIBLE")
+                        ),
                     }
                 else:
                     cluster_data["config"]["worker_config"] = {
@@ -315,10 +353,16 @@ class DataprocClusterManager(GoogleCloudManager):
                         "instance_names": [],
                         "image_uri": "",
                         "machine_type_uri": "",
-                        "disk_config": {},
+                        "disk_config": {
+                            "boot_disk_size_gb": None,
+                            "boot_disk_type": None,
+                        },
+                        "min_cpu_platform": "",
+                        "is_preemptible": False,
+                        "preemptibility": "NON_PREEMPTIBLE",
                     }
 
-                # 소프트웨어 설정
+                # Software configuration
                 software_config = config.get("softwareConfig", {})
                 if software_config:
                     cluster_data["config"]["software_config"] = {
@@ -333,37 +377,6 @@ class DataprocClusterManager(GoogleCloudManager):
                         "image_version": "",
                         "properties": {},
                         "optional_components": [],
-                    }
-
-                # Worker Config
-                worker_config = config.get("workerConfig", {})
-                if worker_config:
-                    cluster_data["config"]["worker_config"] = {
-                        "num_instances": str(worker_config.get("numInstances", "")),
-                        "instance_names": worker_config.get("instanceNames", []),
-                        "image_uri": str(worker_config.get("imageUri", "")),
-                        "machine_type_uri": str(
-                            worker_config.get("machineTypeUri", "")
-                        ),
-                        "disk_config": worker_config.get("diskConfig", {}),
-                        "is_preemptible": worker_config.get("isPreemptible", False),
-                        "min_cpu_platform": str(
-                            worker_config.get("minCpuPlatform", "")
-                        ),
-                        "preemptibility": str(
-                            worker_config.get("preemptibility", "NON_PREEMPTIBLE")
-                        ),
-                    }
-                else:
-                    cluster_data["config"]["worker_config"] = {
-                        "num_instances": "",
-                        "instance_names": [],
-                        "image_uri": "",
-                        "machine_type_uri": "",
-                        "disk_config": {},
-                        "is_preemptible": False,
-                        "min_cpu_platform": "",
-                        "preemptibility": "NON_PREEMPTIBLE",
                     }
 
                 # Lifecycle Config (Scheduled Deletion)
@@ -387,16 +400,16 @@ class DataprocClusterManager(GoogleCloudManager):
                         "idle_delete_ttl": "",
                     }
 
-                # 메트릭 정보 추가
+                # Add metrics information
                 if "metrics" in cluster:
                     cluster_data["metrics"] = cluster["metrics"]
 
-                # Job 정보 수집 최적화 - 성능 개선을 위해 선택적으로 수집
+                # Optimize job information collection - collect selectively for performance improvement
                 cluster_data["jobs"] = []
-                # Job 수집은 별도 옵션이 있을 때만 수행 (성능 최적화)
+                # Job collection is performed only when there is a separate option (performance optimization)
                 if params.get("options", {}).get("include_jobs", False):
                     try:
-                        # 클러스터 위치에서 리전 추출
+                        # Extract region from cluster location
                         cluster_region = (
                             location.rsplit("-", 1)[0]
                             if location and "-" in location
@@ -409,8 +422,8 @@ class DataprocClusterManager(GoogleCloudManager):
                                 params=params,
                             )
                             if jobs:
-                                # 최근 작업 수집 (성능 최적화를 위해 제한)
-                                job_limit = min(5, len(jobs))  # 최대 5개로 축소
+                                # Collect recent jobs (limited for performance optimization)
+                                job_limit = min(5, len(jobs))  # Reduce to maximum 5
                                 for job in jobs[:job_limit]:
                                     job_data = {
                                         "reference": job.get("reference", {}),
@@ -422,15 +435,15 @@ class DataprocClusterManager(GoogleCloudManager):
                                     cluster_data["jobs"].append(job_data)
                     except Exception as e:
                         logger.warning(f"Failed to collect jobs for cluster: {e}")
-                        # jobs는 이미 빈 배열로 초기화됨
+                        # jobs is already initialized as empty array
                 else:
-                    # Job 수집 생략 - 성능 최적화
+                    # Skip job collection - performance optimization
                     logger.debug("Job collection skipped for performance optimization")
 
-                # DataprocCluster 모델 생성
+                # Create DataprocCluster model
                 dataproc_cluster_data = DataprocCluster(cluster_data, strict=False)
 
-                # DataprocClusterResource 생성
+                # Create DataprocClusterResource
                 cluster_resource = DataprocClusterResource(
                     {
                         "name": cluster_data.get("name"),
@@ -446,7 +459,7 @@ class DataprocClusterManager(GoogleCloudManager):
                 ##################################
                 self.set_region_code(location)
 
-                # DataprocClusterResponse 생성
+                # Create DataprocClusterResponse
                 cluster_response = DataprocClusterResponse(
                     {"resource": cluster_resource}
                 )
@@ -461,3 +474,10 @@ class DataprocClusterManager(GoogleCloudManager):
 
         logger.debug("** Dataproc Cluster END **")
         return collected_cloud_services, error_responses
+
+    @staticmethod
+    def _get_labels(labels):
+        changed_labels = []
+        for label_key, label_value in labels.items():
+            changed_labels.append({"key": label_key, "value": label_value})
+        return changed_labels

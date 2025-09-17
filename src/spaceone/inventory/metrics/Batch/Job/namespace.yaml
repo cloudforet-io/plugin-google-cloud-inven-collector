@@ -1,0 +1,8 @@
+---
+namespace_id: ns-google-cloud-batch-job
+name: Batch/Job
+category: ASSET
+icon: "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Batch.svg"
+version: "1.1"
+resource_type: inventory.CloudService:google_cloud.Batch.Job
+group: google_cloud

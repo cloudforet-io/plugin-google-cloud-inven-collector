@@ -42,16 +42,17 @@ app_engine_instance = ItemDynamicLayout.set_fields(
         TextDyField.data_source("CPU Usage", "data.cpu_usage"),
         DateTimeDyField.data_source("Created", "data.create_time"),
         DateTimeDyField.data_source("Updated", "data.update_time"),
+        DateTimeDyField.data_source("Started", "data.start_time"),
     ],
 )
 
 vm_details = ItemDynamicLayout.set_fields(
     "VM Details",
     fields=[
-        TextDyField.data_source("VM Zone Name", "data.vm_details.vmZoneName"),
-        TextDyField.data_source("VM ID", "data.vm_details.vmId"),
-        TextDyField.data_source("VM IP", "data.vm_details.vmIp"),
-        TextDyField.data_source("VM Name", "data.vm_details.vmName"),
+        TextDyField.data_source("VM Zone Name", "data.vm_details.vm_zone_name"),
+        TextDyField.data_source("VM ID", "data.vm_details.vm_id"),
+        TextDyField.data_source("VM IP", "data.vm_details.vm_ip"),
+        TextDyField.data_source("VM Name", "data.vm_details.vm_name"),
     ],
 )
 
@@ -66,10 +67,10 @@ availability = ItemDynamicLayout.set_fields(
 network = ItemDynamicLayout.set_fields(
     "Network",
     fields=[
-        TextDyField.data_source("Forwarded Ports", "data.network.forwardedPorts"),
-        TextDyField.data_source("Instance Tag", "data.network.instanceTag"),
+        TextDyField.data_source("Forwarded Ports", "data.network.forwarded_ports"),
+        TextDyField.data_source("Instance Tag", "data.network.instance_tag"),
         TextDyField.data_source("Network Name", "data.network.name"),
-        TextDyField.data_source("Subnetwork Name", "data.network.subnetworkName"),
+        TextDyField.data_source("Subnetwork Name", "data.network.subnetwork_name"),
     ],
 )
 
@@ -77,8 +78,8 @@ resources = ItemDynamicLayout.set_fields(
     "Resources",
     fields=[
         TextDyField.data_source("CPU", "data.resources.cpu"),
-        TextDyField.data_source("Disk GB", "data.resources.diskGb"),
-        TextDyField.data_source("Memory GB", "data.resources.memoryGb"),
+        TextDyField.data_source("Disk GB", "data.resources.disk_gb"),
+        TextDyField.data_source("Memory GB", "data.resources.memory_gb"),
         TextDyField.data_source("Volumes", "data.resources.volumes"),
     ],
 )

@@ -15,13 +15,19 @@ from schematics.types import (
     StringType,
 )
 
+from spaceone.inventory.libs.schema.google_cloud_logging import (
+    GoogleCloudLoggingModel,
+)
+from spaceone.inventory.libs.schema.google_cloud_monitoring import (
+    GoogleCloudMonitoringModel,
+)
+
 
 class DiskConfig(Model):
     """Dataproc 클러스터 인스턴스의 디스크 구성을 나타냅니다."""
 
     boot_disk_type = StringType()
     boot_disk_size_gb = IntType()
-    num_local_ssds = IntType()
 
 
 class InstanceGroupConfig(Model):
@@ -163,7 +169,7 @@ class DataprocCluster(Model):
     cluster_name = StringType()
     cluster_uuid = StringType()
     config = ModelType(ClusterConfig)
-    labels = DictType(StringType())
+    labels = ListType(DictType(StringType()))
     status = ModelType(ClusterStatus)
     status_history = ListType(ModelType(ClusterStatus))
     metrics = ModelType(ClusterMetrics)
@@ -171,6 +177,12 @@ class DataprocCluster(Model):
     jobs = ListType(ModelType(DataprocJob))
     workflow_templates = ListType(ModelType(WorkflowTemplate))
     autoscaling_policies = ListType(ModelType(AutoscalingPolicy))
+    # Monitoring data
+    google_cloud_monitoring = ModelType(
+        GoogleCloudMonitoringModel, serialize_when_none=False
+    )
+    # Logging data
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)
 
     def reference(self) -> Dict[str, str]:
         """
@@ -181,5 +193,6 @@ class DataprocCluster(Model):
         """
         return {
             "resource_id": f"https://dataproc.googleapis.com/v1/projects/{self.project_id}/regions/{self.location}/clusters/{self.cluster_name}",
-            "external_link": f"https://console.cloud.google.com/dataproc/clusters?project={self.project_id}",
+            # "external_link": f"https://console.cloud.google.com/dataproc/clusters?project={self.project_id}",
+            "external_link": f"https://console.cloud.google.com/dataproc/clusters/{self.cluster_name}/monitoring?region={self.location}&project={self.project_id}",
         }
