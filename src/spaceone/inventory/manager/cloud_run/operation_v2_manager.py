@@ -54,7 +54,6 @@ class CloudRunOperationV2Manager(GoogleCloudManager):
             "CloudRunV1Connector", **params
         )
 
-        # Get lists that relate with operations through Google Cloud API
         all_operations = []
         parent = f"projects/{project_id}"
 
@@ -102,7 +101,6 @@ class CloudRunOperationV2Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                # Operation V2 데이터 구조에 맞게 변환
                 operation_data_dict = {
                     "name": operation_id,
                     "done": operation.get("done", False),
@@ -112,7 +110,6 @@ class CloudRunOperationV2Manager(GoogleCloudManager):
                     "project": project_id,
                     "location": location_id,
                     "region": region,
-                    # 추가 필드들 추출
                     "operation_type": operation.get("metadata", {})
                     .get("@type", "")
                     .split(".")[-1]

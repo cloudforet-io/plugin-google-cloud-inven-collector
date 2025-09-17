@@ -50,14 +50,11 @@ class CloudRunServiceV1Manager(GoogleCloudManager):
             self.connector_name, **params
         )
 
-        # Get lists that relate with services through Google Cloud API
-        # V1은 namespace 기반이므로 단일 namespace로 모든 리소스 조회 가능
         try:
             namespace = f"namespaces/{project_id}"
             services = cloud_run_v1_conn.list_services(namespace)
 
             for service in services:
-                # V1에서는 location 정보가 metadata에 포함되어 있을 수 있음
                 location_id = (
                     service.get("metadata", {})
                     .get("labels", {})
@@ -67,10 +64,8 @@ class CloudRunServiceV1Manager(GoogleCloudManager):
                 )
                 service["_location"] = location_id
 
-                # Get revisions for each service - 단순화된 revision 정보만 저장
                 try:
                     revisions = cloud_run_v1_conn.list_revisions(namespace)
-                    # Filter revisions for this service
                     service_name = service.get("metadata", {}).get("name", "")
                     service_revisions = [
                         rev
@@ -81,7 +76,6 @@ class CloudRunServiceV1Manager(GoogleCloudManager):
                         == service_name
                     ]
 
-                    # 복잡한 중첩 구조 대신 필요한 정보만 추출하여 단순화
                     simplified_revisions = []
                     for rev in service_revisions:
                         metadata = rev.get("metadata", {})
@@ -131,7 +125,7 @@ class CloudRunServiceV1Manager(GoogleCloudManager):
                 ##################################
                 service.update(
                     {
-                        "name": service_id,  # Set name for SpaceONE display
+                        "name": service_id,
                         "project": project_id,
                         "location": location_id,
                         "region": region,

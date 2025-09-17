@@ -50,14 +50,11 @@ class CloudRunJobV1Manager(GoogleCloudManager):
             self.connector_name, **params
         )
 
-        # Get lists that relate with jobs through Google Cloud API
-        # V1은 namespace 기반이므로 단일 namespace로 모든 리소스 조회 가능
         try:
             namespace = f"namespaces/{project_id}"
             jobs = cloud_run_v1_conn.list_jobs(namespace)
 
             for job in jobs:
-                # V1에서는 location 정보가 metadata에 포함되어 있을 수 있음
                 location_id = (
                     job.get("metadata", {})
                     .get("labels", {})
@@ -67,10 +64,8 @@ class CloudRunJobV1Manager(GoogleCloudManager):
                 )
                 job["_location"] = location_id
 
-                # Get executions and tasks for each job - 단순화된 정보만 저장
                 try:
                     executions = cloud_run_v1_conn.list_executions(namespace)
-                    # Filter executions for this job
                     job_name = job.get("metadata", {}).get("name", "")
                     job_executions = [
                         exec
@@ -81,12 +76,9 @@ class CloudRunJobV1Manager(GoogleCloudManager):
                         == job_name
                     ]
 
-                    # 복잡한 중첩 구조 대신 필요한 정보만 추출하여 단순화
                     simplified_executions = []
                     for execution in job_executions:
                         metadata = execution.get("metadata", {})
-
-                        # Get tasks for this execution
                         execution_name = metadata.get("name", "")
                         try:
                             tasks = cloud_run_v1_conn.list_tasks(namespace)
@@ -99,7 +91,6 @@ class CloudRunJobV1Manager(GoogleCloudManager):
                                 == execution_name
                             ]
 
-                            # 단순화된 task 정보
                             simplified_tasks = []
                             for task in execution_tasks:
                                 task_metadata = task.get("metadata", {})
@@ -173,7 +164,6 @@ class CloudRunJobV1Manager(GoogleCloudManager):
                 ##################################
                 # 3. Make Return Resource
                 ##################################
-                # V1 API 응답의 복잡한 중첩 구조를 처리하기 위해 매우 관대한 설정 사용
                 job_data = JobV1(job, strict=False)
 
                 job_resource = JobV1Resource(

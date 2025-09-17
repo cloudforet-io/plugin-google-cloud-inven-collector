@@ -52,7 +52,6 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
             self.connector_name, **params
         )
 
-        # Get lists that relate with repositories through Google Cloud API
         all_repositories = []
         try:
             parent = f"projects/{project_id}"
@@ -90,13 +89,11 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
                                     _LOGGER.warning(
                                         f"Failed to query repositories in connection {connection_name}: {str(e)}"
                                     )
-                                    # Continue with next connection even if this one fails
                                     continue
                     except Exception as e:
                         _LOGGER.error(
                             f"Failed to query connections in location {location_id}: {str(e)}"
                         )
-                        # Continue with next location even if this one fails
                         continue
         except Exception as e:
             _LOGGER.error(f"V2 API failed to get locations: {str(e)}")
@@ -121,12 +118,9 @@ class CloudBuildRepositoryV2Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                # Connection 정보 추출 - Repository name에서 추출
                 connection_display_name = ""
 
                 if full_name:
-                    # Repository name 형식: projects/{project}/locations/{location}/connections/{connection}/repositories/{repo}
-                    # Connection 부분을 추출
                     name_parts = full_name.split("/")
                     if "connections" in name_parts:
                         connection_index = name_parts.index("connections")
