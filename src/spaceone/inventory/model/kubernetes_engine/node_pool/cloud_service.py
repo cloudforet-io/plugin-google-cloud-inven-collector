@@ -229,6 +229,7 @@ class Metrics(Model):
 
 
 class NodePool(BaseResource):
+    name = StringType()  # Override BaseResource name field to ensure serialization
     cluster_name = StringType()
     location = StringType()
     project_id = StringType()
