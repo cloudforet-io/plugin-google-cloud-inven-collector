@@ -408,7 +408,15 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     instance_response = BaseResponse.create_with_logging(
                                         state="SUCCESS",
                                         resource_type="inventory.CloudService",
-                                        resource=instance_resource
+                                        resource=instance_resource,
+                                        match_rules={
+                                            "1": [
+                                                "reference.resource_id",
+                                                "provider",
+                                                "cloud_service_type",
+                                                "cloud_service_group",
+                                            ]
+                                        }
                                     )
 
                                     collected_cloud_services.append(instance_response)
