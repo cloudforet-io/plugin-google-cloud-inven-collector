@@ -266,6 +266,7 @@ class KubernetesEngineResource(CloudServiceResource):
 
 class NodePoolResource(KubernetesEngineResource):
     cloud_service_type = StringType(default="NodePool")
+    data = ModelType(NodePool)  # cluster와 동일한 구조로 복원
     _metadata = ModelType(
         CloudServiceMeta, default=node_pool_meta, serialized_name="metadata"
     )
