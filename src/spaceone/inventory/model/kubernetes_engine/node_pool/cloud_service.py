@@ -1,6 +1,7 @@
 from schematics import Model
 from schematics.types import (
     BooleanType,
+    DateTimeType,
     DictType,
     IntType,
     ListType,
@@ -238,6 +239,9 @@ class NodePool(Model):
     status_message = StringType(deserialize_from="statusMessage")
     initial_node_count = IntType(deserialize_from="initialNodeCount")
     total_nodes = IntType(serialize_when_none=False)
+    create_time = DateTimeType(deserialize_from="createTime")
+    update_time = DateTimeType(deserialize_from="updateTime")
+    api_version = StringType()
     config = ModelType(NodeConfig)
     autoscaling = ModelType(AutoScaling)
     management = ModelType(Management)
