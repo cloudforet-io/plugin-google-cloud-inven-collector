@@ -219,7 +219,15 @@ class GKEClusterV1Connector(GoogleCloudConnector):
         })
         
         try:
-            request = service_usage_client.services().quotaLimits().list(**query)
+            # Service Usage API의 quotaLimits 리소스 접근 시도
+            services_resource = service_usage_client.services()
+            
+            # quotaLimits 속성이 존재하는지 확인
+            if not hasattr(services_resource, 'quotaLimits'):
+                _LOGGER.warning(f"quotaLimits resource not available for service {service_name}")
+                return quota_list
+            
+            request = services_resource.quotaLimits().list(**query)
             while request is not None:
                 response = request.execute()
                 if "quotaLimits" in response:
@@ -227,11 +235,13 @@ class GKEClusterV1Connector(GoogleCloudConnector):
                 
                 # 페이지네이션 처리
                 try:
-                    request = service_usage_client.services().quotaLimits().list_next(
+                    request = services_resource.quotaLimits().list_next(
                         previous_request=request, previous_response=response
                     )
                 except AttributeError:
                     break
+        except AttributeError as e:
+            _LOGGER.warning(f"quotaLimits resource not available for service {service_name}: {e}")
         except Exception as e:
             _LOGGER.warning(f"Failed to list quota limits for service {service_name}: {e}")
             

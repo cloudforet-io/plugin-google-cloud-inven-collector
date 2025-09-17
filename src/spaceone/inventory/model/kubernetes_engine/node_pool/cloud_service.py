@@ -102,7 +102,7 @@ class Metrics(Model):
     status = StringType()
 
 
-class NodePool(CloudServiceResource):
+class NodePool(Model):
     name = StringType()
     cluster_name = StringType()
     location = StringType()
@@ -123,7 +123,6 @@ class NodePool(CloudServiceResource):
     upgrade_settings = DictType(StringType, deserialize_from="upgradeSettings")
     create_time = DateTimeType(deserialize_from="createTime")
     update_time = DateTimeType(deserialize_from="updateTime")
-    api_version = StringType()
     google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
     google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)
     

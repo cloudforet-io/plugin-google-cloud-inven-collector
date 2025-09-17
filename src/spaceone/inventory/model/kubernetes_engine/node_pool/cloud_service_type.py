@@ -60,7 +60,6 @@ cst_gke_node_pool._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Auto Repair", "data.management.auto_repair"),
         DateTimeDyField.data_source("Created", "data.create_time"),
         DateTimeDyField.data_source("Updated", "data.update_time"),
-        TextDyField.data_source("API Version", "data.api_version"),
     ],
     search=[
         SearchField.set(name="NodePool Name", key="data.name"),

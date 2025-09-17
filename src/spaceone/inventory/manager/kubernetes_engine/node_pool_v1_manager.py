@@ -676,7 +676,6 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                     # NodePoolResource 생성
                     node_pool_resource = NodePoolResource(
                         {
-                            "name": node_pool_data.get("name"),
                             "data": node_pool_data_model,
                             "reference": {
                                 "resource_id": f"{cluster_name}/{location}/{node_pool_name}",
