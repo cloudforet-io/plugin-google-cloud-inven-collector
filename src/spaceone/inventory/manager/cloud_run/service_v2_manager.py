@@ -54,7 +54,6 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
             "CloudRunV1Connector", **params
         )
 
-        # Get lists that relate with services through Google Cloud API
         all_services = []
         parent = f"projects/{project_id}"
 
@@ -118,17 +117,13 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                # Extract URL from service
                 service_uri = service.get("uri", "")
-
-                # Extract status information
                 status = service.get("status", {})
                 latest_ready_revision_name = status.get("latestReadyRevisionName", "")
                 latest_created_revision_name = status.get(
                     "latestCreatedRevisionName", ""
                 )
 
-                # If latest_ready_revision_name is empty, try to get from latestReadyRevision
                 if not latest_ready_revision_name:
                     latest_ready_revision = service.get("latestReadyRevision", "")
                     if latest_ready_revision and "/revisions/" in latest_ready_revision:
@@ -136,7 +131,6 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                             "/revisions/"
                         )[-1]
 
-                # If latest_created_revision_name is empty, try to get from latestCreatedRevision
                 if not latest_created_revision_name:
                     latest_created_revision = service.get("latestCreatedRevision", "")
                     if (
@@ -147,47 +141,37 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                             "/revisions/"
                         )[-1]
 
-                # Extract terminal condition for status
                 terminal_condition = service.get("terminalCondition", {})
                 if not terminal_condition:
-                    # Fallback: check status.terminalCondition
                     terminal_condition = status.get("terminalCondition", {})
                 if not terminal_condition:
-                    # Fallback: check conditions array for terminal condition
                     conditions = service.get("conditions", [])
                     for condition in conditions:
                         if condition.get("type") == "Ready":
                             terminal_condition = condition
                             break
 
-                # Extract additional information
                 template = service.get("template", {})
                 ingress = service.get("ingress", "")
 
-                # Determine deployment type based on template
-                deployment_type = "Service"  # Default
+                deployment_type = "Service"
                 if template.get("containers"):
-                    # Check if it's a function deployment
                     containers = template.get("containers", [])
                     if containers and any(
                         "function" in str(container).lower() for container in containers
                     ):
                         deployment_type = "Function"
 
-                # Extract authentication info
                 authentication = "No Authentication Required"
                 if template.get("serviceAccount"):
                     authentication = "Authentication Required"
 
-                # Extract deployer information
                 deployer = service.get("creator", "")
                 if not deployer:
                     deployer = service.get("lastModifier", "")
 
-                # Extract last deployment time
                 last_deployment_time = service.get("updateTime", "")
 
-                # Set up monitoring filters for Cloud Run Service
                 google_cloud_monitoring_filters = [
                     {"key": "resource.labels.service_name", "value": service_name},
                 ]
@@ -204,7 +188,7 @@ class CloudRunServiceV2Manager(GoogleCloudManager):
                         "latest_created_revision_name": latest_created_revision_name,
                         "terminal_condition": terminal_condition,
                         "deployment_type": deployment_type,
-                        "requests_per_second": 0,  # Default value, could be calculated from metrics
+                        "requests_per_second": 0,
                         "authentication": authentication,
                         "ingress": ingress,
                         "last_deployment_time": last_deployment_time,

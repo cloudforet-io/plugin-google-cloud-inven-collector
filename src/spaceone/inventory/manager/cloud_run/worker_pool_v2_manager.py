@@ -122,7 +122,6 @@ class CloudRunWorkerPoolV2Manager(GoogleCloudManager):
                 ##################################
                 # 2. Make Base Data
                 ##################################
-                # Set up monitoring filters for Cloud Run WorkerPool
                 google_cloud_monitoring_filters = [
                     {
                         "key": "resource.labels.worker_pool_name",

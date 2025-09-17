@@ -58,10 +58,8 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
             "CloudBuildV2Connector", **params
         )
 
-        # Get lists that relate with builds through Google Cloud API
         builds = cloud_build_v1_conn.list_builds()
 
-        # Get locations using V2 API
         regional_builds = []
         parent = f"projects/{project_id}"
 
@@ -99,26 +97,22 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                 # 1. Set Basic Information
                 ##################################
                 build_id = build.get("id")
-                build_full_name = build.get("name", "")  # Original full path
+                build_full_name = build.get("name", "")
 
-                # Name을 첫 8자리로 변경 (04788528-aa29-4bd1-aa61-b301ea0edb8c → 04788528)
                 build_name_short = (
                     build_id[:8] if build_id and len(build_id) >= 8 else build_id
                 )
 
-                # Build Trigger ID 추출 - 실제 trigger ID를 가져오거나 빈 문자열로 설정
                 build_trigger_id = build.get("buildTriggerId", "")
                 if not build_trigger_id:
-                    # substitutions에서 TRIGGER_ID를 확인
                     build_trigger_id = build.get("substitutions", {}).get(
                         "TRIGGER_ID", ""
                     )
                 if not build_trigger_id:
-                    # substitutions에서 TRIGGER_NAME을 확인
                     build_trigger_id = build.get("substitutions", {}).get(
                         "TRIGGER_NAME", ""
                     )
-                # 여전히 없으면 빈 문자열로 설정
+
                 if not build_trigger_id:
                     build_trigger_id = ""
 
@@ -129,7 +123,6 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                     else "global"
                 )
 
-                # Set up monitoring filters for Cloud Build
                 google_cloud_monitoring_filters = [
                     {"key": "resource.labels.build_id", "value": build_id},
                 ]
@@ -142,9 +135,9 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                         "project": project_id,
                         "location": location_id,
                         "region": region,
-                        "name": build_name_short,  # 첫 8자리만 표시
-                        "full_name": build_full_name,  # Set full path for Build ID column
-                        "build_trigger_id": build_trigger_id,  # 빌드 ID만 표시
+                        "name": build_name_short,
+                        "full_name": build_full_name,
+                        "build_trigger_id": build_trigger_id,
                         "google_cloud_monitoring": self._set_multiple_google_cloud_monitoring(
                             project_id,
                             [
@@ -174,7 +167,6 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                         "reference": ReferenceModel(
                             {
                                 "resource_id": f"https://cloudbuild.googleapis.com/v1/{build_data.full_name}",
-                                # "external_link": f"https://console.cloud.google.com/cloud-build/builds?project={project_id}",
                                 "external_link": f"https://console.cloud.google.com/cloud-build/builds;region={region}/{build_data.id}?project={project_id}",
                             }
                         ),
