@@ -586,6 +586,9 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                         cluster_name, location, node_pool_name, params
                     )
 
+                    # 원본 node_group 데이터 구조 확인 (디버깅용)
+                    _LOGGER.debug(f"Original node_group keys: {list(node_group.keys())}")
+                    
                     # 기본 노드 풀 데이터 준비 (NodePool 모델에 맞게 수정)
                     node_pool_data = {
                         "name": str(node_pool_name),
@@ -673,7 +676,7 @@ class GKENodePoolV1Manager(GoogleCloudManager):
 
                     # NodePool 모델 생성
                     _LOGGER.debug(f"Creating NodePool model with name: '{node_pool_data.get('name')}'")
-                    node_pool_data_model = NodePool(node_pool_data, strict=False)
+                    node_pool_data_model = NodePool(node_pool_data, strict=True)
                     _LOGGER.debug(f"NodePool model created - name attribute: '{node_pool_data_model.name}'")
 
                     # NodePoolResource 생성

@@ -13,8 +13,9 @@ from spaceone.inventory.libs.schema.cloud_service import (
     CloudServiceMeta,
     CloudServiceResource,
     CloudServiceResponse,
-    BaseResource,
 )
+from spaceone.inventory.libs.schema.google_cloud_monitoring import GoogleCloudMonitoringModel
+from spaceone.inventory.libs.schema.google_cloud_logging import GoogleCloudLoggingModel
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     EnumDyField,
     TextDyField,
@@ -228,8 +229,8 @@ class Metrics(Model):
     status = StringType()
 
 
-class NodePool(BaseResource):
-    name = StringType()  # Override BaseResource name field to ensure serialization
+class NodePool(Model):
+    name = StringType()
     cluster_name = StringType()
     location = StringType()
     project_id = StringType()
@@ -246,6 +247,11 @@ class NodePool(BaseResource):
     instance_group_urls = ListType(StringType, deserialize_from="instanceGroupUrls")
     pod_ipv4_cidr_size = IntType(deserialize_from="podIpv4CidrSize")
     upgrade_settings = DictType(StringType, deserialize_from="upgradeSettings")
+    
+    # Google Cloud monitoring and logging (previously from BaseResource)
+    self_link = StringType(deserialize_from="selfLink", serialize_when_none=False)
+    google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
+    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)
     
     # Additional fields for extended node pool information
     nodes = ListType(ModelType(NodeInfo), serialize_when_none=False)
