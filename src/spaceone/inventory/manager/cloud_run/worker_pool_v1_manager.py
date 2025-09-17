@@ -50,14 +50,11 @@ class CloudRunWorkerPoolV1Manager(GoogleCloudManager):
             self.connector_name, **params
         )
 
-        # Get lists that relate with worker pools through Google Cloud API
-        # V1은 namespace 기반이므로 단일 namespace로 모든 리소스 조회 가능
         try:
             namespace = f"namespaces/{project_id}"
             worker_pools = cloud_run_v1_conn.list_worker_pools(namespace)
 
             for worker_pool in worker_pools:
-                # V1에서는 location 정보가 metadata에 포함되어 있을 수 있음
                 location_id = (
                     worker_pool.get("metadata", {})
                     .get("labels", {})
@@ -69,10 +66,9 @@ class CloudRunWorkerPoolV1Manager(GoogleCloudManager):
                 )
                 worker_pool["_location"] = location_id
 
-                # Get revisions for each worker pool (V1에서는 workerPool 라벨 사용)
+                # Get revisions for each worker pool
                 try:
                     revisions = cloud_run_v1_conn.list_revisions(namespace)
-                    # Filter revisions for this worker pool - 올바른 라벨 사용
                     worker_pool_name = worker_pool.get("metadata", {}).get("name", "")
                     worker_pool_revisions = [
                         rev
@@ -83,7 +79,6 @@ class CloudRunWorkerPoolV1Manager(GoogleCloudManager):
                         == worker_pool_name
                     ]
 
-                    # 복잡한 중첩 구조 대신 필요한 정보만 추출하여 단순화
                     simplified_revisions = []
                     for rev in worker_pool_revisions:
                         metadata = rev.get("metadata", {})
