@@ -1,0 +1,30 @@
+---
+metric_id: metric-google-cloud-filestore-snapshot-by-instance
+name: Filestore Snapshot Count by Instance
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Filestore.Snapshot
+query_options:
+  group_by:
+    - key: data.instance_id
+      name: Instance ID
+      search_key: data.instance_id
+      default: true
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.state
+      name: State
+      search_key: data.state
+      default: true
+  fields:
+    value:
+      operator: count
+unit: Count
+namespace_id: ns-google-cloud-filestore-snapshot
+version: '1.0'
