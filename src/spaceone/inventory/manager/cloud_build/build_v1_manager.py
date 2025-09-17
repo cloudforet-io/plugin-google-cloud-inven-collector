@@ -145,7 +145,7 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
                         "name": build_name_short,  # 첫 8자리만 표시
                         "full_name": build_full_name,  # Set full path for Build ID column
                         "build_trigger_id": build_trigger_id,  # 빌드 ID만 표시
-                        "google_cloud_monitoring": self.set_google_cloud_monitoring(
+                        "google_cloud_monitoring": self._set_multiple_google_cloud_monitoring(
                             project_id,
                             [
                                 "logging.googleapis.com/byte_count",
@@ -196,3 +196,29 @@ class CloudBuildBuildV1Manager(GoogleCloudManager):
         _LOGGER.debug(f"** Cloud Build Build END ** ({time.time() - start_time:.2f}s)")
 
         return collected_cloud_services, error_responses
+
+    @staticmethod
+    def _set_multiple_google_cloud_monitoring(
+        project_id, metric_types, resource_id, filters
+    ):
+        """
+        Set multiple Google Cloud Monitoring metric types for CloudBuild Build.
+
+        Args:
+            project_id (str): GCP project ID
+            metric_types (list): List of metric types
+            resource_id (str): Resource ID
+            filters (list): Filters to apply to all metric types
+
+        Returns:
+            dict: Google Cloud Monitoring configuration with multiple metric types
+        """
+        monitoring_filters = []
+        for metric_type in metric_types:
+            monitoring_filters.append({"metric_type": metric_type, "labels": filters})
+
+        return {
+            "name": f"projects/{project_id}",
+            "resource_id": resource_id,
+            "filters": monitoring_filters,
+        }
