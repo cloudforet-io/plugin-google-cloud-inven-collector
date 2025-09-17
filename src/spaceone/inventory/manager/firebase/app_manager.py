@@ -108,7 +108,7 @@ class FirebaseManager(GoogleCloudManager):
                     "full_name": app_data.get("displayName", app_id),
                     "google_cloud_monitoring": self.set_google_cloud_monitoring(
                         project_id,
-                        "firebaseappcheck.googleapis.com/resources",
+                        "firebaseappcheck.googleapis.com",
                         app_id,
                         [
                             {
