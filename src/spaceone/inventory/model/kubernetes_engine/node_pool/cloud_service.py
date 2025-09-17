@@ -33,7 +33,6 @@ Node Pool
 node_pool_overview = ItemDynamicLayout.set_fields(
     "Node Pool Overview",
     fields=[
-        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("Cluster Name", "data.cluster_name"),
         TextDyField.data_source("Location", "data.location"),
         TextDyField.data_source("Project ID", "data.project_id"),
@@ -49,8 +48,6 @@ node_pool_overview = ItemDynamicLayout.set_fields(
         TextDyField.data_source("Initial Node Count", "data.initial_node_count"),
         TextDyField.data_source("Total Nodes", "data.total_nodes"),
         TextDyField.data_source("Version", "data.version"),
-        DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
     ],
 )
 
@@ -234,7 +231,6 @@ class Metrics(Model):
 
 
 class NodePool(Model):
-    name = StringType()
     cluster_name = StringType()
     location = StringType()
     project_id = StringType()
@@ -252,8 +248,6 @@ class NodePool(Model):
     instance_group_urls = ListType(StringType, deserialize_from="instanceGroupUrls")
     pod_ipv4_cidr_size = IntType(deserialize_from="podIpv4CidrSize")
     upgrade_settings = DictType(StringType, deserialize_from="upgradeSettings")
-    create_time = DateTimeType(deserialize_from="createTime")
-    update_time = DateTimeType(deserialize_from="updateTime")
     google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
     google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)
     
