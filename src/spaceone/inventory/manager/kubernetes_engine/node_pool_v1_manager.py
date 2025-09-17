@@ -574,6 +574,7 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                         project_id = project_id or "unknown"
 
                     _LOGGER.info(f"Processing node group: {node_pool_name} in cluster: {cluster_name} (project: {project_id})")
+                    _LOGGER.debug(f"Node pool name from API: '{node_pool_name}' (type: {type(node_pool_name)})")
 
                     # 메트릭 정보 조회
                     metrics = self.get_node_pool_metrics(
@@ -671,7 +672,9 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                     )
 
                     # NodePool 모델 생성
+                    _LOGGER.debug(f"Creating NodePool model with name: '{node_pool_data.get('name')}'")
                     node_pool_data_model = NodePool(node_pool_data, strict=False)
+                    _LOGGER.debug(f"NodePool model created - name attribute: '{node_pool_data_model.name}'")
 
                     # NodePoolResource 생성
                     node_pool_resource = NodePoolResource(

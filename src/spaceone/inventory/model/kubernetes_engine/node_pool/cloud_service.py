@@ -1,7 +1,6 @@
 from schematics import Model
 from schematics.types import (
     BooleanType,
-    DateTimeType,
     DictType,
     IntType,
     ListType,
@@ -14,11 +13,9 @@ from spaceone.inventory.libs.schema.cloud_service import (
     CloudServiceMeta,
     CloudServiceResource,
     CloudServiceResponse,
+    BaseResource,
 )
-from spaceone.inventory.libs.schema.google_cloud_monitoring import GoogleCloudMonitoringModel
-from spaceone.inventory.libs.schema.google_cloud_logging import GoogleCloudLoggingModel
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
-    DateTimeDyField,
     EnumDyField,
     TextDyField,
 )
@@ -33,6 +30,7 @@ Node Pool
 node_pool_overview = ItemDynamicLayout.set_fields(
     "Node Pool Overview",
     fields=[
+        TextDyField.data_source("Name", "data.name"),
         TextDyField.data_source("Cluster Name", "data.cluster_name"),
         TextDyField.data_source("Location", "data.location"),
         TextDyField.data_source("Project ID", "data.project_id"),
@@ -230,7 +228,7 @@ class Metrics(Model):
     status = StringType()
 
 
-class NodePool(Model):
+class NodePool(BaseResource):
     cluster_name = StringType()
     location = StringType()
     project_id = StringType()
@@ -243,13 +241,10 @@ class NodePool(Model):
     management = ModelType(Management)
     max_pods_constraint = ModelType(MaxPodsConstraint, deserialize_from="maxPodsConstraint")
     network_config = ModelType(NetworkConfig, deserialize_from="networkConfig")
-    self_link = StringType(deserialize_from="selfLink")
     version = StringType()
     instance_group_urls = ListType(StringType, deserialize_from="instanceGroupUrls")
     pod_ipv4_cidr_size = IntType(deserialize_from="podIpv4CidrSize")
     upgrade_settings = DictType(StringType, deserialize_from="upgradeSettings")
-    google_cloud_monitoring = ModelType(GoogleCloudMonitoringModel, serialize_when_none=False)
-    google_cloud_logging = ModelType(GoogleCloudLoggingModel, serialize_when_none=False)
     
     # Additional fields for extended node pool information
     nodes = ListType(ModelType(NodeInfo), serialize_when_none=False)
@@ -270,7 +265,6 @@ class KubernetesEngineResource(CloudServiceResource):
 
 class NodePoolResource(KubernetesEngineResource):
     cloud_service_type = StringType(default="NodePool")
-    data = ModelType(NodePool)
     _metadata = ModelType(
         CloudServiceMeta, default=node_pool_meta, serialized_name="metadata"
     )
