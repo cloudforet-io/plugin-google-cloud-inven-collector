@@ -2,23 +2,17 @@ from schematics.types import DictType, ListType, StringType
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
-"""
-Filestore Snapshot Data 모델 정의
-
-Google Cloud Filestore 스냅샷의 상세 데이터를 표현하기 위한 schematics 모델입니다.
-"""
-
 
 class FilestoreSnapshotData(BaseResource):
-    """Filestore 스냅샷 데이터 모델"""
+    """Filestore Snapshot data model"""
 
     snapshot_id = StringType()
-    full_name = StringType()  # full path name
+    full_name = StringType()
     state = StringType()
     description = StringType(serialize_when_none=False)
     location = StringType()
 
-    instance_id = StringType()  # parent instance id
+    instance_id = StringType()
 
     labels = ListType(DictType(StringType), default=[])
 

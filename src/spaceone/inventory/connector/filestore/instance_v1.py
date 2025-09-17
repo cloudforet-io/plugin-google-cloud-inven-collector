@@ -9,15 +9,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FilestoreInstanceConnector(GoogleCloudConnector):
-    """
-    Google Cloud Filestore Instance Connector (v1 API)
-
-    Filestore 인스턴스 관련 API 호출을 담당하는 클래스
-    - 인스턴스 목록 조회 (v1 API)
-
-    Note: 스냅샷 조회는 별도 FilestoreSnapshotConnector에서 처리
-    """
-
     google_client_service = "file"
     version = "v1"
 
@@ -25,20 +16,7 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
         super().__init__(**kwargs)
 
     def list_instances(self, **query) -> List[Dict[str, Any]]:
-        """
-        Filestore 인스턴스 목록을 조회합니다.
-        Google Cloud Filestore v1 API의 locations/- 와일드카드를 사용하여
-        모든 리전의 인스턴스를 한 번에 조회합니다.
-
-        Args:
-            **query: 추가 쿼리 파라미터 (location, filter 등)
-
-        Returns:
-            Filestore 인스턴스 목록
-        """
         try:
-            # 모든 리전의 Filestore 인스턴스를 한 번에 조회
-            # API 문서:
             # https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances/list
             # "To retrieve instance information for all locations,
             # use "-" for the {location} value."
@@ -57,11 +35,9 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
             while request is not None:
                 response = request.execute()
 
-                # 응답에서 인스턴스 목록 추출
                 if "instances" in response:
                     for instance in response["instances"]:
-                        # 인스턴스 이름에서 리전 정보 추출
-                        # 예: projects/my-project/locations/us-central1/
+                        # projects/my-project/locations/us-central1/
                         # instances/my-instance
                         location = self._extract_location_from_instance_name(
                             instance.get("name", "")
@@ -102,18 +78,8 @@ class FilestoreInstanceConnector(GoogleCloudConnector):
             raise e from e
 
     def _extract_location_from_instance_name(self, instance_name: str) -> str:
-        """
-        인스턴스 이름에서 리전 정보를 추출합니다.
-
-        Args:
-            instance_name: 인스턴스 이름
-                (projects/{project}/locations/{location}/instances/{instance})
-
-        Returns:
-            리전 정보
-        """
         try:
-            # 예: projects/my-project/locations/us-central1/instances/my-instance
+            # projects/my-project/locations/us-central1/instances/my-instance
             parts = instance_name.split("/")
             if len(parts) >= 6 and parts[2] == "locations":
                 return parts[3]

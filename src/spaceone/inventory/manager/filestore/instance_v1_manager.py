@@ -20,17 +20,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FilestoreInstanceManager(GoogleCloudManager):
-    """
-    Google Cloud Filestore Instance Manager (v1 API)
-
-    Filestore 인스턴스 리소스를 수집하고 처리하는 매니저 클래스 (v1 API 전용)
-    - 인스턴스 목록 수집 (v1 API)
-    - 인스턴스 상세 정보 처리 (v1 API)
-
-    Note: 파일 공유 상세 정보(v1beta1 API)는 별도 매니저에서 처리
-    Note: 스냅샷 정보는 별도 FilestoreSnapshotManager에서 처리
-    """
-
     connector_name = "FilestoreInstanceConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
     instance_conn = None
@@ -38,17 +27,6 @@ class FilestoreInstanceManager(GoogleCloudManager):
     def collect_cloud_service(
         self, params
     ) -> Tuple[List[FilestoreInstanceResponse], List]:
-        """
-        Filestore 인스턴스 리소스를 수집합니다 (v1 API).
-
-        Args:
-            params: 수집 파라미터
-                - secret_data: 인증 정보
-                - options: 옵션 설정
-
-        Returns:
-            성공한 리소스 응답 리스트와 에러 응답 리스트
-        """
         _LOGGER.debug("** Filestore Instance START **")
         start_time = time.time()
 
@@ -86,24 +64,21 @@ class FilestoreInstanceManager(GoogleCloudManager):
                     ##################################
                     # 2. Make Base Data
                     ##################################
-                    # 파일 공유 정보 처리 및 용량 계산
+                    # Process file share information and calculate capacity
                     unified_file_shares, total_capacity_gb = (
                         self._process_file_shares_directly(
                             filestore_instance.get("fileShares", [])
                         )
                     )
 
-                    # 기본 정보 추출
                     labels = self.convert_labels_format(
                         filestore_instance.get("labels", {})
                     )
 
-                    # 네트워크 정보 수집
                     networks = self._process_networks(
                         filestore_instance.get("networks", [])
                     )
 
-                    # 원본 데이터 기반으로 업데이트
                     filestore_instance.update(
                         {
                             "project": project_id,
@@ -202,7 +177,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
         return collected_cloud_services, error_responses
 
     def _process_networks(self, networks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """네트워크 정보를 처리합니다."""
+        """Process network information"""
         network_info = []
         for network in networks:
             network_info.append(
@@ -218,7 +193,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
     def _process_file_shares_directly(
         self, file_shares: List[Dict[str, Any]]
     ) -> Tuple[List[Dict[str, Any]], int]:
-        """파일 공유 정보를 처리합니다."""
+        """Process file share information and calculate capacity"""
         unified_shares = []
         total_capacity_gb = 0
 
@@ -229,9 +204,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
             unified_shares.append(
                 {
                     "name": file_share.get("name", ""),
-                    "capacity_gb": str(
-                        capacity_gb
-                    ),  # StringType 필드이므로 문자열로 변환
+                    "capacity_gb": str(capacity_gb),
                     "source_backup": file_share.get("sourceBackup", ""),
                     "nfs_export_options": file_share.get("nfsExportOptions", []),
                     "data_source": "Basic",
@@ -243,7 +216,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
     def _process_performance_limits(
         self, performance_limits: Dict[str, Any]
     ) -> Dict[str, str]:
-        """성능 제한 정보를 처리합니다."""
+        """Process performance limit information"""
         if not performance_limits:
             return None
 

@@ -17,18 +17,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
 )
 from spaceone.inventory.model.filestore.backup.data import FilestoreBackupData
 
-"""
-Filestore Backup Cloud Service 모델 정의
-
-SpaceONE의 Cloud Service 형태로 Filestore 백업 리소스를 표현하기 위한 모델입니다.
-"""
-
-"""
-Filestore Backup UI 메타데이터 레이아웃 정의
-
-SpaceONE 콘솔에서 Filestore 백업 정보를 표시하기 위한 UI 레이아웃을 정의합니다.
-"""
-
 # TAB - Backup Details
 filestore_backup_details = ItemDynamicLayout.set_fields(
     "Backup Details",
@@ -91,8 +79,6 @@ filestore_backup_meta = CloudServiceMeta.set_layouts(
 
 
 class FilestoreBackupResource(CloudServiceResource):
-    """Filestore 백업 리소스 모델"""
-
     cloud_service_type = StringType(default="Backup")
     cloud_service_group = StringType(default="Filestore")
     data = ModelType(FilestoreBackupData)
@@ -102,6 +88,4 @@ class FilestoreBackupResource(CloudServiceResource):
 
 
 class FilestoreBackupResponse(CloudServiceResponse):
-    """Filestore 백업 응답 모델"""
-
     resource = ModelType(FilestoreBackupResource)

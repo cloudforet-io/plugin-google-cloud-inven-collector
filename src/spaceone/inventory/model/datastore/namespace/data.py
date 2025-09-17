@@ -10,7 +10,7 @@ Google Cloud Datastore Namespace의 상세 데이터를 표현하기 위한 sche
 
 
 class DatastoreNamespaceData(BaseResource):
-    """Datastore Namespace 데이터 모델"""
+    """Datastore Namespace data model"""
 
     namespace_id = StringType()
     display_name = StringType()
@@ -19,12 +19,12 @@ class DatastoreNamespaceData(BaseResource):
     database_id = StringType()
 
     def reference(self):
-        # database_id가 "(default)"인 경우 "-default-"로 변환
+        # database_id is "(default)" then convert to "-default-"
         url_database_id = (
             "-default-" if self.database_id == "(default)" else self.database_id
         )
 
-        # namespace_id가 "(default)"인 경우 "__$DEFAULT$__"로 변환
+        # namespace_id is "(default)" then convert to "__$DEFAULT$__"
         url_namespace_id = (
             "__$DEFAULT$__" if self.namespace_id == "(default)" else self.namespace_id
         )

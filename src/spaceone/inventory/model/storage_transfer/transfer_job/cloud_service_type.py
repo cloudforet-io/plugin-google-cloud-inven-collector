@@ -53,7 +53,7 @@ cst_transfer_job._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Latest Operation", "data.latest_operation_name"),
         DateTimeDyField.data_source("Created", "data.creation_time"),
         DateTimeDyField.data_source("Last Modified", "data.last_modification_time"),
-        # Union Field 기반 활성 구성 정보
+        # Union Field based active configuration information
         TextDyField.data_source(
             "Active Source Details",
             "data.active_source_details",

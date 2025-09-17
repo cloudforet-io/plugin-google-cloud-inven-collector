@@ -25,7 +25,7 @@ class FirestoreIndex(BaseResource):
 
     @staticmethod
     def filter_internal_fields(fields):
-        """GCP 내부 필드(__로 시작하는 필드) 제거"""
+        """GCP internal fields (__로 시작하는 필드) 제거"""
         filtered_fields = []
         for field in fields:
             field_path = field.get("fieldPath", "")

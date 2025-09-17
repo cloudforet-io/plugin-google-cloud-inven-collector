@@ -14,12 +14,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
 )
 from spaceone.inventory.model.datastore.namespace.data import DatastoreNamespaceData
 
-"""
-Datastore Namespace Cloud Service 모델 정의
-
-Google Cloud Datastore Namespace 리소스를 SpaceONE에서 표현하기 위한 모델을 정의합니다.
-"""
-
 # TAB - Namespace Details
 datastore_namespace_details = ItemDynamicLayout.set_fields(
     "Namespace Details",

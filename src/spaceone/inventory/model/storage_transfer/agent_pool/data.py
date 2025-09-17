@@ -8,13 +8,13 @@ from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class BandwidthLimit(Model):
-    """대역폭 제한 정보"""
+    """Bandwidth limit information"""
 
     limit_mbps = StringType(deserialize_from="limitMbps", serialize_when_none=False)
 
 
 class AgentPool(BaseResource):
-    """Storage Transfer Agent Pool 모델"""
+    """Storage Transfer Agent Pool model"""
 
     full_name = StringType()
     display_name = StringType(deserialize_from="displayName", serialize_when_none=False)

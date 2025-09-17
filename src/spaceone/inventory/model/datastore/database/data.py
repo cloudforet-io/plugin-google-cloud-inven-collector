@@ -4,7 +4,7 @@ from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
 class DatastoreDatabaseData(BaseResource):
-    """Datastore Database 데이터 모델"""
+    """Datastore Database data model"""
 
     full_name = StringType()
     uid = StringType()
@@ -30,7 +30,7 @@ class DatastoreDatabaseData(BaseResource):
     etag = StringType()
 
     def reference(self):
-        # database_id가 "(default)"인 경우 "-default-"로 변환
+        # database_id is "(default)" then convert to "-default-"
         url_database_id = "-default-" if self.name == "(default)" else self.name
 
         return {

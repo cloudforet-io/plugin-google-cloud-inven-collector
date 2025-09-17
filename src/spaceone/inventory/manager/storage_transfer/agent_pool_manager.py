@@ -20,25 +20,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class StorageTransferAgentPoolManager(GoogleCloudManager):
-    """Storage Transfer Agent Pool 리소스 관리자"""
-
     connector_name = "StorageTransferConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params) -> Tuple[List[AgentPoolResponse], List]:
-        """Storage Transfer Agent Pool 리소스를 수집합니다.
-
-        Args:
-            params: 수집 파라미터
-                - options: 수집 옵션
-                - schema: 스키마 정보
-                - secret_data: 인증 정보
-                - filter: 필터 조건
-                - zones: 대상 영역
-
-        Returns:
-            수집된 CloudService 응답과 에러 응답의 튜플
-        """
         _LOGGER.debug("** Storage Transfer Agent Pool START **")
         start_time = time.time()
 
@@ -155,7 +140,6 @@ class StorageTransferAgentPoolManager(GoogleCloudManager):
             )
             error_responses.append(error_response)
 
-        # 수집 완료 로깅
         _LOGGER.debug(
             f"** Storage Transfer Agent Pool Finished {time.time() - start_time} Seconds **"
         )

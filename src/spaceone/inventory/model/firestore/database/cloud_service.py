@@ -13,20 +13,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout
 from spaceone.inventory.model.firestore.database.data import Database
 
-"""
-Firestore Database Cloud Service 모델 정의
-
-Google Cloud Firestore 데이터베이스 리소스를 SpaceONE에서 표현하기 위한 모델을 정의합니다.
-- DatabaseResource: Firestore 데이터베이스 리소스 데이터 구조
-- DatabaseResponse: Firestore 데이터베이스 응답 형식
-"""
-
-"""
-Firestore Database UI 메타데이터 레이아웃 정의
-
-SpaceONE 콘솔에서 Firestore 데이터베이스 정보를 표시하기 위한 UI 레이아웃을 정의합니다.
-"""
-
 # TAB - Database Details
 firestore_database_details = ItemDynamicLayout.set_fields(
     "Database Details",
@@ -112,14 +98,6 @@ firestore_database_meta = CloudServiceMeta.set_layouts(
 )
 
 
-"""
-Firestore Database 리소스 모델
-
-Google Cloud Firestore 데이터베이스의 모든 정보를 포함하는 리소스 모델입니다.
-CloudServiceResource의 기본 구조를 상속받아 사용합니다.
-"""
-
-
 class FirestoreResource(CloudServiceResource):
     cloud_service_group = StringType(default="Firestore")
 
@@ -133,10 +111,4 @@ class DatabaseResource(FirestoreResource):
 
 
 class DatabaseResponse(CloudServiceResponse):
-    """
-    Firestore Database 응답 모델
-
-    Firestore 데이터베이스 수집 결과를 반환하는 응답 모델입니다.
-    """
-
     resource = PolyModelType(DatabaseResource)

@@ -17,7 +17,7 @@ from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
 )
 
 """
-Google Cloud Firestore Collection 서비스 타입을 SpaceONE에서 표현하기 위한 모델을 정의합니다.
+Firestore Collection
 """
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
@@ -26,7 +26,7 @@ total_count_conf = os.path.join(current_dir, "widget/total_count.yaml")
 count_by_database_conf = os.path.join(current_dir, "widget/count_by_database.yaml")
 count_by_project_conf = os.path.join(current_dir, "widget/count_by_project.yaml")
 
-# Cloud Service Type 리소스 정의
+# Cloud Service Type resource definition
 cst_collection = CloudServiceTypeResource()
 cst_collection.name = "Collection"
 cst_collection.provider = "google_cloud"

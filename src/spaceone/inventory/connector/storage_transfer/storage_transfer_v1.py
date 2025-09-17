@@ -9,8 +9,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class StorageTransferConnector(GoogleCloudConnector):
-    """Google Cloud Storage Transfer Service API 커넥터"""
-
     google_client_service = "storagetransfer"
     version = "v1"
 
@@ -18,17 +16,6 @@ class StorageTransferConnector(GoogleCloudConnector):
         super().__init__(**kwargs)
 
     def list_transfer_jobs(self, **query) -> List[Dict]:
-        """전송 작업 목록을 조회합니다.
-
-        Args:
-            **query: API 쿼리 파라미터
-
-        Returns:
-            전송 작업 목록
-
-        Raises:
-            Exception: API 호출 실패 시
-        """
         transfer_jobs = []
         query.update(
             {"filter": f'{{"project_id": "{self.project_id}"}}', "pageSize": 100}
@@ -69,29 +56,16 @@ class StorageTransferConnector(GoogleCloudConnector):
             raise
 
     def list_transfer_operations(self, **query) -> List[Dict]:
-        """전송 작업 실행 목록을 조회합니다.
-
-        Args:
-            **query: API 쿼리 파라미터
-
-        Returns:
-            전송 작업 실행 목록
-
-        Raises:
-            Exception: API 호출 실패 시
-        """
         operations = []
 
-        # 필터 설정
         filter_dict = {"project_id": self.project_id}
 
-        # 특정 transfer job의 operations만 조회하는 경우
         if "transfer_job_names" in query:
             filter_dict["transfer_job_names"] = query["transfer_job_names"]
 
         query.update(
             {
-                "name": "transferOperations",  # name 파라미터는 필수 - "TransferOperaions" 고정갑사
+                "name": "transferOperations",
                 "filter": str(filter_dict).replace("'", '"'),
                 "pageSize": 100,
             }
@@ -132,17 +106,6 @@ class StorageTransferConnector(GoogleCloudConnector):
             raise
 
     def list_agent_pools(self, **query) -> List[Dict]:
-        """에이전트 풀 목록을 조회합니다.
-
-        Args:
-            **query: API 쿼리 파라미터
-
-        Returns:
-            에이전트 풀 목록
-
-        Raises:
-            Exception: API 호출 실패 시
-        """
         agent_pools = []
         query.update({"projectId": self.project_id, "pageSize": 100})
 

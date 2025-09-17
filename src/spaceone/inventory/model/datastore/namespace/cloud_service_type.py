@@ -22,11 +22,7 @@ total_count_conf = os.path.join(current_dir, "widget/total_count.yml")
 count_by_database_conf = os.path.join(current_dir, "widget/count_by_database.yml")
 count_by_kind_count_conf = os.path.join(current_dir, "widget/count_by_kind_count.yml")
 
-"""
-Google Cloud Datastore Namespace 서비스 타입을 SpaceONE에서 표현하기 위한 모델을 정의합니다.
-"""
-
-# Cloud Service Type 리소스 정의
+# Cloud Service Type resource definition
 cst_namespace = CloudServiceTypeResource()
 cst_namespace.name = "Namespace"
 cst_namespace.provider = "google_cloud"
@@ -40,7 +36,6 @@ cst_namespace.tags = {
     "spaceone:icon": f"{ASSET_URL}/Datastore.svg",
 }
 
-# 메타데이터 설정
 cst_namespace._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
         TextDyField.data_source("Database ID", "data.database_id"),
