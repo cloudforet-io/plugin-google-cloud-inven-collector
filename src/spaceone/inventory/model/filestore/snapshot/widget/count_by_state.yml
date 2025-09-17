@@ -1,18 +1,15 @@
-widget_type: chart
+---
+cloud_service_group: Filestore
+cloud_service_type: Snapshot
 name: Count by State
 query:
   aggregate:
     - group:
         keys:
-          - name: state
+          - name: name
             key: data.state
         fields:
           - name: value
-            key: data.count
-            operator: sum
-  filter: []
-labels: []
+            operator: count
 options:
-  chart_type: donut
-  legend:
-    visible: true
+  chart_type: DONUT

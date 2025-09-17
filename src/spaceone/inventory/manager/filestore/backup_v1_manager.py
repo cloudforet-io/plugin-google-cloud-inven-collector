@@ -90,10 +90,11 @@ class FilestoreBackupManager(GoogleCloudManager):
 
                     # 소스 인스턴스 정보 처리
                     source_instance = filestore_backup.get("sourceInstance", "")
-
-                    # 용량 정보 처리
-                    capacity_gb = str(filestore_backup.get("capacityGb", ""))
-                    storage_bytes = str(filestore_backup.get("storageBytes", ""))
+                    source_instance_id = (
+                        source_instance.split("/")[-1]
+                        if "/" in source_instance
+                        else source_instance
+                    )
 
                     # 원본 데이터 기반으로 업데이트
                     filestore_backup.update(
@@ -103,23 +104,8 @@ class FilestoreBackupManager(GoogleCloudManager):
                             "full_name": backup_name,
                             "location": location,
                             "source_instance": source_instance,
-                            "capacity_gb": capacity_gb,
-                            "storage_bytes": storage_bytes,
+                            "source_instance_id": source_instance_id,
                             "labels": labels,
-                            "google_cloud_monitoring": self.set_google_cloud_monitoring(
-                                project_id,
-                                "file.googleapis.com/backup",
-                                backup_id,
-                                [
-                                    {
-                                        "key": "resource.labels.backup_name",
-                                        "value": backup_id,
-                                    }
-                                ],
-                            ),
-                            "google_cloud_logging": self.set_google_cloud_logging(
-                                "Filestore", "Backup", project_id, backup_id
-                            ),
                         }
                     )
 

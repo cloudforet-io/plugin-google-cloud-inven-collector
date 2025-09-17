@@ -97,26 +97,13 @@ class FilestoreSnapshotManager(GoogleCloudManager):
                     # 원본 데이터 기반으로 업데이트
                     filestore_snapshot.update(
                         {
+                            "name": snapshot_id,
                             "project": project_id,
                             "snapshot_id": snapshot_id,
                             "full_name": snapshot_name,
                             "location": location,
                             "instance_id": instance_id,
                             "labels": labels,
-                            "google_cloud_monitoring": self.set_google_cloud_monitoring(
-                                project_id,
-                                "file.googleapis.com/snapshot",
-                                snapshot_id,
-                                [
-                                    {
-                                        "key": "resource.labels.snapshot_name",
-                                        "value": snapshot_id,
-                                    }
-                                ],
-                            ),
-                            "google_cloud_logging": self.set_google_cloud_logging(
-                                "Filestore", "Snapshot", project_id, snapshot_id
-                            ),
                         }
                     )
 

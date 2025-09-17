@@ -1,0 +1,30 @@
+---
+metric_id: metric-google-cloud-filestore-backup-capacity
+name: Filestore Backup Capacity
+metric_type: GAUGE
+resource_type: inventory.CloudService:google_cloud.Filestore.Backup
+query_options:
+  group_by:
+    - key: region_code
+      name: Region
+      search_key: region_code
+      reference:
+        resource_type: inventory.Region
+        reference_key: region_code
+    - key: account
+      name: Project ID
+      search_key: account
+    - key: data.state
+      name: State
+      search_key: data.state
+      default: true
+    - key: data.source_instance_id
+      name: Source Instance ID
+      search_key: data.source_instance_id
+  fields:
+    value:
+      key: data.capacity_gb
+      operator: sum
+unit: GB
+namespace_id: ns-google-cloud-filestore-backup
+version: '1.0'

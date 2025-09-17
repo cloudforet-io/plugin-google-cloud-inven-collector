@@ -66,7 +66,6 @@ cst_filestore_instance._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Description", "data.description"),
         SizeField.data_source("Total Capacity (GB)", "data.stats.total_capacity_gb"),
         TextDyField.data_source("File Share Count", "data.stats.file_share_count"),
-        TextDyField.data_source("Snapshot Count", "data.stats.snapshot_count"),
         TextDyField.data_source("Network Count", "data.stats.network_count"),
         DateTimeDyField.data_source("Created", "data.create_time"),
         # Essential optional fields only
@@ -77,9 +76,6 @@ cst_filestore_instance._metadata = CloudServiceTypeMeta.set_meta(
             "Reserved IP Range",
             "data.networks.0.reserved_ip_range",
             options={"is_optional": True},
-        ),
-        TextDyField.data_source(
-            "Latest Snapshot", "data.snapshots.0.name", options={"is_optional": True}
         ),
     ],
     search=[
@@ -118,9 +114,6 @@ cst_filestore_instance._metadata = CloudServiceTypeMeta.set_meta(
             name="File Share Count",
             key="data.stats.file_share_count",
             data_type="integer",
-        ),
-        SearchField.set(
-            name="Snapshot Count", key="data.stats.snapshot_count", data_type="integer"
         ),
         SearchField.set(
             name="Network Count", key="data.stats.network_count", data_type="integer"

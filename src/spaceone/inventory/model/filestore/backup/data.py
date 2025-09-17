@@ -12,26 +12,34 @@ Google Cloud Filestore 백업의 상세 데이터를 표현하기 위한 schemat
 class FilestoreBackupData(BaseResource):
     """Filestore 백업 데이터 모델"""
 
-    # 기본 정보
-    full_name = StringType()  # reference 메서드용 전체 경로
+    full_name = StringType()
     backup_id = StringType()
-    state = StringType()
     description = StringType(serialize_when_none=False)
-    location = StringType()
-
-    # 백업 소스 정보
-    source_instance = StringType(serialize_when_none=False)  # 소스 인스턴스 전체 경로
-    source_file_share = StringType(serialize_when_none=False)  # 소스 파일 공유 이름
-
-    # 용량 정보
-    capacity_gb = StringType(serialize_when_none=False)  # 백업 용량 (GB)
-    storage_bytes = StringType(serialize_when_none=False)  # 실제 저장 용량 (bytes)
-
-    # 라벨 정보
-    labels = ListType(DictType(StringType), default=[])
-
-    # 시간 정보
+    state = StringType()
     create_time = StringType(deserialize_from="createTime")
+
+    labels = ListType(DictType(StringType), default=[])
+    capacity_gb = StringType(deserialize_from="capacityGb", serialize_when_none=False)
+    storage_bytes = StringType(
+        deserialize_from="storageBytes", serialize_when_none=False
+    )
+    source_instance = StringType(serialize_when_none=False)
+    source_instance_id = StringType(serialize_when_none=False)
+    source_file_share = StringType(
+        deserialize_from="sourceFileShare", serialize_when_none=False
+    )
+    source_instance_tier = StringType(
+        deserialize_from="sourceInstanceTier", serialize_when_none=False
+    )
+    download_bytes = StringType(
+        deserialize_from="downloadBytes", serialize_when_none=False
+    )
+    kms_key = StringType(deserialize_from="kmsKey", serialize_when_none=False)
+    file_system_protocol = StringType(
+        deserialize_from="fileSystemProtocol", serialize_when_none=False
+    )
+
+    location = StringType()
 
     def reference(self):
         return {

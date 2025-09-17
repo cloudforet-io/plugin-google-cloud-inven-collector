@@ -124,26 +124,6 @@ filestore_file_shares = TableDynamicLayout.set_fields(
     ],
 )
 
-# TAB - Snapshots
-filestore_snapshots = TableDynamicLayout.set_fields(
-    "Snapshots",
-    root_path="data.snapshots",
-    fields=[
-        TextDyField.data_source("Name", "name"),
-        TextDyField.data_source("Description", "description"),
-        EnumDyField.data_source(
-            "State",
-            "state",
-            default_state={
-                "safe": ["READY"],
-                "warning": ["CREATING", "DELETING"],
-                "alert": ["ERROR"],
-            },
-        ),
-        DateTimeDyField.data_source("Create Time", "create_time"),
-    ],
-)
-
 # TAB - Statistics
 filestore_statistics = ItemDynamicLayout.set_fields(
     "Statistics",
@@ -172,7 +152,6 @@ filestore_instance_meta = CloudServiceMeta.set_layouts(
         filestore_performance,
         filestore_networks,
         filestore_file_shares,
-        filestore_snapshots,
         filestore_statistics,
         filestore_labels,
     ]
