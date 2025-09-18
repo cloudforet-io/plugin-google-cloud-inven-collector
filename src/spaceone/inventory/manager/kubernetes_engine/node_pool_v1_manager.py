@@ -18,8 +18,8 @@ from spaceone.inventory.model.kubernetes_engine.node_pool.cloud_service_type imp
 from spaceone.inventory.model.kubernetes_engine.node_pool.cloud_service import (
     NodePoolResource,
     NodePoolResponse,
-    NodePool,
 )
+from spaceone.inventory.model.kubernetes_engine.node_pool.data import NodePool
 from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_datetime
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 
