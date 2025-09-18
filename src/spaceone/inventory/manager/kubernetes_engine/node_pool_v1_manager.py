@@ -676,9 +676,8 @@ class GKENodePoolV1Manager(GoogleCloudManager):
 
                     # NodePool 모델 생성
                     _LOGGER.debug(f"Creating NodePool model with name: '{node_pool_data.get('name')}'")
-                    node_pool_data_model = NodePool(node_pool_data, strict=True)
+                    node_pool_data_model = NodePool(node_pool_data, strict=False)
                     _LOGGER.debug(f"NodePool model created - name attribute: '{node_pool_data_model.name}'")
-
                     # NodePoolResource 생성
                     node_pool_resource = NodePoolResource(
                         {
@@ -692,6 +691,8 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                             "account": project_id,
                         }
                     )
+                    _LOGGER.debug(f"### NodePoolResource created - serialized data: {node_pool_resource.to_primitive()}")
+                    
 
                     ##################################
                     # 4. Make Collected Region Code
