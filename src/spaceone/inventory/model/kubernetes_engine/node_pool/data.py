@@ -1,152 +1,130 @@
-import logging
-import time
+from schematics import Model
+from schematics.types import (
+    BooleanType,
+    DateTimeType,
+    DictType,
+    IntType,
+    ListType,
+    ModelType,
+    StringType,
+)
+from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
-from spaceone.inventory.libs.manager import GoogleCloudManager
-from spaceone.inventory.libs.schema.base import ReferenceModel
-from spaceone.inventory.model.kubernetes_engine.node_pool.cloud_service import *
-from spaceone.inventory.model.kubernetes_engine.node_pool.cloud_service_type import CLOUD_SERVICE_TYPES
-from spaceone.inventory.connector.kubernetes_engine_connector import KubernetesEngineConnector
-from spaceone.inventory.libs.schema.base import make_error_response
 
-_LOGGER = logging.getLogger(__name__)
+class NodeConfig(Model):
+    machine_type = StringType(deserialize_from="machineType")
+    disk_size_gb = IntType(deserialize_from="diskSizeGb")
+    disk_type = StringType(deserialize_from="diskType")
+    image_type = StringType(deserialize_from="imageType")
+    preemptible = BooleanType()
+    oauth_scopes = ListType(StringType, deserialize_from="oauthScopes")
+    service_account = StringType(deserialize_from="serviceAccount")
+    metadata = DictType(StringType)
+    labels = DictType(StringType)
+    tags = ListType(StringType)
+    local_ssd_count = IntType(deserialize_from="localSsdCount")
+    spot = BooleanType()
+    min_cpu_platform = StringType(deserialize_from="minCpuPlatform")
 
 
-class NodePoolManager(GoogleCloudManager):
-    connector_name = "KubernetesEngineConnector"
-    cloud_service_types = CLOUD_SERVICE_TYPES
-    cloud_service_group = "KubernetesEngine"
-    cloud_service_type = "NodePool"
-    provider = "google_cloud"
+class AutoScaling(Model):
+    enabled = BooleanType()
+    min_node_count = IntType(deserialize_from="minNodeCount")
+    max_node_count = IntType(deserialize_from="maxNodeCount")
+    total_min_node_count = IntType(deserialize_from="totalMinNodeCount")
+    total_max_node_count = IntType(deserialize_from="totalMaxNodeCount")
+    location_policy = StringType(deserialize_from="locationPolicy")
 
-    def collect_cloud_service(self, params):
-        _LOGGER.debug(f"** NodePool START **")
-        start_time = time.time()
-        
-        """
-        Args:
-            params:
-                - options
-                - schema
-                - secret_data
-                - filter
-                - zones
-        Response:
-            CloudServiceResponse
-        """
-        collected_cloud_services = []
-        error_responses = []
-        
-        project_id = params["secret_data"]["project_id"]
-        
-        ##################################
-        # 0. Gather All Related Resources
-        # List all related resources through connector
-        ##################################
-        
-        try:
-            self.connector: KubernetesEngineConnector = self.locator.get_connector(
-                self.connector_name, **params
-            )
-            
-            # Get clusters first to iterate through their node pools
-            clusters = self.connector.list_clusters()
-            
-            for cluster in clusters:
-                cluster_name = cluster.get("name", "")
-                location = cluster.get("location", "")
-                
-                # Get node pools for this cluster
-                node_pools = self.connector.list_node_pools(cluster_name, location)
-                
-                for node_pool_vo in node_pools:
-                    try:
-                        ##################################
-                        # 1. Set Basic Information
-                        ##################################
-                        node_pool_name = node_pool_vo.get("name", "")
-                        region_code = self._get_region_from_zone(location)
-                        
-                        ##################################
-                        # 2. Make Base Data
-                        ##################################
-                        node_pool_data = NodePool(node_pool_vo, strict=False)
-                        
-                        # Set additional fields
-                        node_pool_data.cluster_name = cluster_name
-                        node_pool_data.location = location
-                        node_pool_data.project_id = project_id
-                        node_pool_data.api_version = params.get("api_version", "v1")
-                        
-                        ##################################
-                        # 3. Make Return Resource
-                        ##################################
-                        node_pool_resource = NodePoolResource({
-                            "name": node_pool_name,
-                            "account": project_id,
-                            "region_code": region_code,
-                            "data": node_pool_data,
-                            "tags": self._get_tags_from_labels(node_pool_vo.get("config", {}).get("labels", {})),
-                            "reference": ReferenceModel(node_pool_data.reference(region_code)),
-                        })
-                        
-                        ##################################
-                        # 4. Make Collected Region Code
-                        ##################################
-                        self.set_region_code(region_code)
-                        
-                        ##################################
-                        # 5. Make Resource Response Object
-                        # List of InstanceResponse Object
-                        ##################################
-                        collected_cloud_services.append(
-                            NodePoolResponse({"resource": node_pool_resource})
-                        )
-                        
-                    except Exception as e:
-                        _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
-                        error_responses.append(
-                            make_error_response(
-                                error=e,
-                                provider=self.provider,
-                                cloud_service_group=self.cloud_service_group,
-                                cloud_service_type=self.cloud_service_type,
-                            )
-                        )
-                        
-        except Exception as e:
-            _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
-            error_responses.append(
-                make_error_response(
-                    error=e,
-                    provider=self.provider,
-                    cloud_service_group=self.cloud_service_group,
-                    cloud_service_type=self.cloud_service_type,
-                )
-            )
-            
-        _LOGGER.debug(f"** NodePool Finished {time.time() - start_time} Seconds **")
-        return collected_cloud_services, error_responses
 
-    def _get_region_from_zone(self, location):
-        """Zone 또는 Region에서 Region 코드를 추출합니다."""
-        if not location:
-            return "global"
-        
-        # Zone 형태인 경우 (예: us-central1-a)
-        if location.count('-') >= 2:
-            parts = location.split('-')
-            return f"{parts[0]}-{parts[1]}"
-        
-        # 이미 Region 형태인 경우 (예: us-central1)
-        return location
+class Management(Model):
+    auto_upgrade = BooleanType(deserialize_from="autoUpgrade")
+    auto_repair = BooleanType(deserialize_from="autoRepair")
+    upgrade_options = DictType(StringType, deserialize_from="upgradeOptions")
 
-    def _get_tags_from_labels(self, labels):
-        """GCP Labels를 SpaceONE Tags 형식으로 변환합니다."""
-        if not labels:
-            return {}
-        
-        tags = {}
-        for key, value in labels.items():
-            tags[key] = str(value)
-        
-        return tags
+
+class MaxPodsConstraint(Model):
+    max_pods_per_node = IntType(deserialize_from="maxPodsPerNode")
+
+
+class NetworkConfig(Model):
+    pod_range = StringType(deserialize_from="podRange")
+    pod_ipv4_cidr_block = StringType(deserialize_from="podIpv4CidrBlock")
+    create_pod_range = BooleanType(deserialize_from="createPodRange")
+    enable_private_nodes = BooleanType(deserialize_from="enablePrivateNodes")
+
+
+class NodeInfo(Model):
+    name = StringType()
+    status = StringType()
+    machine_type = StringType(deserialize_from="machineType")
+    zone = StringType()
+    internal_ip = StringType(deserialize_from="internalIP")
+    external_ip = StringType(deserialize_from="externalIP")
+    create_time = StringType(deserialize_from="createTime")
+    labels = DictType(StringType)
+    taints = ListType(StringType)
+
+
+class InstanceGroupInfo(Model):
+    name = StringType()
+    type = StringType()
+    location = StringType()
+    self_link = StringType(deserialize_from="selfLink")
+    creation_timestamp = StringType(deserialize_from="creationTimestamp")
+    description = StringType()
+    network = StringType()
+    subnetwork = StringType()
+    zone = StringType()
+    region = StringType()
+    size = IntType()
+    named_ports = ListType(DictType(StringType), deserialize_from="namedPorts")
+    instances = ListType(ModelType(NodeInfo))
+
+
+class Metrics(Model):
+    node_count = StringType(deserialize_from="node_count")
+    initial_node_count = StringType(deserialize_from="initial_node_count")
+    machine_type = StringType(deserialize_from="machine_type")
+    disk_size_gb = StringType(deserialize_from="disk_size_gb")
+    status = StringType()
+
+
+class NodePool(BaseResource):
+    """GKE NodePool 데이터 모델 (SpaceONE 표준 패턴)"""
+    name = StringType(serialize_when_none=False)
+    cluster_name = StringType()
+    location = StringType()
+    project_id = StringType()
+    status = StringType()
+    status_message = StringType(deserialize_from="statusMessage")
+    initial_node_count = IntType(deserialize_from="initialNodeCount")
+    total_nodes = IntType(serialize_when_none=False)
+    create_time = DateTimeType(deserialize_from="createTime")
+    update_time = DateTimeType(deserialize_from="updateTime")
+    api_version = StringType()
+    config = ModelType(NodeConfig)
+    autoscaling = ModelType(AutoScaling)
+    management = ModelType(Management)
+    max_pods_constraint = ModelType(MaxPodsConstraint, deserialize_from="maxPodsConstraint")
+    network_config = ModelType(NetworkConfig, deserialize_from="networkConfig")
+    version = StringType()
+    instance_group_urls = ListType(StringType, deserialize_from="instanceGroupUrls")
+    pod_ipv4_cidr_size = IntType(deserialize_from="podIpv4CidrSize")
+    upgrade_settings = DictType(StringType, deserialize_from="upgradeSettings")
+    
+    # BaseResource에서 상속받는 필드들:
+    # - self_link
+    # - google_cloud_monitoring
+    # - google_cloud_logging
+    
+    # Additional fields for extended node pool information
+    nodes = ListType(ModelType(NodeInfo), serialize_when_none=False)
+    instance_groups = ListType(ModelType(InstanceGroupInfo), serialize_when_none=False)
+    metrics = ModelType(Metrics, serialize_when_none=False)
+    total_groups = IntType(serialize_when_none=False)
+
+    def reference(self, region_code):
+        return {
+            "resource_id": self.self_link,
+            "external_link": f"https://console.cloud.google.com/kubernetes/nodepool/detail/{self.location}/{self.cluster_name}/{self.name}/details?project={self.project_id}",
+        }
