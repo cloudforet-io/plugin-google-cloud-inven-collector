@@ -677,7 +677,7 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                     # NodePool 모델 생성
                     _LOGGER.debug(f"Creating NodePool model with name: '{node_pool_data.get('name')}'")
                     node_pool_data_model = NodePool(node_pool_data, strict=False)
-                    _LOGGER.debug(f"NodePool model created - name attribute: '{node_pool_data_model.name}'")
+                    #_LOGGER.debug(f"NodePool model created - name attribute: '{node_pool_data_model.name}'")
                     # NodePoolResource 생성
                     node_pool_resource = NodePoolResource(
                         {
@@ -691,7 +691,7 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                             "account": project_id,
                         }
                     )
-                    _LOGGER.debug(f"### NodePoolResource created - serialized data: {node_pool_resource.to_primitive()}")
+                    #_LOGGER.debug(f"### NodePoolResource created - serialized data: {node_pool_resource.to_primitive()}")
                     
 
                     ##################################
@@ -706,6 +706,7 @@ class GKENodePoolV1Manager(GoogleCloudManager):
 
                     collected_cloud_services.append(node_pool_response)
                     _LOGGER.info(f"Successfully processed node group: {node_pool_name}")
+                    _LOGGER.debug(f"### NodePoolResponse created - serialized data: {node_pool_resource.to_primitive()}")
 
                 except Exception as e:
                     _LOGGER.error(f"[collect_cloud_service] => {e}", exc_info=True)
