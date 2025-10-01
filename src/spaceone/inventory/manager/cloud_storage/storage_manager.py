@@ -1,17 +1,17 @@
-import time
 import logging
-
+import time
 from datetime import datetime, timedelta
+
+from spaceone.inventory.connector.cloud_storage.monitoring import MonitoringConnector
+from spaceone.inventory.connector.cloud_storage.storage import StorageConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
-from spaceone.inventory.connector.cloud_storage.storage import StorageConnector
-from spaceone.inventory.connector.cloud_storage.monitoring import MonitoringConnector
-from spaceone.inventory.model.cloud_storage.bucket.cloud_service_type import (
-    CLOUD_SERVICE_TYPES,
-)
 from spaceone.inventory.model.cloud_storage.bucket.cloud_service import (
     StorageResource,
     StorageResponse,
+)
+from spaceone.inventory.model.cloud_storage.bucket.cloud_service_type import (
+    CLOUD_SERVICE_TYPES,
 )
 from spaceone.inventory.model.cloud_storage.bucket.data import Storage
 
@@ -23,7 +23,7 @@ class StorageManager(GoogleCloudManager):
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params):
-        _LOGGER.debug(f"** Storage START **")
+        _LOGGER.debug("** Storage START **")
         start_time = time.time()
         """
         Args:
@@ -56,24 +56,72 @@ class StorageManager(GoogleCloudManager):
         # Get lists that relate with snapshots through Google Cloud API
         buckets = storage_conn.list_buckets()
 
+        # buckets가 None인 경우 처리
+        if buckets is None:
+            _LOGGER.warning("No buckets returned from storage connector")
+            return collected_cloud_services, error_responses
+
         for bucket in buckets:
             try:
+                # bucket 객체가 None인지 먼저 체크
+                if bucket is None:
+                    _LOGGER.warning("Skipping None bucket object")
+                    continue
+
                 ##################################
                 # 1. Set Basic Information
                 ##################################
                 bucket_name = bucket.get("name")
                 bucket_id = bucket.get("id")
 
+                # bucket_name이 None인 경우 처리
+                if bucket_name is None:
+                    _LOGGER.warning("Skipping bucket with None name")
+                    continue
+
                 _name = bucket.get("name", "")
-                is_payer_bucket = bucket.get('billing', {}).get('requesterPays', False)
+                is_payer_bucket = bucket.get("billing", {}).get("requesterPays", False)
                 if is_payer_bucket:
                     print(f"Bucket Name: {bucket_name} is Payer Bucket")
-                    
-                iam_policy = storage_conn.list_iam_policy(bucket_name, is_payer_bucket)
-                
-                object_count = self._get_object_total_count(monitoring_conn, bucket_name)
-                object_size = self._get_bucket_total_size(monitoring_conn, bucket_name)
-                st_class = bucket.get("storageClass").lower()
+
+                # IAM policy 조회 시 예외 처리
+                try:
+                    iam_policy = storage_conn.list_iam_policy(
+                        bucket_name, is_payer_bucket
+                    )
+                    if iam_policy is None:
+                        iam_policy = {}
+                except Exception as iam_error:
+                    _LOGGER.warning(
+                        f"Failed to get IAM policy for bucket {bucket_name}: {iam_error}"
+                    )
+                    iam_policy = {"error_flag": "na"}  # Not Authorized
+
+                # 모니터링 데이터 조회 시 예외 처리
+                try:
+                    object_count = self._get_object_total_count(
+                        monitoring_conn, bucket_name
+                    )
+                except Exception as count_error:
+                    _LOGGER.warning(
+                        f"Failed to get object count for bucket {bucket_name}: {count_error}"
+                    )
+                    object_count = 0
+
+                try:
+                    object_size = self._get_bucket_total_size(
+                        monitoring_conn, bucket_name
+                    )
+                except Exception as size_error:
+                    _LOGGER.warning(
+                        f"Failed to get bucket size for bucket {bucket_name}: {size_error}"
+                    )
+                    object_size = 0
+
+                # storageClass가 None일 수 있으므로 안전하게 처리
+                storage_class = bucket.get("storageClass")
+                st_class = storage_class.lower() if storage_class else "standard"
+
                 region = self.get_matching_region(bucket)
                 labels = self.convert_labels_format(bucket.get("labels", {}))
 
@@ -179,7 +227,6 @@ class StorageManager(GoogleCloudManager):
                     f"{location} (Multiple Regions in {location.capitalize()})"
                 )
             else:
-
                 # Dual - choices
                 # Americas nam4 (lowa and South Carolina)
                 # Europe eur4 (Netherlands and Finland)
@@ -223,10 +270,14 @@ class StorageManager(GoogleCloudManager):
         iam_config = bucket.get("iamConfiguration", {})
         bucket_policy_only = iam_config.get("bucketPolicyOnly", {})
         uniform_bucket_level = iam_config.get("uniformBucketLevelAccess", {})
-        [
-            binding_members.extend(s.get("members"))
-            for s in iam_policy.get("bindings", [])
-        ]
+
+        # iam_policy가 None이 아니고 bindings가 있는 경우만 처리
+        if iam_policy and "bindings" in iam_policy:
+            for binding in iam_policy.get("bindings", []):
+                if binding and "members" in binding:
+                    members = binding.get("members", [])
+                    if members:
+                        binding_members.extend(members)
 
         if not bucket_policy_only.get("enabled") and not uniform_bucket_level.get(
             "enabled"
@@ -367,12 +418,25 @@ class StorageManager(GoogleCloudManager):
     @staticmethod
     def _get_iam_policy_binding(iam_policy):
         iam_policy_binding = []
-        if "bindings" in iam_policy:
-            bindings = iam_policy.get("bindings")
-            for binding in bindings:
-                members = binding.get("members")
-                role = binding.get("role", "")
-                for member in members:
+
+        # iam_policy가 None이거나 비어있는 경우 처리
+        if not iam_policy or "bindings" not in iam_policy:
+            return iam_policy_binding
+
+        bindings = iam_policy.get("bindings", [])
+        for binding in bindings:
+            if binding is None:
+                continue
+
+            members = binding.get("members", [])
+            role = binding.get("role", "")
+
+            # members가 None인 경우 처리
+            if members is None:
+                continue
+
+            for member in members:
+                if member:  # member가 None이 아닌 경우만 추가
                     iam_policy_binding.append(
                         {
                             "member": member,
