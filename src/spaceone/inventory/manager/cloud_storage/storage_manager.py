@@ -22,6 +22,26 @@ class StorageManager(GoogleCloudManager):
     connector_name = "StorageConnector"
     cloud_service_types = CLOUD_SERVICE_TYPES
 
+    @staticmethod
+    def _safe_get(data, key, default=None):
+
+        if isinstance(data, dict) and key in data:
+            return data[key]
+        return default
+    
+    @staticmethod
+    def _safe_get_nested(data, keys, default=None):
+
+        current = data
+        for key in keys:
+            if isinstance(current, dict) and key in current:
+                current = current[key]
+            else:
+                return default
+        return current
+
+
+
     def collect_cloud_service(self, params):
         _LOGGER.debug("** Storage START **")
         start_time = time.time()
@@ -80,7 +100,7 @@ class StorageManager(GoogleCloudManager):
                     continue
 
                 _name = bucket.get("name", "")
-                is_payer_bucket = bucket.get("billing", {}).get("requesterPays", False)
+                is_payer_bucket = self._safe_get_nested(bucket, ["billing", "requesterPays"], False)
                 if is_payer_bucket:
                     print(f"Bucket Name: {bucket_name} is Payer Bucket")
 
@@ -119,11 +139,11 @@ class StorageManager(GoogleCloudManager):
                     object_size = 0
 
                 # storageClass가 None일 수 있으므로 안전하게 처리
-                storage_class = bucket.get("storageClass")
+                storage_class = self._safe_get(bucket, "storageClass")
                 st_class = storage_class.lower() if storage_class else "standard"
 
                 region = self.get_matching_region(bucket)
-                labels = self.convert_labels_format(bucket.get("labels", {}))
+                labels = self.convert_labels_format(self._safe_get(bucket, "labels", {}))
 
                 ##################################
                 # 2. Make Base Data
@@ -141,7 +161,7 @@ class StorageManager(GoogleCloudManager):
                         "size": object_size,
                         "default_event_based_hold": (
                             "Enabled"
-                            if bucket.get("defaultEventBasedHold")
+                            if self._safe_get(bucket, "defaultEventBasedHold")
                             else "Disabled"
                         ),
                         "iam_policy": iam_policy,
@@ -207,15 +227,15 @@ class StorageManager(GoogleCloudManager):
 
     def get_matching_region(self, bucket):
         location_type_ref = ["multi-region", "dual-region"]
-        location = bucket.get("location", "").lower()
-        location_type = bucket.get("locationType", "")
+        location = self._safe_get(bucket, "location", "").lower()
+        location_type = self._safe_get(bucket, "locationType", "")
         region_code = "global" if location_type in location_type_ref else location
         return self.match_region_info(region_code)
 
     def get_location(self, bucket):
         location_type_ref = ["multi-region", "dual-region"]
-        location = bucket.get("location", "").lower()
-        location_type = bucket.get("locationType", "")
+        location = self._safe_get(bucket, "location", "").lower()
+        location_type = self._safe_get(bucket, "locationType", "")
 
         if location_type in location_type_ref:
             # Multi
@@ -253,7 +273,7 @@ class StorageManager(GoogleCloudManager):
 
     @staticmethod
     def _get_encryption(bucket):
-        encryption = bucket.get("encryption", {})
+        encryption = bucket.get("encryption") if isinstance(bucket, dict) and "encryption" in bucket else {}
         return "Google-managed" if encryption == {} else "Customer-managed"
 
     @staticmethod
@@ -267,7 +287,7 @@ class StorageManager(GoogleCloudManager):
         }
 
         binding_members = []
-        iam_config = bucket.get("iamConfiguration", {})
+        iam_config = bucket.get("iamConfiguration") if isinstance(bucket, dict) and "iamConfiguration" in bucket else {}
         bucket_policy_only = iam_config.get("bucketPolicyOnly", {})
         uniform_bucket_level = iam_config.get("uniformBucketLevelAccess", {})
 
@@ -296,7 +316,7 @@ class StorageManager(GoogleCloudManager):
     @staticmethod
     def _get_requester_pays(bucket):
         pays = "OFF"
-        billing = bucket.get("billing", {})
+        billing = bucket.get("billing") if isinstance(bucket, dict) and "billing" in bucket else {}
         if billing.get("requesterPays", False):
             pays = "ON"
         return pays
@@ -304,7 +324,7 @@ class StorageManager(GoogleCloudManager):
     @staticmethod
     def _get_access_control(bucket):
         access_control = "Fine-grained"
-        iam_config = bucket.get("iamConfiguration", {})
+        iam_config = bucket.get("iamConfiguration") if isinstance(bucket, dict) and "iamConfiguration" in bucket else {}
         uniform = iam_config.get("uniformBucketLevelAccess", {})
         if uniform.get("enabled"):
             access_control = "Uniform"
@@ -312,7 +332,7 @@ class StorageManager(GoogleCloudManager):
 
     @staticmethod
     def _get_config_link(bucket):
-        name = bucket.get("name")
+        name = bucket.get("name") if isinstance(bucket, dict) and "name" in bucket else ""
         return {
             "link_url": f"https://console.cloud.google.com/storage/browser/{name}",
             "gsutil_link": f"gs://{name}",
@@ -321,7 +341,7 @@ class StorageManager(GoogleCloudManager):
     @staticmethod
     def _get_lifecycle_rule(bucket):
         display = ""
-        life_cycle = bucket.get("lifecycle", {})
+        life_cycle = bucket.get("lifecycle") if isinstance(bucket, dict) and "lifecycle" in bucket else {}
         rules = life_cycle.get("rule", [])
         num_of_rule = len(rules)
 
@@ -449,7 +469,7 @@ class StorageManager(GoogleCloudManager):
     @staticmethod
     def _get_retention_policy_display(bucket):
         display = ""
-        policy = bucket.get("retentionPolicy")
+        policy = bucket.get("retentionPolicy") if isinstance(bucket, dict) and "retentionPolicy" in bucket else None
         if policy:
             retention_period = int(policy.get("retentionPeriod", 0))
             rp_in_days = retention_period / 86400

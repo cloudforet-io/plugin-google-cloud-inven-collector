@@ -21,8 +21,15 @@ class StorageConnector(GoogleCloudConnector):
         request = self.client.buckets().list(**query)
         while request is not None:
             response = request.execute()
-            for template in response.get("items", []):
-                bucket_list.append(template)
+            # items가 존재하고 None이 아닌지 확인
+            items = response.get("items", [])
+            if items:
+                for template in items:
+                    # template이 딕셔너리인지 확인
+                    if template is not None and isinstance(template, dict):
+                        bucket_list.append(template)
+                    else:
+                        _LOGGER.warning(f"Skipping invalid bucket template: {type(template)}")
             request = self.client.buckets().list_next(
                 previous_request=request, previous_response=response
             )
@@ -46,9 +53,15 @@ class StorageConnector(GoogleCloudConnector):
         while request is not None:
             response = request.execute()
             result = response.get("items", [])
-            count = count + len(result)
-            for template in result:
-                objects_list.append({"size": template["size"]})
+            if result:
+                count = count + len(result)
+                for template in result:
+                    if template and isinstance(template, dict):
+                        # size 필드가 있는지 확인
+                        size = template.get("size", "0")
+                        objects_list.append({"size": size})
+                    else:
+                        _LOGGER.warning(f"Skipping invalid object template: {type(template)}")
             # Max iteration
             if count > MAX_OBJECTS:
                 # TOO MANY objects
