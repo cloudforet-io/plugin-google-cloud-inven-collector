@@ -356,7 +356,11 @@ class StorageManager(GoogleCloudManager):
             if isinstance(bucket, dict) and "billing" in bucket
             else {}
         )
-        if billing and billing.get("requesterPays", False):
+        if (
+            billing is not None
+            and isinstance(billing, dict)
+            and billing.get("requesterPays", False)
+        ):
             pays = "ON"
         return pays
 
@@ -368,8 +372,12 @@ class StorageManager(GoogleCloudManager):
             if isinstance(bucket, dict) and "iamConfiguration" in bucket
             else {}
         )
-        uniform = iam_config.get("uniformBucketLevelAccess", {}) if iam_config else {}
-        if uniform.get("enabled"):
+        if iam_config is None:
+            uniform = {}
+        else:
+            uniform = iam_config.get("uniformBucketLevelAccess", {})
+
+        if uniform is not None and uniform.get("enabled"):
             access_control = "Uniform"
         return access_control
 
@@ -391,6 +399,8 @@ class StorageManager(GoogleCloudManager):
             if isinstance(bucket, dict) and "lifecycle" in bucket
             else {}
         )
+        if life_cycle is None:
+            life_cycle = {}
         rules = life_cycle.get("rule", [])
         num_of_rule = len(rules)
 
@@ -402,8 +412,6 @@ class StorageManager(GoogleCloudManager):
             display = f"{num_of_rule} rules"
 
         life_cycle_rule = []
-        if life_cycle is None:
-            life_cycle = {}
         rules = life_cycle.get("rule", []) if life_cycle else []
 
         for rule in rules:
@@ -539,6 +547,8 @@ class StorageManager(GoogleCloudManager):
             if isinstance(bucket, dict) and "retentionPolicy" in bucket
             else None
         )
+        if policy is None:
+            return display
         if policy:
             retention_period = int(policy.get("retentionPeriod", 0))
             rp_in_days = retention_period / 86400
