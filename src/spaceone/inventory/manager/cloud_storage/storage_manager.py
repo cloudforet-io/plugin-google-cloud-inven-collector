@@ -91,16 +91,18 @@ class StorageManager(GoogleCloudManager):
                 ##################################
                 # 1. Set Basic Information
                 ##################################
-                bucket_name = bucket.get("name")
-                bucket_id = bucket.get("id")
+                bucket_name = self._safe_get(bucket, "name")
+                bucket_id = self._safe_get(bucket, "id")
 
                 # bucket_name이 None인 경우 처리
                 if bucket_name is None:
                     _LOGGER.warning("Skipping bucket with None name")
                     continue
 
-                _name = bucket.get("name", "")
-                is_payer_bucket = self._safe_get_nested(bucket, ["billing", "requesterPays"], False)
+                _name = self._safe_get(bucket, "name", "")
+                is_payer_bucket = self._safe_get_nested(
+                    bucket, ["billing", "requesterPays"], False
+                )
                 if is_payer_bucket:
                     print(f"Bucket Name: {bucket_name} is Payer Bucket")
 
@@ -143,7 +145,9 @@ class StorageManager(GoogleCloudManager):
                 st_class = storage_class.lower() if storage_class else "standard"
 
                 region = self.get_matching_region(bucket)
-                labels = self.convert_labels_format(self._safe_get(bucket, "labels", {}))
+                labels = self.convert_labels_format(
+                    self._safe_get(bucket, "labels", {})
+                )
 
                 ##################################
                 # 2. Make Base Data
@@ -187,6 +191,11 @@ class StorageManager(GoogleCloudManager):
 
                 bucket_data = Storage(bucket, strict=False)
 
+                if region is None or region.get("region_code") is None:
+                    region_code = "Global"
+                else:
+                    region_code = region.get("region_code")
+
                 ##################################
                 # 3. Make Return Resource
                 ##################################
@@ -195,7 +204,7 @@ class StorageManager(GoogleCloudManager):
                         "name": _name,
                         "account": project_id,
                         "tags": labels,
-                        "region_code": region.get("region_code"),
+                        "region_code": region_code,
                         "instance_type": "",
                         "instance_size": bucket_data.size,
                         "data": bucket_data,
@@ -206,7 +215,7 @@ class StorageManager(GoogleCloudManager):
                 ##################################
                 # 4. Make Collected Region Code
                 ##################################
-                self.set_region_code(region.get("region_code"))
+                self.set_region_code(region_code)
 
                 ##################################
                 # 5. Make Resource Response Object
@@ -262,7 +271,7 @@ class StorageManager(GoogleCloudManager):
 
         else:
             region = self.match_region_info(location)
-            region_name = region.get("name", "")
+            region_name = region.get("name", "") if region else "Global"
             location_display = f"{location} | {region_name}"
 
         return {
@@ -273,7 +282,11 @@ class StorageManager(GoogleCloudManager):
 
     @staticmethod
     def _get_encryption(bucket):
-        encryption = bucket.get("encryption") if isinstance(bucket, dict) and "encryption" in bucket else {}
+        encryption = (
+            bucket.get("encryption")
+            if isinstance(bucket, dict) and "encryption" in bucket
+            else None
+        )
         return "Google-managed" if encryption == {} else "Customer-managed"
 
     @staticmethod
@@ -287,23 +300,45 @@ class StorageManager(GoogleCloudManager):
         }
 
         binding_members = []
-        iam_config = bucket.get("iamConfiguration") if isinstance(bucket, dict) and "iamConfiguration" in bucket else {}
-        bucket_policy_only = iam_config.get("bucketPolicyOnly", {})
-        uniform_bucket_level = iam_config.get("uniformBucketLevelAccess", {})
+        iam_config = (
+            bucket.get("iamConfiguration")
+            if isinstance(bucket, dict) and "iamConfiguration" in bucket
+            else None
+        )
+        if iam_config is None:
+            bucket_policy_only = {}
+            uniform_bucket_level = {}
+        else:
+            bucket_policy_only = iam_config.get("bucketPolicyOnly", {})
+            uniform_bucket_level = iam_config.get("uniformBucketLevelAccess", {})
 
         # iam_policy가 None이 아니고 bindings가 있는 경우만 처리
         if iam_policy and "bindings" in iam_policy:
-            for binding in iam_policy.get("bindings", []):
-                if binding and "members" in binding:
-                    members = binding.get("members", [])
-                    if members:
+            bindings = (
+                iam_policy.get("bindings", []) if isinstance(iam_policy, dict) else []
+            )
+            if isinstance(bindings, list):
+                for binding in bindings:
+                    if binding is None or not isinstance(binding, dict):
+                        continue
+
+                    if "members" in binding:
+                        members = binding.get("members", [])
+                        if members is None or not isinstance(members, list):
+                            continue
+
                         binding_members.extend(members)
+
+        if bucket_policy_only is None:
+            bucket_policy_only = {}
+        if uniform_bucket_level is None:
+            uniform_bucket_level = {}
 
         if not bucket_policy_only.get("enabled") and not uniform_bucket_level.get(
             "enabled"
         ):
             public_access = public_access_map.get("soa")
-        elif "error_flag" in iam_policy:
+        elif isinstance(iam_policy, dict) and "error_flag" in iam_policy:
             public_access = public_access_map.get(iam_policy.get("error_flag"))
         elif (
             "allUsers" in binding_members or "allAuthenticatedUsers" in binding_members
@@ -316,23 +351,33 @@ class StorageManager(GoogleCloudManager):
     @staticmethod
     def _get_requester_pays(bucket):
         pays = "OFF"
-        billing = bucket.get("billing") if isinstance(bucket, dict) and "billing" in bucket else {}
-        if billing.get("requesterPays", False):
+        billing = (
+            bucket.get("billing")
+            if isinstance(bucket, dict) and "billing" in bucket
+            else {}
+        )
+        if billing and billing.get("requesterPays", False):
             pays = "ON"
         return pays
 
     @staticmethod
     def _get_access_control(bucket):
         access_control = "Fine-grained"
-        iam_config = bucket.get("iamConfiguration") if isinstance(bucket, dict) and "iamConfiguration" in bucket else {}
-        uniform = iam_config.get("uniformBucketLevelAccess", {})
+        iam_config = (
+            bucket.get("iamConfiguration")
+            if isinstance(bucket, dict) and "iamConfiguration" in bucket
+            else {}
+        )
+        uniform = iam_config.get("uniformBucketLevelAccess", {}) if iam_config else {}
         if uniform.get("enabled"):
             access_control = "Uniform"
         return access_control
 
     @staticmethod
     def _get_config_link(bucket):
-        name = bucket.get("name") if isinstance(bucket, dict) and "name" in bucket else ""
+        name = (
+            bucket.get("name") if isinstance(bucket, dict) and "name" in bucket else ""
+        )
         return {
             "link_url": f"https://console.cloud.google.com/storage/browser/{name}",
             "gsutil_link": f"gs://{name}",
@@ -341,7 +386,11 @@ class StorageManager(GoogleCloudManager):
     @staticmethod
     def _get_lifecycle_rule(bucket):
         display = ""
-        life_cycle = bucket.get("lifecycle") if isinstance(bucket, dict) and "lifecycle" in bucket else {}
+        life_cycle = (
+            bucket.get("lifecycle")
+            if isinstance(bucket, dict) and "lifecycle" in bucket
+            else {}
+        )
         rules = life_cycle.get("rule", [])
         num_of_rule = len(rules)
 
@@ -353,7 +402,14 @@ class StorageManager(GoogleCloudManager):
             display = f"{num_of_rule} rules"
 
         life_cycle_rule = []
-        for rule in life_cycle.get("rule", []):
+        if life_cycle is None:
+            life_cycle = {}
+        rules = life_cycle.get("rule", []) if life_cycle else []
+
+        for rule in rules:
+            if rule is None:
+                continue
+
             action_header = (
                 "Set to" if rule.get("type") == "SetStorageClass" else "Delete"
             )
@@ -366,6 +422,9 @@ class StorageManager(GoogleCloudManager):
             condition_display = ""
             formatter = "%Y-%m-%d"
             condition_vo = rule.get("condition", {})
+            if condition_vo is None:
+                condition_vo = {}
+
             if "customTimeBefore" in condition_vo:
                 f = "Object's custom time is on or before"
                 target = datetime.strptime(
@@ -443,16 +502,22 @@ class StorageManager(GoogleCloudManager):
         if not iam_policy or "bindings" not in iam_policy:
             return iam_policy_binding
 
-        bindings = iam_policy.get("bindings", [])
+        bindings = (
+            iam_policy.get("bindings", []) if isinstance(iam_policy, dict) else []
+        )
+        if not isinstance(bindings, list):
+            return iam_policy_binding
+
         for binding in bindings:
-            if binding is None:
+            # binding이 None이거나 딕셔너리가 아닌 경우 건너뛰기
+            if binding is None or not isinstance(binding, dict):
                 continue
 
             members = binding.get("members", [])
             role = binding.get("role", "")
 
-            # members가 None인 경우 처리
-            if members is None:
+            # members가 None이거나 리스트가 아닌 경우 처리
+            if members is None or not isinstance(members, list):
                 continue
 
             for member in members:
@@ -469,7 +534,11 @@ class StorageManager(GoogleCloudManager):
     @staticmethod
     def _get_retention_policy_display(bucket):
         display = ""
-        policy = bucket.get("retentionPolicy") if isinstance(bucket, dict) and "retentionPolicy" in bucket else None
+        policy = (
+            bucket.get("retentionPolicy")
+            if isinstance(bucket, dict) and "retentionPolicy" in bucket
+            else None
+        )
         if policy:
             retention_period = int(policy.get("retentionPeriod", 0))
             rp_in_days = retention_period / 86400
@@ -483,11 +552,27 @@ class StorageManager(GoogleCloudManager):
         metric = "storage.googleapis.com/storage/object_count"
         start = datetime.now() - timedelta(days=1)
         end = datetime.now()
+        if monitoring_conn is None:
+            return 0
+
         response = monitoring_conn.get_metric_data(bucket_name, metric, start, end)
 
-        if response.get("points", []):
+        if response is None:
+            return 0
+
+        points = response.get("points", [])
+        if points is None:
+            return 0
+
+        if (
+            points
+            and len(points) > 0
+            and points[0] is not None
+            and isinstance(points[0], dict)
+        ):
+            value = points[0].get("value", {})
             object_total_count = (
-                response.get("points", [])[0].get("value", {}).get("int64Value", "")
+                value.get("int64Value", 0) if isinstance(value, dict) else 0
             )
         else:
             object_total_count = 0
@@ -499,11 +584,28 @@ class StorageManager(GoogleCloudManager):
         metric = "storage.googleapis.com/storage/total_bytes"
         start = datetime.now() - timedelta(days=1)
         end = datetime.now()
+
+        if monitoring_conn is None:
+            return 0
+
         response = monitoring_conn.get_metric_data(bucket_name, metric, start, end)
 
-        if response.get("points", []):
+        if response is None:
+            return 0
+
+        points = response.get("points", [])
+        if points is None:
+            return 0
+
+        if (
+            points
+            and len(points) > 0
+            and points[0] is not None
+            and isinstance(points[0], dict)
+        ):
+            value = points[0].get("value", {})
             object_total_size = (
-                response.get("points", [])[0].get("value", {}).get("doubleValue", "")
+                value.get("doubleValue", 0) if isinstance(value, dict) else 0
             )
         else:
             object_total_size = 0
