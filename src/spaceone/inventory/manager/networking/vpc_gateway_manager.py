@@ -1,20 +1,20 @@
-import time
 import logging
+import time
 
+from spaceone.inventory.connector.networking.vpc_gateway import VPCGatewayConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import (
     ReferenceModel,
-    reset_state_counters,
     log_state_summary,
+    reset_state_counters,
 )
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
-from spaceone.inventory.connector.networking.vpc_gateway import VPCGatewayConnector
-from spaceone.inventory.model.networking.vpc_gateway.cloud_service_type import (
-    CLOUD_SERVICE_TYPES,
-)
 from spaceone.inventory.model.networking.vpc_gateway.cloud_service import (
     VPCGatewayResource,
     VPCGatewayResponse,
+)
+from spaceone.inventory.model.networking.vpc_gateway.cloud_service_type import (
+    CLOUD_SERVICE_TYPES,
 )
 from spaceone.inventory.model.networking.vpc_gateway.data import VPCGateway
 
@@ -42,7 +42,7 @@ class VPCGatewayManager(GoogleCloudManager):
 
         # v2.0 상태 추적 초기화
         reset_state_counters()
-        
+
         collected_cloud_services = []
         error_responses = []
         gateway_id = ""
@@ -70,18 +70,24 @@ class VPCGatewayManager(GoogleCloudManager):
                 ##################################
                 gateway_id = nat_gateway.get("name", "")
                 region = self.match_region_info(nat_gateway.get("region", "global"))
-                
+
                 # 네트워크 정보 파싱
-                network_name = self._get_network_name_from_url(nat_gateway.get("network", ""))
-                
-                nat_gateway.update({
-                    "gateway_type": "NAT_GATEWAY",
-                    "project": project_id,
-                    "network_name": network_name,
-                    "nat_subnetworks": self._process_nat_subnetworks(nat_gateway.get("subnetworks", [])),
-                    "nat_log_config": nat_gateway.get("log_config"),
-                    "timeouts": self._get_nat_timeouts(nat_gateway),
-                })
+                network_name = self._get_network_name_from_url(
+                    nat_gateway.get("network", "")
+                )
+
+                nat_gateway.update(
+                    {
+                        "gateway_type": "NAT_GATEWAY",
+                        "project": project_id,
+                        "network_name": network_name,
+                        "nat_subnetworks": self._process_nat_subnetworks(
+                            nat_gateway.get("subnetworks", [])
+                        ),
+                        "nat_log_config": nat_gateway.get("log_config"),
+                        "timeouts": self._get_nat_timeouts(nat_gateway),
+                    }
+                )
 
                 # No labels
                 _name = nat_gateway.get("name", "")
@@ -115,21 +121,18 @@ class VPCGatewayManager(GoogleCloudManager):
                 ##################################
                 collected_cloud_services.append(
                     VPCGatewayResponse.create_with_logging(
-                        state="SUCCESS",
                         resource=vpc_gateway_resource,
-                        message=f"Successfully collected NAT Gateway: {_name}"
+                        message=f"Successfully collected NAT Gateway: {_name}",
                     )
                 )
 
             except Exception as e:
-                _LOGGER.error(f"[collect_cloud_service] NAT Gateway => {e}", exc_info=True)
+                _LOGGER.error(
+                    f"[collect_cloud_service] NAT Gateway => {e}", exc_info=True
+                )
                 error_response = ErrorResourceResponse.create_with_logging(
-                    state="FAILURE",
-                    message=f"Failed to collect NAT Gateway {gateway_id}: {str(e)}",
+                    error_message=f"Failed to collect NAT Gateway {gateway_id}: {str(e)}",
                     resource_type="inventory.CloudService",
-                    cloud_service_group="Networking",
-                    cloud_service_type="VPCGateway",
-                    resource_id=gateway_id
                 )
                 error_responses.append(error_response)
 
@@ -141,16 +144,22 @@ class VPCGatewayManager(GoogleCloudManager):
                 ##################################
                 gateway_id = vpn_gateway.get("name", "")
                 region = self.match_region_info(vpn_gateway.get("region", "global"))
-                
+
                 # 네트워크 정보 파싱
-                network_name = self._get_network_name_from_url(vpn_gateway.get("network", ""))
-                
-                vpn_gateway.update({
-                    "gateway_type": vpn_gateway.get("type", "VPN_GATEWAY"),
-                    "project": project_id,
-                    "network_name": network_name,
-                    "vpn_interfaces_display": self._process_vpn_interfaces(vpn_gateway.get("vpnInterfaces", [])),
-                })
+                network_name = self._get_network_name_from_url(
+                    vpn_gateway.get("network", "")
+                )
+
+                vpn_gateway.update(
+                    {
+                        "gateway_type": vpn_gateway.get("type", "VPN_GATEWAY"),
+                        "project": project_id,
+                        "network_name": network_name,
+                        "vpn_interfaces_display": self._process_vpn_interfaces(
+                            vpn_gateway.get("vpnInterfaces", [])
+                        ),
+                    }
+                )
 
                 # No labels
                 _name = vpn_gateway.get("name", "")
@@ -184,27 +193,24 @@ class VPCGatewayManager(GoogleCloudManager):
                 ##################################
                 collected_cloud_services.append(
                     VPCGatewayResponse.create_with_logging(
-                        state="SUCCESS",
                         resource=vpc_gateway_resource,
-                        message=f"Successfully collected VPN Gateway: {_name}"
+                        message=f"Successfully collected VPN Gateway: {_name}",
                     )
                 )
 
             except Exception as e:
-                _LOGGER.error(f"[collect_cloud_service] VPN Gateway => {e}", exc_info=True)
+                _LOGGER.error(
+                    f"[collect_cloud_service] VPN Gateway => {e}", exc_info=True
+                )
                 error_response = ErrorResourceResponse.create_with_logging(
-                    state="FAILURE",
-                    message=f"Failed to collect VPN Gateway {gateway_id}: {str(e)}",
+                    error_message=f"Failed to collect VPN Gateway {gateway_id}: {str(e)}",
                     resource_type="inventory.CloudService",
-                    cloud_service_group="Networking",
-                    cloud_service_type="VPCGateway",
-                    resource_id=gateway_id
                 )
                 error_responses.append(error_response)
 
         # v2.0 수집 결과 요약 로깅
         log_state_summary()
-        
+
         _LOGGER.debug(f"** VPC Gateway Finished {time.time() - start_time} Seconds **")
         return collected_cloud_services, error_responses
 
@@ -218,7 +224,9 @@ class VPCGatewayManager(GoogleCloudManager):
         """NAT 서브네트워크 정보를 처리합니다."""
         processed_subnetworks = []
         for subnetwork in subnetworks:
-            subnetwork_name = self.get_param_in_url(subnetwork.get("name", ""), "subnetworks")
+            subnetwork_name = self.get_param_in_url(
+                subnetwork.get("name", ""), "subnetworks"
+            )
             processed_data = {
                 "name": subnetwork_name,
                 "source_ip_ranges_to_nat": subnetwork.get("sourceIpRangesToNat", []),
@@ -242,22 +250,28 @@ class VPCGatewayManager(GoogleCloudManager):
     def _get_nat_timeouts(self, nat_gateway):
         """NAT Gateway의 타임아웃 설정을 정리하여 반환합니다."""
         timeouts = {}
-        
+
         if "icmpIdleTimeoutSec" in nat_gateway:
             timeouts["icmp_idle_timeout"] = f"{nat_gateway['icmpIdleTimeoutSec']}s"
-        
+
         if "tcpEstablishedIdleTimeoutSec" in nat_gateway:
-            timeouts["tcp_established_idle_timeout"] = f"{nat_gateway['tcpEstablishedIdleTimeoutSec']}s"
-            
+            timeouts["tcp_established_idle_timeout"] = (
+                f"{nat_gateway['tcpEstablishedIdleTimeoutSec']}s"
+            )
+
         if "tcpTransitoryIdleTimeoutSec" in nat_gateway:
-            timeouts["tcp_transitory_idle_timeout"] = f"{nat_gateway['tcpTransitoryIdleTimeoutSec']}s"
-            
+            timeouts["tcp_transitory_idle_timeout"] = (
+                f"{nat_gateway['tcpTransitoryIdleTimeoutSec']}s"
+            )
+
         if "tcpTimeWaitTimeoutSec" in nat_gateway:
-            timeouts["tcp_time_wait_timeout"] = f"{nat_gateway['tcpTimeWaitTimeoutSec']}s"
-            
+            timeouts["tcp_time_wait_timeout"] = (
+                f"{nat_gateway['tcpTimeWaitTimeoutSec']}s"
+            )
+
         if "udpIdleTimeoutSec" in nat_gateway:
             timeouts["udp_idle_timeout"] = f"{nat_gateway['udpIdleTimeoutSec']}s"
-            
+
         return timeouts
 
     def get_network_name_from_url(self, network_url):

@@ -1,15 +1,17 @@
-from schematics.types import ModelType, StringType, PolyModelType
+from schematics.types import ModelType, PolyModelType
 
+from spaceone.inventory.libs.schema.base import BaseResponse
 from spaceone.inventory.libs.schema.cloud_service import (
+    CloudServiceMeta,
     CloudServiceResource,
     CloudServiceResponse,
-    CloudServiceMeta,
 )
 from spaceone.inventory.model.networking.vpc_gateway.data import VPCGateway
 
 """
 VPC Gateway Cloud Service
 """
+
 
 class VPCGatewayResource(CloudServiceResource):
     cloud_service_group = "Networking"
@@ -20,7 +22,7 @@ class VPCGatewayResource(CloudServiceResource):
 
 class VPCGatewayResponse(CloudServiceResponse):
     resource = PolyModelType(VPCGatewayResource)
-    
+
     @classmethod
     def create_with_logging(
         cls,
@@ -34,11 +36,12 @@ class VPCGatewayResponse(CloudServiceResponse):
         v2.0 로깅 시스템을 사용하여 VPCGatewayResponse를 생성합니다.
         """
         # BaseResponse의 create_with_logging 메서드 활용
-        base_response = super().create_with_logging(
+        base_response = BaseResponse.create_with_logging(
             state=state,
             resource_type=resource_type,
             message=message,
             resource=resource,
             match_rules=match_rules,
         )
+
         return base_response
