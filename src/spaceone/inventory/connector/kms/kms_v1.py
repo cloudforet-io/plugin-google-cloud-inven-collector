@@ -1,12 +1,12 @@
 import logging
 
-from spaceone.inventory.libs.connector import GoogleCloudConnector
 from spaceone.inventory.conf.kms_config import (
     COMMON_KMS_LOCATIONS,
-    LOCATION_DISPLAY_NAMES,
     KMS_API_CONFIG,
+    LOCATION_DISPLAY_NAMES,
     LOG_LEVEL_CONFIG,
 )
+from spaceone.inventory.libs.connector import GoogleCloudConnector
 
 __all__ = ["KMSConnector"]
 _LOGGER = logging.getLogger(__name__)
@@ -119,7 +119,8 @@ class KMSConnector(GoogleCloudConnector):
             return key_rings
 
         except Exception as e:
-            _LOGGER.error(f"Error listing key rings in location {location}: {e}")
+            # 권한이 없는 location에 대한 접근은 정상적인 상황이므로 로그 출력하지 않음
+            # _LOGGER.warning(f"Permission denied or location not accessible for {location}: {e}")
             raise e
 
     def list_all_key_rings(self, target_locations=None):
@@ -176,10 +177,9 @@ class KMSConnector(GoogleCloudConnector):
                             key_ring["location_data"] = location_data
                             all_key_rings.append(key_ring)
 
-                except Exception as e:
-                    _LOGGER.warning(
-                        f"Failed to list key rings in location {location_id}: {e}"
-                    )
+                except Exception:
+                    # 권한이 없는 location에 대한 접근은 정상적인 상황이므로 로그 출력하지 않음
+                    # _LOGGER.debug(f"Location {location_id} not accessible or no permission: {e}")
                     continue
 
             _LOGGER.info(
@@ -383,9 +383,13 @@ class KMSConnector(GoogleCloudConnector):
             if log_level == "INFO":
                 _LOGGER.info(f"No crypto keys found in keyring {keyring_name}: {e}")
             elif log_level == "WARNING":
-                _LOGGER.warning(f"Error listing crypto keys in keyring {keyring_name}: {e}")
+                _LOGGER.warning(
+                    f"Error listing crypto keys in keyring {keyring_name}: {e}"
+                )
             else:
-                _LOGGER.error(f"Error listing crypto keys in keyring {keyring_name}: {e}")
+                _LOGGER.error(
+                    f"Error listing crypto keys in keyring {keyring_name}: {e}"
+                )
             return []
 
     def list_crypto_key_versions(self, crypto_key_name):
@@ -470,9 +474,15 @@ class KMSConnector(GoogleCloudConnector):
             # CryptoKeyVersion 조회 실패는 정보성 로그로 처리 (CryptoKey는 있지만 Version이 없을 수 있음)
             log_level = LOG_LEVEL_CONFIG.get("crypto_key_not_found", "INFO")
             if log_level == "INFO":
-                _LOGGER.info(f"No crypto key versions found in crypto key {crypto_key_name}: {e}")
+                _LOGGER.info(
+                    f"No crypto key versions found in crypto key {crypto_key_name}: {e}"
+                )
             elif log_level == "WARNING":
-                _LOGGER.warning(f"Error listing crypto key versions in crypto key {crypto_key_name}: {e}")
+                _LOGGER.warning(
+                    f"Error listing crypto key versions in crypto key {crypto_key_name}: {e}"
+                )
             else:
-                _LOGGER.error(f"Error listing crypto key versions in crypto key {crypto_key_name}: {e}")
+                _LOGGER.error(
+                    f"Error listing crypto key versions in crypto key {crypto_key_name}: {e}"
+                )
             return []
