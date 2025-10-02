@@ -26,6 +26,10 @@ class DiskConnector(GoogleCloudConnector):
             request = self.client.disks().aggregatedList_next(
                 previous_request=request, previous_response=response
             )
+
+        if disk_list is None or not disk_list:
+            return []
+
         return disk_list
 
     def list_resource_policies(self, **query):
@@ -41,5 +45,8 @@ class DiskConnector(GoogleCloudConnector):
             request = self.client.resourcePolicies().aggregatedList_next(
                 previous_request=request, previous_response=response
             )
+
+        if resource_policy_vo is None or not resource_policy_vo:
+            return {}
 
         return resource_policy_vo

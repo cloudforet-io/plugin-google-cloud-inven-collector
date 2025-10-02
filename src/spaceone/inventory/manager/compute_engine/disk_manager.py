@@ -2,15 +2,15 @@ import logging
 import time
 from datetime import datetime
 
+from spaceone.inventory.connector.compute_engine.disk import DiskConnector
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.base import ReferenceModel
-from spaceone.inventory.connector.compute_engine.disk import DiskConnector
-from spaceone.inventory.model.compute_engine.disk.cloud_service_type import (
-    CLOUD_SERVICE_TYPES,
-)
 from spaceone.inventory.model.compute_engine.disk.cloud_service import (
     DiskResource,
     DiskResponse,
+)
+from spaceone.inventory.model.compute_engine.disk.cloud_service_type import (
+    CLOUD_SERVICE_TYPES,
 )
 from spaceone.inventory.model.compute_engine.disk.data import Disk
 
@@ -22,7 +22,7 @@ class DiskManager(GoogleCloudManager):
     cloud_service_types = CLOUD_SERVICE_TYPES
 
     def collect_cloud_service(self, params):
-        _LOGGER.debug(f"** Disk START **")
+        _LOGGER.debug("** Disk START **")
         start_time = time.time()
         """
         Args:
@@ -53,17 +53,24 @@ class DiskManager(GoogleCloudManager):
         disks = disk_conn.list_disks()
         resource_policies = disk_conn.list_resource_policies()
 
+        disks = disks if disks is not None else []
+        resource_policies = resource_policies if resource_policies is not None else {}
+
         for disk in disks:
+            if disk is None or not isinstance(disk, dict):
+                continue
             try:
                 ##################################
                 # 1. Set Basic Information
                 ##################################
                 disk_id = disk.get("id")
-                disk_type = self.get_param_in_url(disk.get("type", ""), "diskTypes")
-                disk_size = float(disk.get("sizeGb", 0.0))
-                zone = self.get_param_in_url(disk.get("zone", ""), "zones")
+                disk_type = self.get_param_in_url(
+                    disk.get("type", "") or "", "diskTypes"
+                )
+                disk_size = float(disk.get("sizeGb", 0.0) or 0.0)
+                zone = self.get_param_in_url(disk.get("zone", "") or "", "zones")
                 region = self.parse_region_from_zone(zone)
-                labels = self.convert_labels_format(disk.get("labels", {}))
+                labels = self.convert_labels_format(disk.get("labels", {}) or {})
 
                 ##################################
                 # 2. Make Base Data
@@ -86,14 +93,16 @@ class DiskManager(GoogleCloudManager):
                         "disk_type": disk_type,
                         "snapshot_schedule": self._get_matched_snapshot_schedule_detail(
                             region, disk, resource_policies
-                        ),
+                        )
+                        or [],
                         "snapshot_schedule_display": self._get_snapshot_schedule_name(
                             disk
-                        ),
+                        )
+                        or [],
                         "encryption": self.get_disk_encryption_type(
                             disk.get("diskEncryptionKey")
                         ),
-                        "size": float(self._get_bytes(int(disk.get("sizeGb", 0)))),
+                        "size": float(self._get_bytes(int(disk.get("sizeGb", 0) or 0))),
                         "read_iops": self._get_iops_rate(disk_type, disk_size, "read"),
                         "write_iops": self._get_iops_rate(
                             disk_type, disk_size, "write"
@@ -129,9 +138,9 @@ class DiskManager(GoogleCloudManager):
                 ##################################
                 disk_resource = DiskResource(
                     {
-                        "name": disk.get("name", ""),
+                        "name": disk.get("name", "") or "",
                         "account": project_id,
-                        "region_code": disk.get("region"),
+                        "region_code": disk.get("region", "Global") or "Global",
                         "tags": labels,
                         "data": disk_data,
                         "reference": ReferenceModel(disk_data.reference()),
@@ -141,7 +150,7 @@ class DiskManager(GoogleCloudManager):
                 ##################################
                 # 4. Make Collected Region Code
                 ##################################
-                self.set_region_code(disk["region"])
+                self.set_region_code(disk.get("region", "Global") or "Global")
 
                 ##################################
                 # 5. Make Resource Response Object
@@ -161,36 +170,52 @@ class DiskManager(GoogleCloudManager):
         return collected_cloud_services, error_responses
 
     def _get_iops_rate(self, disk_type, disk_size, flag):
+        if not disk_type or not disk_size:
+            return 0.0
+
         const = self._get_iops_constant(disk_type, flag)
         return disk_size * const
 
     def _get_throughput_rate(self, disk_type, disk_size):
+        if not disk_type or not disk_size:
+            return 0.0
+
         const = self._get_throughput_constant(disk_type)
         return disk_size * const
 
     # Get disk snapshot detailed configurations
     def _get_matched_snapshot_schedule_detail(self, region, disk, resource_policies):
         matched_policies = []
-        policy_self_links = disk.get("resourcePolicies", [])
-        policies = resource_policies.get(region)
+        policy_self_links = disk.get("resourcePolicies", []) or []
+        policies = resource_policies.get(region, []) or []
 
         for self_link in policy_self_links:
+            if self_link is None:
+                continue
+
             for policy in policies:
+                if not policy or not isinstance(policy, dict):
+                    continue
+
                 if policy.get("selfLink") == self_link:
-                    snapshot_schedule_policy = policy.get("snapshotSchedulePolicy", {})
-                    snapshot_prop = snapshot_schedule_policy.get(
-                        "snapshotProperties", {}
+                    snapshot_schedule_policy = (
+                        policy.get("snapshotSchedulePolicy", {}) or {}
                     )
-                    retention = snapshot_schedule_policy.get("retentionPolicy", {})
+                    snapshot_prop = (
+                        snapshot_schedule_policy.get("snapshotProperties", {}) or {}
+                    )
+                    retention = (
+                        snapshot_schedule_policy.get("retentionPolicy", {}) or {}
+                    )
                     retention.update(
                         {
                             "max_retention_days_display": str(
                                 retention.get("maxRetentionDays")
                             )
-                                                          + " days"
+                            + " days"
                         }
                     )
-                    policy_schedule = snapshot_schedule_policy.get("schedule", {})
+                    policy_schedule = snapshot_schedule_policy.get("schedule", {}) or {}
 
                     policy.update(
                         {
@@ -205,14 +230,15 @@ class DiskManager(GoogleCloudManager):
                                 policy.get("region", ""), "regions"
                             ),
                             "labels": self.convert_labels_format(
-                                snapshot_prop.get("labels", {})
+                                snapshot_prop.get("labels", {}) or {}
                             ),
                             "tags": self.convert_labels_format(
-                                snapshot_prop.get("labels", {})
+                                snapshot_prop.get("labels", {}) or {}
                             ),
                             "storage_locations": snapshot_prop.get(
                                 "storageLocations", []
-                            ),
+                            )
+                            or [],
                         }
                     )
                     matched_policies.append(policy)
@@ -221,7 +247,10 @@ class DiskManager(GoogleCloudManager):
 
     def _get_in_used_by(self, users):
         in_used_by = []
-        for user in users:
+        for user in users or []:
+            if not user:
+                continue
+
             used_single = self.get_param_in_url(user, "instances")
             in_used_by.append(used_single)
         return in_used_by
@@ -229,20 +258,23 @@ class DiskManager(GoogleCloudManager):
     def _get_schedule_display(self, schedule):
         schedule_display = []
         if "weeklySchedule" in schedule:
-            week_schedule = schedule.get("weeklySchedule", {})
-            weeks = week_schedule.get("dayOfWeeks", [])
-            for week in weeks:
+            week_schedule = schedule.get("weeklySchedule", {}) or {}
+            weeks = week_schedule.get("dayOfWeeks", []) or []
+            for week in weeks or []:
+                if week is None or not isinstance(week, dict):
+                    continue
+
                 schedule_display.append(
                     week.get("day").title() + self._get_readable_time(week)
                 )
 
         elif "dailySchedule" in schedule:
-            daily = schedule.get("dailySchedule")
+            daily = schedule.get("dailySchedule", {}) or {}
             schedule_display.append(f"Every day{self._get_readable_time(daily)}")
 
         elif "hourlySchedule" in schedule:
-            hourly = schedule.get("hourlySchedule")
-            cycle = str(hourly.get("hoursInCycle"))
+            hourly = schedule.get("hourlySchedule", {}) or {}
+            cycle = str(hourly.get("hoursInCycle", 0) or 0)
             hourly_schedule = f"Every {cycle} hours"
             schedule_display.append(hourly_schedule)
 
@@ -250,21 +282,33 @@ class DiskManager(GoogleCloudManager):
 
     @staticmethod
     def _get_readable_time(day_of_weeks):
-        start_time = day_of_weeks.get("startTime")
+        if not day_of_weeks:
+            return ""
+
+        start_time = day_of_weeks.get("startTime", "") or ""
+        if not start_time:
+            return ""
+
         time_frame = start_time.split(":")
-        first = int(time_frame[0]) + 1
-        second = int(time_frame[1])
+        if len(time_frame) != 2:
+            return ""
 
-        d = datetime.strptime(start_time, "%H:%M")
-        start = d.strftime("%I:%M %p")
-        e = datetime.strptime(f"{first}:{second}", "%H:%M")
-        end = e.strftime("%I:%M %p")
+        try:
+            first = (int(time_frame[0]) + 1) % 24
+            second = int(time_frame[1])
 
-        return f" between {start} and {end}"
+            d = datetime.strptime(start_time, "%H:%M")
+            start = d.strftime("%I:%M %p")
+            e = datetime.strptime(f"{first}:{second}", "%H:%M")
+            end = e.strftime("%I:%M %p")
+
+            return f" between {start} and {end}"
+        except ValueError:
+            return ""
 
     @staticmethod
     def _get_iops_constant(disk_type, flag):
-        constant = 0
+        constant = 0.0
         if flag == "read":
             if disk_type == "pd-standard":
                 constant = 0.75
@@ -283,7 +327,7 @@ class DiskManager(GoogleCloudManager):
 
     @staticmethod
     def _get_throughput_constant(disk_type):
-        constant = 0
+        constant = 0.0
         if disk_type == "pd-standard":
             constant = 0.12
         elif disk_type == "pd-balanced":
@@ -295,7 +339,7 @@ class DiskManager(GoogleCloudManager):
 
     def _get_source_image_display(self, disk):
         source_image_display = ""
-        url_source_image = disk.get("sourceImage")
+        url_source_image = disk.get("sourceImage", "") or ""
         if url_source_image:
             source_image_display = self.get_param_in_url(url_source_image, "images")
         return source_image_display
@@ -303,8 +347,12 @@ class DiskManager(GoogleCloudManager):
     # Get name of snapshot schedule
     def _get_snapshot_schedule_name(self, disk):
         snapshot_schedule = []
-        policies = disk.get("resourcePolicies", [])
+        policies = disk.get("resourcePolicies", []) or []
+
         for url_policy in policies:
+            if not url_policy:
+                continue
+
             str_policy = self.get_param_in_url(url_policy, "resourcePolicies")
             snapshot_schedule.append(str_policy)
 
