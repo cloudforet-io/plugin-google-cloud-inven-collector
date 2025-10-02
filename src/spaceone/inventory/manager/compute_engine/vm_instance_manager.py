@@ -1,12 +1,11 @@
-import time
 import logging
-from typing import Tuple, List
+import time
+from typing import List, Tuple
 
-from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.connector.compute_engine.vm_instance import VMInstanceConnector
-from spaceone.inventory.manager.compute_engine.vm_instance.vm_instance_manager_resource_helper import (
-    VMInstanceManagerResourceHelper,
-)
+from spaceone.inventory.libs.manager import GoogleCloudManager
+from spaceone.inventory.libs.schema.base import ReferenceModel
+from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 from spaceone.inventory.manager.compute_engine.vm_instance import (
     InstanceGroupManagerResourceHelper,
 )
@@ -22,6 +21,9 @@ from spaceone.inventory.manager.compute_engine.vm_instance.load_balancer_manager
 from spaceone.inventory.manager.compute_engine.vm_instance.nic_manager_resource_helper import (
     NICManagerResourceHelper,
 )
+from spaceone.inventory.manager.compute_engine.vm_instance.vm_instance_manager_resource_helper import (
+    VMInstanceManagerResourceHelper,
+)
 from spaceone.inventory.manager.compute_engine.vm_instance.vpc_manager_resource_helper import (
     VPCManagerResourceHelper,
 )
@@ -32,8 +34,6 @@ from spaceone.inventory.model.compute_engine.instance.cloud_service import (
 from spaceone.inventory.model.compute_engine.instance.cloud_service_type import (
     CLOUD_SERVICE_TYPES,
 )
-from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
-from spaceone.inventory.libs.schema.base import ReferenceModel
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class VMInstanceManager(GoogleCloudManager):
     def collect_cloud_service(
         self, params
     ) -> Tuple[List[VMInstanceResponse], List[ErrorResourceResponse]]:
-        _LOGGER.debug(f"** VM Instance START **")
+        _LOGGER.debug("** VM Instance START **")
         """
         params = {
             'zone_info': {
@@ -72,17 +72,27 @@ class VMInstanceManager(GoogleCloudManager):
         self.instance_conn: VMInstanceConnector = self.locator.get_connector(
             self.connector_name, **params
         )
-        all_resources = self.get_all_resources(project_id)
+        all_resources = self.get_all_resources(project_id) or {}
         compute_vms = self.instance_conn.list_instances()
 
+        if not compute_vms:
+            return resource_responses, error_responses
+
         for compute_vm in compute_vms:
+            if compute_vm is None or not isinstance(compute_vm, dict):
+                continue
+
             try:
                 ##################################
                 # 1. Set Basic Information
                 ##################################
                 vm_id = compute_vm.get("id")
-                zone, region = self._get_zone_and_region(compute_vm)
-                zone_info = {"zone": zone, "region": region, "project_id": project_id}
+                zone, region = self._get_zone_and_region(compute_vm) or ("", "")
+                zone_info = {
+                    "zone": zone,
+                    "region": region,
+                    "project_id": project_id,
+                }
 
                 ##################################
                 # 2. Make Base Data
@@ -140,37 +150,37 @@ class VMInstanceManager(GoogleCloudManager):
     ) -> VMInstanceResource:
         """Prepare input params for call manager"""
         # VPC
-        vpcs = all_resources.get("vpcs", [])
-        subnets = all_resources.get("subnets", [])
+        vpcs = all_resources.get("vpcs", []) or []
+        subnets = all_resources.get("subnets", []) or []
 
         # All Public Images
-        public_images = all_resources.get("public_images", {})
+        public_images = all_resources.get("public_images", {}) or {}
 
         # URL Maps
-        url_maps = all_resources.get("url_maps", [])
-        backend_svcs = all_resources.get("backend_svcs", [])
-        target_pools = all_resources.get("target_pools", [])
+        url_maps = all_resources.get("url_maps", []) or []
+        backend_svcs = all_resources.get("backend_svcs", []) or []
+        target_pools = all_resources.get("target_pools", []) or []
 
         # Forwarding Rules
-        forwarding_rules = all_resources.get("forwarding_rules", [])
+        forwarding_rules = all_resources.get("forwarding_rules", []) or []
 
         # Firewall
-        firewalls = all_resources.get("firewalls", [])
+        firewalls = all_resources.get("firewalls", []) or []
 
         # Get Instance Groups
-        instance_group = all_resources.get("instance_group", [])
+        instance_group = all_resources.get("instance_group", []) or []
 
         # Get Machine Types
-        instance_types = all_resources.get("instance_type", [])
+        instance_types = all_resources.get("instance_type", []) or []
 
         # Autoscaling group list
-        autoscaler = all_resources.get("autoscaler", [])
-        instance_in_managed_instance_groups = all_resources.get(
-            "managed_instances_in_instance_groups", []
+        autoscaler = all_resources.get("autoscaler", []) or []
+        instance_in_managed_instance_groups = (
+            all_resources.get("managed_instances_in_instance_groups", []) or []
         )
 
         # disks
-        disks = all_resources.get("disk", [])
+        disks = all_resources.get("disk", []) or []
 
         """Get related resources from managers"""
         vm_instance_manager_helper: VMInstanceManagerResourceHelper = (
@@ -199,37 +209,41 @@ class VMInstanceManager(GoogleCloudManager):
             target_pools,
             forwarding_rules,
         )
-        disk_vos = disk_manager_helper.get_disk_info(instance, disks)
+        disk_vos = disk_manager_helper.get_disk_info(instance, disks) or []
         disk_size = sum([float(disk.get("size")) for disk in disk_vos])
 
         vpc_vo, subnet_vo = vpc_manager_helper.get_vpc_info(instance, vpcs, subnets)
-        nic_vos = nic_manager_helper.get_nic_info(instance, subnet_vo)
-        firewall_vos = firewall_manager_helper.list_firewall_rules_info(
-            instance, firewalls
+        nic_vos = nic_manager_helper.get_nic_info(instance, subnet_vo) or []
+        firewall_vos = (
+            firewall_manager_helper.list_firewall_rules_info(instance, firewalls) or []
         )
 
         firewall_names = [
             d.get("name") for d in firewall_vos if d.get("name", "") != ""
         ]
-        server_data = vm_instance_manager_helper.get_server_info(
-            instance,
-            instance_types,
-            disks,
-            zone_info,
-            public_images,
-            instance_in_managed_instance_groups,
+        server_data = (
+            vm_instance_manager_helper.get_server_info(
+                instance,
+                instance_types,
+                disks,
+                zone_info,
+                public_images,
+                instance_in_managed_instance_groups,
+            )
+            or {}
         )
         google_cloud_filters = [
-            {"key": "resource.labels.instance_id", "value": instance.get("id")}
+            {"key": "resource.labels.instance_id", "value": instance.get("id")} or []
         ]
-        google_cloud = server_data["data"].get("google_cloud", {})
-        _google_cloud = google_cloud.to_primitive()
-        labels = _google_cloud.get("labels", [])
-        _name = instance.get("name", "")
+        google_cloud = server_data["data"].get("google_cloud", {}) or {}
+        _google_cloud = google_cloud.to_primitive() or {}
+        labels = _google_cloud.get("labels", []) or []
+        _name = instance.get("name", "") or ""
 
         # Set GPU info
-        if gpus_info := instance.get("guestAccelerators", []):
-            gpus = self._get_gpu_info(gpus_info)
+        gpus_info = instance.get("guestAccelerators", []) or []
+        if gpus_info:
+            gpus = self._get_gpu_info(gpus_info) or []
             server_data["data"].update(
                 {
                     "gpus": gpus,
@@ -242,7 +256,11 @@ class VMInstanceManager(GoogleCloudManager):
                 }
             )
 
-        path, instance_type = instance.get("machineType").split("machineTypes/")
+        machine_type_str = instance.get("machineType", "") or ""
+        if machine_type_str and "machineTypes/" in machine_type_str:
+            path, instance_type = machine_type_str.split("machineTypes/")
+        else:
+            instance_type = ""
 
         """ Gather all resources information """
         """
@@ -257,7 +275,7 @@ class VMInstanceManager(GoogleCloudManager):
                 "disks": disk_vos,
             }
         )
-        server_data["data"]["compute"]["security_groups"] = firewall_names
+        server_data["data"]["compute"]["security_groups"] = firewall_names or []
         server_data["data"].update(
             {
                 "load_balancers": load_balancer_vos,
@@ -317,10 +335,18 @@ class VMInstanceManager(GoogleCloudManager):
     @staticmethod
     def _get_gpu_info(gpus_info):
         gpu_items = []
+        if not gpus_info:
+            return gpu_items
+
         for gpu_info in gpus_info:
-            path, gpu_machine_type = gpu_info.get("acceleratorType").split(
-                "acceleratorTypes/"
-            )
+            accelerator_type = gpu_info.get("acceleratorType", "")
+            if accelerator_type and "acceleratorTypes/" in accelerator_type:
+                path, gpu_machine_type = gpu_info.get("acceleratorType").split(
+                    "acceleratorTypes/"
+                )
+            else:
+                gpu_machine_type = ""
+
             gpus = gpu_info.get("acceleratorCount")
             gpu_items.append({"gpu_count": gpus, "gpu_machine_type": gpu_machine_type})
         return gpu_items
