@@ -66,19 +66,19 @@ spacectl exec create repository.Plugin -f register_plugin.yaml
 이 플러그인은 다음 Google Cloud 서비스들의 리소스를 수집합니다:
 
 ### 컴퓨팅 서비스
+- **Compute Engine**: 가상 머신 인스턴스 및 관련 리소스 (VM Instance, Disk, Snapshot, Machine Image, Instance Template, Instance Group)
 - **App Engine**: 완전 관리형 서버리스 플랫폼 (Application, Service, Version, Instance)
 - **Kubernetes Engine (GKE)**: 관리형 Kubernetes 클러스터 서비스 (Cluster, Node Pool, Node, Node Group)
-- **Compute Engine**: 가상 머신 인스턴스 및 관련 리소스
 - **Cloud Run**: 컨테이너 기반 서버리스 플랫폼 (Service, Job, Execution, Task, Revision)
-- **Cloud Functions**: 이벤트 기반 서버리스 함수
+- **Cloud Functions**: 이벤트 기반 서버리스 함수 (1세대, 2세대)
 
 ### 데이터 및 스토리지 서비스
-- **Cloud Storage**: 객체 스토리지 서비스
-- **Cloud SQL**: 관리형 관계형 데이터베이스
-- **BigQuery**: 데이터 웨어하우스 및 분석 서비스
-- **Filestore**: 관리형 NFS 파일 시스템
-- **Firestore**: NoSQL 문서 데이터베이스
-- **Datastore**: NoSQL 문서 데이터베이스 (Datastore 모드)
+- **Cloud Storage**: 객체 스토리지 서비스 (Bucket, Object)
+- **Cloud SQL**: 관리형 관계형 데이터베이스 (Instance, Database, User, Backup)
+- **BigQuery**: 데이터 웨어하우스 및 분석 서비스 (Dataset, Table, Job)
+- **Filestore**: 관리형 NFS 파일 시스템 (Instance, Backup, Snapshot)
+- **Firestore**: NoSQL 문서 데이터베이스 (Database, Collection, Index, Backup)
+- **Datastore**: NoSQL 문서 데이터베이스 (Database, Index, Namespace)
 
 ### 데이터 처리 및 분석
 - **Dataproc**: 관리형 Apache Spark 및 Hadoop 서비스
@@ -89,11 +89,12 @@ spacectl exec create repository.Plugin -f register_plugin.yaml
 - **Cloud Build**: 지속적 통합/배포 서비스
 - **Firebase**: 모바일 및 웹 애플리케이션 개발 플랫폼
 
-### 보안 및 관리
-- **KMS (Key Management Service)**: 암호화 키 관리 서비스
-- **Pub/Sub**: 메시징 서비스
-- **Networking**: 네트워크 리소스
-- **Recommender**: 리소스 최적화 권장사항
+### 네트워킹 및 보안
+- **Networking**: 네트워크 리소스 (VPC Network, Subnet, Firewall, External IP, Load Balancer, Route, VPN Gateway)
+- **KMS (Key Management Service)**: 암호화 키 관리 서비스 (KeyRing, CryptoKey, CryptoKeyVersion)
+
+### 메시징 및 통합
+- **Pub/Sub**: 메시징 서비스 (Topic, Subscription, Schema, Snapshot)
 
 ## GCP 서비스 엔드포인트
 
@@ -175,73 +176,115 @@ spacectl exec create repository.Plugin -f register_plugin.yaml
 
 현재 구현된 서비스별 상세 정보:
 
-### 1. App Engine
+### 1. Compute Engine
+- **설명**: Google Cloud의 가상 머신 컴퓨팅 서비스
+- **수집 리소스**: VM Instance, Disk, Snapshot, Machine Image, Instance Template, Instance Group
+- **API 버전**: v1
+- **문서**: [Compute Engine 가이드](./prd/compute_engine/README.md)
+
+### 2. App Engine
 - **설명**: Google Cloud의 완전 관리형 서버리스 플랫폼
 - **수집 리소스**: Application, Service, Version, Instance
 - **API 버전**: v1, v1beta (하위 호환성)
 - **문서**: [App Engine 가이드](./prd/app_engine/README.md)
 
-### 2. Kubernetes Engine (GKE)
+### 3. Kubernetes Engine (GKE)
 - **설명**: Google Cloud의 관리형 Kubernetes 클러스터 서비스
 - **수집 리소스**: Cluster, Node Pool, Node, Node Group
 - **API 버전**: v1, v1beta (하위 호환성)
 - **문서**: [Kubernetes Engine 가이드](./prd/kubernetes_engine/README.md)
 
-### 3. Cloud Run
+### 4. Cloud Run
 - **설명**: 컨테이너 기반 서버리스 플랫폼
 - **수집 리소스**: Service, Job, Execution, Task, Revision, Worker Pool, Domain Mapping
 - **API 버전**: v1, v2 (버전별 완전 분리)
 - **문서**: [Cloud Run 가이드](./prd/cloud_run/README.md)
 
-### 4. Cloud Build
+### 5. Cloud Functions
+- **설명**: 이벤트 기반 서버리스 함수 서비스
+- **수집 리소스**: Function (1세대, 2세대), Trigger, Environment Variables
+- **API 버전**: v1, v2 (세대별 완전 분리)
+- **문서**: [Cloud Functions 가이드](./prd/cloud_functions/README.md)
+
+### 6. Cloud Storage
+- **설명**: 객체 스토리지 서비스
+- **수집 리소스**: Bucket, Lifecycle Policy, IAM Policy, Encryption Settings
+- **API 버전**: v1
+- **문서**: [Cloud Storage 가이드](./prd/cloud_storage/README.md)
+
+### 7. Cloud SQL
+- **설명**: 관리형 관계형 데이터베이스 서비스
+- **수집 리소스**: Instance, Database, User, Backup Configuration
+- **API 버전**: v1
+- **문서**: [Cloud SQL 가이드](./prd/cloud_sql/README.md)
+
+### 8. BigQuery
+- **설명**: 데이터 웨어하우스 및 분석 서비스
+- **수집 리소스**: Dataset, Table, View, Job, Schema
+- **API 버전**: v2
+- **문서**: [BigQuery 가이드](./prd/bigquery/README.md)
+
+### 9. Cloud Build
 - **설명**: 지속적 통합/배포 서비스
 - **수집 리소스**: Build, Trigger, Worker Pool, Connection, Repository
 - **API 버전**: v1, v2 (버전별 완전 분리)
 - **문서**: [Cloud Build 가이드](./prd/cloud_build/README.md)
 
-### 5. Dataproc
+### 10. Dataproc
 - **설명**: 관리형 Apache Spark 및 Hadoop 서비스
 - **수집 리소스**: Cluster, Job, Workflow Template, Autoscaling Policy
 - **API 버전**: v1
 - **문서**: [Dataproc 가이드](./prd/dataproc/README.md)
 
-### 6. Filestore
+### 11. Filestore
 - **설명**: 관리형 NFS 파일 시스템
 - **수집 리소스**: Instance, Backup, Snapshot
 - **API 버전**: v1, v1beta1
 - **문서**: [Filestore 가이드](./prd/filestore/README.md)
 
-### 7. Firestore
+### 12. Firestore
 - **설명**: NoSQL 문서 데이터베이스
 - **수집 리소스**: Database, Collection, Index, Backup
 - **API 버전**: v1
 - **문서**: [Firestore 가이드](./prd/firestore/README.md)
 
-### 8. Datastore
+### 13. Datastore
 - **설명**: NoSQL 문서 데이터베이스 (Datastore 모드)
 - **수집 리소스**: Database, Index, Namespace
 - **API 버전**: v1
 - **문서**: [Datastore 가이드](./prd/datastore/README.md)
 
-### 9. KMS (Key Management Service)
+### 14. Networking
+- **설명**: 네트워크 인프라 서비스
+- **수집 리소스**: VPC Network, Subnet, Firewall, External IP, Load Balancer, Route, VPN Gateway
+- **API 버전**: v1
+- **문서**: [Networking 가이드](./prd/networking/README.md)
+
+### 15. KMS (Key Management Service)
 - **설명**: 암호화 키 관리 서비스
 - **수집 리소스**: KeyRing, CryptoKey, CryptoKeyVersion
 - **API 버전**: v1
 - **문서**: [KMS 가이드](./prd/kms/README.md)
 
-### 10. Firebase
+### 16. Pub/Sub
+- **설명**: 메시징 및 이벤트 스트리밍 서비스
+- **수집 리소스**: Topic, Subscription, Schema, Snapshot
+- **API 버전**: v1
+- **문서**: [Pub/Sub 가이드](./prd/pubsub/README.md)
+
+### 17. Firebase
 - **설명**: 모바일 및 웹 애플리케이션 개발 플랫폼
 - **수집 리소스**: Project
 - **API 버전**: v1beta1
 - **문서**: [Firebase 가이드](./prd/firebase/Google Firebase 제품 요구사항 정의서.md)
 
-### 11. Batch
+### 18. Batch
 - **설명**: 배치 작업 처리 서비스
 - **수집 리소스**: Job, Task
 - **API 버전**: v1
 - **문서**: [Batch 가이드](./prd/batch/Google Cloud Batch 제품 요구사항 정의서.md)
 
-### 12. Storage Transfer
+### 19. Storage Transfer
 - **설명**: 데이터 전송 서비스
 - **수집 리소스**: Transfer Job, Transfer Operation, Agent Pool, Service Account
 - **API 버전**: v1

@@ -63,11 +63,11 @@ spacectl exec create repository.Plugin -f register_plugin.yaml
 This plugin collects resources from the following Google Cloud services:
 
 ### Computing Services
+- **Compute Engine**: Virtual machine instances and related resources (VM Instance, Disk, Snapshot, Machine Image, Instance Template, Instance Group)
 - **App Engine**: Fully managed serverless platform (Application, Service, Version, Instance)
 - **Kubernetes Engine (GKE)**: Managed Kubernetes cluster service (Cluster, Node Pool, Node, Node Group)
-- **Compute Engine**: Virtual machine instances and related resources
 - **Cloud Run**: Container-based serverless platform (Service, Job, Execution, Task, Revision)
-- **Cloud Functions**: Event-driven serverless functions
+- **Cloud Functions**: Event-driven serverless functions (Gen1, Gen2)
 
 ### Data and Storage Services
 - **Cloud Storage**: Object storage service
@@ -172,73 +172,115 @@ This plugin can collect resources from the following Google Cloud regions:
 
 Detailed information for currently implemented services:
 
-### 1. App Engine
+### 1. Compute Engine
+- **Description**: Google Cloud's virtual machine computing service
+- **Collected Resources**: VM Instance, Disk, Snapshot, Machine Image, Instance Template, Instance Group
+- **API Version**: v1
+- **Documentation**: [Compute Engine Guide](./docs/ko/prd/compute_engine/README.md)
+
+### 2. App Engine
 - **Description**: Google Cloud's fully managed serverless platform
 - **Collected Resources**: Application, Service, Version, Instance
 - **API Version**: v1, v1beta (backward compatibility)
 - **Documentation**: [App Engine Guide](./docs/ko/prd/app_engine/README.md)
 
-### 2. Kubernetes Engine (GKE)
+### 3. Kubernetes Engine (GKE)
 - **Description**: Google Cloud's managed Kubernetes cluster service
 - **Collected Resources**: Cluster, Node Pool, Node, Node Group
 - **API Version**: v1, v1beta (backward compatibility)
 - **Documentation**: [Kubernetes Engine Guide](./docs/ko/prd/kubernetes_engine/README.md)
 
-### 3. Cloud Run
+### 4. Cloud Run
 - **Description**: Container-based serverless platform
 - **Collected Resources**: Service, Job, Execution, Task, Revision, Worker Pool, Domain Mapping
 - **API Version**: v1, v2 (complete version separation)
 - **Documentation**: [Cloud Run Guide](./docs/ko/prd/cloud_run/README.md)
 
-### 4. Cloud Build
+### 5. Cloud Functions
+- **Description**: Event-driven serverless functions service
+- **Collected Resources**: Function (Gen1, Gen2), Trigger, Environment Variables
+- **API Version**: v1, v2 (complete generation separation)
+- **Documentation**: [Cloud Functions Guide](./docs/ko/prd/cloud_functions/README.md)
+
+### 6. Cloud Storage
+- **Description**: Object storage service
+- **Collected Resources**: Bucket, Lifecycle Policy, IAM Policy, Encryption Settings
+- **API Version**: v1
+- **Documentation**: [Cloud Storage Guide](./docs/ko/prd/cloud_storage/README.md)
+
+### 7. Cloud SQL
+- **Description**: Managed relational database service
+- **Collected Resources**: Instance, Database, User, Backup Configuration
+- **API Version**: v1
+- **Documentation**: [Cloud SQL Guide](./docs/ko/prd/cloud_sql/README.md)
+
+### 8. BigQuery
+- **Description**: Data warehouse and analytics service
+- **Collected Resources**: Dataset, Table, View, Job, Schema
+- **API Version**: v2
+- **Documentation**: [BigQuery Guide](./docs/ko/prd/bigquery/README.md)
+
+### 9. Cloud Build
 - **Description**: Continuous integration/deployment service
 - **Collected Resources**: Build, Trigger, Worker Pool, Connection, Repository
 - **API Version**: v1, v2 (complete version separation)
 - **Documentation**: [Cloud Build Guide](./docs/ko/prd/cloud_build/README.md)
 
-### 5. Dataproc
+### 10. Dataproc
 - **Description**: Managed Apache Spark and Hadoop service
 - **Collected Resources**: Cluster, Job, Workflow Template, Autoscaling Policy
 - **API Version**: v1
 - **Documentation**: [Dataproc Guide](./docs/ko/prd/dataproc/README.md)
 
-### 6. Filestore
+### 11. Filestore
 - **Description**: Managed NFS file system
 - **Collected Resources**: Instance, Backup, Snapshot
 - **API Version**: v1, v1beta1
 - **Documentation**: [Filestore Guide](./docs/ko/prd/filestore/README.md)
 
-### 7. Firestore
+### 12. Firestore
 - **Description**: NoSQL document database
 - **Collected Resources**: Database, Collection, Index, Backup
 - **API Version**: v1
 - **Documentation**: [Firestore Guide](./docs/ko/prd/firestore/README.md)
 
-### 8. Datastore
+### 13. Datastore
 - **Description**: NoSQL document database (Datastore mode)
 - **Collected Resources**: Database, Index, Namespace
 - **API Version**: v1
 - **Documentation**: [Datastore Guide](./docs/ko/prd/datastore/README.md)
 
-### 9. KMS (Key Management Service)
+### 14. Networking
+- **Description**: Network infrastructure service
+- **Collected Resources**: VPC Network, Subnet, Firewall, External IP, Load Balancer, Route, VPN Gateway
+- **API Version**: v1
+- **Documentation**: [Networking Guide](./docs/ko/prd/networking/README.md)
+
+### 15. KMS (Key Management Service)
 - **Description**: Encryption key management service
 - **Collected Resources**: KeyRing, CryptoKey, CryptoKeyVersion
 - **API Version**: v1
 - **Documentation**: [KMS Guide](./docs/ko/prd/kms/README.md)
 
-### 10. Firebase
+### 16. Pub/Sub
+- **Description**: Messaging and event streaming service
+- **Collected Resources**: Topic, Subscription, Schema, Snapshot
+- **API Version**: v1
+- **Documentation**: [Pub/Sub Guide](./docs/ko/prd/pubsub/README.md)
+
+### 17. Firebase
 - **Description**: Mobile and web application development platform
 - **Collected Resources**: Project
 - **API Version**: v1beta1
 - **Documentation**: [Firebase Guide](./docs/ko/prd/firebase/Google Firebase 제품 요구사항 정의서.md)
 
-### 11. Batch
+### 18. Batch
 - **Description**: Batch job processing service
 - **Collected Resources**: Job, Task
 - **API Version**: v1
 - **Documentation**: [Batch Guide](./docs/ko/prd/batch/Google Cloud Batch 제품 요구사항 정의서.md)
 
-### 12. Storage Transfer
+### 19. Storage Transfer
 - **Description**: Data transfer service
 - **Collected Resources**: Transfer Job, Transfer Operation, Agent Pool, Service Account
 - **API Version**: v1
