@@ -695,40 +695,6 @@ Connector Layer (Google Cloud API 연동)
 4. **검증**: 데이터 무결성 및 관계 검사
 5. **저장**: SpaceONE 인벤토리에 리소스 저장
 
-## 시작하기
-
-### 1. 사전 요구사항
-- Python 3.8+
-- Google Cloud 프로젝트
-- Service Account 키 파일
-- 필요한 API 활성화
-
-### 2. 설치 및 설정
-```bash
-# 저장소 클론
-git clone <repository-url>
-cd plugin-google-cloud-inven-collector
-
-# 가상환경 생성 및 활성화
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 의존성 설치
-pip install -r requirements.txt
-
-# 환경 변수 설정
-export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account-key.json"
-export GOOGLE_CLOUD_PROJECT_ID="your-project-id"
-```
-
-### 3. 실행
-```bash
-# 기본 수집 실행
-python -m spaceone.inventory.service.collector_service
-
-# 특정 서비스만 수집
-python -m spaceone.inventory.service.collector_service --service app_engine
-```
 
 ## 개발 가이드
 

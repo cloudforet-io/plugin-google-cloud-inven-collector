@@ -691,31 +691,6 @@ Connector Layer (Google Cloud API integration)
 4. **Validation**: Data integrity and relationship verification
 5. **Storage**: Store resources in SpaceONE inventory
 
-## Getting Started
-
-### 1. Prerequisites
-- Python 3.8+
-- Google Cloud project
-- Service Account key file
-- Required API activation
-
-### 2. Installation and Setup
-```bash
-# Clone repository
-git clone <repository-url>
-cd plugin-google-cloud-inven-collector
-
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set environment variables
-export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account-key.json"
-export GOOGLE_CLOUD_PROJECT_ID="your-project-id"
-```
 
 ### 3. Execution
 ```bash
