@@ -1,537 +1,810 @@
-<h1 align="center">Google Cloud Collector</h1>  
+# Google Cloud Inventory Collector Plugin
 
-<br/>  
-<div align="center" style="display:flex;">  
-  <img width="245" src="https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud/Google_Cloud.svg">
-  <p> 
-    <br>
-    <img alt="Version"  src="https://img.shields.io/badge/version-0.5.2-blue.svg?cacheSeconds=2592000"  />    
-    <a href="https://www.apache.org/licenses/LICENSE-2.0"  target="_blank"><img alt="License: Apache 2.0"  src="https://img.shields.io/badge/License-Apache 2.0-yellow.svg" /></a> 
-  </p> 
-</div>    
+Language: [English](README.md) | [한국어](README_KR.md)
 
-**Plugin to collect Google Cloud**
+SpaceONE's GCP (Google Cloud Platform) Inventory Collector plugin. The Inventory plugin automatically collects Google Cloud resource information.
 
-> SpaceONE's [plugin-google-cloud-inven-collector](https://github.com/spaceone-dev/plugin-google-cloud-inven-collector) is a convenient tool to
-get cloud service data from Google Cloud platform.
+## Table of Contents
 
+1. [Overview](#overview)
+2. [Plugin Setup and Deployment Guide](#plugin-setup-and-deployment-guide)
+3. [Target Services for Collection](#target-services-for-collection)
+4. [GCP Service Endpoints](#gcp-service-endpoints)
+5. [Supported Regions List](#supported-regions-list)
+6. [Service List](#service-list)
+7. [Authentication Overview](#authentication-overview)
+8. [IAM Permission Setup](#iam-permission-setup)
+9. [Automated Permission Setup Scripts](#automated-permission-setup-scripts)
+10. [Secret Data Configuration](#secret-data-configuration)
+11. [Product Requirements Document (PRD)](#product-requirements-document-prd)
+12. [Input Parameters](#input-parameters)
 
-Find us also at [Dockerhub](https://hub.docker.com/repository/docker/spaceone/plugin-google-cloud-inven-collector)
+## Overview
 
+This document provides resource collection methods and implementation guides for Google Cloud services supported by the SpaceONE Google Cloud Inventory Collector plugin.
 
-Please contact us if you need any further information. (<support@spaceone.dev>)
+## Plugin Setup and Deployment Guide
 
----
+### Step 1: Register Plugin to Repository
 
+Register the plugin to the Repository service so that SpaceONE can recognize the container image as a plugin.
 
-<br>
-<br>
+#### 1.1 Create Plugin Registration YAML File
 
-### Google Service Endpoint (in use)
-There is an endpoints used to collect resources information of GCP. Endpoint of served GCP is a URL consisting of a service code.
-```text
-https://[service-code].googleapis.com
+You need to modify the registry_type and image path appropriately according to your deployment environment.
+
+```yaml
+# register_plugin.yaml
+capability: {}
+image: plugin-google-cloud-inven-collector
+labels:
+- Compute Engine
+- Networking
+- Cloud SQL
+name: plugin-google-cloud-inven-collector
+plugin_id: plugin-google-cloud-inven-collector
+provider: google_cloud
+registry_config:
+  image_pull_secret: aramco-gcr-json-key
+  url: asia-northeast3-docker.pkg.dev/mkkang-project/mkkang-repository
+registry_type: GCP_PRIVATE_GCR
+resource_type: inventory.Collector
+tags: {}
 ```
 
-We use dozens of endpoints because we collect information from many services.
+#### 1.2 Register Plugin
 
-<br>
-<br>
+```bash
+spacectl exec create repository.Plugin -f register_plugin.yaml
+```
 
-### Service list
+## Target Services for Collection
 
-The following is a list of services being collected and service code information.
+This plugin collects resources from the following Google Cloud services:
 
-|No.|Service name|Service Code|
-|---|------|---|
-|1|Compute Engine|compute|
-|2|Networking|compute|
-|3|Cloud SQL|sqladmin|
-|4|Storage|storage|
-|5|BigQuery|bigquery|
-|6|Cloud Pub/Sub|pubsub|
-|7|Cloud Functions|cloudfunctions|
-|8|Recommender|recommender|
-|9|Firebase|firebase
+### Computing Services
+- **App Engine**: Fully managed serverless platform (Application, Service, Version, Instance)
+- **Kubernetes Engine (GKE)**: Managed Kubernetes cluster service (Cluster, Node Pool, Node, Node Group)
+- **Compute Engine**: Virtual machine instances and related resources
+- **Cloud Run**: Container-based serverless platform (Service, Job, Execution, Task, Revision)
+- **Cloud Functions**: Event-driven serverless functions
 
-If you want to know the detailed service endpoint, please check the [content details](###content-details) below.
+### Data and Storage Services
+- **Cloud Storage**: Object storage service
+- **Cloud SQL**: Managed relational database
+- **BigQuery**: Data warehouse and analytics service
+- **Filestore**: Managed NFS file system
+- **Firestore**: NoSQL document database
+- **Datastore**: NoSQL document database (Datastore mode)
 
-<br>
-<br>
+### Data Processing and Analytics
+- **Dataproc**: Managed Apache Spark and Hadoop service
+- **Batch**: Batch job processing service
+- **Storage Transfer**: Data transfer service
 
-### Content details
+### Development Tools and CI/CD
+- **Cloud Build**: Continuous integration/deployment service
+- **Firebase**: Mobile and web application development platform
 
-* Table of Contents
-    * [Compute Engine](#compute-engine)
-        * [VM Instance](#vm-instance)
-        * [Instance Template](#instance-template)
-        * [Instance Group](#instance-group)
-        * [Machine Images](#machine-images)
-        * [Disk](#disk)
-        * [Snapshot](#snapshot)
-    * [Networking](#networking)
-        * [VPC Network](#vpc-network)
-        * [Route](#route)
-        * [External IP Address](#external-ip-address)
-        * [Firewall](#firewall)
-        * [LoadBalancing](#loadbalancing)
-    * [Cloud SQL](#cloud-sql)
-        * [Instance](#instance)
-    * [Storage](#storage)
-        * [Buckets](#Bucket)
-    * [BigQuery](#bigquery)
-        * [SQLWorkspace](#SQLWorkspace)
-    * [Cloud Pub/Sub](#cloud-pub/sub)
-        * [Topic](#topic)
-        * [Subscription](#subscription)
-        * [Snapshot](#snapshot)
-        * [Schema](#schema)
-    * [Cloud Fuctions](#cloud-functions)
-        * [Function](#function)
-    * [Recommender](#recommender)
-        * [Recommendation](#recommendation)
-        * [Insight](#insight)
-    * [Firebase](#firebase)
-        * [Project](#project)
-    * [Options](#options)
-      * [CloudServiceType](#cloud-service-type--specify-what-to-collect)
-      * [ServiceCodeMapper](#service-code-mapper--update-service-code-in-cloud-service-type)
+### Security and Management
+- **KMS (Key Management Service)**: Encryption key management service
+- **Pub/Sub**: Messaging service
+- **Networking**: Network resources
+- **Recommender**: Resource optimization recommendations
 
-<br>
-<br>
+## GCP Service Endpoints
+
+Each Google Cloud service uses the following API endpoints:
+
+| Service | API Endpoint | API Version |
+|---------|-------------|-------------|
+| App Engine | `https://appengine.googleapis.com` | v1, v1beta |
+| Kubernetes Engine | `https://container.googleapis.com` | v1, v1beta1 |
+| Compute Engine | `https://compute.googleapis.com` | v1 |
+| Cloud Run | `https://run.googleapis.com` | v1, v2 |
+| Cloud Storage | `https://storage.googleapis.com` | v1 |
+| Cloud SQL | `https://sqladmin.googleapis.com` | v1 |
+| BigQuery | `https://bigquery.googleapis.com` | v2 |
+| Dataproc | `https://dataproc.googleapis.com` | v1 |
+| Cloud Build | `https://cloudbuild.googleapis.com` | v1, v2 |
+| Filestore | `https://file.googleapis.com` | v1, v1beta1 |
+| Firestore | `https://firestore.googleapis.com` | v1 |
+| Datastore | `https://datastore.googleapis.com` | v1 |
+| Firebase | `https://firebase.googleapis.com` | v1beta1 |
+| KMS | `https://cloudkms.googleapis.com` | v1 |
+| Batch | `https://batch.googleapis.com` | v1 |
+| Storage Transfer | `https://storagetransfer.googleapis.com` | v1 |
+
+## Supported Regions List
+
+This plugin can collect resources from the following Google Cloud regions:
+
+### Asia Pacific Region
+- `asia-east1` (Taiwan)
+- `asia-east2` (Hong Kong)
+- `asia-northeast1` (Tokyo)
+- `asia-northeast2` (Osaka)
+- `asia-northeast3` (Seoul)
+- `asia-south1` (Mumbai)
+- `asia-south2` (Delhi)
+- `asia-southeast1` (Singapore)
+- `asia-southeast2` (Jakarta)
+
+### Europe Region
+- `europe-central2` (Warsaw)
+- `europe-north1` (Finland)
+- `europe-southwest1` (Madrid)
+- `europe-west1` (Belgium)
+- `europe-west2` (London)
+- `europe-west3` (Frankfurt)
+- `europe-west4` (Netherlands)
+- `europe-west6` (Zurich)
+- `europe-west8` (Milan)
+- `europe-west9` (Paris)
+
+### North America Region
+- `northamerica-northeast1` (Montreal)
+- `northamerica-northeast2` (Toronto)
+- `us-central1` (Iowa)
+- `us-east1` (South Carolina)
+- `us-east4` (Northern Virginia)
+- `us-east5` (Columbus)
+- `us-south1` (Dallas)
+- `us-west1` (Oregon)
+- `us-west2` (Los Angeles)
+- `us-west3` (Salt Lake City)
+- `us-west4` (Las Vegas)
+
+### South America Region
+- `southamerica-east1` (São Paulo)
+- `southamerica-west1` (Santiago)
+
+### Other Regions
+- `australia-southeast1` (Sydney)
+- `australia-southeast2` (Melbourne)
+- `me-central1` (Doha)
+- `me-west1` (Tel Aviv)
+
+### Global Resources
+- `global` (For global resources)
+
+## Service List
+
+Detailed information for currently implemented services:
+
+### 1. App Engine
+- **Description**: Google Cloud's fully managed serverless platform
+- **Collected Resources**: Application, Service, Version, Instance
+- **API Version**: v1, v1beta (backward compatibility)
+- **Documentation**: [App Engine Guide](./docs/ko/prd/app_engine/README.md)
+
+### 2. Kubernetes Engine (GKE)
+- **Description**: Google Cloud's managed Kubernetes cluster service
+- **Collected Resources**: Cluster, Node Pool, Node, Node Group
+- **API Version**: v1, v1beta (backward compatibility)
+- **Documentation**: [Kubernetes Engine Guide](./docs/ko/prd/kubernetes_engine/README.md)
+
+### 3. Cloud Run
+- **Description**: Container-based serverless platform
+- **Collected Resources**: Service, Job, Execution, Task, Revision, Worker Pool, Domain Mapping
+- **API Version**: v1, v2 (complete version separation)
+- **Documentation**: [Cloud Run Guide](./docs/ko/prd/cloud_run/README.md)
+
+### 4. Cloud Build
+- **Description**: Continuous integration/deployment service
+- **Collected Resources**: Build, Trigger, Worker Pool, Connection, Repository
+- **API Version**: v1, v2 (complete version separation)
+- **Documentation**: [Cloud Build Guide](./docs/ko/prd/cloud_build/README.md)
+
+### 5. Dataproc
+- **Description**: Managed Apache Spark and Hadoop service
+- **Collected Resources**: Cluster, Job, Workflow Template, Autoscaling Policy
+- **API Version**: v1
+- **Documentation**: [Dataproc Guide](./docs/ko/prd/dataproc/README.md)
+
+### 6. Filestore
+- **Description**: Managed NFS file system
+- **Collected Resources**: Instance, Backup, Snapshot
+- **API Version**: v1, v1beta1
+- **Documentation**: [Filestore Guide](./docs/ko/prd/filestore/README.md)
+
+### 7. Firestore
+- **Description**: NoSQL document database
+- **Collected Resources**: Database, Collection, Index, Backup
+- **API Version**: v1
+- **Documentation**: [Firestore Guide](./docs/ko/prd/firestore/README.md)
+
+### 8. Datastore
+- **Description**: NoSQL document database (Datastore mode)
+- **Collected Resources**: Database, Index, Namespace
+- **API Version**: v1
+- **Documentation**: [Datastore Guide](./docs/ko/prd/datastore/README.md)
+
+### 9. KMS (Key Management Service)
+- **Description**: Encryption key management service
+- **Collected Resources**: KeyRing, CryptoKey, CryptoKeyVersion
+- **API Version**: v1
+- **Documentation**: [KMS Guide](./docs/ko/prd/kms/README.md)
+
+### 10. Firebase
+- **Description**: Mobile and web application development platform
+- **Collected Resources**: Project
+- **API Version**: v1beta1
+- **Documentation**: [Firebase Guide](./docs/ko/prd/firebase/Google Firebase 제품 요구사항 정의서.md)
+
+### 11. Batch
+- **Description**: Batch job processing service
+- **Collected Resources**: Job, Task
+- **API Version**: v1
+- **Documentation**: [Batch Guide](./docs/ko/prd/batch/Google Cloud Batch 제품 요구사항 정의서.md)
+
+### 12. Storage Transfer
+- **Description**: Data transfer service
+- **Collected Resources**: Transfer Job, Transfer Operation, Agent Pool, Service Account
+- **API Version**: v1
+- **Documentation**: [Storage Transfer Guide](./docs/ko/prd/storage_transfer/README.md)
 
 ## Authentication Overview
-Registered service account on SpaceONE must have certain permissions to collect cloud service data
-Please, set authentication privilege for followings:
 
-#### [Compute Engine](https://cloud.google.com/compute/docs/apis)
+Google Cloud Inventory Collector uses Service Account-based authentication to access Google Cloud APIs.
 
-- ##### VM Instance
-    - Scopes
-        - https://www.googleapis.com/auth/compute
-        - https://www.googleapis.com/auth/cloud-platform
+### Authentication Method
+- **Service Account Key File**: Uses JSON format Service Account key file
+- **OAuth 2.0**: Google Cloud API standard authentication method
+- **Scope**: `https://www.googleapis.com/auth/cloud-platform` (Full Google Cloud platform access)
 
-    - IAM
-        - compute.zones.list
-        - compute.regions.list
-        - compute.instances.list
-        - compute.machineTypes.list
-        - compute.urlMaps.list
-        - compute.backendServices.list
-        - compute.disks.list
-        - compute.diskTypes.list
-        - compute.autoscalers.list
-        - compute.images.list
-        - compute.subnetworks.list
-        - compute.regionUrlMaps.list
-        - compute.backendServices.list
-        - compute.targetPools.list
-        - compute.forwardingRules.list
+### Authentication Flow
+1. Register Service Account key file to SpaceONE Secret
+2. Plugin authenticates to Google Cloud API using the key file
+3. Verify required IAM permissions for each service
+4. Collect resources through API calls
 
-    - Service Endpoint
-        - https://compute.googleapis.com/compute/v1/projects/{project}/aggregated/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/global/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/zone/{zone}/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/{resource_name}
+## IAM Permission Setup
 
-- ##### Instance Template
-    - Scopes
-        - https://www.googleapis.com/auth/compute
-        - https://www.googleapis.com/auth/cloud-platform
+Minimum IAM permissions required for each Google Cloud service:
 
-    - IAM
-        - compute.instanceGroupManagers.list
-        - compute.machineTypes.list
-        - compute.disks.list
-        - compute.instanceTemplates.list
-
-    - Service Endpoint
-        - https://compute.googleapis.com/compute/v1/projects/{project}/aggregated/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/global/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/zone/{zone}/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/{resource_name}
-
-- ##### Instance Group
-    - Scopes
-        - https://www.googleapis.com/auth/compute
-        - https://www.googleapis.com/auth/cloud-platform
-
-    - IAM
-        - compute.instanceGroups.list
-        - compute.instanceGroupManagers.list
-        - compute.instances.list
-        - compute.autoscalers.list
-        - compute.instanceTemplates.list
-
-    - Service Endpoint
-        - https://compute.googleapis.com/compute/v1/projects/{project}/aggregated/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/global/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/zone/{zone}/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/{resource_name}
-
-- #### Machine Images
-    - Scopes
-        - https://www.googleapis.com/auth/compute
-        - https://www.googleapis.com/auth/cloud-platform
-
-    - IAM
-        - compute.machineImages.list
-        - compute.machineTypes.list
-        - compute.disks.list
-        - compute.images.list
-
-    - Service Endpoint
-        - https://compute.googleapis.com/compute/v1/projects/{project}/aggregated/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/global/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/zone/{zone}/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/{resource_name}
-
-- #### Disk
-    - Scopes
-        - https://www.googleapis.com/auth/compute
-        - https://www.googleapis.com/auth/cloud-platform
-
-    - IAM
-        - compute.disks.list
-        - compute.resourcePolicies.list
-
-    - Service Endpoint
-        - https://compute.googleapis.com/compute/v1/projects/{project}/aggregated/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/global/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/zone/{zone}/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/{resource_name}
-
-- #### Snapshot
-    - Scopes
-        - https://www.googleapis.com/auth/compute
-        - https://www.googleapis.com/auth/cloud-platform
-
-    - IAM
-        - compute.snapshots.list
-        - compute.resourcePolicies.list
-        - compute.disks.list
-
-    - Service Endpoint
-        - https://compute.googleapis.com/compute/v1/projects/{project}/aggregated/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/global/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/zone/{zone}/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/{resource_name}
-
-
-#### [Networking](https://cloud.google.com/compute/docs/apis)
-
-- #### VPC Network
-    - Scopes
-        - https://www.googleapis.com/auth/compute
-        - https://www.googleapis.com/auth/cloud-platform
-
-    - IAM
-        - compute.instances.list
-        - compute.forwardingRules.list
-        - compute.networks.list
-        - compute.addresses.list
-        - compute.globalAddresses.list
-        - compute.subnetworks.list
-        - compute.firewalls.list
-        - compute.routes.list
-
-    - Service Endpoint
-        - https://compute.googleapis.com/compute/v1/projects/{project}/aggregated/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/global/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/zone/{zone}/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/{resource_name}
-
-- #### Route
-    - Scopes
-        - https://www.googleapis.com/auth/compute
-        - https://www.googleapis.com/auth/cloud-platform
-
-    - IAM
-        - compute.routes.list
-        - compute.instances.list
-
-    - Service Endpoint
-        - https://compute.googleapis.com/compute/v1/projects/{project}/aggregated/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/global/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/zone/{zone}/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/{resource_name}
-
-- #### External IP Address
-    - Scopes
-        - https://www.googleapis.com/auth/compute
-        - https://www.googleapis.com/auth/cloud-platform
-
-    - IAM
-        - compute.instances.list
-        - compute.forwardingRules.list
-        - compute.addresses.list
-
-    - Service Endpoint
-        - https://compute.googleapis.com/compute/v1/projects/{project}/aggregated/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/global/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/zone/{zone}/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/{resource_name}
-
-- #### Firewall
-    - Scopes
-        - https://www.googleapis.com/auth/compute
-        - https://www.googleapis.com/auth/cloud-platform
-
-    - IAM
-        - compute.instances.list
-        - compute.firewalls.list
-
-    - Service Endpoint
-        - https://compute.googleapis.com/compute/v1/projects/{project}/aggregated/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/global/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/zone/{zone}/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/{resource_name}
-
-- #### LoadBalancing
-    - Scopes
-        - https://www.googleapis.com/auth/compute
-        - https://www.googleapis.com/auth/cloud-platform
-
-    - IAM
-        - compute.urlMaps.list
-        - compute.backendBuckets.list
-        - compute.backendServices.list
-        - compute.targetPools.list
-        - compute.forwardingRules.list
-        - compute.targetGrpcProxies.list
-        - compute.targetHttpProxies.list
-        - compute.targetHttpsProxies.list
-        - compute.targetGrpcProxies.list
-        - compute.healthChecks.list
-        - compute.httpHealthChecks.list
-        - compute.httpsHealthChecks.list
-        - compute.autoscalers.list
-
-    - Service Endpoint
-        - https://compute.googleapis.com/compute/v1/projects/{project}/aggregated/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/global/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/zone/{zone}/{resource_name}
-        - https://compute.googleapis.com/compute/v1/projects/{project}/regions/{region}/{resource_name}
-
-
-#### [Cloud SQL](https://cloud.google.com/sql/docs/mysql/apis)
-- #### Instance
-    - Scopes
-        - https://www.googleapis.com/auth/cloud-platform
-        - https://www.googleapis.com/auth/sqlservice.admin
-
-    - IAM
-        - sqladmin.instances.list
-        - sqladmin.databases.list
-        - sqladmin.users.list
-        - sqladmin.backup_runs.list
-
-    - Service Endpoint
-        - https://sqladmin.googleapis.com/v1/projects/{project}/{resources}
-        - https://sqladmin.googleapis.com/v1/projects/{project}/instances/{instance}/{resources}
-
-
-
-#### [Storage](https://cloud.google.com/storage/docs/apis)
-- #### Bucket
-    - IAM
-        - storage.buckets.get
-        - storage.objects.list
-        - storage.objects.getIamPolicy
-
-    - Service Endpoint
-        - https://storage.googleapis.com/storage/v1/b/{resource}
-
-
-#### [BigQuery](https://cloud.google.com/bigquery/docs/reference)
-- #### SQLWorkspace
-    - IAM
-        - bigquery.datasets.get
-        - bigquery.tables.get
-        - bigquery.tables.list
-        - bigquery.jobs.list
-        - resourcemanager.projects.get
-
-    - Service Endpoint
-        - https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/{resource}
-
-
-#### [Pub/Sub](https://cloud.google.com/pubsub/docs/reference)
-- #### Topic
-    - IAM
-        - pubsub.topics.list
-        - pubsub.subscriptions.get
-        - pubsub.snapshots.get
-
-    - Service Endpoint
-        - https://pubsub.googleapis.com/v1/{project}/topics
-        - https://pubsub.googleapis.com/v1/{subscription}
-        - https://pubsub.googleapis.com/v1/{snapshot}
-- #### Subscription
-    - IAM
-        - pubsub.subscriptions.list
-
-    - Service Endpoint
-        - https://pubsub.googleapis.com/v1/{project}/subscriptions
-- #### Snapshot
-    - IAM
-        - pubsub.snapshots.list
-
-    - Service Endpoint
-        - https://pubsub.googleapis.com/v1/{project}/snapshots
-- #### Schema
-    - IAM
-        - pubsub.schemas.list
-
-    - Service Endpoint
-        - https://pubsub.googleapis.com/v1/{parent}/schemas
-
-#### [Functions](https://cloud.google.com/functions/docs/reference)
-- #### Function
-    - IAM
-        - 1st Generation
-          - cloudfunctions.functions.list
-          - storage.bucket.get
-        - 2nd Generation
-          - cloudfunctions.functions.list
-          - storage.bucket.get
-          - eventarc.providers.list
-
-    - Service Endpoint
-        - 1st Generation
-          - https://cloudfunctions.googleapis.com/v1/{parent=projects/*/locations/*}/functions
-          - https://storage.googleapis.com/storage/v1/b/{bucket}
-        - 2nd Generation
-          - https://cloudfunctions.googleapis.com/v2/{parent=projects/*/locations/*}/functions
-          - https://storage.googleapis.com/storage/v1/b/{bucket}
-          - https://eventarc.googleapis.com/v1/{parent=projects/*/locations/*}/providers
-
-#### [Recommender](https://cloud.google.com/recommender/docs/overview)
-- #### Recommendation & Insight
-    - IAM
-        - cloudasset.assets.listResource
-        - cloudasset.assets.listIamPolicy
-        - cloudasset.assets.listOrgPolicy
-        - cloudasset.assets.listAccessPolicy
-        - cloudasset.assets.listOSInventories
-        - recommender.*.get
-        - recommender.*.list
-
-    - Recommendation Service Endpoint
-        - https://recommender.googleapis.com/v1/{name=projects/*/locations/*/recommenders/*/recommendations/*}
-
-    - Insight Service Endpoint
-        - https://cloudasset.googleapis.com/v1/{parent=*/*}/assets
-        - https://recommender.googleapis.com/v1/{parent=projects/*/locations/*/insightTypes/*}/insights
-
-#### [Firebase](https://firebase.google.com/docs/reference/firebase-management/rest)
-- #### Project
-    - IAM
-        - firebase.projects.searchApps
-        - firebase.projects.get
-
-    - Service Endpoint
-        - https://firebase.googleapis.com/v1beta1/projects/{parent}/searchApps
-
----
-
-## Firebase
-
-### Project
-
-Firebase 프로젝트 정보를 수집합니다. Firebase Management API의 `searchApps` 엔드포인트를 사용하여 특정 프로젝트의 Firebase 앱들을 가져옵니다.
-
-#### 수집되는 정보:
-- Project ID
-- Display Name
-- Project Number
-- State (ACTIVE, DELETED 등)
-- Firebase Apps (iOS, Android, Web 앱들)
-- Platform Statistics (플랫폼별 앱 개수)
-- App Count (총 앱 개수)
-
-#### 사용 예시:
-```bash
-# Firebase 프로젝트만 수집
+### Basic Permissions (Common to all services)
+```json
 {
-    "cloud_service_types": ["Firebase"]
+  "roles": [
+    "roles/viewer",
+    "roles/browser"
+  ]
 }
 ```
 
+### Service-specific Detailed Permissions
+
+#### App Engine
+```json
+{
+  "permissions": [
+    "appengine.applications.get",
+    "appengine.services.list",
+    "appengine.versions.list",
+    "appengine.instances.list"
+  ]
+}
+```
+
+#### Kubernetes Engine (GKE)
+```json
+{
+  "permissions": [
+    "container.clusters.list",
+    "container.clusters.get",
+    "container.nodePools.list",
+    "container.nodePools.get",
+    "container.nodes.list"
+  ]
+}
+```
+
+#### Cloud Run
+```json
+{
+  "permissions": [
+    "run.services.list",
+    "run.services.get",
+    "run.jobs.list",
+    "run.executions.list",
+    "run.tasks.list",
+    "run.revisions.list"
+  ]
+}
+```
+
+#### Cloud Build
+```json
+{
+  "permissions": [
+    "cloudbuild.builds.list",
+    "cloudbuild.triggers.list",
+    "cloudbuild.workerpools.list",
+    "source.repos.list"
+  ]
+}
+```
+
+#### Dataproc
+```json
+{
+  "permissions": [
+    "dataproc.clusters.list",
+    "dataproc.clusters.get",
+    "dataproc.jobs.list",
+    "dataproc.workflowTemplates.list",
+    "dataproc.autoscalingPolicies.list"
+  ]
+}
+```
+
+#### Storage & Database Services
+```json
+{
+  "permissions": [
+    "storage.buckets.list",
+    "storage.objects.list",
+    "file.instances.list",
+    "datastore.databases.list",
+    "datastore.indexes.list",
+    "datastore.entities.list"
+  ]
+}
+```
+
+#### KMS
+```json
+{
+  "permissions": [
+    "cloudkms.keyRings.list",
+    "cloudkms.cryptoKeys.list",
+    "cloudkms.cryptoKeyVersions.list"
+  ]
+}
+```
+
+## Automated Permission Setup Scripts
+
+Use the following scripts to automatically set up required IAM permissions:
+
+### 1. Service Account Creation and Permission Grant
+```bash
+#!/bin/bash
+
+# Variable settings
+PROJECT_ID="your-project-id"
+SERVICE_ACCOUNT_NAME="spaceone-collector"
+SERVICE_ACCOUNT_EMAIL="${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+KEY_FILE="spaceone-collector-key.json"
+
+# Create Service Account
+gcloud iam service-accounts create ${SERVICE_ACCOUNT_NAME} \
+    --display-name="SpaceONE Inventory Collector" \
+    --description="Service account for SpaceONE Google Cloud inventory collection" \
+    --project=${PROJECT_ID}
+
+# Grant basic permissions
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+    --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+    --role="roles/viewer"
+
+# Grant service-specific permissions
+ROLES=(
+    "roles/appengine.appViewer"
+    "roles/container.viewer"
+    "roles/run.viewer"
+    "roles/cloudbuild.builds.viewer"
+    "roles/dataproc.viewer"
+    "roles/storage.objectViewer"
+    "roles/file.viewer"
+    "roles/datastore.viewer"
+    "roles/cloudkms.viewer"
+    "roles/firebase.viewer"
+)
+
+for role in "${ROLES[@]}"; do
+    gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+        --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+        --role="${role}"
+done
+
+# Create Service Account key file
+gcloud iam service-accounts keys create ${KEY_FILE} \
+    --iam-account=${SERVICE_ACCOUNT_EMAIL} \
+    --project=${PROJECT_ID}
+
+echo "Service Account setup completed."
+echo "Key file: ${KEY_FILE}"
+echo "Service Account Email: ${SERVICE_ACCOUNT_EMAIL}"
+```
+
+### 2. API Activation Script
+```bash
+#!/bin/bash
+
+PROJECT_ID="your-project-id"
+
+# Required API list
+APIS=(
+    "appengine.googleapis.com"
+    "container.googleapis.com"
+    "run.googleapis.com"
+    "cloudbuild.googleapis.com"
+    "dataproc.googleapis.com"
+    "storage.googleapis.com"
+    "file.googleapis.com"
+    "datastore.googleapis.com"
+    "cloudkms.googleapis.com"
+    "firebase.googleapis.com"
+    "batch.googleapis.com"
+    "storagetransfer.googleapis.com"
+    "compute.googleapis.com"
+)
+
+# Enable APIs
+for api in "${APIS[@]}"; do
+    echo "Enabling ${api}..."
+    gcloud services enable ${api} --project=${PROJECT_ID}
+done
+
+echo "All APIs have been enabled."
+```
+
+## Secret Data Configuration
+
+How to configure Secret Data for using Google Cloud Inventory Collector in SpaceONE.
+
+### Secret Data Format
+```json
+{
+  "type": "service_account",
+  "project_id": "your-project-id",
+  "private_key_id": "key-id",
+  "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+  "client_email": "spaceone-collector@your-project-id.iam.gserviceaccount.com",
+  "client_id": "client-id",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/spaceone-collector%40your-project-id.iam.gserviceaccount.com"
+}
+```
+
+### Register Secret in SpaceONE Console
+1. Navigate to **Asset > Service Account** menu
+2. Click **+ Create** button
+3. **Provider**: Select `Google Cloud`
+4. **Secret Data**: Enter Service Account key file content in the above JSON format
+5. Save with **Save** button
+
+### Register Secret via CLI
+```bash
+# Register Secret using spacectl
+spacectl exec register secret.secret \
+    -p name="google-cloud-sa" \
+    -p provider="google_cloud" \
+    -p secret_type="CREDENTIALS" \
+    -p data=@service-account-key.json
+```
+
+## Product Requirements Document (PRD)
+
+Detailed Product Requirements Documents for each Google Cloud service can be found at the following links:
+
+### Computing Services
+- [App Engine PRD](./docs/ko/prd/app_engine/README.md) - Serverless application platform
+- [Kubernetes Engine PRD](./docs/ko/prd/kubernetes_engine/README.md) - Managed Kubernetes service
+- [Cloud Run PRD](./docs/ko/prd/cloud_run/README.md) - Container-based serverless platform
+
+### Data and Storage
+- [Filestore PRD](./docs/ko/prd/filestore/README.md) - Managed NFS file system
+- [Firestore PRD](./docs/ko/prd/firestore/README.md) - NoSQL document database
+- [Datastore PRD](./docs/ko/prd/datastore/README.md) - NoSQL database (Datastore mode)
+
+### Data Processing and Analytics
+- [Dataproc PRD](./docs/ko/prd/dataproc/README.md) - Managed Spark/Hadoop service
+- [Batch PRD](./docs/ko/prd/batch/Google Cloud Batch 제품 요구사항 정의서.md) - Batch job processing
+- [Storage Transfer PRD](./docs/ko/prd/storage_transfer/README.md) - Data transfer service
+
+### Development Tools and CI/CD
+- [Cloud Build PRD](./docs/ko/prd/cloud_build/README.md) - Continuous integration/deployment service
+- [Firebase PRD](./docs/ko/prd/firebase/Google Firebase 제품 요구사항 정의서.md) - Mobile/web development platform
+
+### Security and Management
+- [KMS PRD](./docs/ko/prd/kms/README.md) - Encryption key management service
+
+## Input Parameters
+
+Google Cloud Inventory Collector supports the following input parameters:
+
+### Required Parameters
+```json
+{
+  "secret_data": {
+    "type": "service_account",
+    "project_id": "string",
+    "private_key": "string",
+    "client_email": "string"
+  }
+}
+```
+
+### Optional Parameters
+```json
+{
+  "options": {
+    "cloud_service_types": ["AppEngine", "KubernetesEngine", "CloudRun"],
+    "region_filter": ["asia-northeast3", "us-central1"],
+    "exclude_regions": ["europe-west1", "us-west1"],
+    "kms_locations": ["global", "asia-northeast3"],
+    "include_jobs": true,
+    "database_filter": ["(default)", "custom-db"],
+    "job_filter": ["active-jobs-only"]
+  }
+}
+```
+
+### Parameter Detailed Description
+
+#### cloud_service_types
+- **Type**: Array of String
+- **Description**: Specify Google Cloud service types to collect
+- **Default**: All services
+- **Example**: `["AppEngine", "KubernetesEngine", "CloudRun", "CloudBuild"]`
+
+#### region_filter
+- **Type**: Array of String
+- **Description**: Specify list of regions to collect
+- **Default**: All regions
+- **Example**: `["asia-northeast3", "us-central1", "global"]`
+
+#### exclude_regions
+- **Type**: Array of String
+- **Description**: List of regions to exclude from collection
+- **Default**: None
+- **Example**: `["europe-west1", "us-west1"]`
+
+#### kms_locations (KMS only)
+- **Type**: Array of String
+- **Description**: Specific location list to search for KMS KeyRings
+- **Default**: Search all locations
+- **Recommended**: `["global", "asia-northeast3"]`
+
+#### include_jobs (Dataproc only)
+- **Type**: Boolean
+- **Description**: Whether to include Dataproc cluster job information
+- **Default**: `false`
+
+#### database_filter (Datastore/Firestore only)
+- **Type**: Array of String
+- **Description**: Specify list of databases to collect
+- **Default**: All databases
+- **Example**: `["(default)", "custom-database"]`
+
+## Document Structure
+
+```
+docs/ko/
+├── README.md                           # This file
+├── guide/                             # General guides
+├── development/                       # Development guides
+└── prd/                              # Product Requirements Documents
+    ├── app_engine/                    # App Engine domain
+    │   ├── README.md                  # Comprehensive guide
+    │   ├── API_Reference.md           # API reference
+    │   └── Implementation_Guide.md    # Implementation guide
+    ├── kubernetes_engine/             # Kubernetes Engine domain
+    │   ├── README.md                  # Comprehensive guide
+    │   ├── API_Reference.md           # API reference
+    │   └── Implementation_Guide.md    # Implementation guide
+    ├── storage_transfer/              # Storage Transfer domain
+    ├── firestore/                     # Firestore domain
+    ├── kms/                           # KMS domain
+    ├── datastore/                     # Datastore domain
+    ├── filestore/                     # Filestore domain
+    ├── dataproc/                      # Dataproc domain
+    ├── cloud_run/                     # Cloud Run domain
+    └── cloud_build/                   # Cloud Build domain
+```
+
+## Key Features
+
+### 1. Resource Collection
+- **Hierarchical Collection**: Application → Service → Version → Instance structure
+- **Batch Processing**: Efficient processing of large data
+- **Parallel Processing**: Concurrent collection of multiple resources
+- **Caching**: Minimize repetitive API calls
+
+### 2. Error Handling
+- **Retry Logic**: Automatic retry for transient errors
+- **Detailed Error Messages**: Clear information for troubleshooting
+- **Logging**: Detailed log recording for all operations
+
+### 3. Performance Optimization
+- **Timeout Management**: Appropriate timeout settings for each API call
+- **Memory Efficiency**: Minimize memory usage through sequential processing
+- **API Quota Management**: Prevent quota exceeded and optimization
+
+### 4. Monitoring
+- **Performance Metrics**: Performance indicators such as collection time and error rate
+- **Status Tracking**: Monitor resource status and health
+- **Health Check**: Real-time service status verification
+
+## Architecture
+
+### Service-Manager-Connector Structure
+```
+Service Layer (API endpoints)
+    ↓
+Manager Layer (Business logic)
+    ↓
+Connector Layer (Google Cloud API integration)
+```
+
+### Resource Collection Flow
+1. **Initialization**: Load authentication information and settings
+2. **Collection**: Query resource information through API
+3. **Processing**: Add metadata and data cleansing
+4. **Validation**: Data integrity and relationship verification
+5. **Storage**: Store resources in SpaceONE inventory
+
+## Getting Started
+
+### 1. Prerequisites
+- Python 3.8+
+- Google Cloud project
+- Service Account key file
+- Required API activation
+
+### 2. Installation and Setup
+```bash
+# Clone repository
+git clone <repository-url>
+cd plugin-google-cloud-inven-collector
+
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set environment variables
+export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account-key.json"
+export GOOGLE_CLOUD_PROJECT_ID="your-project-id"
+```
+
+### 3. Execution
+```bash
+# Basic collection execution
+python -m spaceone.inventory.service.collector_service
+
+# Collect specific service only
+python -m spaceone.inventory.service.collector_service --service app_engine
+```
+
+## Development Guide
+
+### 1. Adding New Service
+1. **Implement Connector**: Google Cloud API integration
+2. **Implement Manager**: Business logic and data processing
+3. **Define Model**: Data structure and validation
+4. **Write Tests**: Unit and integration tests
+5. **Documentation**: API reference and implementation guide
+
+### 2. Coding Rules
+- **Naming Convention**: snake_case (variables, functions), PascalCase (classes)
+- **Documentation**: Google style Docstring (in English)
+- **Error Handling**: Specific exception handling and logging
+- **Testing**: Write test code for all features
+
+### 3. Quality Assurance
+- **Linting**: Code style checking through Ruff
+- **Formatting**: Apply automatic code formatting
+- **Testing**: Test execution through pytest
+- **Coverage**: Maintain code coverage above 80%
+
+## Troubleshooting
+
+### 1. Common Issues
+- **Permission Error**: Check IAM roles and API activation
+- **Resource Not Found**: Check project ID and region settings
+- **Timeout**: Adjust network delay and batch size
+- **Quota Exceeded**: Request API quota increase or implement retry logic
+
+### 2. Debugging Tools
+- **Logging**: Analyze detailed log files
+- **API Testing**: Direct API calls using curl or gcloud commands
+- **Performance Monitoring**: Track collection time and memory usage
+
+## Performance Optimization
+
+### 1. Improve Collection Performance
+- **Batch Size Adjustment**: Set optimal batch size for environment
+- **Parallel Processing**: Concurrent collection of multiple resources
+- **Caching Strategy**: Cache frequently used data
+
+### 2. Resource Usage Optimization
+- **Memory Management**: Minimize memory usage through sequential processing
+- **Network Optimization**: Appropriate timeout and retry settings
+- **API Call Optimization**: Minimize unnecessary API calls
+
+## Security Considerations
+
+### 1. Authentication and Authorization
+- **Service Account**: Apply principle of least privilege
+- **Key Management**: Secure storage and regular rotation of key files
+- **Audit Logs**: Logging for all API calls
+
+### 2. Data Protection
+- **Encryption**: Encrypt sensitive information
+- **Network Security**: Secure communication through HTTPS
+- **Access Control**: Use IP whitelist and VPN
+
+## Monitoring and Operations
+
+### 1. Performance Monitoring
+- **Collection Performance**: Collection time and success rate by resource
+- **System Resources**: CPU, memory, network usage
+- **API Quota**: Google Cloud API usage and limits
+
+### 2. Operations Management
+- **Health Check**: Regular service status verification
+- **Backup and Recovery**: Configuration and data backup strategy
+- **Updates**: Regular dependency and security patches
+
+## References
+
+### 1. Official Documentation
+- [Google Cloud Documentation](https://cloud.google.com/docs)
+- [SpaceONE Documentation](https://spaceone.io/docs)
+- [Python Official Documentation](https://docs.python.org/)
+
+### 2. Development Tools
+- [Ruff (Python Linter)](https://docs.astral.sh/ruff/)
+- [pytest (Testing Framework)](https://docs.pytest.org/)
+- [Google Cloud Python Client](https://googleapis.dev/python/)
+
+### 3. Community
+- [SpaceONE GitHub](https://github.com/spaceone)
+- [Google Cloud Community](https://cloud.google.com/community)
+- [Python Community](https://www.python.org/community/)
+
+## Contributing
+
+### 1. How to Contribute
+1. **Issue Registration**: Bug reports or feature requests
+2. **Fork and Development**: Development in personal repository
+3. **Pull Request**: Submit changes to main repository
+4. **Code Review**: Code review and feedback from team members
+
+### 2. Development Environment Setup
+- Refer to development environment setup guide
+- Write and execute test code
+- Verify compliance with coding rules
+
+### 3. Documentation Contribution
+- Write and translate English documentation
+- Improve code examples and usage
+- Add troubleshooting guides
+
+## License
+
+This project is distributed under the Apache License 2.0. For details, see the [LICENSE](LICENSE) file.
+
+## Support
+
+### 1. Technical Support
+- **GitHub Issues**: Bug reports and feature requests
+- **Documentation**: Refer to detailed guides for each domain
+- **Community**: Utilize SpaceONE and Google Cloud communities
+
+### 2. Contact
+- **Email**: support@spaceone.dev
+- **GitHub**: [SpaceONE Organization](https://github.com/spaceone)
+- **Website**: [SpaceONE](https://spaceone.io/)
+
 ---
 
-## Options
-
-### Cloud Service Type : Specify what to collect
-
-If `cloud_service_types` is added to the list elements in options, only the specified cloud service type is collected.
-By default, if cloud_service_types is not specified in options, all services are collected.
-
-The cloud_service_types items that can be specified are as follows.
-
-<pre>
-<code>
-{
-    "cloud_service_types": [
-    'ComputeEngine'
-    'CloudSQL',
-    'BigQuery',
-    'CloudStorage',
-    'Networking'
-    ]
-}
-</code>
-</pre>
-
-How to update plugin information using spacectl is as follows.
-First, create a yaml file to set options.
-
-<pre>
-<code>
-> cat update_collector.yaml
----
-collector_id: collector-xxxxxxx
-options:
-  cloud_service_types:
-    - CloudSQL
-    - VPCNetwork
-</code>
-</pre>
-
-Update plugin through spacectl command with the created yaml file.
-
-<pre><code>
-> spacectl exec update_plugin inventory.Collector -f update_collector.yaml
-</code></pre>
-
-
-### Service Code Mapper : Update service code in Cloud Service Type.
-
-If `service_code_mapper` is in options, You can replace the existed service code into new value one. 
-The default service code is listed below [service code list](#service-list) 
-<pre>
-<code>
-{
-    "service_code_mappers": {
-        "Compute Engine": "Your new service code",
-        "Cloud SQL": "Your new service code",
-    }
-}
-</code>
-</pre>
-
-### Custom Asset URL : Update ASSET_URL  in Cloud Service Type.
-
-If `custom_asset_url` is in options, You can change it to an asset_url that users will use instead of the default asset_url.  
-The default ASSET_URL in cloud_service_conf is 
-`https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/cloud-services/google_cloud`.
-
-<pre>
-<code>
-{
-    "custom_asset_url": "https://xxxxx.spaceone.dev/icon/google"
-}
-</code>
-</pre>
-
----
+**Note**: This document is continuously updated. Check the GitHub repository for the latest information.

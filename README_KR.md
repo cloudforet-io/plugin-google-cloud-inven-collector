@@ -1,23 +1,65 @@
-# Google Cloud Inventory Collector 문서
+# Google Cloud Inventory Collector Plugin
+
+Language: [English](README.md) | [한국어](README_KR.md)
+
+SpaceONE의 GCP(Google Cloud Platform) Inventory Collector 플러그인입니다. Inventory 플러그인은 구글 클라우드의 자원 정보를 자동 수집합니다.
 
 ## 목차 (Table of Contents)
 
 1. [개요](#개요)
-2. [수집 대상 서비스](#수집-대상-서비스)
-3. [GCP 서비스 엔드포인트](#gcp-서비스-엔드포인트)
-4. [지원 리전 목록](#지원-리전-목록)
-5. [서비스 목록](#서비스-목록)
-6. [인증 개요](#인증-개요)
-7. [IAM 권한 설정](#iam-권한-설정)
-8. [자동 권한 설정 스크립트](#자동-권한-설정-스크립트)
-9. [Secret Data 구성](#secret-data-구성)
-10. [제품 요구사항 정의서 (PRD)](#제품-요구사항-정의서-prd)
-11. [입력 파라미터](#입력-파라미터)
-12. [Configuration Guide](#configuration-guide)
+2. [플러그인 설정 및 배포 가이드](#플러그인-설정-및-배포-가이드)
+3. [수집 대상 서비스](#수집-대상-서비스)
+4. [GCP 서비스 엔드포인트](#gcp-서비스-엔드포인트)
+5. [지원 리전 목록](#지원-리전-목록)
+6. [서비스 목록](#서비스-목록)
+7. [인증 개요](#인증-개요)
+8. [IAM 권한 설정](#iam-권한-설정)
+9. [자동 권한 설정 스크립트](#자동-권한-설정-스크립트)
+10. [Secret Data 구성](#secret-data-구성)
+11. [제품 요구사항 정의서 (PRD)](#제품-요구사항-정의서-prd)
+12. [입력 파라미터](#입력-파라미터)
 
 ## 개요
 
 이 문서는 SpaceONE Google Cloud Inventory Collector 플러그인에서 지원하는 Google Cloud 서비스들의 리소스 수집 방법과 구현 가이드를 제공합니다.
+
+## 플러그인 설정 및 배포 가이드
+
+### 1단계: Repository에 플러그인 등록
+
+SpaceONE이 컨테이너 이미지를 플러그인으로 인식할 수 있도록 Repository 서비스에 등록합니다.
+
+
+1.1 플러그인 등록 YAML 파일 생성
+
+배포 환경에 따라 registry_type과 image 경로를 적절히 수정해야 합니다.
+
+
+```yaml
+# register_plugin.yaml
+capability: {}
+image: plugin-google-cloud-inven-collector
+labels:
+- Compute Engine
+- Networking
+- Cloud SQL
+name: plugin-google-cloud-inven-collector
+plugin_id: plugin-google-cloud-inven-collector
+provider: google_cloud
+registry_config:
+  image_pull_secret: aramco-gcr-json-key
+  url: asia-northeast3-docker.pkg.dev/mkkang-project/mkkang-repository
+registry_type: GCP_PRIVATE_GCR
+resource_type: inventory.Collector
+tags: {}
+```
+
+#### 1.2 플러그인 등록
+
+```bash
+spacectl exec create repository.Plugin -f register_plugin.yaml
+```
+
 
 ## 수집 대상 서비스
 
@@ -542,103 +584,6 @@ Google Cloud Inventory Collector는 다음과 같은 입력 파라미터를 지�
 - **설명**: 수집할 데이터베이스 목록 지정
 - **기본값**: 모든 데이터베이스
 - **예시**: `["(default)", "custom-database"]`
-
-## Configuration Guide
-
-### 1. 기본 설정
-```yaml
-# collector_config.yaml
-collector:
-  name: "google-cloud-inventory-collector"
-  version: "2.0.0"
-  provider: "google_cloud"
-  
-secret:
-  service_account_type: "google_cloud"
-  
-options:
-  # 수집할 서비스 타입 지정 (선택사항)
-  cloud_service_types:
-    - "AppEngine"
-    - "KubernetesEngine"
-    - "CloudRun"
-    - "CloudBuild"
-    - "Dataproc"
-  
-  # 수집할 리전 지정 (선택사항)
-  region_filter:
-    - "asia-northeast3"  # 서울
-    - "us-central1"      # 아이오와
-    - "global"           # 글로벌 리소스
-```
-
-### 2. 성능 최적화 설정
-```yaml
-# 대용량 환경을 위한 최적화 설정
-options:
-  # 특정 서비스만 수집하여 성능 향상
-  cloud_service_types: ["AppEngine", "KubernetesEngine"]
-  
-  # 주요 리전만 수집
-  region_filter: ["asia-northeast3", "global"]
-  
-  # KMS의 경우 특정 location만 검색
-  kms_locations: ["global", "asia-northeast3"]
-  
-  # Dataproc 작업 정보 제외로 수집 시간 단축
-  include_jobs: false
-```
-
-### 3. 개발/테스트 환경 설정
-```yaml
-# 개발 환경용 최소 설정
-options:
-  cloud_service_types: ["AppEngine"]
-  region_filter: ["asia-northeast3"]
-  
-# 테스트 환경용 설정
-options:
-  cloud_service_types: ["AppEngine", "CloudRun"]
-  region_filter: ["asia-northeast3", "us-central1"]
-  exclude_regions: ["europe-west1", "europe-west2"]
-```
-
-### 4. 프로덕션 환경 설정
-```yaml
-# 프로덕션 환경용 전체 수집 설정
-options:
-  # 모든 서비스 수집 (기본값)
-  # cloud_service_types: [] # 빈 배열 또는 생략 시 모든 서비스
-  
-  # 사용 중인 리전만 지정하여 효율성 향상
-  region_filter:
-    - "asia-northeast3"    # 서울
-    - "asia-northeast1"    # 도쿄
-    - "us-central1"        # 아이오와
-    - "us-east1"          # 사우스캐롤라이나
-    - "europe-west1"      # 벨기에
-    - "global"            # 글로벌 리소스
-  
-  # 상세 정보 수집 활성화
-  include_jobs: true
-```
-
-### 5. 문제 해결 가이드
-
-#### 수집 시간이 너무 오래 걸리는 경우
-1. `cloud_service_types`를 사용하여 필요한 서비스만 수집
-2. `region_filter`를 사용하여 사용 중인 리전만 지정
-3. KMS의 경우 `kms_locations`를 `["global"]`로 제한
-
-#### 권한 오류가 발생하는 경우
-1. Service Account에 필요한 IAM 권한이 부여되었는지 확인
-2. 해당 Google Cloud API가 활성화되었는지 확인
-3. Service Account 키 파일이 올바른지 확인
-
-#### 특정 서비스 수집이 실패하는 경우
-1. 해당 서비스의 API가 프로젝트에서 활성화되었는지 확인
-2. 해당 리전에서 서비스가 지원되는지 확인
-3. Service Account에 해당 서비스의 권한이 있는지 확인
 
 ## 문서 구조
 
