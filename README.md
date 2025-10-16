@@ -272,13 +272,13 @@ Detailed information for currently implemented services:
 - **Description**: Mobile and web application development platform
 - **Collected Resources**: Project
 - **API Version**: v1beta1
-- **Documentation**: [Firebase Guide](./docs/ko/prd/firebase/Google Firebase 제품 요구사항 정의서.md)
+- **Documentation**: [Firebase Guide](./docs/ko/prd/firebase/README.md)
 
 ### 18. Batch
 - **Description**: Batch job processing service
 - **Collected Resources**: Job, Task
 - **API Version**: v1
-- **Documentation**: [Batch Guide](./docs/ko/prd/batch/Google Cloud Batch 제품 요구사항 정의서.md)
+- **Documentation**: [Batch Guide](./docs/ko/prd/batch/README.md)
 
 ### 19. Storage Transfer
 - **Description**: Data transfer service
@@ -535,26 +535,35 @@ spacectl exec register secret.secret \
 Detailed Product Requirements Documents for each Google Cloud service can be found at the following links:
 
 ### Computing Services
+- [Compute Engine PRD](./docs/ko/prd/compute_engine/README.md) - Virtual machine computing service
 - [App Engine PRD](./docs/ko/prd/app_engine/README.md) - Serverless application platform
 - [Kubernetes Engine PRD](./docs/ko/prd/kubernetes_engine/README.md) - Managed Kubernetes service
 - [Cloud Run PRD](./docs/ko/prd/cloud_run/README.md) - Container-based serverless platform
+- [Cloud Functions PRD](./docs/ko/prd/cloud_functions/README.md) - Event-driven serverless functions
 
 ### Data and Storage
+- [Cloud Storage PRD](./docs/ko/prd/cloud_storage/README.md) - Object storage service
+- [Cloud SQL PRD](./docs/ko/prd/cloud_sql/README.md) - Managed relational database service
+- [BigQuery PRD](./docs/ko/prd/bigquery/README.md) - Data warehouse and analytics service
 - [Filestore PRD](./docs/ko/prd/filestore/README.md) - Managed NFS file system
 - [Firestore PRD](./docs/ko/prd/firestore/README.md) - NoSQL document database
 - [Datastore PRD](./docs/ko/prd/datastore/README.md) - NoSQL database (Datastore mode)
 
 ### Data Processing and Analytics
 - [Dataproc PRD](./docs/ko/prd/dataproc/README.md) - Managed Spark/Hadoop service
-- [Batch PRD](./docs/ko/prd/batch/Google Cloud Batch 제품 요구사항 정의서.md) - Batch job processing
+- [Batch PRD](./docs/ko/prd/batch/README.md) - Batch job processing
 - [Storage Transfer PRD](./docs/ko/prd/storage_transfer/README.md) - Data transfer service
 
 ### Development Tools and CI/CD
 - [Cloud Build PRD](./docs/ko/prd/cloud_build/README.md) - Continuous integration/deployment service
-- [Firebase PRD](./docs/ko/prd/firebase/Google Firebase 제품 요구사항 정의서.md) - Mobile/web development platform
+- [Firebase PRD](./docs/ko/prd/firebase/README.md) - Mobile/web development platform
 
-### Security and Management
+### Networking and Security
+- [Networking PRD](./docs/ko/prd/networking/README.md) - Network infrastructure service
 - [KMS PRD](./docs/ko/prd/kms/README.md) - Encryption key management service
+
+### Messaging and Integration
+- [Pub/Sub PRD](./docs/ko/prd/pubsub/README.md) - Messaging and event streaming service
 
 ## Input Parameters
 

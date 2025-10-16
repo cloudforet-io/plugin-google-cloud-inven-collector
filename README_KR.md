@@ -276,13 +276,13 @@ spacectl exec create repository.Plugin -f register_plugin.yaml
 - **설명**: 모바일 및 웹 애플리케이션 개발 플랫폼
 - **수집 리소스**: Project
 - **API 버전**: v1beta1
-- **문서**: [Firebase 가이드](./prd/firebase/Google Firebase 제품 요구사항 정의서.md)
+- **문서**: [Firebase 가이드](./prd/firebase/README.md)
 
 ### 18. Batch
 - **설명**: 배치 작업 처리 서비스
 - **수집 리소스**: Job, Task
 - **API 버전**: v1
-- **문서**: [Batch 가이드](./prd/batch/Google Cloud Batch 제품 요구사항 정의서.md)
+- **문서**: [Batch 가이드](./prd/batch/README.md)
 
 ### 19. Storage Transfer
 - **설명**: 데이터 전송 서비스
@@ -539,23 +539,28 @@ spacectl exec register secret.secret \
 각 Google Cloud 서비스별 상세한 제품 요구사항 정의서는 다음 링크에서 확인할 수 있습니다:
 
 ### 컴퓨팅 서비스
+- [Compute Engine PRD](./prd/compute_engine/README.md) - 가상 머신 컴퓨팅 서비스
 - [App Engine PRD](./prd/app_engine/README.md) - 서버리스 애플리케이션 플랫폼
 - [Kubernetes Engine PRD](./prd/kubernetes_engine/README.md) - 관리형 Kubernetes 서비스
 - [Cloud Run PRD](./prd/cloud_run/README.md) - 컨테이너 기반 서버리스 플랫폼
+- [Cloud Functions PRD](./prd/cloud_functions/README.md) - 이벤트 기반 서버리스 함수
 
 ### 데이터 및 스토리지
+- [Cloud Storage PRD](./prd/cloud_storage/README.md) - 객체 스토리지 서비스
+- [Cloud SQL PRD](./prd/cloud_sql/README.md) - 관리형 관계형 데이터베이스
+- [BigQuery PRD](./prd/bigquery/README.md) - 데이터 웨어하우스 및 분석 서비스
 - [Filestore PRD](./prd/filestore/README.md) - 관리형 NFS 파일 시스템
 - [Firestore PRD](./prd/firestore/README.md) - NoSQL 문서 데이터베이스
 - [Datastore PRD](./prd/datastore/README.md) - NoSQL 데이터베이스 (Datastore 모드)
 
 ### 데이터 처리 및 분석
 - [Dataproc PRD](./prd/dataproc/README.md) - 관리형 Spark/Hadoop 서비스
-- [Batch PRD](./prd/batch/Google Cloud Batch 제품 요구사항 정의서.md) - 배치 작업 처리
+- [Batch PRD](./prd/batch/README.md) - 배치 작업 처리
 - [Storage Transfer PRD](./prd/storage_transfer/README.md) - 데이터 전송 서비스
 
 ### 개발 도구 및 CI/CD
 - [Cloud Build PRD](./prd/cloud_build/README.md) - 지속적 통합/배포 서비스
-- [Firebase PRD](./prd/firebase/Google Firebase 제품 요구사항 정의서.md) - 모바일/웹 개발 플랫폼
+- [Firebase PRD](./prd/firebase/README.md) - 모바일/웹 개발 플랫폼
 
 ### 보안 및 관리
 - [KMS PRD](./prd/kms/README.md) - 암호화 키 관리 서비스
