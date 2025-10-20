@@ -65,7 +65,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
                     # 2. Make Base Data
                     ##################################
                     # Process file share information and calculate capacity
-                    unified_file_shares, total_capacity_gb = (
+                    unified_file_shares, total_capacity_tib = (
                         self._process_file_shares_directly(
                             filestore_instance.get("fileShares", [])
                         )
@@ -90,7 +90,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
                             "unified_file_shares": unified_file_shares,
                             "labels": labels,
                             "stats": {
-                                "total_capacity_gb": str(total_capacity_gb),
+                                "total_capacity_tib": str(total_capacity_tib),
                                 "file_share_count": str(len(unified_file_shares)),
                                 "network_count": str(len(networks)),
                             },
@@ -134,7 +134,7 @@ class FilestoreInstanceManager(GoogleCloudManager):
                             "name": instance_id,
                             "account": project_id,
                             "instance_type": filestore_instance.get("tier", ""),
-                            "instance_size": total_capacity_gb,
+                            "instance_size": total_capacity_tib,
                             "tags": labels,
                             "region_code": location,
                             "data": instance_data,
@@ -192,26 +192,29 @@ class FilestoreInstanceManager(GoogleCloudManager):
 
     def _process_file_shares_directly(
         self, file_shares: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], int]:
+    ) -> Tuple[List[Dict[str, Any]], float]:
         """Process file share information and calculate capacity"""
         unified_shares = []
-        total_capacity_gb = 0
+        total_capacity_tib = 0
 
         for file_share in file_shares:
             capacity_gb = int(file_share.get("capacityGb", 0))
-            total_capacity_gb += capacity_gb
+            # Convert individual capacity from GB to TiB (1 TiB = 1024 GB)
+            capacity_tib = round(capacity_gb / 1024, 3)
+
+            total_capacity_tib += capacity_tib
 
             unified_shares.append(
                 {
                     "name": file_share.get("name", ""),
-                    "capacity_gb": str(capacity_gb),
+                    "capacity_tib": str(capacity_tib),
                     "source_backup": file_share.get("sourceBackup", ""),
                     "nfs_export_options": file_share.get("nfsExportOptions", []),
                     "data_source": "Basic",
                 }
             )
 
-        return unified_shares, total_capacity_gb
+        return unified_shares, total_capacity_tib
 
     def _process_performance_limits(
         self, performance_limits: Dict[str, Any]
