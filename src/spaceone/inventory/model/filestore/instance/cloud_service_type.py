@@ -64,7 +64,7 @@ cst_filestore_instance._metadata = CloudServiceTypeMeta.set_meta(
             ],
         ),
         TextDyField.data_source("Description", "data.description"),
-        SizeField.data_source("Total Capacity (GB)", "data.stats.total_capacity_gb"),
+        SizeField.data_source("Total Capacity (TiB)", "data.stats.total_capacity_tib"),
         TextDyField.data_source("File Share Count", "data.stats.file_share_count"),
         TextDyField.data_source("Network Count", "data.stats.network_count"),
         DateTimeDyField.data_source("Created", "data.create_time"),
@@ -106,8 +106,8 @@ cst_filestore_instance._metadata = CloudServiceTypeMeta.set_meta(
         ),
         SearchField.set(name="Description", key="data.description"),
         SearchField.set(
-            name="Total Capacity (GB)",
-            key="data.stats.total_capacity_gb",
+            name="Total Capacity (TiB)",
+            key="data.stats.total_capacity_tib",
             data_type="integer",
         ),
         SearchField.set(

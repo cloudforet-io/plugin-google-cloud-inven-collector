@@ -29,7 +29,7 @@ class UnifiedFileShare(Model):
     name = StringType()
     mount_name = StringType(serialize_when_none=False)
     description = StringType(serialize_when_none=False)
-    capacity_gb = StringType()
+    capacity_tib = StringType()
     state = StringType(serialize_when_none=False)
     source_backup = StringType(serialize_when_none=False)
     nfs_export_options = ListType(StringType, default=[], serialize_when_none=False)
@@ -39,7 +39,7 @@ class UnifiedFileShare(Model):
 class Stats(Model):
     """Statistics information model"""
 
-    total_capacity_gb = StringType()
+    total_capacity_tib = StringType()
     file_share_count = StringType()
     network_count = StringType()
 
