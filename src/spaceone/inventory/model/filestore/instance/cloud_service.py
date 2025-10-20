@@ -116,7 +116,6 @@ filestore_statistics = ItemDynamicLayout.set_fields(
     fields=[
         SizeField.data_source("Total Capacity (TiB)", "data.stats.total_capacity_tib"),
         TextDyField.data_source("File Share Count", "data.stats.file_share_count"),
-        TextDyField.data_source("Snapshot Count", "data.stats.snapshot_count"),
         TextDyField.data_source("Network Count", "data.stats.network_count"),
     ],
 )
