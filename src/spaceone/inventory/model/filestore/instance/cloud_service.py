@@ -9,7 +9,6 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
     ListDyField,
-    SizeField,
     TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
@@ -89,7 +88,7 @@ filestore_file_shares = TableDynamicLayout.set_fields(
         TextDyField.data_source("Name", "name"),
         # TextDyField.data_source("Mount Name", "mount_name"),
         # TextDyField.data_source("Description", "description"),
-        SizeField.data_source("Capacity (TiB)", "capacity_tib"),
+        TextDyField.data_source("Capacity (TiB)", "capacity_tib"),
         # EnumDyField.data_source(
         #     "State",
         #     "state",
@@ -114,7 +113,9 @@ filestore_file_shares = TableDynamicLayout.set_fields(
 filestore_statistics = ItemDynamicLayout.set_fields(
     "Statistics",
     fields=[
-        SizeField.data_source("Total Capacity (TiB)", "data.stats.total_capacity_tib"),
+        TextDyField.data_source(
+            "Total Capacity (TiB)", "data.stats.total_capacity_tib"
+        ),
         TextDyField.data_source("File Share Count", "data.stats.file_share_count"),
         TextDyField.data_source("Network Count", "data.stats.network_count"),
     ],
