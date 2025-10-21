@@ -8,7 +8,6 @@ from spaceone.inventory.libs.schema.cloud_service import (
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
-    SizeField,
     TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
@@ -55,19 +54,19 @@ transfer_counters_meta = ItemDynamicLayout.set_fields(
         TextDyField.data_source(
             "Objects Found", "data.metadata.counters.objects_found_from_source"
         ),
-        SizeField.data_source(
+        TextDyField.data_source(
             "Bytes Found", "data.metadata.counters.bytes_found_from_source"
         ),
         TextDyField.data_source(
             "Objects Transferred", "data.metadata.counters.objects_copied_to_sink"
         ),
-        SizeField.data_source(
+        TextDyField.data_source(
             "Bytes Transferred", "data.metadata.counters.bytes_copied_to_sink"
         ),
         TextDyField.data_source(
             "Objects Failed", "data.metadata.counters.objects_from_source_failed"
         ),
-        SizeField.data_source(
+        TextDyField.data_source(
             "Bytes Failed", "data.metadata.counters.bytes_from_source_failed"
         ),
     ],
