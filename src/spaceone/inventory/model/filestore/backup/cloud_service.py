@@ -8,7 +8,6 @@ from spaceone.inventory.libs.schema.cloud_service import (
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     DateTimeDyField,
     EnumDyField,
-    SizeField,
     TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
@@ -52,9 +51,9 @@ filestore_backup_source = ItemDynamicLayout.set_fields(
 filestore_backup_capacity = ItemDynamicLayout.set_fields(
     "Capacity Information",
     fields=[
-        SizeField.data_source("Capacity (GB)", "data.capacity_gb"),
-        SizeField.data_source("Storage (Bytes)", "data.storage_bytes"),
-        SizeField.data_source("Download (Bytes)", "data.download_bytes"),
+        TextDyField.data_source("Capacity (GB)", "data.capacity_gb"),
+        TextDyField.data_source("Storage (Bytes)", "data.storage_bytes"),
+        TextDyField.data_source("Download (Bytes)", "data.download_bytes"),
     ],
 )
 
