@@ -5,7 +5,10 @@ from spaceone.inventory.libs.schema.cloud_service import (
     CloudServiceResource,
     CloudServiceResponse,
 )
-from spaceone.inventory.libs.schema.metadata.dynamic_field import TextDyField
+from spaceone.inventory.libs.schema.metadata.dynamic_field import (
+    EnumDyField,
+    TextDyField,
+)
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout
 from spaceone.inventory.model.app_engine.service.data import AppEngineService
 
@@ -25,6 +28,15 @@ app_engine_service = ItemDynamicLayout.set_fields(
         ),
         TextDyField.data_source(
             "Last Version Deployed", "data.latest_version_deployed"
+        ),
+        EnumDyField.data_source(
+            "Serving Status",
+            "data.serving_status",
+            default_state={
+                "safe": ["SERVING"],
+                "warning": ["USER_DISABLED", "STOPPED"],
+                "alert": ["SYSTEM_DISABLED"],
+            },
         ),
         TextDyField.data_source("Project ID", "data.project_id"),
         TextDyField.data_source("Service ID", "data.service_id"),
@@ -78,6 +90,10 @@ class AppEngineServiceResource(AppEngineResource):
     _metadata = ModelType(
         CloudServiceMeta, default=app_engine_service_meta, serialized_name="metadata"
     )
+
+
+class AppEngineServiceResponse(CloudServiceResponse):
+    resource = PolyModelType(AppEngineServiceResource)
 
 
 class AppEngineServiceResponse(CloudServiceResponse):
