@@ -219,4 +219,3 @@ class AppEngineServiceV1Connector(GoogleCloudConnector):
                 f"Failed to get App Engine service with versions {service_id} (v1): {e}"
             )
             return None
-            return None
