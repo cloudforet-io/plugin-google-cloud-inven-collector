@@ -45,11 +45,16 @@ cst_app_engine_version._metadata = CloudServiceTypeMeta.set_meta(
         }),
         TextDyField.data_source("Runtime", "data.runtime"),
         TextDyField.data_source("Environment", "data.environment"),
+        EnumDyField.data_source("Scaling Type", "data.scaling_type", default_state={
+            "safe": ["Automatic"],
+            "warning": ["Manual"],
+            "alert": ["Basic"],
+            "disable": ["Unknown"],
+        }),
         TextDyField.data_source("Instance Count", "data.instance_count"),
         TextDyField.data_source("Memory Usage", "data.memory_usage"),
         TextDyField.data_source("CPU Usage", "data.cpu_usage"),
         DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
@@ -59,9 +64,9 @@ cst_app_engine_version._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Serving Status", key="data.serving_status"),
         SearchField.set(name="Runtime", key="data.runtime"),
         SearchField.set(name="Environment", key="data.environment"),
+        SearchField.set(name="Scaling Type", key="data.scaling_type"),
         SearchField.set(name="Instance Count", key="data.instance_count"),
         SearchField.set(name="Created", key="data.create_time", data_type="datetime"),
-        SearchField.set(name="Updated", key="data.update_time", data_type="datetime"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
