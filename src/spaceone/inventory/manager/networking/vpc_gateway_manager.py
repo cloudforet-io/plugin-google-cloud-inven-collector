@@ -117,13 +117,9 @@ class VPCGatewayManager(GoogleCloudManager):
 
                 ##################################
                 # 5. Make Resource Response Object
-                # v2.0 로깅 시스템 사용
                 ##################################
                 collected_cloud_services.append(
-                    VPCGatewayResponse.create_with_logging(
-                        resource=vpc_gateway_resource,
-                        message=f"Successfully collected NAT Gateway: {_name}",
-                    )
+                    VPCGatewayResponse({"resource": vpc_gateway_resource})
                 )
 
             except Exception as e:
@@ -189,13 +185,9 @@ class VPCGatewayManager(GoogleCloudManager):
 
                 ##################################
                 # 5. Make Resource Response Object
-                # v2.0 로깅 시스템 사용
                 ##################################
                 collected_cloud_services.append(
-                    VPCGatewayResponse.create_with_logging(
-                        resource=vpc_gateway_resource,
-                        message=f"Successfully collected VPN Gateway: {_name}",
-                    )
+                    VPCGatewayResponse({"resource": vpc_gateway_resource})
                 )
 
             except Exception as e:
