@@ -47,7 +47,7 @@ cst_app_engine_instance._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Latency", "data.average_latency"),
         TextDyField.data_source("Requests", "data.request_count"),
         TextDyField.data_source("Errors", "data.errors"),
-        TextDyField.data_source("Memory", "data.memory_usage"),
+        TextDyField.data_source("Memory (MB)", "data.memory_usage"),
         DateTimeDyField.data_source("Start Time", "data.start_time"),
         TextDyField.data_source("Availability", "data.availability.liveness"),
         TextDyField.data_source("Service ID", "data.service_id"),
