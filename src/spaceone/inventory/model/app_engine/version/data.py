@@ -1,22 +1,23 @@
 import logging
+
 from schematics import Model
-from schematics.types import (
-    ModelType,
-    ListType,
-    StringType,
-    IntType,
-    FloatType,
-    DictType,
-)
+from schematics.types import (DictType, FloatType, IntType, ListType,
+                              ModelType, StringType)
+
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 _LOGGER = logging.getLogger(__name__)
 
 
+class CpuUtilization(Model):
+    """AppEngine CPU Utilization 모델"""
+    target_utilization = FloatType(deserialize_from="targetUtilization", serialize_when_none=False)
+
+
 class AutomaticScaling(Model):
     """AppEngine Automatic Scaling 모델"""
     cool_down_period = StringType(deserialize_from="coolDownPeriod", serialize_when_none=False)
-    cpu_utilization = DictType(StringType, deserialize_from="cpuUtilization", serialize_when_none=False)
+    cpu_utilization = ModelType(CpuUtilization, deserialize_from="cpuUtilization", serialize_when_none=False)
     max_concurrent_requests = IntType(deserialize_from="maxConcurrentRequests", serialize_when_none=False)
     max_idle_instances = IntType(deserialize_from="maxIdleInstances", serialize_when_none=False)
     max_total_instances = IntType(deserialize_from="maxTotalInstances", serialize_when_none=False)
@@ -53,7 +54,6 @@ class AppEngineVersion(BaseResource):
     runtime = StringType(serialize_when_none=False)
     environment = StringType(serialize_when_none=False)
     create_time = StringType(deserialize_from="createTime", serialize_when_none=False)
-    update_time = StringType(deserialize_from="updateTime", serialize_when_none=False)
     
     # Scaling configurations
     automatic_scaling = ModelType(AutomaticScaling, deserialize_from="automaticScaling", serialize_when_none=False)
@@ -64,6 +64,7 @@ class AppEngineVersion(BaseResource):
     resources = ModelType(Resources, serialize_when_none=False)
     
     # Calculated fields
+    scaling_type = StringType(serialize_when_none=False)
     instance_count = StringType(serialize_when_none=False)
     memory_usage = StringType(serialize_when_none=False)
     cpu_usage = StringType(serialize_when_none=False)

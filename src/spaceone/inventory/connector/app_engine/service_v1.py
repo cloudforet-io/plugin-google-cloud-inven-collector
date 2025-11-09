@@ -1,4 +1,5 @@
 import logging
+
 import google.oauth2.service_account
 import googleapiclient.discovery
 
@@ -43,24 +44,32 @@ class AppEngineServiceV1Connector(GoogleCloudConnector):
         """
         service_list = []
         query.update({"appsId": self.project_id})
-        
+
         try:
             request = self.client.apps().services().list(**query)
             while request is not None:
                 response = request.execute()
                 if "services" in response:
-                    service_list.extend(response.get("services", []))
-                
+                    services = response.get("services", [])
+                    # API 응답 구조 로깅 (첫 번째 서비스만)
+                    if services and len(services) > 0:
+                        _LOGGER.info(
+                            f"App Engine Service API response sample: {services[0]}"
+                        )
+                    service_list.extend(services)
+
                 # 페이지네이션 처리
                 try:
-                    request = self.client.apps().services().list_next(
-                        previous_request=request, previous_response=response
+                    request = (
+                        self.client.apps()
+                        .services()
+                        .list_next(previous_request=request, previous_response=response)
                     )
                 except AttributeError:
                     break
         except Exception as e:
             _LOGGER.error(f"Failed to list App Engine services (v1): {e}")
-            
+
         return service_list
 
     def get_service(self, service_id, **query):
@@ -68,9 +77,10 @@ class AppEngineServiceV1Connector(GoogleCloudConnector):
         특정 App Engine 서비스 정보를 조회합니다 (v1 API).
         """
         try:
-            request = self.client.apps().services().get(
-                appsId=self.project_id,
-                servicesId=service_id
+            request = (
+                self.client.apps()
+                .services()
+                .get(appsId=self.project_id, servicesId=service_id)
             )
             return request.execute()
         except Exception as e:
@@ -82,28 +92,30 @@ class AppEngineServiceV1Connector(GoogleCloudConnector):
         App Engine 버전 목록을 조회합니다 (v1 API).
         """
         version_list = []
-        query.update({
-            "appsId": self.project_id,
-            "servicesId": service_id
-        })
-        
+        query.update({"appsId": self.project_id, "servicesId": service_id})
+
         try:
             request = self.client.apps().services().versions().list(**query)
             while request is not None:
                 response = request.execute()
                 if "versions" in response:
                     version_list.extend(response.get("versions", []))
-                
+
                 # 페이지네이션 처리
                 try:
-                    request = self.client.apps().services().versions().list_next(
-                        previous_request=request, previous_response=response
+                    request = (
+                        self.client.apps()
+                        .services()
+                        .versions()
+                        .list_next(previous_request=request, previous_response=response)
                     )
                 except AttributeError:
                     break
         except Exception as e:
-            _LOGGER.error(f"Failed to list App Engine versions for service {service_id} (v1): {e}")
-            
+            _LOGGER.error(
+                f"Failed to list App Engine versions for service {service_id} (v1): {e}"
+            )
+
         return version_list
 
     def get_version(self, service_id, version_id, **query):
@@ -111,10 +123,13 @@ class AppEngineServiceV1Connector(GoogleCloudConnector):
         특정 App Engine 버전 정보를 조회합니다 (v1 API).
         """
         try:
-            request = self.client.apps().services().versions().get(
-                appsId=self.project_id,
-                servicesId=service_id,
-                versionsId=version_id
+            request = (
+                self.client.apps()
+                .services()
+                .versions()
+                .get(
+                    appsId=self.project_id, servicesId=service_id, versionsId=version_id
+                )
             )
             return request.execute()
         except Exception as e:
@@ -126,29 +141,37 @@ class AppEngineServiceV1Connector(GoogleCloudConnector):
         App Engine 인스턴스 목록을 조회합니다 (v1 API).
         """
         instance_list = []
-        query.update({
-            "appsId": self.project_id,
-            "servicesId": service_id,
-            "versionsId": version_id
-        })
-        
+        query.update(
+            {
+                "appsId": self.project_id,
+                "servicesId": service_id,
+                "versionsId": version_id,
+            }
+        )
+
         try:
             request = self.client.apps().services().versions().instances().list(**query)
             while request is not None:
                 response = request.execute()
                 if "instances" in response:
                     instance_list.extend(response.get("instances", []))
-                
+
                 # 페이지네이션 처리
                 try:
-                    request = self.client.apps().services().versions().instances().list_next(
-                        previous_request=request, previous_response=response
+                    request = (
+                        self.client.apps()
+                        .services()
+                        .versions()
+                        .instances()
+                        .list_next(previous_request=request, previous_response=response)
                     )
                 except AttributeError:
                     break
         except Exception as e:
-            _LOGGER.error(f"Failed to list App Engine instances for version {version_id} (v1): {e}")
-            
+            _LOGGER.error(
+                f"Failed to list App Engine instances for version {version_id} (v1): {e}"
+            )
+
         return instance_list
 
     def get_instance(self, service_id, version_id, instance_id, **query):
@@ -156,11 +179,17 @@ class AppEngineServiceV1Connector(GoogleCloudConnector):
         특정 App Engine 인스턴스 정보를 조회합니다 (v1 API).
         """
         try:
-            request = self.client.apps().services().versions().instances().get(
-                appsId=self.project_id,
-                servicesId=service_id,
-                versionsId=version_id,
-                instancesId=instance_id
+            request = (
+                self.client.apps()
+                .services()
+                .versions()
+                .instances()
+                .get(
+                    appsId=self.project_id,
+                    servicesId=service_id,
+                    versionsId=version_id,
+                    instancesId=instance_id,
+                )
             )
             return request.execute()
         except Exception as e:
@@ -176,15 +205,17 @@ class AppEngineServiceV1Connector(GoogleCloudConnector):
             if service_info:
                 versions = self.list_versions(service_id)
                 service_info["versions"] = versions
-                
+
                 # 각 버전에 대한 인스턴스 정보 추가
                 for version in versions:
                     version_id = version.get("id")
                     if version_id:
                         instances = self.list_instances(service_id, version_id)
                         version["instances"] = instances
-                        
+
             return service_info
         except Exception as e:
-            _LOGGER.error(f"Failed to get App Engine service with versions {service_id} (v1): {e}")
+            _LOGGER.error(
+                f"Failed to get App Engine service with versions {service_id} (v1): {e}"
+            )
             return None

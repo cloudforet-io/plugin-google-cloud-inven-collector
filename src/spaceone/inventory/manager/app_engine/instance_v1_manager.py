@@ -23,6 +23,13 @@ from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_date
 _LOGGER = logging.getLogger(__name__)
 
 
+def bytes_to_mb(bytes_value):
+    """바이트를 MB로 변환하는 유틸리티 함수"""
+    if not bytes_value or bytes_value == 0:
+        return 0.0
+    return round(float(bytes_value) / (1024 * 1024), 1)
+
+
 class AppEngineInstanceV1Manager(GoogleCloudManager):
     connector_name = "AppEngineInstanceV1Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
@@ -345,7 +352,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                             )
                                             or 0
                                         ),
-                                        "memory_usage": float(
+                                        "memory_usage": bytes_to_mb(
                                             instance.get("memoryUsage", 0) or 0
                                         ),
                                         "cpu_usage": float(
@@ -492,7 +499,13 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     # Google Cloud Monitoring/Logging 리소스 ID: App Engine Instance의 경우 instance_id 사용
                                     monitoring_resource_id = instance_id
 
+                                    # App Engine Instance 모니터링 필터 설정
+                                    # Standard와 Flexible Environment 모두 지원하는 gae_instance 리소스 타입 사용
                                     google_cloud_monitoring_filters = [
+                                        {
+                                            "key": "resource.labels.project_id",
+                                            "value": project_id,
+                                        },
                                         {
                                             "key": "resource.labels.module_id",
                                             "value": service_id,
@@ -505,15 +518,11 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                             "key": "resource.labels.instance_id",
                                             "value": instance_id,
                                         },
-                                        {
-                                            "key": "resource.labels.project_id",
-                                            "value": project_id,
-                                        },
                                     ]
                                     instance_data["google_cloud_monitoring"] = (
                                         self.set_google_cloud_monitoring(
                                             project_id,
-                                            "appengine.googleapis.com/flex/instance",
+                                            "gae_instance",
                                             monitoring_resource_id,
                                             google_cloud_monitoring_filters,
                                         )

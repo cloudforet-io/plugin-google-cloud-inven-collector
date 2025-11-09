@@ -27,7 +27,7 @@ app_engine_instance = ItemDynamicLayout.set_fields(
         TextDyField.data_source("Average Latency", "data.average_latency"),
         TextDyField.data_source("Request Count", "data.request_count"),
         TextDyField.data_source("Errors", "data.errors"),
-        TextDyField.data_source("Memory Usage", "data.memory_usage"),
+        TextDyField.data_source("Memory Usage (MB)", "data.memory_usage"),
         TextDyField.data_source("CPU Usage", "data.cpu_usage"),
         TextDyField.data_source("App Engine Release", "data.app_engine_release"),
         EnumDyField.data_source(

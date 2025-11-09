@@ -1,24 +1,20 @@
 import logging
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 from spaceone.inventory.connector.app_engine.version_v1 import (
     AppEngineVersionV1Connector,
 )
 from spaceone.inventory.libs.manager import GoogleCloudManager
-
-from spaceone.inventory.model.app_engine.version.cloud_service_type import (
-    CLOUD_SERVICE_TYPES,
-)
-
+from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 from spaceone.inventory.model.app_engine.version.cloud_service import (
     AppEngineVersionResource,
     AppEngineVersionResponse,
 )
-from spaceone.inventory.model.app_engine.version.data import (
-    AppEngineVersion,
+from spaceone.inventory.model.app_engine.version.cloud_service_type import (
+    CLOUD_SERVICE_TYPES,
 )
+from spaceone.inventory.model.app_engine.version.data import AppEngineVersion
 from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_datetime
-from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -206,18 +202,30 @@ class AppEngineVersionV1Manager(GoogleCloudManager):
                     # 기본 버전 데이터 준비
                     version_data = {
                         "name": str(version.get("name", "")),
-                        "projectId": str(project_id),  # secret_data에서 가져온 project_id 사용
+                        "projectId": str(
+                            project_id
+                        ),  # secret_data에서 가져온 project_id 사용
                         "serviceId": str(service_id),
                         "id": str(version.get("id", "")),
                         "servingStatus": str(version.get("servingStatus", "")),
                         "runtime": str(version.get("runtime", "")),
-                        "environment": str(version.get("environment", "")),
+                        "environment": str(version.get("env", "")),
                         "createTime": convert_datetime(version.get("createTime")),
-                        "updateTime": convert_datetime(version.get("updateTime")),
                         "instance_count": str(len(instances)),
                         "memory_usage": str(metrics.get("memory_usage", 0)),
                         "cpu_usage": str(metrics.get("cpu_usage", 0)),
                     }
+
+                    # 스케일링 타입 결정
+                    scaling_type = "Unknown"
+                    if "automaticScaling" in version:
+                        scaling_type = "Automatic"
+                    elif "manualScaling" in version:
+                        scaling_type = "Manual"
+                    elif "basicScaling" in version:
+                        scaling_type = "Basic"
+                    
+                    version_data["scaling_type"] = scaling_type
 
                     # Automatic Scaling 추가
                     if "automaticScaling" in version:
@@ -264,25 +272,31 @@ class AppEngineVersionV1Manager(GoogleCloudManager):
                     # Stackdriver 정보 추가
                     version_id = version.get("id")
                     if not version_id:
-                        _LOGGER.warning(f"Version missing ID, skipping monitoring setup: service={service_id}")
+                        _LOGGER.warning(
+                            f"Version missing ID, skipping monitoring setup: service={service_id}"
+                        )
                         version_id = "unknown"
-                    
+
                     # Google Cloud Monitoring/Logging 리소스 ID: App Engine Version의 경우 version_id 사용
                     monitoring_resource_id = version_id
-                    
+
                     google_cloud_monitoring_filters = [
                         {"key": "resource.labels.module_id", "value": service_id},
                         {"key": "resource.labels.version_id", "value": version_id},
                         {"key": "resource.labels.project_id", "value": project_id},
                     ]
-                    version_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
-                        project_id,
-                        "appengine.googleapis.com/system",
-                        monitoring_resource_id,
-                        google_cloud_monitoring_filters,
+                    version_data["google_cloud_monitoring"] = (
+                        self.set_google_cloud_monitoring(
+                            project_id,
+                            "appengine.googleapis.com/system",
+                            monitoring_resource_id,
+                            google_cloud_monitoring_filters,
+                        )
                     )
-                    version_data["google_cloud_logging"] = self.set_google_cloud_logging(
-                        "AppEngine", "Version", project_id, monitoring_resource_id
+                    version_data["google_cloud_logging"] = (
+                        self.set_google_cloud_logging(
+                            "AppEngine", "Version", project_id, monitoring_resource_id
+                        )
                     )
 
                     # AppEngineVersion 모델 생성
