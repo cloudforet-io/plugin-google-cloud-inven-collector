@@ -23,6 +23,13 @@ from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_date
 _LOGGER = logging.getLogger(__name__)
 
 
+def bytes_to_mb(bytes_value):
+    """바이트를 MB로 변환하는 유틸리티 함수"""
+    if not bytes_value or bytes_value == 0:
+        return 0.0
+    return round(float(bytes_value) / (1024 * 1024), 1)
+
+
 class AppEngineInstanceV1Manager(GoogleCloudManager):
     connector_name = "AppEngineInstanceV1Connector"
     cloud_service_types = CLOUD_SERVICE_TYPES
@@ -345,7 +352,7 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                             )
                                             or 0
                                         ),
-                                        "memory_usage": float(
+                                        "memory_usage": bytes_to_mb(
                                             instance.get("memoryUsage", 0) or 0
                                         ),
                                         "cpu_usage": float(
