@@ -193,12 +193,14 @@ class AppEngineApplicationV1Manager(GoogleCloudManager):
                     "locationId": str(application.get("locationId", "")),
                     "servingStatus": str(application.get("servingStatus", "")),
                     "defaultHostname": str(application.get("defaultHostname", "")),
-                    "defaultCookieExpiration": str(
-                        application.get("defaultCookieExpiration", "")
-                    ),
                     "codeBucket": str(application.get("codeBucket", "")),
                     "gcrDomain": str(application.get("gcrDomain", "")),
                     "databaseType": str(application.get("databaseType", "")),
+                    # 실제 API에서 제공하는 추가 필드들
+                    "authDomain": str(application.get("authDomain", "")),
+                    "defaultBucket": str(application.get("defaultBucket", "")),
+                    "serviceAccount": str(application.get("serviceAccount", "")),
+                    "sslPolicy": str(application.get("sslPolicy", "")),
                     "version_count": str(total_versions),
                     "instance_count": str(total_instances),
                 }

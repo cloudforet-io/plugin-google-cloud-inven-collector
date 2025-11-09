@@ -53,12 +53,13 @@ cst_app_engine_application._metadata = CloudServiceTypeMeta.set_meta(
             },
         ),
         TextDyField.data_source("Default Hostname", "data.default_hostname"),
-        TextDyField.data_source(
-            "Default Cookie Expiration", "data.default_cookie_expiration"
-        ),
         TextDyField.data_source("Code Bucket", "data.code_bucket"),
         TextDyField.data_source("GCR Domain", "data.gcr_domain"),
         TextDyField.data_source("Database Type", "data.database_type"),
+        TextDyField.data_source("Auth Domain", "data.auth_domain"),
+        TextDyField.data_source("Default Bucket", "data.default_bucket"),
+        TextDyField.data_source("Service Account", "data.service_account"),
+        TextDyField.data_source("SSL Policy", "data.ssl_policy"),
         TextDyField.data_source("Feature Settings", "data.feature_settings"),
     ],
     search=[
@@ -70,6 +71,10 @@ cst_app_engine_application._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Code Bucket", key="data.code_bucket"),
         SearchField.set(name="GCR Domain", key="data.gcr_domain"),
         SearchField.set(name="Database Type", key="data.database_type"),
+        SearchField.set(name="Auth Domain", key="data.auth_domain"),
+        SearchField.set(name="Default Bucket", key="data.default_bucket"),
+        SearchField.set(name="Service Account", key="data.service_account"),
+        SearchField.set(name="SSL Policy", key="data.ssl_policy"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
