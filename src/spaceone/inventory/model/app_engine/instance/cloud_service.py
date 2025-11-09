@@ -1,19 +1,17 @@
-from schematics.types import ModelType, StringType, PolyModelType
+from schematics.types import ModelType, PolyModelType, StringType
 
-from spaceone.inventory.model.app_engine.instance.data import AppEngineInstance
-from spaceone.inventory.libs.schema.metadata.dynamic_field import (
-    TextDyField,
-    EnumDyField,
-    DateTimeDyField,
-)
-from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
-    ItemDynamicLayout,
-)
 from spaceone.inventory.libs.schema.cloud_service import (
     CloudServiceMeta,
     CloudServiceResource,
     CloudServiceResponse,
 )
+from spaceone.inventory.libs.schema.metadata.dynamic_field import (
+    DateTimeDyField,
+    EnumDyField,
+    TextDyField,
+)
+from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout
+from spaceone.inventory.model.app_engine.instance.data import AppEngineInstance
 
 """
 AppEngine Instance
@@ -21,11 +19,17 @@ AppEngine Instance
 app_engine_instance = ItemDynamicLayout.set_fields(
     "AppEngine Instance",
     fields=[
-        TextDyField.data_source("Name", "data.name"),
+        TextDyField.data_source("Instance ID", "data.instance_id"),
         TextDyField.data_source("Project ID", "data.project_id"),
         TextDyField.data_source("Service ID", "data.service_id"),
         TextDyField.data_source("Version ID", "data.version_id"),
-        TextDyField.data_source("Instance ID", "data.instance_id"),
+        TextDyField.data_source("QPS", "data.qps"),
+        TextDyField.data_source("Average Latency", "data.average_latency"),
+        TextDyField.data_source("Request Count", "data.request_count"),
+        TextDyField.data_source("Errors", "data.errors"),
+        TextDyField.data_source("Memory Usage", "data.memory_usage"),
+        TextDyField.data_source("CPU Usage", "data.cpu_usage"),
+        TextDyField.data_source("App Engine Release", "data.app_engine_release"),
         EnumDyField.data_source(
             "VM Status",
             "data.vm_status",
@@ -37,9 +41,6 @@ app_engine_instance = ItemDynamicLayout.set_fields(
         ),
         TextDyField.data_source("VM Debug Enabled", "data.vm_debug_enabled"),
         TextDyField.data_source("VM Liveness", "data.vm_liveness"),
-        TextDyField.data_source("Request Count", "data.request_count"),
-        TextDyField.data_source("Memory Usage", "data.memory_usage"),
-        TextDyField.data_source("CPU Usage", "data.cpu_usage"),
         DateTimeDyField.data_source("Created", "data.create_time"),
         DateTimeDyField.data_source("Updated", "data.update_time"),
         DateTimeDyField.data_source("Started", "data.start_time"),

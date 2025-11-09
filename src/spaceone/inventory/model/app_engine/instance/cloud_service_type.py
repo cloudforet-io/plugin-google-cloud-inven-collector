@@ -1,18 +1,23 @@
 import os
+
+from spaceone.inventory.conf.cloud_service_conf import *
 from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.common_parser import *
+from spaceone.inventory.libs.schema.cloud_service_type import (
+    CloudServiceTypeMeta,
+    CloudServiceTypeResource,
+    CloudServiceTypeResponse,
+)
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
-    TextDyField,
-    SearchField,
     DateTimeDyField,
     EnumDyField,
+    SearchField,
+    TextDyField,
 )
-from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, CloudServiceTypeMeta
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
     CardWidget,
     ChartWidget,
 )
-from spaceone.inventory.conf.cloud_service_conf import *
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -37,24 +42,30 @@ cst_app_engine_instance.tags = {
 
 cst_app_engine_instance._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
+        TextDyField.data_source("Instance ID", "data.instance_id"),
+        TextDyField.data_source("QPS", "data.qps"),
+        TextDyField.data_source("Latency", "data.average_latency"),
+        TextDyField.data_source("Requests", "data.request_count"),
+        TextDyField.data_source("Errors", "data.errors"),
+        TextDyField.data_source("Memory", "data.memory_usage"),
+        DateTimeDyField.data_source("Start Time", "data.start_time"),
+        TextDyField.data_source("Availability", "data.availability.liveness"),
         TextDyField.data_source("Service ID", "data.service_id"),
         TextDyField.data_source("Version ID", "data.version_id"),
-        TextDyField.data_source("Instance ID", "data.instance_id"),
-        EnumDyField.data_source("VM Status", "data.vm_status", default_state={
-            "safe": ["RUNNING"],
-            "warning": ["PENDING", "STAGING"],
-            "alert": ["STOPPED", "TERMINATED"],
-        }),
-        TextDyField.data_source("VM Debug Enabled", "data.vm_debug_enabled"),
-        TextDyField.data_source("VM Liveness", "data.vm_liveness"),
-        TextDyField.data_source("Request Count", "data.request_count"),
-        TextDyField.data_source("Memory Usage", "data.memory_usage"),
-        TextDyField.data_source("CPU Usage", "data.cpu_usage"),
+        EnumDyField.data_source(
+            "VM Status",
+            "data.vm_status",
+            default_state={
+                "safe": ["RUNNING"],
+                "warning": ["PENDING", "STAGING"],
+                "alert": ["STOPPED", "TERMINATED"],
+            },
+        ),
+        TextDyField.data_source("App Engine Release", "data.app_engine_release"),
         DateTimeDyField.data_source("Created", "data.create_time"),
         DateTimeDyField.data_source("Updated", "data.update_time"),
     ],
     search=[
-        SearchField.set(name="Name", key="data.name"),
         SearchField.set(name="Instance ID", key="data.instance_id"),
         SearchField.set(name="Service ID", key="data.service_id"),
         SearchField.set(name="Version ID", key="data.version_id"),
@@ -72,8 +83,13 @@ cst_app_engine_instance._metadata = CloudServiceTypeMeta.set_meta(
         ChartWidget.set(**get_data_from_yaml(count_by_vm_status_conf)),
         CardWidget.set(**get_data_from_yaml(total_memory_usage_conf)),
         CardWidget.set(**get_data_from_yaml(total_cpu_usage_conf)),
-    ]
+    ],
 )
+
+# Export
+CLOUD_SERVICE_TYPES = [
+    CloudServiceTypeResponse({"resource": cst_app_engine_instance}),
+]
 
 # Export
 CLOUD_SERVICE_TYPES = [
