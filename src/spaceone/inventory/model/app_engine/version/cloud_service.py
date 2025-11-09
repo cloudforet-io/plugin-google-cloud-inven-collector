@@ -40,7 +40,6 @@ app_engine_version = ItemDynamicLayout.set_fields(
         TextDyField.data_source("Memory Usage", "data.memory_usage"),
         TextDyField.data_source("CPU Usage", "data.cpu_usage"),
         DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
     ],
 )
 

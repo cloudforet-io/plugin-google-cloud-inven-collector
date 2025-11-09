@@ -53,7 +53,6 @@ class AppEngineVersion(BaseResource):
     runtime = StringType(serialize_when_none=False)
     environment = StringType(serialize_when_none=False)
     create_time = StringType(deserialize_from="createTime", serialize_when_none=False)
-    update_time = StringType(deserialize_from="updateTime", serialize_when_none=False)
     
     # Scaling configurations
     automatic_scaling = ModelType(AutomaticScaling, deserialize_from="automaticScaling", serialize_when_none=False)

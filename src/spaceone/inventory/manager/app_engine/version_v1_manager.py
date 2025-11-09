@@ -211,7 +211,6 @@ class AppEngineVersionV1Manager(GoogleCloudManager):
                         "runtime": str(version.get("runtime", "")),
                         "environment": str(version.get("env", "")),
                         "createTime": convert_datetime(version.get("createTime")),
-                        "updateTime": convert_datetime(version.get("updateTime")),
                         "instance_count": str(len(instances)),
                         "memory_usage": str(metrics.get("memory_usage", 0)),
                         "cpu_usage": str(metrics.get("cpu_usage", 0)),
