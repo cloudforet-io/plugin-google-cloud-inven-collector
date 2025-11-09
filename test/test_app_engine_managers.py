@@ -2,13 +2,16 @@
 
 import unittest
 from unittest.mock import Mock, patch
-from typing import Dict, Any
 
 # AppEngine 매니저들 임포트
-from spaceone.inventory.manager.app_engine.application_v1_manager import AppEngineApplicationV1Manager
-from spaceone.inventory.manager.app_engine.service_v1_manager import AppEngineServiceV1Manager
-from spaceone.inventory.manager.app_engine.version_v1_manager import AppEngineVersionV1Manager
-from spaceone.inventory.manager.app_engine.instance_v1_manager import AppEngineInstanceV1Manager
+from spaceone.inventory.manager.app_engine.application_v1_manager import \
+    AppEngineApplicationV1Manager
+from spaceone.inventory.manager.app_engine.instance_v1_manager import \
+    AppEngineInstanceV1Manager
+from spaceone.inventory.manager.app_engine.service_v1_manager import \
+    AppEngineServiceV1Manager
+from spaceone.inventory.manager.app_engine.version_v1_manager import \
+    AppEngineVersionV1Manager
 
 
 class TestAppEngineApplicationV1Manager(unittest.TestCase):
@@ -179,6 +182,43 @@ class TestAppEngineVersionV1Manager(unittest.TestCase):
             
             self.assertIsInstance(result, dict)
             self.assertEqual(result["id"], "test-version")
+
+    def test_environment_field_mapping(self):
+        """environment 필드가 env 필드에서 올바르게 매핑되는지 테스트."""
+        with patch.object(self.manager, 'locator') as mock_locator:
+            # Mock connector 설정
+            mock_connector = Mock()
+            mock_connector.list_versions.return_value = [
+                {
+                    "id": "test-version",
+                    "name": "Test Version",
+                    "env": "standard",  # env 필드로 environment 정보 제공
+                    "runtime": "python39",
+                    "servingStatus": "SERVING",
+                    "createTime": "2023-01-01T00:00:00Z",
+                    "updateTime": "2023-01-01T00:00:00Z"
+                }
+            ]
+            mock_connector.list_instances.return_value = []
+            mock_connector.get_version_metrics.return_value = {}
+            mock_locator.get_connector.return_value = mock_connector
+
+            # Mock application connector
+            with patch('spaceone.inventory.connector.app_engine.application_v1.AppEngineApplicationV1Connector') as mock_app_connector_class:
+                mock_app_connector = Mock()
+                mock_app_connector.list_services.return_value = [{"id": "test-service"}]
+                mock_app_connector_class.return_value = mock_app_connector
+
+                # collect_cloud_service 호출
+                collected_services, errors = self.manager.collect_cloud_service(self.mock_params)
+                
+                # 결과 검증
+                self.assertEqual(len(errors), 0)
+                self.assertEqual(len(collected_services), 1)
+                
+                # environment 필드가 올바르게 매핑되었는지 확인
+                service_data = collected_services[0].resource.data
+                self.assertEqual(service_data.environment, "standard")
 
 
 class TestAppEngineInstanceV1Manager(unittest.TestCase):
