@@ -74,7 +74,6 @@ class AppEngineInstance(BaseResource):
     average_latency = FloatType(serialize_when_none=False)  # 평균 지연시간
     errors = IntType(serialize_when_none=False)  # 에러 수
     create_time = StringType(serialize_when_none=False)
-    update_time = StringType(serialize_when_none=False)
     start_time = StringType(serialize_when_none=False)
 
     # VM Details

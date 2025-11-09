@@ -63,7 +63,6 @@ cst_app_engine_instance._metadata = CloudServiceTypeMeta.set_meta(
         ),
         TextDyField.data_source("App Engine Release", "data.app_engine_release"),
         DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
     ],
     search=[
         SearchField.set(name="Instance ID", key="data.instance_id"),
@@ -75,7 +74,6 @@ cst_app_engine_instance._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="VM Liveness", key="data.vm_liveness"),
         SearchField.set(name="Request Count", key="data.request_count"),
         SearchField.set(name="Created", key="data.create_time", data_type="datetime"),
-        SearchField.set(name="Updated", key="data.update_time", data_type="datetime"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
@@ -85,11 +83,6 @@ cst_app_engine_instance._metadata = CloudServiceTypeMeta.set_meta(
         CardWidget.set(**get_data_from_yaml(total_cpu_usage_conf)),
     ],
 )
-
-# Export
-CLOUD_SERVICE_TYPES = [
-    CloudServiceTypeResponse({"resource": cst_app_engine_instance}),
-]
 
 # Export
 CLOUD_SERVICE_TYPES = [

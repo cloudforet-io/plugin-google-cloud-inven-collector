@@ -42,7 +42,6 @@ app_engine_instance = ItemDynamicLayout.set_fields(
         TextDyField.data_source("VM Debug Enabled", "data.vm_debug_enabled"),
         TextDyField.data_source("VM Liveness", "data.vm_liveness"),
         DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
         DateTimeDyField.data_source("Started", "data.start_time"),
     ],
 )

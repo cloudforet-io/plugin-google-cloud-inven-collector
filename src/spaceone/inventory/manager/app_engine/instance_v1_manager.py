@@ -356,14 +356,11 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                             instance.get("averageLatency", 0) or 0
                                         ),
                                         "errors": int(instance.get("errors", 0) or 0),
-                                        # 시간 정보
+                                        # 시간 정보 - API에서 제공하는 필드만 매핑
                                         "create_time": convert_datetime(
                                             instance.get(
                                                 "startTime", instance.get("createTime")
                                             )
-                                        ),
-                                        "update_time": convert_datetime(
-                                            instance.get("updateTime", "")
                                         ),
                                         "start_time": convert_datetime(
                                             instance.get("startTime", "")
