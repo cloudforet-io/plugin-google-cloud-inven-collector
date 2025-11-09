@@ -133,9 +133,12 @@ class AppEngineInstanceV1Connector(GoogleCloudConnector):
             if not instance_info:
                 return None
             
-            # 기본 메트릭 정보
+            # 기본 메트릭 정보 - memory_usage는 바이트에서 MB로 변환하여 저장
+            memory_bytes = instance_info.get("memoryUsage", 0) or 0
+            memory_mb = round(float(memory_bytes) / (1024 * 1024), 1) if memory_bytes else 0.0
+            
             metrics = {
-                "memory_usage": instance_info.get("memoryUsage", 0),
+                "memory_usage": memory_mb,  # MB 단위로 변환된 값
                 "cpu_usage": instance_info.get("cpuUsage", 0),
                 "request_count": instance_info.get("requestCount", 0),
                 "vm_status": instance_info.get("vmStatus", ""),
