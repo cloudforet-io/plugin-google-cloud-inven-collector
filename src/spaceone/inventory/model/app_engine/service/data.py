@@ -1,7 +1,7 @@
 import logging
 
 from schematics import Model
-from schematics.types import DictType, ListType, ModelType, StringType
+from schematics.types import DictType, FloatType, ListType, ModelType, StringType
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 class TrafficSplit(Model):
     """AppEngine Traffic Split 모델"""
 
-    allocations = DictType(StringType, serialize_when_none=False)
+    allocations = DictType(FloatType, serialize_when_none=False)
     shard_by = StringType(deserialize_from="shardBy", serialize_when_none=False)
 
 
