@@ -1,11 +1,8 @@
 import logging
+
 from schematics import Model
-from schematics.types import (
-    ModelType,
-    ListType,
-    StringType,
-    BooleanType,
-)
+from schematics.types import BooleanType, ListType, ModelType, StringType
+
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,8 +39,6 @@ class AppEngineApplication(BaseResource):
     code_bucket = StringType(deserialize_from="codeBucket", serialize_when_none=False)
     gcr_domain = StringType(deserialize_from="gcrDomain", serialize_when_none=False)
     database_type = StringType(deserialize_from="databaseType", serialize_when_none=False)
-    create_time = StringType(deserialize_from="createTime", serialize_when_none=False)
-    update_time = StringType(deserialize_from="updateTime", serialize_when_none=False)
     
     # Feature Settings
     feature_settings = ModelType(FeatureSettings, deserialize_from="featureSettings", serialize_when_none=False)
@@ -61,5 +56,5 @@ class AppEngineApplication(BaseResource):
     def reference(self, region_code):
         return {
             "resource_id": self.name,
-            "external_link": f"https://console.cloud.google.com/appengine/instances?project={self.project_id}"
+            "external_link": f"https://console.cloud.google.com/appengine?project={self.project_id}"
         }

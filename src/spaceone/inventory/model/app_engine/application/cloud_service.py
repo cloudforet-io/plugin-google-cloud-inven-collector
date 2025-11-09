@@ -1,20 +1,19 @@
-from schematics.types import ModelType, StringType, PolyModelType
+from schematics.types import ModelType, PolyModelType, StringType
 
-from spaceone.inventory.model.app_engine.application.data import AppEngineApplication
-from spaceone.inventory.libs.schema.metadata.dynamic_field import (
-    TextDyField,
-    EnumDyField,
-    DateTimeDyField,
-)
-from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
-    ItemDynamicLayout,
-    TableDynamicLayout,
-)
 from spaceone.inventory.libs.schema.cloud_service import (
     CloudServiceMeta,
     CloudServiceResource,
     CloudServiceResponse,
 )
+from spaceone.inventory.libs.schema.metadata.dynamic_field import (
+    EnumDyField,
+    TextDyField,
+)
+from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
+    ItemDynamicLayout,
+    TableDynamicLayout,
+)
+from spaceone.inventory.model.app_engine.application.data import AppEngineApplication
 
 """
 AppEngine Application
@@ -35,12 +34,12 @@ app_engine_application = ItemDynamicLayout.set_fields(
             },
         ),
         TextDyField.data_source("Default Hostname", "data.default_hostname"),
-        TextDyField.data_source("Default Cookie Expiration", "data.default_cookie_expiration"),
+        TextDyField.data_source(
+            "Default Cookie Expiration", "data.default_cookie_expiration"
+        ),
         TextDyField.data_source("Code Bucket", "data.code_bucket"),
         TextDyField.data_source("GCR Domain", "data.gcr_domain"),
         TextDyField.data_source("Database Type", "data.database_type"),
-        DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
     ],
 )
 
@@ -96,7 +95,9 @@ class AppEngineApplicationResource(AppEngineResource):
     cloud_service_type = StringType(default="Application")
     data = ModelType(AppEngineApplication)
     _metadata = ModelType(
-        CloudServiceMeta, default=app_engine_application_meta, serialized_name="metadata"
+        CloudServiceMeta,
+        default=app_engine_application_meta,
+        serialized_name="metadata",
     )
 
 

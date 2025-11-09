@@ -14,7 +14,6 @@ from spaceone.inventory.model.app_engine.application.cloud_service_type import (
     CLOUD_SERVICE_TYPES,
 )
 from spaceone.inventory.model.app_engine.application.data import AppEngineApplication
-from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_datetime
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -200,8 +199,6 @@ class AppEngineApplicationV1Manager(GoogleCloudManager):
                     "codeBucket": str(application.get("codeBucket", "")),
                     "gcrDomain": str(application.get("gcrDomain", "")),
                     "databaseType": str(application.get("databaseType", "")),
-                    "createTime": convert_datetime(application.get("createTime")),
-                    "updateTime": convert_datetime(application.get("updateTime")),
                     "version_count": str(total_versions),
                     "instance_count": str(total_instances),
                 }
