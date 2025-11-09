@@ -803,12 +803,9 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                         "name": str(node_pool_name),
                         "clusterName": str(cluster_name),
                         "location": str(location),
-                        "projectId": str(project_id),
                         "version": str(node_group.get("version", "")),
                         "status": str(node_group.get("status", "")),
                         "initialNodeCount": str(node_group.get("initialNodeCount", "")),
-                        "createTime": node_group.get("createTime"),
-                        "updateTime": node_group.get("updateTime"),
                         "api_version": "v1beta1",
                     }
 

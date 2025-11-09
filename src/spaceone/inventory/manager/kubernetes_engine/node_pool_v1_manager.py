@@ -11,7 +11,6 @@ from spaceone.inventory.connector.kubernetes_engine.node_pool_v1 import (
 )
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
-from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_datetime
 from spaceone.inventory.model.kubernetes_engine.node_pool.cloud_service import (
     NodePoolResource,
     NodePoolResponse,
@@ -713,14 +712,11 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                         "name": str(node_pool_name),
                         "cluster_name": str(cluster_name),
                         "location": str(location),
-                        "project_id": str(project_id),
                         "version": str(node_group.get("version", "")),
                         "status": str(node_group.get("status", "")),
                         "initial_node_count": int(node_group.get("initialNodeCount", 0))
                         if node_group.get("initialNodeCount")
                         else 0,
-                        "create_time": convert_datetime(node_group.get("createTime")),
-                        "update_time": convert_datetime(node_group.get("updateTime")),
                         "api_version": "v1",
                         "self_link": node_group.get("selfLink", ""),
                     }
