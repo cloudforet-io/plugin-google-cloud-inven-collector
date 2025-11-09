@@ -1,13 +1,9 @@
 import logging
+
 from schematics import Model
-from schematics.types import (
-    ModelType,
-    ListType,
-    StringType,
-    IntType,
-    FloatType,
-    DictType,
-)
+from schematics.types import (DictType, FloatType, IntType, ListType,
+                              ModelType, StringType)
+
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 _LOGGER = logging.getLogger(__name__)
@@ -68,6 +64,7 @@ class AppEngineVersion(BaseResource):
     resources = ModelType(Resources, serialize_when_none=False)
     
     # Calculated fields
+    scaling_type = StringType(serialize_when_none=False)
     instance_count = StringType(serialize_when_none=False)
     memory_usage = StringType(serialize_when_none=False)
     cpu_usage = StringType(serialize_when_none=False)

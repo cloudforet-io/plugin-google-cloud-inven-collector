@@ -216,6 +216,17 @@ class AppEngineVersionV1Manager(GoogleCloudManager):
                         "cpu_usage": str(metrics.get("cpu_usage", 0)),
                     }
 
+                    # 스케일링 타입 결정
+                    scaling_type = "Unknown"
+                    if "automaticScaling" in version:
+                        scaling_type = "Automatic"
+                    elif "manualScaling" in version:
+                        scaling_type = "Manual"
+                    elif "basicScaling" in version:
+                        scaling_type = "Basic"
+                    
+                    version_data["scaling_type"] = scaling_type
+
                     # Automatic Scaling 추가
                     if "automaticScaling" in version:
                         auto_scaling = version["automaticScaling"]
