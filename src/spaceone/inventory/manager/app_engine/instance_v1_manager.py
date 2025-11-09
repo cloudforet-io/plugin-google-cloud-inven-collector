@@ -55,6 +55,34 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
         
         return memory_mb
 
+    def _set_multiple_google_cloud_monitoring(
+        self, project_id: str, metric_types: List[str], resource_id: str, filters: List[Dict[str, str]]
+    ) -> Dict[str, Any]:
+        """
+        App Engine Instance에 대한 여러 메트릭 타입을 설정합니다.
+
+        Args:
+            project_id: GCP 프로젝트 ID
+            metric_types: 메트릭 타입 목록
+            resource_id: 리소스 ID
+            filters: 필터 목록
+
+        Returns:
+            Google Cloud Monitoring 설정 딕셔너리
+        """
+        monitoring_filters = []
+        for metric_type in metric_types:
+            monitoring_filters.append({
+                "metric_type": metric_type,
+                "labels": filters
+            })
+
+        return {
+            "name": f"projects/{project_id}",
+            "resource_id": resource_id,
+            "filters": monitoring_filters,
+        }
+
     def list_instances(
         self, service_id: str, version_id: str, params: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
@@ -559,10 +587,20 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                             "value": instance_id,
                                         },
                                     ]
+                                    # App Engine Instance 메트릭 타입들
+                                    app_engine_metric_types = [
+                                        "appengine.googleapis.com/http/server/response_count",
+                                        "appengine.googleapis.com/http/server/response_latencies", 
+                                        "appengine.googleapis.com/system/cpu/usage",
+                                        "appengine.googleapis.com/system/memory/usage",
+                                        "appengine.googleapis.com/system/network/sent_bytes",
+                                        "appengine.googleapis.com/system/network/received_bytes"
+                                    ]
+                                    
                                     instance_data["google_cloud_monitoring"] = (
-                                        self.set_google_cloud_monitoring(
+                                        self._set_multiple_google_cloud_monitoring(
                                             project_id,
-                                            "gae_instance",
+                                            app_engine_metric_types,
                                             monitoring_resource_id,
                                             google_cloud_monitoring_filters,
                                         )
