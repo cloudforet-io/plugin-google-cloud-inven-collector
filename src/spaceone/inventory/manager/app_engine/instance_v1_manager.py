@@ -499,28 +499,18 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     # Google Cloud Monitoring/Logging 리소스 ID: App Engine Instance의 경우 instance_id 사용
                                     monitoring_resource_id = instance_id
 
+                                    # App Engine Instance 모니터링 필터 설정
+                                    # Standard와 Flexible Environment 모두 지원하는 gae_instance 리소스 타입 사용
                                     google_cloud_monitoring_filters = [
-                                        {
-                                            "key": "resource.labels.module_id",
-                                            "value": service_id,
-                                        },
-                                        {
-                                            "key": "resource.labels.version_id",
-                                            "value": version_id,
-                                        },
-                                        {
-                                            "key": "resource.labels.instance_id",
-                                            "value": instance_id,
-                                        },
-                                        {
-                                            "key": "resource.labels.project_id",
-                                            "value": project_id,
-                                        },
+                                        {"key": "resource.labels.project_id", "value": project_id},
+                                        {"key": "resource.labels.module_id", "value": service_id},
+                                        {"key": "resource.labels.version_id", "value": version_id},
+                                        {"key": "resource.labels.instance_id", "value": instance_id},
                                     ]
                                     instance_data["google_cloud_monitoring"] = (
                                         self.set_google_cloud_monitoring(
                                             project_id,
-                                            "appengine.googleapis.com/flex/instance",
+                                            "gae_instance",
                                             monitoring_resource_id,
                                             google_cloud_monitoring_filters,
                                         )
