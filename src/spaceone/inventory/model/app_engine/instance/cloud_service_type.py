@@ -56,9 +56,9 @@ cst_app_engine_instance._metadata = CloudServiceTypeMeta.set_meta(
             "VM Status",
             "data.vm_status",
             default_state={
-                "safe": ["RUNNING"],
-                "warning": ["PENDING", "STAGING"],
-                "alert": ["STOPPED", "TERMINATED"],
+                "safe": ["RUNNING", "DYNAMIC", "RESIDENT"],
+                "warning": ["PENDING", "STAGING", "UNKNOWN"],
+                "alert": ["STOPPED", "TERMINATED", "ERROR"],
             },
         ),
         TextDyField.data_source("App Engine Release", "data.app_engine_release"),

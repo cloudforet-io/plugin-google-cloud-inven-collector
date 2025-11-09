@@ -254,6 +254,29 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     )
                                     _LOGGER.debug(f"Raw instance data: {instance}")
 
+                                    # VM Status 및 Availability 디버깅
+                                    _LOGGER.info(
+                                        f"[API_RESPONSE] Instance {instance_id} - vmStatus: {instance.get('vmStatus')}"
+                                    )
+                                    _LOGGER.info(
+                                        f"[API_RESPONSE] Instance {instance_id} - vmLiveness: {instance.get('vmLiveness')}"
+                                    )
+                                    _LOGGER.info(
+                                        f"[API_RESPONSE] Instance {instance_id} - availability: {instance.get('availability')}"
+                                    )
+                                    _LOGGER.info(
+                                        f"[API_RESPONSE] Instance {instance_id} - servingStatus: {instance.get('servingStatus')}"
+                                    )
+                                    _LOGGER.info(
+                                        f"[API_RESPONSE] Instance {instance_id} - status: {instance.get('status')}"
+                                    )
+                                    _LOGGER.info(
+                                        f"[API_RESPONSE] Instance {instance_id} - all keys: {sorted(list(instance.keys()))}"
+                                    )
+                                    _LOGGER.info(
+                                        f"[API_RESPONSE] Instance {instance_id} - full response: {instance}"
+                                    )
+
                                     # 인스턴스 상세 정보 조회
                                     instance_details = self.get_instance_details(
                                         service_id, version_id, instance_id, params
@@ -290,15 +313,29 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                         ),  # secret_data에서 가져온 project_id 사용
                                         "service_id": str(service_id),
                                         "version_id": str(version_id),
-                                        # VM 상태 정보
+                                        # VM 상태 정보 - App Engine 특성에 맞는 매핑
                                         "vm_status": str(
-                                            instance.get("vmStatus", "UNKNOWN")
+                                            instance.get("vmStatus")
+                                            or instance.get("status")
+                                            or instance.get("servingStatus")
+                                            or
+                                            # App Engine Flexible의 경우 availability가 상태를 나타냄
+                                            (
+                                                instance.get("availability")
+                                                if instance.get("availability")
+                                                in ["RUNNING", "DYNAMIC", "RESIDENT"]
+                                                else None
+                                            )
+                                            or "UNKNOWN"
                                         ),
                                         "vm_debug_enabled": bool(
                                             instance.get("vmDebugEnabled", False)
                                         ),
                                         "vm_liveness": str(
-                                            instance.get("vmLiveness", "")
+                                            instance.get(
+                                                "vmLiveness",
+                                                instance.get("liveness", ""),
+                                            )
                                         ),
                                         # 사용량 정보
                                         "request_count": int(
@@ -368,32 +405,59 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                             instance["appEngineRelease"]
                                         )
 
-                                    # Availability 추가 - 타입에 따라 적절히 변환
-                                    if "availability" in instance:
-                                        availability = instance["availability"]
+                                    # Availability 추가 - 다양한 필드명 시도 및 타입 변환
+                                    availability_data = None
+
+                                    # 다양한 가능한 필드명 시도
+                                    for field_name in [
+                                        "availability",
+                                        "vmLiveness",
+                                        "liveness",
+                                        "status",
+                                    ]:
+                                        if field_name in instance:
+                                            availability_data = instance[field_name]
+                                            _LOGGER.debug(
+                                                f"Found availability data in {field_name} for {instance_id}: {availability_data}"
+                                            )
+                                            break
+
+                                    if availability_data is not None:
                                         _LOGGER.debug(
-                                            f"Processing availability for {instance_id}: {availability} (type: {type(availability)})"
+                                            f"Processing availability for {instance_id}: {availability_data} (type: {type(availability_data)})"
                                         )
 
-                                        if isinstance(availability, dict):
+                                        if isinstance(availability_data, dict):
                                             # 이미 딕셔너리 형태면 그대로 사용
-                                            instance_data["availability"] = availability
-                                        elif isinstance(availability, str):
+                                            instance_data["availability"] = (
+                                                availability_data
+                                            )
+                                        elif isinstance(availability_data, str):
                                             # 문자열이면 liveness 필드로 매핑
                                             instance_data["availability"] = {
-                                                "liveness": availability,
+                                                "liveness": availability_data,
                                                 "readiness": "",
                                             }
                                         else:
                                             # 다른 타입이면 문자열로 변환하여 liveness에 설정
                                             instance_data["availability"] = {
-                                                "liveness": str(availability),
+                                                "liveness": str(availability_data),
                                                 "readiness": "",
                                             }
                                     else:
-                                        # availability 필드가 없는 경우 기본값 설정
+                                        # availability 관련 필드가 없는 경우 VM 상태 기반으로 설정
+                                        vm_status = instance_data.get(
+                                            "vm_status", "UNKNOWN"
+                                        )
+                                        liveness_status = (
+                                            "HEALTHY"
+                                            if vm_status == "RUNNING"
+                                            else "UNHEALTHY"
+                                            if vm_status != "UNKNOWN"
+                                            else ""
+                                        )
                                         instance_data["availability"] = {
-                                            "liveness": "",
+                                            "liveness": liveness_status,
                                             "readiness": "",
                                         }
 

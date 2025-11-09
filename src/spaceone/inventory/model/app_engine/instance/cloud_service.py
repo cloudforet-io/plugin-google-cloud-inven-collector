@@ -34,9 +34,9 @@ app_engine_instance = ItemDynamicLayout.set_fields(
             "VM Status",
             "data.vm_status",
             default_state={
-                "safe": ["RUNNING"],
-                "warning": ["PENDING", "STAGING"],
-                "alert": ["STOPPED", "TERMINATED"],
+                "safe": ["RUNNING", "DYNAMIC", "RESIDENT"],
+                "warning": ["PENDING", "STAGING", "UNKNOWN"],
+                "alert": ["STOPPED", "TERMINATED", "ERROR"],
             },
         ),
         TextDyField.data_source("VM Debug Enabled", "data.vm_debug_enabled"),
