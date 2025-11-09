@@ -38,6 +38,23 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def _convert_memory_usage(self, instance: Dict[str, Any], instance_id: str) -> float:
+        """메모리 사용량을 바이트에서 MB로 변환하고 로깅"""
+        memory_bytes = instance.get("memoryUsage", 0) or 0
+        
+        # 디버깅을 위한 로그 추가
+        _LOGGER.info(f"[MEMORY_DEBUG] Instance {instance_id} - Raw memoryUsage: {memory_bytes} (type: {type(memory_bytes)})")
+        
+        if not memory_bytes or memory_bytes == 0:
+            _LOGGER.info(f"[MEMORY_DEBUG] Instance {instance_id} - Memory usage is 0 or None")
+            return 0.0
+        
+        # 바이트를 MB로 변환
+        memory_mb = bytes_to_mb(memory_bytes)
+        _LOGGER.info(f"[MEMORY_DEBUG] Instance {instance_id} - Converted to MB: {memory_mb}")
+        
+        return memory_mb
+
     def list_instances(
         self, service_id: str, version_id: str, params: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
@@ -308,6 +325,11 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                     _LOGGER.debug(
                                         f"Final instance data after enhancements: {instance}"
                                     )
+                                    
+                                    # API 응답에서 메모리 관련 필드들 로깅
+                                    _LOGGER.info(f"[API_MEMORY_DEBUG] Instance {instance_id} - memoryUsage: {instance.get('memoryUsage')} (type: {type(instance.get('memoryUsage'))})")
+                                    _LOGGER.info(f"[API_MEMORY_DEBUG] Instance {instance_id} - All memory-related fields: {[k for k in instance.keys() if 'memory' in k.lower()]}")
+                                    _LOGGER.info(f"[API_MEMORY_DEBUG] Instance {instance_id} - Full instance keys: {sorted(list(instance.keys()))}")
 
                                     # 기본 인스턴스 데이터 준비 - API 응답 구조와 정확히 일치하도록 수정
                                     instance_data = {
@@ -352,8 +374,8 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                             )
                                             or 0
                                         ),
-                                        "memory_usage": bytes_to_mb(
-                                            instance.get("memoryUsage", 0) or 0
+                                        "memory_usage": self._convert_memory_usage(
+                                            instance, instance_id
                                         ),
                                         "cpu_usage": float(
                                             instance.get("cpuUsage", 0) or 0
@@ -374,9 +396,14 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                         ),
                                     }
 
-                                    # 수집된 메트릭 정보 추가 (기존 availability는 덮어쓰지 않음)
+                                    # 수집된 메트릭 정보 추가 (기존 memory_usage는 덮어쓰지 않음)
                                     if "metrics" in instance:
                                         metrics_data = instance["metrics"]
+                                        
+                                        # 메트릭 데이터 디버깅
+                                        _LOGGER.info(f"[METRICS_DEBUG] Instance {instance_id} - metrics_data keys: {list(metrics_data.keys())}")
+                                        _LOGGER.info(f"[METRICS_DEBUG] Instance {instance_id} - metrics memory_usage: {metrics_data.get('memory_usage')}")
+                                        
                                         enhanced_metrics = {
                                             "memory_usage_enhanced": metrics_data.get(
                                                 "memory_usage", ""
@@ -391,7 +418,20 @@ class AppEngineInstanceV1Manager(GoogleCloudManager):
                                                 "app_engine_release", ""
                                             ),
                                         }
+                                        
+                                        # memory_usage가 metrics에 있다면 제거 (기존 변환된 값 보호)
+                                        if "memory_usage" in metrics_data:
+                                            _LOGGER.info(f"[METRICS_DEBUG] Instance {instance_id} - Removing memory_usage from metrics to prevent overwrite")
+                                            # memory_usage 키를 제외한 나머지만 업데이트
+                                            safe_metrics = {k: v for k, v in metrics_data.items() if k != "memory_usage"}
+                                            instance_data.update(safe_metrics)
+                                        
                                         instance_data.update(enhanced_metrics)
+                                        
+                                        # 메모리 값 덮어쓰기 디버깅
+                                        _LOGGER.info(f"[MEMORY_OVERWRITE_DEBUG] Instance {instance_id} - After enhanced_metrics update:")
+                                        _LOGGER.info(f"[MEMORY_OVERWRITE_DEBUG] Instance {instance_id} - memory_usage: {instance_data.get('memory_usage')}")
+                                        _LOGGER.info(f"[MEMORY_OVERWRITE_DEBUG] Instance {instance_id} - memory_usage_enhanced: {instance_data.get('memory_usage_enhanced')}")
 
                                     # VM Details 추가 - 딕셔너리 타입 검증 후 전달
                                     if "vmDetails" in instance:

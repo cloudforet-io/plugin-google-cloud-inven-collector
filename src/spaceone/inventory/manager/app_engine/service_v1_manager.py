@@ -215,6 +215,9 @@ class AppEngineServiceV1Manager(GoogleCloudManager):
                     service_data["latest_version_deployed"] = (
                         f"{latest_version_info['create_time']} (v{latest_version_info['version_id']})"
                     )
+                    service_data["serving_status"] = latest_version_info[
+                        "serving_status"
+                    ]
 
                 # Traffic Split 추가
                 if "split" in service:

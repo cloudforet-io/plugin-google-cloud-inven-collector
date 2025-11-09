@@ -49,12 +49,12 @@ feature_settings = ItemDynamicLayout.set_fields(
     fields=[
         EnumDyField.data_source(
             "Split Health Checks",
-            "data.featureSettings.splitHealthChecks",
+            "data.feature_settings.split_health_checks",
             default_badge={"indigo.500": ["True"], "coral.600": ["False"]},
         ),
         EnumDyField.data_source(
             "Use Container Optimized OS",
-            "data.featureSettings.useContainerOptimizedOs",
+            "data.feature_settings.use_container_optimized_os",
             default_badge={"indigo.500": ["True"], "coral.600": ["False"]},
         ),
     ],
@@ -68,14 +68,16 @@ iap_settings = ItemDynamicLayout.set_fields(
             "data.iap.enabled",
             default_badge={"indigo.500": ["True"], "coral.600": ["False"]},
         ),
-        TextDyField.data_source("OAuth2 Client ID", "data.iap.oauth2ClientId"),
-        TextDyField.data_source("OAuth2 Client Secret", "data.iap.oauth2ClientSecret"),
+        TextDyField.data_source("OAuth2 Client ID", "data.iap.oauth2_client_id"),
+        TextDyField.data_source(
+            "OAuth2 Client Secret", "data.iap.oauth2_client_secret"
+        ),
     ],
 )
 
 dispatch_rules = TableDynamicLayout.set_fields(
     "Dispatch Rules",
-    root_path="data.dispatchRules",
+    root_path="data.dispatch_rules",
     fields=[
         TextDyField.data_source("Domain", "domain"),
         TextDyField.data_source("Path", "path"),

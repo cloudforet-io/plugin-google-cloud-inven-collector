@@ -55,26 +55,26 @@ automatic_scaling = ItemDynamicLayout.set_fields(
     "Automatic Scaling",
     fields=[
         TextDyField.data_source(
-            "Cool Down Period", "data.automatic_scaling.coolDownPeriod"
+            "Cool Down Period", "data.automatic_scaling.cool_down_period"
         ),
         TextDyField.data_source(
             "CPU Target Utilization",
             "data.automatic_scaling.cpu_utilization.target_utilization",
         ),
         TextDyField.data_source(
-            "Max Concurrent Requests", "data.automatic_scaling.maxConcurrentRequests"
+            "Max Concurrent Requests", "data.automatic_scaling.max_concurrent_requests"
         ),
         TextDyField.data_source(
-            "Max Idle Instances", "data.automatic_scaling.maxIdleInstances"
+            "Max Idle Instances", "data.automatic_scaling.max_idle_instances"
         ),
         TextDyField.data_source(
-            "Max Total Instances", "data.automatic_scaling.maxTotalInstances"
+            "Max Total Instances", "data.automatic_scaling.max_total_instances"
         ),
         TextDyField.data_source(
-            "Min Idle Instances", "data.automatic_scaling.minIdleInstances"
+            "Min Idle Instances", "data.automatic_scaling.min_idle_instances"
         ),
         TextDyField.data_source(
-            "Min Total Instances", "data.automatic_scaling.minTotalInstances"
+            "Min Total Instances", "data.automatic_scaling.min_total_instances"
         ),
     ],
 )
@@ -89,8 +89,8 @@ manual_scaling = ItemDynamicLayout.set_fields(
 basic_scaling = ItemDynamicLayout.set_fields(
     "Basic Scaling",
     fields=[
-        TextDyField.data_source("Idle Timeout", "data.basic_scaling.idleTimeout"),
-        TextDyField.data_source("Max Instances", "data.basic_scaling.maxInstances"),
+        TextDyField.data_source("Idle Timeout", "data.basic_scaling.idle_timeout"),
+        TextDyField.data_source("Max Instances", "data.basic_scaling.max_instances"),
     ],
 )
 
@@ -98,8 +98,8 @@ resources = ItemDynamicLayout.set_fields(
     "Resources",
     fields=[
         TextDyField.data_source("CPU", "data.resources.cpu"),
-        TextDyField.data_source("Disk GB", "data.resources.diskGb"),
-        TextDyField.data_source("Memory GB", "data.resources.memoryGb"),
+        TextDyField.data_source("Disk GB", "data.resources.disk_gb"),
+        TextDyField.data_source("Memory GB", "data.resources.memory_gb"),
         TextDyField.data_source("Volumes", "data.resources.volumes"),
     ],
 )
