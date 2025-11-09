@@ -47,7 +47,7 @@ automatic_scaling = ItemDynamicLayout.set_fields(
     "Automatic Scaling",
     fields=[
         TextDyField.data_source("Cool Down Period", "data.automatic_scaling.coolDownPeriod"),
-        TextDyField.data_source("CPU Utilization", "data.automatic_scaling.cpuUtilization"),
+        TextDyField.data_source("CPU Target Utilization", "data.automatic_scaling.cpu_utilization.target_utilization"),
         TextDyField.data_source("Max Concurrent Requests", "data.automatic_scaling.maxConcurrentRequests"),
         TextDyField.data_source("Max Idle Instances", "data.automatic_scaling.maxIdleInstances"),
         TextDyField.data_source("Max Total Instances", "data.automatic_scaling.maxTotalInstances"),

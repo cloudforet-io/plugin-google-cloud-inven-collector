@@ -13,10 +13,15 @@ from spaceone.inventory.libs.schema.cloud_service import BaseResource
 _LOGGER = logging.getLogger(__name__)
 
 
+class CpuUtilization(Model):
+    """AppEngine CPU Utilization 모델"""
+    target_utilization = FloatType(deserialize_from="targetUtilization", serialize_when_none=False)
+
+
 class AutomaticScaling(Model):
     """AppEngine Automatic Scaling 모델"""
     cool_down_period = StringType(deserialize_from="coolDownPeriod", serialize_when_none=False)
-    cpu_utilization = DictType(StringType, deserialize_from="cpuUtilization", serialize_when_none=False)
+    cpu_utilization = ModelType(CpuUtilization, deserialize_from="cpuUtilization", serialize_when_none=False)
     max_concurrent_requests = IntType(deserialize_from="maxConcurrentRequests", serialize_when_none=False)
     max_idle_instances = IntType(deserialize_from="maxIdleInstances", serialize_when_none=False)
     max_total_instances = IntType(deserialize_from="maxTotalInstances", serialize_when_none=False)
