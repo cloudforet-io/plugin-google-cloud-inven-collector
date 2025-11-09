@@ -1,24 +1,20 @@
 import logging
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 from spaceone.inventory.connector.app_engine.application_v1 import (
     AppEngineApplicationV1Connector,
 )
 from spaceone.inventory.libs.manager import GoogleCloudManager
-
-from spaceone.inventory.model.app_engine.application.cloud_service_type import (
-    CLOUD_SERVICE_TYPES,
-)
-
+from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 from spaceone.inventory.model.app_engine.application.cloud_service import (
     AppEngineApplicationResource,
     AppEngineApplicationResponse,
 )
-from spaceone.inventory.model.app_engine.application.data import (
-    AppEngineApplication,
+from spaceone.inventory.model.app_engine.application.cloud_service_type import (
+    CLOUD_SERVICE_TYPES,
 )
+from spaceone.inventory.model.app_engine.application.data import AppEngineApplication
 from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_datetime
-from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -192,7 +188,9 @@ class AppEngineApplicationV1Manager(GoogleCloudManager):
                 # 기본 애플리케이션 데이터 준비
                 app_data = {
                     "name": str(application.get("name", "")),
-                    "projectId": str(project_id),  # secret_data에서 가져온 project_id 사용
+                    "projectId": str(
+                        project_id
+                    ),  # secret_data에서 가져온 project_id 사용
                     "locationId": str(application.get("locationId", "")),
                     "servingStatus": str(application.get("servingStatus", "")),
                     "defaultHostname": str(application.get("defaultHostname", "")),
@@ -248,7 +246,7 @@ class AppEngineApplicationV1Manager(GoogleCloudManager):
                 app_id = application.get("id", "default")
                 # Google Cloud Monitoring/Logging 리소스 ID: App Engine의 경우 module_id (app_id) 사용
                 monitoring_resource_id = app_id
-                
+
                 google_cloud_monitoring_filters = [
                     {"key": "resource.labels.project_id", "value": project_id},
                 ]
@@ -272,7 +270,7 @@ class AppEngineApplicationV1Manager(GoogleCloudManager):
                         "data": app_engine_app_data,
                         "reference": {
                             "resource_id": application.get("name"),
-                            "external_link": f"https://console.cloud.google.com/appengine/instances?project={project_id}",
+                            "external_link": f"https://console.cloud.google.com/appengine?project={project_id}",
                         },
                         "region_code": app_data.get("locationId"),
                         "account": app_data.get("projectId"),
