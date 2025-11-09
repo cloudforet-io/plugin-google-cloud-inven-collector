@@ -1,20 +1,19 @@
-from schematics.types import ModelType, StringType, PolyModelType
+from schematics.types import ModelType, PolyModelType, StringType
 
-from spaceone.inventory.model.app_engine.application.data import AppEngineApplication
-from spaceone.inventory.libs.schema.metadata.dynamic_field import (
-    TextDyField,
-    EnumDyField,
-    DateTimeDyField,
-)
-from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
-    ItemDynamicLayout,
-    TableDynamicLayout,
-)
 from spaceone.inventory.libs.schema.cloud_service import (
     CloudServiceMeta,
     CloudServiceResource,
     CloudServiceResponse,
 )
+from spaceone.inventory.libs.schema.metadata.dynamic_field import (
+    EnumDyField,
+    TextDyField,
+)
+from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
+    ItemDynamicLayout,
+    TableDynamicLayout,
+)
+from spaceone.inventory.model.app_engine.application.data import AppEngineApplication
 
 """
 AppEngine Application
@@ -35,12 +34,13 @@ app_engine_application = ItemDynamicLayout.set_fields(
             },
         ),
         TextDyField.data_source("Default Hostname", "data.default_hostname"),
-        TextDyField.data_source("Default Cookie Expiration", "data.default_cookie_expiration"),
         TextDyField.data_source("Code Bucket", "data.code_bucket"),
         TextDyField.data_source("GCR Domain", "data.gcr_domain"),
         TextDyField.data_source("Database Type", "data.database_type"),
-        DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
+        TextDyField.data_source("Auth Domain", "data.auth_domain"),
+        TextDyField.data_source("Default Bucket", "data.default_bucket"),
+        TextDyField.data_source("Service Account", "data.service_account"),
+        TextDyField.data_source("SSL Policy", "data.ssl_policy"),
     ],
 )
 
@@ -49,13 +49,13 @@ feature_settings = ItemDynamicLayout.set_fields(
     fields=[
         EnumDyField.data_source(
             "Split Health Checks",
-            "data.feature_settings.splitHealthChecks",
-            default_badge={"indigo.500": ["true"], "coral.600": ["false"]},
+            "data.featureSettings.splitHealthChecks",
+            default_badge={"indigo.500": ["True"], "coral.600": ["False"]},
         ),
         EnumDyField.data_source(
             "Use Container Optimized OS",
-            "data.feature_settings.useContainerOptimizedOs",
-            default_badge={"indigo.500": ["true"], "coral.600": ["false"]},
+            "data.featureSettings.useContainerOptimizedOs",
+            default_badge={"indigo.500": ["True"], "coral.600": ["False"]},
         ),
     ],
 )
@@ -66,7 +66,7 @@ iap_settings = ItemDynamicLayout.set_fields(
         EnumDyField.data_source(
             "Enabled",
             "data.iap.enabled",
-            default_badge={"indigo.500": ["true"], "coral.600": ["false"]},
+            default_badge={"indigo.500": ["True"], "coral.600": ["False"]},
         ),
         TextDyField.data_source("OAuth2 Client ID", "data.iap.oauth2ClientId"),
         TextDyField.data_source("OAuth2 Client Secret", "data.iap.oauth2ClientSecret"),
@@ -75,7 +75,7 @@ iap_settings = ItemDynamicLayout.set_fields(
 
 dispatch_rules = TableDynamicLayout.set_fields(
     "Dispatch Rules",
-    root_path="data.dispatch_rules",
+    root_path="data.dispatchRules",
     fields=[
         TextDyField.data_source("Domain", "domain"),
         TextDyField.data_source("Path", "path"),
@@ -96,7 +96,9 @@ class AppEngineApplicationResource(AppEngineResource):
     cloud_service_type = StringType(default="Application")
     data = ModelType(AppEngineApplication)
     _metadata = ModelType(
-        CloudServiceMeta, default=app_engine_application_meta, serialized_name="metadata"
+        CloudServiceMeta,
+        default=app_engine_application_meta,
+        serialized_name="metadata",
     )
 
 
