@@ -59,7 +59,6 @@ cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Cluster IPV4 CIDR", "data.cluster_ipv4_cidr"),
         TextDyField.data_source("Services IPV4 CIDR", "data.services_ipv4_cidr"),
         DateTimeDyField.data_source("Created", "data.create_time"),
-        TextDyField.data_source("API Version", "data.api_version"),
         TextDyField.data_source("Fleet Info", "data.fleet_info"),
         TextDyField.data_source("Membership Info", "data.membership_info"),
         TextDyField.data_source("Resource Limits Count", "data.resource_limits"),
@@ -73,7 +72,6 @@ cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Subnetwork", key="data.subnetwork"),
         SearchField.set(name="Project ID", key="data.project_id"),
         SearchField.set(name="Created", key="data.create_time", data_type="datetime"),
-        SearchField.set(name="API Version", key="data.api_version"),
         SearchField.set(name="Fleet Info", key="data.fleet_info"),
         SearchField.set(name="Membership Info", key="data.membership_info"),
         SearchField.set(name="Resource Limits", key="data.resource_limits"),
@@ -87,10 +85,6 @@ cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
     ],
 )
 
-# Export unified version
-CLOUD_SERVICE_TYPES = [
-    CloudServiceTypeResponse({"resource": cst_gke_cluster}),
-]
 # Export unified version
 CLOUD_SERVICE_TYPES = [
     CloudServiceTypeResponse({"resource": cst_gke_cluster}),

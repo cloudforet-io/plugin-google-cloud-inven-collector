@@ -26,7 +26,6 @@ def parse_cluster_data(
     cluster_data: Dict,
     fleet_info: Dict = None,
     membership_info: Dict = None,
-    api_version: str = "v1",
 ) -> Dict:
     """GKE 클러스터 데이터를 파싱합니다 (v1/v1beta API 통합)."""
     if not cluster_data:
@@ -46,7 +45,6 @@ def parse_cluster_data(
         "resourceLabels": {
             k: str(v) for k, v in cluster_data.get("resourceLabels", {}).items()
         },
-        "api_version": str(api_version),
     }
 
     # 네트워크 설정 - 기본 정보만 추출
@@ -130,7 +128,7 @@ def parse_cluster_data(
         parsed_data["resourceLimits"] = cluster_data["resourceLimits"]
 
     # v1beta 전용 정보 (Fleet, Membership)
-    if api_version == "v1beta1":
+    # v1beta1 specific fields are handled separately
         if fleet_info:
             parsed_data["fleet_info"] = {
                 "fleetProject": str(fleet_info.get("fleetProject", "")),
@@ -310,7 +308,6 @@ class GKECluster(BaseResource):
     resource_labels = DictType(
         StringType, deserialize_from="resourceLabels", serialize_when_none=False
     )
-    api_version = StringType(serialize_when_none=False)
 
     # Network
     network = StringType(serialize_when_none=False)

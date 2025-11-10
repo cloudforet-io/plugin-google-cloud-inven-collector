@@ -41,7 +41,6 @@ gke_cluster = ItemDynamicLayout.set_fields(
         TextDyField.data_source("Cluster IPV4 CIDR", "data.cluster_ipv4_cidr"),
         TextDyField.data_source("Services IPV4 CIDR", "data.services_ipv4_cidr"),
         DateTimeDyField.data_source("Created", "data.create_time"),
-        TextDyField.data_source("API Version", "data.api_version"),
     ],
 )
 

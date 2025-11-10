@@ -190,7 +190,6 @@ class GKEClusterV1Manager(GoogleCloudManager):
                     "resourceLabels": {
                         k: str(v) for k, v in cluster.get("resourceLabels", {}).items()
                     },
-                    "api_version": "v1",
                 }
 
                 # 네트워크 설정 추가

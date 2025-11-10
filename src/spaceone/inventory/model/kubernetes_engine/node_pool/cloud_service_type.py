@@ -77,7 +77,6 @@ cst_gke_node_pool._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Image Type", key="data.config.image_type"),
         SearchField.set(name="Project ID", key="data.project_id"),
         SearchField.set(name="Preemptible", key="data.config.preemptible"),
-        SearchField.set(name="API Version", key="data.api_version"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
