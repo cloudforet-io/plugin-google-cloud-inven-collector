@@ -161,6 +161,29 @@ class AppEngineApplicationV1Manager(GoogleCloudManager):
         # App Engine 애플리케이션 정보 조회
         application = self.get_application(params)
 
+        # API 응답 디버깅
+        if application:
+            _LOGGER.info(
+                f"[API_DEBUG] App Engine Application API Response Keys: {sorted(list(application.keys()))}"
+            )
+            _LOGGER.info(
+                f"[API_DEBUG] featureSettings in response: {'featureSettings' in application}"
+            )
+            _LOGGER.info(f"[API_DEBUG] iap in response: {'iap' in application}")
+            _LOGGER.info(
+                f"[API_DEBUG] dispatchRules in response: {'dispatchRules' in application}"
+            )
+            if "featureSettings" in application:
+                _LOGGER.info(
+                    f"[API_DEBUG] featureSettings data: {application['featureSettings']}"
+                )
+            if "iap" in application:
+                _LOGGER.info(f"[API_DEBUG] iap data: {application['iap']}")
+            if "dispatchRules" in application:
+                _LOGGER.info(
+                    f"[API_DEBUG] dispatchRules data: {application['dispatchRules']}"
+                )
+
         if application:
             try:
                 # 서비스 목록 조회
