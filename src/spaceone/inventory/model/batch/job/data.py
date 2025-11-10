@@ -108,7 +108,7 @@ job_overview_meta = ItemDynamicLayout.set_fields(
     fields=[
         TextDyField.data_source("Job Name", "data.display_name"),
         TextDyField.data_source("Job ID", "data.uid"),
-        TextDyField.data_source("Full Path", "data.name"),
+        TextDyField.data_source("Full Name", "data.name"),
         EnumDyField.data_source(
             "Status",
             "data.state",
