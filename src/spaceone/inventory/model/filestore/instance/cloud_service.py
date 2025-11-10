@@ -86,26 +86,7 @@ filestore_file_shares = TableDynamicLayout.set_fields(
     root_path="data.unified_file_shares",
     fields=[
         TextDyField.data_source("Name", "name"),
-        # TextDyField.data_source("Mount Name", "mount_name"),
-        # TextDyField.data_source("Description", "description"),
         TextDyField.data_source("Capacity (TiB)", "capacity_tib"),
-        # EnumDyField.data_source(
-        #     "State",
-        #     "state",
-        #     default_state={
-        #         "safe": ["READY"],
-        #         "warning": ["CREATING", "DELETING"],
-        #         "alert": ["ERROR"],
-        #         "disable": ["UNKNOWN", ""],
-        #     },
-        # ),
-        TextDyField.data_source("Source Backup", "source_backup"),
-        ListDyField.data_source(
-            "NFS Export Options",
-            "nfs_export_options",
-            default_badge={"type": "outline", "delimiter": "<br>"},
-        ),
-        # TextDyField.data_source("Data Source", "data_source"),
     ],
 )
 
