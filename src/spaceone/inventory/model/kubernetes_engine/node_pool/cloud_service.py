@@ -1,24 +1,20 @@
-from schematics.types import (
-    ModelType,
-    StringType,
-    PolyModelType,
-)
+from schematics.types import ModelType, PolyModelType, StringType
 
 from spaceone.inventory.libs.schema.cloud_service import (
     CloudServiceMeta,
     CloudServiceResource,
     CloudServiceResponse,
 )
-from spaceone.inventory.model.kubernetes_engine.node_pool.data import NodePool
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     EnumDyField,
+    ListDyField,
     TextDyField,
 )
 from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
     ItemDynamicLayout,
     TableDynamicLayout,
 )
-
+from spaceone.inventory.model.kubernetes_engine.node_pool.data import NodePool
 
 """
 Node Pool
@@ -78,8 +74,12 @@ autoscaling_config = ItemDynamicLayout.set_fields(
         ),
         TextDyField.data_source("Min Node Count", "data.autoscaling.min_node_count"),
         TextDyField.data_source("Max Node Count", "data.autoscaling.max_node_count"),
-        TextDyField.data_source("Total Min Node Count", "data.autoscaling.total_min_node_count"),
-        TextDyField.data_source("Total Max Node Count", "data.autoscaling.total_max_node_count"),
+        TextDyField.data_source(
+            "Total Min Node Count", "data.autoscaling.total_min_node_count"
+        ),
+        TextDyField.data_source(
+            "Total Max Node Count", "data.autoscaling.total_max_node_count"
+        ),
         TextDyField.data_source("Location Policy", "data.autoscaling.location_policy"),
     ],
 )
@@ -104,7 +104,9 @@ network_configuration = ItemDynamicLayout.set_fields(
     "Network Configuration",
     fields=[
         TextDyField.data_source("Pod Range", "data.network_config.pod_range"),
-        TextDyField.data_source("Pod IPv4 CIDR Block", "data.network_config.pod_ipv4_cidr_block"),
+        TextDyField.data_source(
+            "Pod IPv4 CIDR Block", "data.network_config.pod_ipv4_cidr_block"
+        ),
         EnumDyField.data_source(
             "Create Pod Range",
             "data.network_config.create_pod_range",
@@ -119,22 +121,27 @@ network_configuration = ItemDynamicLayout.set_fields(
     ],
 )
 
-oauth_scopes = TableDynamicLayout.set_fields(
+oauth_scopes = ItemDynamicLayout.set_fields(
     "OAuth Scopes",
-    root_path="data.config.oauth_scopes",
     fields=[
-        TextDyField.data_source("Scope", ".")
+        ListDyField.data_source(
+            "Scopes", 
+            "data.config.oauth_scopes", 
+            default_badge={"type": "outline", "delimiter": "<br>"}
+        ),
     ],
 )
 
-node_pool_meta = CloudServiceMeta.set_layouts([
-    node_pool_overview,
-    node_configuration,
-    autoscaling_config,
-    management_config,
-    network_configuration,
-    oauth_scopes,
-])
+node_pool_meta = CloudServiceMeta.set_layouts(
+    [
+        node_pool_overview,
+        node_configuration,
+        autoscaling_config,
+        management_config,
+        network_configuration,
+        oauth_scopes,
+    ]
+)
 
 
 class KubernetesEngineResource(CloudServiceResource):
