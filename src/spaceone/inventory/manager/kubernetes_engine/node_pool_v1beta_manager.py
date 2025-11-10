@@ -345,7 +345,6 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
         """
         try:
             # Compute Engine 도메인의 커넥터들을 직접 호출
-            vm_connector = self.locator.get_connector("VMInstanceConnector", **params)
             instance_group_connector = self.locator.get_connector(
                 "InstanceGroupConnector", **params
             )
@@ -467,35 +466,27 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
 
                 try:
                     if is_regional:
-                        # regional instance group의 경우 region 내의 모든 zone에서 인스턴스 조회
-                        # regional 클러스터는 보통 3개의 zone에 분산됨
-                        zones_in_region = self._get_zones_in_region(
-                            vm_connector, location
-                        )
-                        _LOGGER.info(
-                            f"Zones in region {location}: {zones_in_region} (v1beta1)"
-                        )
-
-                        for zone in zones_in_region:
-                            try:
-                                # InstanceGroupConnector의 list_instances 메서드에 project_id를 직접 전달
-                                instances = self._get_instances_from_group(
-                                    instance_group_connector,
-                                    group_name,
-                                    zone,
-                                    project_id,
+                        # regional instance group의 경우 region 레벨에서 직접 조회
+                        try:
+                            instances = self._get_instances_from_group(
+                                instance_group_connector,
+                                group_name,
+                                location,  # region을 직접 사용
+                                project_id,
+                            )
+                            for instance in instances:
+                                # instance에서 zone 정보 추출
+                                instance_zone = instance.get("zone", "").split("/")[-1] if instance.get("zone") else location
+                                node_info = self._extract_node_info(instance, instance_zone)
+                                nodes.append(node_info)
+                                group_info["instances"].append(node_info)
+                                _LOGGER.info(
+                                    f"Found node {node_info['name']} in zone {instance_zone} (v1beta1)"
                                 )
-                                for instance in instances:
-                                    node_info = self._extract_node_info(instance, zone)
-                                    nodes.append(node_info)
-                                    group_info["instances"].append(node_info)
-                                    _LOGGER.info(
-                                        f"Found node {node_info['name']} in zone {zone} (v1beta1)"
-                                    )
-                            except Exception as e:
-                                _LOGGER.debug(
-                                    f"Failed to get instances from regional group {group_name} in zone {zone} (v1beta1): {e}"
-                                )
+                        except Exception as e:
+                            _LOGGER.debug(
+                                f"Failed to get instances from regional group {group_name} in region {location} (v1beta1): {e}"
+                            )
                     else:
                         # zonal instance group의 경우 해당 zone에서만 인스턴스 조회
                         instances = self._get_instances_from_group(
@@ -705,8 +696,8 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
             return []
 
         except Exception as e:
-            _LOGGER.info(
-                f"Failed to get instances from {location} for group {group_name}: {e}"
+            _LOGGER.debug(
+                f"No instances found in {location} for group {group_name}: {e}"
             )
             return []
 
