@@ -1,24 +1,22 @@
 import logging
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import (
     GKEClusterV1Connector,
 )
 from spaceone.inventory.libs.manager import GoogleCloudManager
-
-from spaceone.inventory.model.kubernetes_engine.cluster.cloud_service_type import (
-    CLOUD_SERVICE_TYPES,
-)
-
+from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 from spaceone.inventory.model.kubernetes_engine.cluster.cloud_service import (
     GKEClusterResource,
     GKEClusterResponse,
+)
+from spaceone.inventory.model.kubernetes_engine.cluster.cloud_service_type import (
+    CLOUD_SERVICE_TYPES,
 )
 from spaceone.inventory.model.kubernetes_engine.cluster.data import (
     GKECluster,
     convert_datetime,
 )
-from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -58,7 +56,7 @@ class GKEClusterV1Manager(GoogleCloudManager):
     # 노드풀 관련 기능은 별도의 NodePoolManager에서 처리
     # def list_node_pools(self, cluster_name: str, location: str, params: Dict[str, Any]) -> List[Dict[str, Any]]:
     #     """GKE 노드풀 목록을 조회합니다 (v1 API).
-    #     
+    #
     #     이 메서드는 제거되었습니다. 노드풀 정보는 GKENodePoolManager를 사용하세요.
     #     """
     #     _LOGGER.warning("list_node_pools method is deprecated. Use GKENodePoolManager instead.")
@@ -166,7 +164,7 @@ class GKEClusterV1Manager(GoogleCloudManager):
 
         # GKE 클러스터 목록 조회
         clusters = self.list_clusters(params)
-        
+
         # GKE 리소스 제한 정보 조회
         resource_limits = self.get_resource_limits(params)
 
@@ -179,7 +177,9 @@ class GKEClusterV1Manager(GoogleCloudManager):
                     "name": str(cluster.get("name", "")),
                     "description": str(cluster.get("description", "")),
                     "location": str(cluster.get("location", "")),
-                    "projectId": str(project_id),  # secret_data에서 가져온 project_id 사용
+                    "projectId": str(
+                        project_id
+                    ),  # secret_data에서 가져온 project_id 사용
                     "status": str(cluster.get("status", "")),
                     "currentMasterVersion": str(
                         cluster.get("currentMasterVersion", "")
@@ -187,7 +187,6 @@ class GKEClusterV1Manager(GoogleCloudManager):
                     "currentNodeVersion": str(cluster.get("currentNodeVersion", "")),
                     "currentNodeCount": str(cluster.get("currentNodeCount", "")),
                     "createTime": convert_datetime(cluster.get("createTime")),
-                    "updateTime": convert_datetime(cluster.get("updateTime")),
                     "resourceLabels": {
                         k: str(v) for k, v in cluster.get("resourceLabels", {}).items()
                     },
@@ -289,28 +288,39 @@ class GKEClusterV1Manager(GoogleCloudManager):
                 # ResourceLimit 정보 추가
                 if resource_limits:
                     cluster_data["resourceLimits"] = resource_limits
-                    _LOGGER.info(f"Added {len(resource_limits)} resource limits to cluster {cluster_data.get('name')}")
+                    _LOGGER.info(
+                        f"Added {len(resource_limits)} resource limits to cluster {cluster_data.get('name')}"
+                    )
 
                 # Stackdriver 정보 추가
                 cluster_name = cluster.get("name")
                 cluster_location = cluster.get("location")
-                
+
                 if not cluster_name:
-                    _LOGGER.warning(f"Cluster missing name, skipping monitoring setup: {cluster}")
+                    _LOGGER.warning(
+                        f"Cluster missing name, skipping monitoring setup: {cluster}"
+                    )
                     cluster_name = "unknown"
-                
+
                 # Google Cloud Monitoring 리소스 ID: {project_id}:{location}:{cluster_name}
-                monitoring_resource_id = f"{project_id}:{cluster_location or 'unknown'}:{cluster_name}"
-                
+                monitoring_resource_id = (
+                    f"{project_id}:{cluster_location or 'unknown'}:{cluster_name}"
+                )
+
                 google_cloud_monitoring_filters = [
                     {"key": "resource.labels.cluster_name", "value": cluster_name},
-                    {"key": "resource.labels.location", "value": cluster_location or "unknown"},
+                    {
+                        "key": "resource.labels.location",
+                        "value": cluster_location or "unknown",
+                    },
                 ]
-                cluster_data["google_cloud_monitoring"] = self.set_google_cloud_monitoring(
-                    project_id,
-                    "kubernetes.io/container",
-                    monitoring_resource_id,
-                    google_cloud_monitoring_filters,
+                cluster_data["google_cloud_monitoring"] = (
+                    self.set_google_cloud_monitoring(
+                        project_id,
+                        "kubernetes.io/container",
+                        monitoring_resource_id,
+                        google_cloud_monitoring_filters,
+                    )
                 )
                 cluster_data["google_cloud_logging"] = self.set_google_cloud_logging(
                     "KubernetesEngine", "Cluster", project_id, monitoring_resource_id
@@ -318,6 +328,9 @@ class GKEClusterV1Manager(GoogleCloudManager):
 
                 # GKECluster 모델 생성
                 gke_cluster_data = GKECluster(cluster_data, strict=False)
+
+                # resourceLabels를 tags 형식으로 변환
+                tags = self.convert_labels_format(cluster.get("resourceLabels", {}))
 
                 # GKEClusterResource 생성
                 cluster_resource = GKEClusterResource(
@@ -330,6 +343,7 @@ class GKEClusterV1Manager(GoogleCloudManager):
                         },
                         "region_code": cluster.get("location"),
                         "account": project_id,
+                        "tags": tags,
                     }
                 )
 

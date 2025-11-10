@@ -63,7 +63,7 @@ CLOUD_SERVICE_GROUP_MAP = {
         "CloudRunWorkerPoolV2Manager",
         # "CloudRunOperationV2Manager",
     ],
-    "KubernetesEngine": ["GKEClusterV1Manager", "GKENodePoolV1Manager"],
+    "KubernetesEngine": ["GKEClusterV1BetaManager", "GKENodePoolV1BetaManager"],
     "AppEngine": [
         "AppEngineApplicationV1Manager",
         "AppEngineServiceV1Manager",
