@@ -127,14 +127,6 @@ oauth_scopes = TableDynamicLayout.set_fields(
     ],
 )
 
-tags = TableDynamicLayout.set_fields(
-    "Tags",
-    root_path="data.config.tags",
-    fields=[
-        TextDyField.data_source("Tag", ".")
-    ],
-)
-
 node_pool_meta = CloudServiceMeta.set_layouts([
     node_pool_overview,
     node_configuration,
@@ -142,7 +134,6 @@ node_pool_meta = CloudServiceMeta.set_layouts([
     management_config,
     network_configuration,
     oauth_scopes,
-    tags,
 ])
 
 
