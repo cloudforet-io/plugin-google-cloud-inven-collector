@@ -1,12 +1,7 @@
 from schematics import Model
-from schematics.types import (
-    BooleanType,
-    DictType,
-    IntType,
-    ListType,
-    ModelType,
-    StringType,
-)
+from schematics.types import (BooleanType, DictType, IntType, ListType,
+                              ModelType, StringType)
+
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
 
