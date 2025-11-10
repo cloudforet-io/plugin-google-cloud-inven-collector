@@ -1,20 +1,20 @@
-from schematics.types import ModelType, StringType, PolyModelType
+from schematics.types import ModelType, PolyModelType, StringType
 
-from spaceone.inventory.model.kubernetes_engine.cluster.data import GKECluster
-from spaceone.inventory.libs.schema.metadata.dynamic_field import (
-    TextDyField,
-    EnumDyField,
-    DateTimeDyField,
-)
-from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
-    ItemDynamicLayout,
-    TableDynamicLayout,
-)
 from spaceone.inventory.libs.schema.cloud_service import (
     CloudServiceMeta,
     CloudServiceResource,
     CloudServiceResponse,
 )
+from spaceone.inventory.libs.schema.metadata.dynamic_field import (
+    DateTimeDyField,
+    EnumDyField,
+    TextDyField,
+)
+from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
+    ItemDynamicLayout,
+    TableDynamicLayout,
+)
+from spaceone.inventory.model.kubernetes_engine.cluster.data import GKECluster
 
 """
 GKE Cluster
@@ -41,7 +41,6 @@ gke_cluster = ItemDynamicLayout.set_fields(
         TextDyField.data_source("Cluster IPV4 CIDR", "data.cluster_ipv4_cidr"),
         TextDyField.data_source("Services IPV4 CIDR", "data.services_ipv4_cidr"),
         DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
         TextDyField.data_source("API Version", "data.api_version"),
     ],
 )
