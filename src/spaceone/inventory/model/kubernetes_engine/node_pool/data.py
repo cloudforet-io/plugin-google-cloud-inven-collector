@@ -1,6 +1,12 @@
 from schematics import Model
-from schematics.types import (BooleanType, DictType, IntType, ListType,
-                              ModelType, StringType)
+from schematics.types import (
+    BooleanType,
+    DictType,
+    IntType,
+    ListType,
+    ModelType,
+    StringType,
+)
 
 from spaceone.inventory.libs.schema.cloud_service import BaseResource
 
@@ -85,6 +91,7 @@ class Metrics(Model):
 
 class NodePool(BaseResource):
     """GKE NodePool 데이터 모델 (SpaceONE 표준 패턴)"""
+
     name = StringType(serialize_when_none=False)
     cluster_name = StringType()
     location = StringType()
@@ -97,18 +104,20 @@ class NodePool(BaseResource):
     config = ModelType(NodeConfig)
     autoscaling = ModelType(AutoScaling)
     management = ModelType(Management)
-    max_pods_constraint = ModelType(MaxPodsConstraint, deserialize_from="maxPodsConstraint")
+    max_pods_constraint = ModelType(
+        MaxPodsConstraint, deserialize_from="maxPodsConstraint"
+    )
     network_config = ModelType(NetworkConfig, deserialize_from="networkConfig")
     version = StringType()
     instance_group_urls = ListType(StringType, deserialize_from="instanceGroupUrls")
     pod_ipv4_cidr_size = IntType(deserialize_from="podIpv4CidrSize")
     upgrade_settings = DictType(StringType, deserialize_from="upgradeSettings")
-    
+
     # BaseResource에서 상속받는 필드들:
     # - self_link
     # - google_cloud_monitoring
     # - google_cloud_logging
-    
+
     # Additional fields for extended node pool information
     nodes = ListType(ModelType(NodeInfo), serialize_when_none=False)
     instance_groups = ListType(ModelType(InstanceGroupInfo), serialize_when_none=False)

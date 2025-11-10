@@ -476,8 +476,14 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                             )
                             for instance in instances:
                                 # instance에서 zone 정보 추출
-                                instance_zone = instance.get("zone", "").split("/")[-1] if instance.get("zone") else location
-                                node_info = self._extract_node_info(instance, instance_zone)
+                                instance_zone = (
+                                    instance.get("zone", "").split("/")[-1]
+                                    if instance.get("zone")
+                                    else location
+                                )
+                                node_info = self._extract_node_info(
+                                    instance, instance_zone
+                                )
                                 nodes.append(node_info)
                                 group_info["instances"].append(node_info)
                                 _LOGGER.info(
