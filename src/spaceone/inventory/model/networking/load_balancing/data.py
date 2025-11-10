@@ -533,5 +533,54 @@ class LoadBalancing(BaseResource):
     creation_timestamp = DateTimeType(deserialize_from="creationTimestamp")
     affected_instance_count = IntType(serialize_when_none=False, default=0)
 
-    def reference(self, refer_link):
-        return {"resource_id": self.self_link, "external_link": refer_link}
+    def reference(self):
+        return {"resource_id": self.self_link, "external_link": self._get_console_url()}
+
+    def _get_console_url(self):
+        """
+        LoadBalancer 타입에 따라 적절한 Google Cloud Console URL을 생성합니다.
+        """
+        # 기본 정보 추출
+        project = getattr(self, 'project', '')
+        region = getattr(self, 'region', '')
+        name = getattr(self, 'name', '')
+        lb_type = getattr(self, 'type', '')
+        internal_or_external = getattr(self, 'internal_or_external', '')
+        
+        if not all([project, name]):
+            # 필수 정보가 없으면 API URL 반환 (fallback)
+            return getattr(self, 'self_link', '')
+        
+        # LoadBalancer 타입별 Console URL 매핑
+        base_url = "https://console.cloud.google.com/net-services/loadbalancing/details"
+        
+        # Internal vs External 구분
+        if internal_or_external == "INTERNAL_MANAGED":
+            if region:
+                # Regional Internal LoadBalancer
+                if "HTTP" in lb_type:
+                    return f"{base_url}/internalRegionalHttp/{region}/{name}?project={project}"
+                elif "TCP" in lb_type or "SSL" in lb_type:
+                    return f"{base_url}/internalRegionalTcp/{region}/{name}?project={project}"
+            else:
+                # Global Internal LoadBalancer (rare case)
+                return f"{base_url}/internalGlobalHttp/{name}?project={project}"
+        
+        elif internal_or_external in ["EXTERNAL", "EXTERNAL_MANAGED"]:
+            if region:
+                # Regional External LoadBalancer
+                if "HTTP" in lb_type:
+                    return f"{base_url}/externalRegionalHttp/{region}/{name}?project={project}"
+                elif "TCP" in lb_type or "UDP" in lb_type:
+                    return f"{base_url}/externalRegionalTcp/{region}/{name}?project={project}"
+            else:
+                # Global External LoadBalancer
+                if "HTTP" in lb_type:
+                    return f"{base_url}/externalGlobalHttp/{name}?project={project}"
+                elif "TCP" in lb_type:
+                    return f"{base_url}/externalGlobalTcp/{name}?project={project}"
+                elif "SSL" in lb_type:
+                    return f"{base_url}/externalGlobalSsl/{name}?project={project}"
+        
+        # 기본 LoadBalancing 목록 페이지로 fallback
+        return f"https://console.cloud.google.com/net-services/loadbalancing/list/loadBalancers?project={project}"

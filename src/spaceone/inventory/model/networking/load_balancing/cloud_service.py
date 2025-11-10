@@ -27,12 +27,6 @@ lb_forwarding_rule = TableDynamicLayout.set_fields(
         TextDyField.data_source("Id", "id"),
         TextDyField.data_source("Name", "name"),
         TextDyField.data_source("Description", "description"),
-        EnumDyField.data_source(
-            "Source",
-            "type",
-            default_badge={"coral.600": ["Global"], "peacock.500": ["Regional"]},
-        ),
-        TextDyField.data_source("Region", "region"),
         TextDyField.data_source("IP Address", "ip_address"),
         EnumDyField.data_source(
             "Protocol",
@@ -48,37 +42,12 @@ lb_forwarding_rule = TableDynamicLayout.set_fields(
             ],
         ),
         TextDyField.data_source("Port Range", "port_range"),
-        TextDyField.data_source("Ports", "ports"),
+        ListDyField.data_source("Ports", "ports"),
         TextDyField.data_source("Target", "target"),
-        EnumDyField.data_source(
-            "Load Balancing Scheme",
-            "load_balancing_scheme",
-            default_outline_badge=[
-                "EXTERNAL",
-                "EXTERNAL_MANAGED",
-                "INTERNAL",
-                "INTERNAL_MANAGED",
-                "INTERNAL_SELF_MANAGED",
-            ],
-        ),
         TextDyField.data_source("Subnetwork", "subnetwork"),
         TextDyField.data_source("Network", "network"),
-        TextDyField.data_source("Backend Service", "backend_service"),
-        TextDyField.data_source("Service Label", "service_label"),
-        TextDyField.data_source("Service Name", "service_name"),
         TextDyField.data_source("Network Tier", "network_tier"),
-        TextDyField.data_source("IP Version", "ip_version"),
-        EnumDyField.data_source(
-            "All Port",
-            "data.all_ports",
-            default_badge={"indigo.500": ["true"], "coral.600": ["false"]},
-        ),
-        EnumDyField.data_source(
-            "All Global Access",
-            "data.all_global_access",
-            default_badge={"indigo.500": ["true"], "coral.600": ["false"]},
-        ),
-        DateTimeDyField.data_source("Created At", "data.creation_timestamp"),
+        DateTimeDyField.data_source("Created At", "creation_timestamp"),
     ],
 )
 
@@ -96,17 +65,6 @@ lb_target_proxy = ItemDynamicLayout.set_fields(
     ],
 )
 
-lb_urlmap = ItemDynamicLayout.set_fields(
-    "UrlMap",
-    root_path="data.urlmap",
-    fields=[
-        TextDyField.data_source("ID", "id"),
-        TextDyField.data_source("Name", "name"),
-        TextDyField.data_source("Description", "description"),
-        TextDyField.data_source("Host Rule", "host_rule"),
-        DateTimeDyField.data_source("Created At", "creation_timestamp"),
-    ],
-)
 
 lb_certificate = TableDynamicLayout.set_fields(
     "Certificate",
@@ -140,14 +98,15 @@ lb_backend_service = TableDynamicLayout.set_fields(
         TextDyField.data_source("Description", "description"),
         EnumDyField.data_source(
             "Protocol",
-            "data.protocol",
+            "protocol",
             default_outline_badge=[
                 "HTTP",
                 "HTTPS",
                 "HTTP2",
                 "TCP",
                 "SSL",
-                "UDP" "GRPC",
+                "UDP",
+                "GRPC",
             ],
         ),
         ListDyField.data_source("Backends", "backends"),
@@ -156,32 +115,22 @@ lb_backend_service = TableDynamicLayout.set_fields(
         TextDyField.data_source("Port", "port"),
         TextDyField.data_source("Port Name", "port_name"),
         EnumDyField.data_source(
-            "Type",
-            "data.enable_cdn",
-            default_badge={"indigo.500": ["true"], "coral.600": ["false"]},
-        ),
-        EnumDyField.data_source(
             "Session Affinity",
-            "data.session_affinity",
+            "session_affinity",
             default_outline_badge=[
                 "NONE",
                 "CLIENT_IP",
                 "CLIENT_IP_PROTO",
                 "CLIENT_IP_PORT_PROTO",
-                "INTERNAL_MANAGED",
-                "INTERNAL_SELF_MANAGED",
                 "GENERATED_COOKIE",
                 "HEADER_FIELD",
                 "HTTP_COOKIE",
             ],
         ),
-        TextDyField.data_source(
-            "Affinity Cookie TTL Seconds", "affinity_cookie_ttl_sec"
-        ),
-        TextDyField.data_source("FailOver Policy", "failover_policy"),
+        TextDyField.data_source("Affinity Cookie TTL Seconds", "affinity_cookie_ttl_sec"),
         EnumDyField.data_source(
-            "LoadBalancing Scheme",
-            "data.load_balancing_scheme",
+            "Load Balancing Scheme",
+            "load_balancing_scheme",
             default_outline_badge=[
                 "EXTERNAL",
                 "INTERNAL",
@@ -189,8 +138,6 @@ lb_backend_service = TableDynamicLayout.set_fields(
                 "INTERNAL_SELF_MANAGED",
             ],
         ),
-        TextDyField.data_source("Log Config", "log_config"),
-        TextDyField.data_source("Connection Draining", "connection_draining"),
         DateTimeDyField.data_source("Created At", "creation_timestamp"),
     ],
 )
@@ -239,18 +186,15 @@ lb_health_checks = TableDynamicLayout.set_fields(
     fields=[
         TextDyField.data_source("Id", "id"),
         TextDyField.data_source("Name", "name"),
-        TextDyField.data_source("Description", "description"),
         EnumDyField.data_source(
             "Type",
-            "data.type",
+            "type",
             default_outline_badge=["TCP", "SSL", "HTTP", "HTTPS", "HTTP2"],
         ),
         TextDyField.data_source("Check Interval Seconds", "check_interval_sec"),
-        TextDyField.data_source("TimeOut Seconds", "timeout_sec"),
-        TextDyField.data_source("UnHealthy Threshold", "unhealthy_threshold"),
+        TextDyField.data_source("Timeout Seconds", "timeout_sec"),
+        TextDyField.data_source("Unhealthy Threshold", "unhealthy_threshold"),
         TextDyField.data_source("Healthy Threshold", "healthy_threshold"),
-        TextDyField.data_source("Region", "region"),
-        TextDyField.data_source("Log Config", "log_config"),
         DateTimeDyField.data_source("Created At", "creation_timestamp"),
     ],
 )
@@ -277,7 +221,6 @@ load_balancing_meta = CloudServiceMeta.set_layouts(
     [
         lb_forwarding_rule,
         lb_target_proxy,
-        lb_urlmap,
         lb_backend_service,
         lb_backend_buckets,
         lb_target_pools,

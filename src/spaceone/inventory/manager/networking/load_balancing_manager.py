@@ -160,7 +160,9 @@ class LoadBalancingManager(GoogleCloudManager):
                         "legacy_health_checks": lb_legacy_health_checks,
                         "target_pools": lb_target_pools,
                         "tags": [],
-                        "creation_timestamp": load_balancer.get("creation_timestamp"),
+                        "creation_timestamp": self._get_creation_timestamp(
+                            load_balancer, lb_forwarding_rules, lb_backend_services, lb_urlmap
+                        ),
                     },
                     strict=False,
                 )
@@ -175,9 +177,7 @@ class LoadBalancingManager(GoogleCloudManager):
                         "region_code": loadbalancer_data.get("region", ""),
                         "data": loadbalancer_data,
                         "reference": ReferenceModel(
-                            loadbalancer_data.reference(
-                                loadbalancer_data.get("self_link", "")
-                            )
+                            loadbalancer_data.reference()
                         ),
                     }
                 )
@@ -443,3 +443,41 @@ class LoadBalancingManager(GoogleCloudManager):
             lb_protocol = "SSL"
 
         return lb_protocol
+
+    @staticmethod
+    def _get_creation_timestamp(load_balancer, forwarding_rules, backend_services, urlmap):
+        """
+        LoadBalancer의 creation_timestamp를 결정합니다.
+        우선순위: 1) load_balancer 자체 2) urlmap 3) forwarding_rules 4) backend_services
+        """
+        # 1. Load Balancer 자체에 creation_timestamp가 있으면 사용
+        lb_timestamp = load_balancer.get("creationTimestamp") or load_balancer.get("creation_timestamp")
+        if lb_timestamp:
+            return lb_timestamp
+        
+        # 2. UrlMap의 creation_timestamp 사용
+        if urlmap and urlmap.get("creation_timestamp"):
+            return urlmap.get("creation_timestamp")
+        
+        # 3. Forwarding Rules 중 가장 이른 timestamp 사용
+        if forwarding_rules:
+            timestamps = []
+            for rule in forwarding_rules:
+                timestamp = rule.get("creation_timestamp")
+                if timestamp:
+                    timestamps.append(timestamp)
+            if timestamps:
+                return min(timestamps)  # 가장 이른 시간 반환
+        
+        # 4. Backend Services 중 가장 이른 timestamp 사용
+        if backend_services:
+            timestamps = []
+            for service in backend_services:
+                timestamp = service.get("creation_timestamp")
+                if timestamp:
+                    timestamps.append(timestamp)
+            if timestamps:
+                return min(timestamps)  # 가장 이른 시간 반환
+        
+        # 모든 구성 요소에 timestamp가 없으면 None 반환
+        return None

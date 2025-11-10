@@ -53,7 +53,6 @@ cst_load_balancing._metadata = CloudServiceTypeMeta.set_meta(
                 "coral.600": ["ESP", "AH", "SCTP", "ICMP", "L3_DEFAULT", "UnKnown"],
             },
         ),
-        TextDyField.data_source("Region", "data.region"),
         DateTimeDyField.data_source("Creation Time", "data.creation_timestamp"),
     ],
     search=[
@@ -62,7 +61,6 @@ cst_load_balancing._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Type", key="data.type"),
         SearchField.set(name="Source", key="data.internal_or_external"),
         SearchField.set(name="Protocol", key="data.protocol"),
-        SearchField.set(name="Region", key="data.region"),
         SearchField.set(
             name="Creation Time", key="data.creation_timestamp", data_type="datetime"
         ),
