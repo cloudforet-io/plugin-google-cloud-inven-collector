@@ -13,7 +13,10 @@ from spaceone.inventory.model.kubernetes_engine.cluster.cloud_service import (
 from spaceone.inventory.model.kubernetes_engine.cluster.cloud_service_type import (
     CLOUD_SERVICE_TYPES,
 )
-from spaceone.inventory.model.kubernetes_engine.cluster.data import GKECluster
+from spaceone.inventory.model.kubernetes_engine.cluster.data import (
+    GKECluster,
+    convert_datetime,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -256,7 +259,7 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
                     ),
                     "currentNodeVersion": str(cluster.get("currentNodeVersion", "")),
                     "currentNodeCount": str(cluster.get("currentNodeCount", "")),
-                    "createTime": cluster.get("createTime"),
+                    "createTime": convert_datetime(cluster.get("createTime")),
                     "resourceLabels": {
                         k: str(v) for k, v in cluster.get("resourceLabels", {}).items()
                     },
@@ -412,6 +415,9 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
                 # GKECluster 모델 생성
                 gke_cluster_data = GKECluster(cluster_data, strict=False)
 
+                # resourceLabels를 tags 형식으로 변환
+                tags = self.convert_labels_format(cluster.get("resourceLabels", {}))
+
                 # GKEClusterResource 생성
                 cluster_resource = GKEClusterResource(
                     {
@@ -423,6 +429,7 @@ class GKEClusterV1BetaManager(GoogleCloudManager):
                         },
                         "region_code": cluster.get("location"),
                         "account": project_id,
+                        "tags": tags,
                     }
                 )
 

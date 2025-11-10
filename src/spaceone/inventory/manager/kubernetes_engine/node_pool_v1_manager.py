@@ -829,6 +829,10 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                     )
                     node_pool_data_model = NodePool(node_pool_data, strict=False)
                     # _LOGGER.debug(f"NodePool model created - name attribute: '{node_pool_data_model.name}'")
+                    # NodePool config의 labels를 tags 형식으로 변환
+                    config_labels = node_group.get("config", {}).get("labels", {})
+                    tags = self.convert_labels_format(config_labels)
+
                     # NodePoolResource 생성
                     node_pool_resource = NodePoolResource(
                         {
@@ -842,6 +846,7 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                             },
                             "region_code": location,
                             "account": project_id,
+                            "tags": tags,
                         }
                     )
                     # _LOGGER.debug(f"### NodePoolResource created - serialized data: {node_pool_resource.to_primitive()}")

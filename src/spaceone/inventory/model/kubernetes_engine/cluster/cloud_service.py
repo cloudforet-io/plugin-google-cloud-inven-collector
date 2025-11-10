@@ -100,8 +100,49 @@ labels = TableDynamicLayout.set_fields(
     ],
 )
 
+# Fleet 정보 (v1beta1 전용)
+fleet_info = ItemDynamicLayout.set_fields(
+    "Fleet Information",
+    fields=[
+        TextDyField.data_source("Fleet Project", "data.fleet_info.fleetProject"),
+        TextDyField.data_source("Membership", "data.fleet_info.membership"),
+    ],
+)
+
+# Membership 정보 (v1beta1 전용)
+membership_info = ItemDynamicLayout.set_fields(
+    "Membership Information",
+    fields=[
+        TextDyField.data_source("Name", "data.membership_info.name"),
+        TextDyField.data_source("Description", "data.membership_info.description"),
+        TextDyField.data_source("State", "data.membership_info.state"),
+    ],
+)
+
+# Resource Limits 정보
+resource_limits = TableDynamicLayout.set_fields(
+    "Resource Limits",
+    root_path="data.resource_limits",
+    fields=[
+        TextDyField.data_source("Service Name", "service_name"),
+        TextDyField.data_source("Display Name", "display_name"),
+        TextDyField.data_source("Metric", "metric"),
+        TextDyField.data_source("Unit", "unit"),
+        TextDyField.data_source("Values", "values"),
+        TextDyField.data_source("Description", "description"),
+    ],
+)
+
 gke_cluster_meta = CloudServiceMeta.set_layouts(
-    [gke_cluster, network_config, addons_config, labels]
+    [
+        gke_cluster,
+        network_config,
+        addons_config,
+        labels,
+        fleet_info,
+        membership_info,
+        resource_limits,
+    ]
 )
 
 

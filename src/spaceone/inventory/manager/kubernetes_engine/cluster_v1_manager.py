@@ -329,6 +329,9 @@ class GKEClusterV1Manager(GoogleCloudManager):
                 # GKECluster 모델 생성
                 gke_cluster_data = GKECluster(cluster_data, strict=False)
 
+                # resourceLabels를 tags 형식으로 변환
+                tags = self.convert_labels_format(cluster.get("resourceLabels", {}))
+
                 # GKEClusterResource 생성
                 cluster_resource = GKEClusterResource(
                     {
@@ -340,6 +343,7 @@ class GKEClusterV1Manager(GoogleCloudManager):
                         },
                         "region_code": cluster.get("location"),
                         "account": project_id,
+                        "tags": tags,
                     }
                 )
 

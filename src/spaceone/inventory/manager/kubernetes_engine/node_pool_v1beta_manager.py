@@ -11,18 +11,15 @@ from spaceone.inventory.connector.kubernetes_engine.node_pool_v1beta import (
 )
 from spaceone.inventory.libs.manager import GoogleCloudManager
 from spaceone.inventory.libs.schema.cloud_service import ErrorResourceResponse
-from spaceone.inventory.model.kubernetes_engine.cluster.cloud_service import (
-    GKEClusterResource as GKENodeGroupResource,
+from spaceone.inventory.model.kubernetes_engine.cluster.data import convert_datetime
+from spaceone.inventory.model.kubernetes_engine.node_pool.cloud_service import (
+    NodePoolResource,
+    NodePoolResponse,
 )
-from spaceone.inventory.model.kubernetes_engine.cluster.cloud_service import (
-    GKEClusterResponse as GKENodeGroupResponse,
-)
-from spaceone.inventory.model.kubernetes_engine.cluster.cloud_service_type import (
+from spaceone.inventory.model.kubernetes_engine.node_pool.cloud_service_type import (
     CLOUD_SERVICE_TYPES,
 )
-from spaceone.inventory.model.kubernetes_engine.cluster.data import (
-    GKECluster as GKENodeGroup,
-)
+from spaceone.inventory.model.kubernetes_engine.node_pool.data import NodePool
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -582,7 +579,7 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                 "externalIP": instance.get("networkInterfaces", [{}])[0]
                 .get("accessConfigs", [{}])[0]
                 .get("natIP", ""),
-                "createTime": instance.get("creationTimestamp", ""),
+                "createTime": convert_datetime(instance.get("creationTimestamp")),
                 "labels": instance.get("labels", {}),
                 "taints": [],  # GKE taint 정보는 별도로 조회 필요
             }
@@ -595,7 +592,7 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                 "zone": zone,
                 "internalIP": "",
                 "externalIP": "",
-                "createTime": "",
+                "createTime": convert_datetime(""),
                 "labels": {},
                 "taints": [],
             }
@@ -798,66 +795,99 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                     nodes = nodes_info["nodes"]
                     instance_groups = nodes_info["instance_groups"]
 
-                    # 기본 노드 그룹 데이터 준비
-                    node_group_data = {
+                    # 기본 노드 풀 데이터 준비 (NodePool 모델에 맞게 수정)
+                    node_pool_data = {
                         "name": str(node_pool_name),
-                        "clusterName": str(cluster_name),
+                        "cluster_name": str(cluster_name),
                         "location": str(location),
+                        "project_id": str(project_id),
                         "version": str(node_group.get("version", "")),
                         "status": str(node_group.get("status", "")),
-                        "initialNodeCount": str(node_group.get("initialNodeCount", "")),
+                        "status_message": str(node_group.get("statusMessage", "")),
+                        "initial_node_count": int(node_group.get("initialNodeCount", 0))
+                        if node_group.get("initialNodeCount")
+                        else 0,
                         "api_version": "v1beta1",
+                        "self_link": node_group.get("selfLink", ""),
+                        "create_time": convert_datetime(node_group.get("createTime")),
+                        "update_time": convert_datetime(node_group.get("updateTime")),
+                        "instance_group_urls": node_group.get("instanceGroupUrls", []),
+                        "pod_ipv4_cidr_size": int(node_group.get("podIpv4CidrSize", 0))
+                        if node_group.get("podIpv4CidrSize")
+                        else 0,
+                        "upgrade_settings": node_group.get("upgradeSettings", {}),
                     }
 
                     # config 정보 추가
                     if "config" in node_group:
                         config = node_group["config"]
-                        node_group_data["config"] = {
-                            "machineType": str(config.get("machineType", "")),
-                            "diskSizeGb": str(config.get("diskSizeGb", "")),
-                            "diskType": str(config.get("diskType", "")),
-                            "imageType": str(config.get("imageType", "")),
-                            "initialNodeCount": str(config.get("initialNodeCount", "")),
-                            "oauthScopes": config.get("oauthScopes", []),
-                            "serviceAccount": str(config.get("serviceAccount", "")),
+                        node_pool_data["config"] = {
+                            "machine_type": str(config.get("machineType", "")),
+                            "disk_size_gb": int(config.get("diskSizeGb", 0))
+                            if config.get("diskSizeGb")
+                            else 0,
+                            "disk_type": str(config.get("diskType", "")),
+                            "image_type": str(config.get("imageType", "")),
+                            "oauth_scopes": config.get("oauthScopes", []),
+                            "service_account": str(config.get("serviceAccount", "")),
                             "metadata": config.get("metadata", {}),
                             "labels": config.get("labels", {}),
-                            "tags": config.get("tags", {}),
+                            "tags": config.get("tags", []),
+                            "preemptible": config.get("preemptible", False),
+                            "spot": config.get("spot", False),
+                            "local_ssd_count": int(config.get("localSsdCount", 0))
+                            if config.get("localSsdCount")
+                            else 0,
+                            "min_cpu_platform": str(config.get("minCpuPlatform", "")),
                         }
 
                     # autoscaling 정보 추가
                     if "autoscaling" in node_group:
                         autoscaling = node_group["autoscaling"]
-                        node_group_data["autoscaling"] = {
-                            "enabled": str(autoscaling.get("enabled", "")),
-                            "minNodeCount": str(autoscaling.get("minNodeCount", "")),
-                            "maxNodeCount": str(autoscaling.get("maxNodeCount", "")),
-                            "autoprovisioned": str(
-                                autoscaling.get("autoprovisioned", "")
+                        node_pool_data["autoscaling"] = {
+                            "enabled": bool(autoscaling.get("enabled", False)),
+                            "min_node_count": int(autoscaling.get("minNodeCount", 0))
+                            if autoscaling.get("minNodeCount")
+                            else 0,
+                            "max_node_count": int(autoscaling.get("maxNodeCount", 0))
+                            if autoscaling.get("maxNodeCount")
+                            else 0,
+                            "total_min_node_count": int(
+                                autoscaling.get("totalMinNodeCount", 0)
+                            )
+                            if autoscaling.get("totalMinNodeCount")
+                            else 0,
+                            "total_max_node_count": int(
+                                autoscaling.get("totalMaxNodeCount", 0)
+                            )
+                            if autoscaling.get("totalMaxNodeCount")
+                            else 0,
+                            "location_policy": str(
+                                autoscaling.get("locationPolicy", "")
                             ),
                         }
 
                     # management 정보 추가
                     if "management" in node_group:
                         management = node_group["management"]
-                        node_group_data["management"] = {
-                            "autoRepair": str(management.get("autoRepair", "")),
-                            "autoUpgrade": str(management.get("autoUpgrade", "")),
-                            "upgradeOptions": management.get("upgradeOptions", {}),
+                        node_pool_data["management"] = {
+                            "auto_repair": bool(management.get("autoRepair", False)),
+                            "auto_upgrade": bool(management.get("autoUpgrade", False)),
+                            "upgrade_options": management.get("upgradeOptions", {}),
                         }
 
                     # 메트릭 정보 추가
                     if metrics:
-                        node_group_data["metrics"] = metrics
+                        node_pool_data["metrics"] = metrics
 
                     # 노드 정보 추가
                     if nodes_info:
-                        node_group_data["total_nodes"] = nodes_info["total_nodes"]
-                        node_group_data["total_groups"] = nodes_info["total_groups"]
+                        node_pool_data["total_nodes"] = nodes_info["total_nodes"]
+                        node_pool_data["total_groups"] = nodes_info["total_groups"]
 
                     # 노드 정보 추가
                     if nodes:
-                        node_group_data["nodes"] = []
+                        node_pool_data["nodes"] = []
                         for node in nodes:
                             node_info = {
                                 "name": str(node.get("name", "")),
@@ -866,15 +896,15 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                                 "zone": str(node.get("zone", "")),
                                 "internalIP": str(node.get("internalIP", "")),
                                 "externalIP": str(node.get("externalIP", "")),
-                                "createTime": node.get("createTime"),
+                                "createTime": convert_datetime(node.get("createTime")),
                                 "labels": node.get("labels", {}),
                                 "taints": node.get("taints", []),
                             }
-                            node_group_data["nodes"].append(node_info)
+                            node_pool_data["nodes"].append(node_info)
 
                     # 인스턴스 그룹 정보 추가
                     if instance_groups:
-                        node_group_data["instance_groups"] = []
+                        node_pool_data["instance_groups"] = []
                         for group in instance_groups:
                             group_info = {
                                 "name": str(group.get("name")),
@@ -901,12 +931,14 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                                     "zone": str(instance.get("zone")),
                                     "internalIP": str(instance.get("internalIP")),
                                     "externalIP": str(instance.get("externalIP")),
-                                    "createTime": instance.get("createTime"),
+                                    "createTime": convert_datetime(
+                                        instance.get("createTime")
+                                    ),
                                     "labels": instance.get("labels"),
                                     "taints": instance.get("taints"),
                                 }
-                                node_info["instances"].append(instance_info)
-                            node_group_data["instance_groups"].append(group_info)
+                                group_info["instances"].append(instance_info)
+                            node_pool_data["instance_groups"].append(group_info)
 
                     # Stackdriver 정보 추가
                     # Google Cloud Monitoring 리소스 ID: {project_id}:{location}:{cluster_name}:{node_pool_name}
@@ -922,7 +954,7 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                             "value": node_pool_name,
                         },
                     ]
-                    node_group_data["google_cloud_monitoring"] = (
+                    node_pool_data["google_cloud_monitoring"] = (
                         self.set_google_cloud_monitoring(
                             project_id,
                             "kubernetes.io/node",
@@ -930,7 +962,7 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                             google_cloud_monitoring_filters,
                         )
                     )
-                    node_group_data["google_cloud_logging"] = (
+                    node_pool_data["google_cloud_logging"] = (
                         self.set_google_cloud_logging(
                             "KubernetesEngine",
                             "NodePool",
@@ -939,20 +971,25 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                         )
                     )
 
-                    # GKENodeGroup 모델 생성
-                    gke_node_group_data = GKENodeGroup(node_group_data, strict=False)
+                    # NodePool 모델 생성
+                    node_pool_data_model = NodePool(node_pool_data, strict=False)
 
-                    # GKENodeGroupResource 생성
-                    node_group_resource = GKENodeGroupResource(
+                    # NodePool config의 labels를 tags 형식으로 변환
+                    config_labels = node_group.get("config", {}).get("labels", {})
+                    tags = self.convert_labels_format(config_labels)
+
+                    # NodePoolResource 생성
+                    node_pool_resource = NodePoolResource(
                         {
-                            "name": node_group_data.get("name"),
-                            "data": gke_node_group_data,
+                            "name": node_pool_data.get("name"),
+                            "data": node_pool_data_model,
                             "reference": {
                                 "resource_id": f"{cluster_name}/{location}/{node_pool_name}",
                                 "external_link": f"https://console.cloud.google.com/kubernetes/nodepool/{location}/{cluster_name}/{node_pool_name}?project={project_id}",
                             },
                             "region_code": location,
                             "account": project_id,
+                            "tags": tags,
                         }
                     )
 
@@ -961,12 +998,12 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                     ##################################
                     self.set_region_code(location)
 
-                    # GKENodeGroupResponse 생성
-                    node_group_response = GKENodeGroupResponse(
-                        {"resource": node_group_resource}
+                    # NodePoolResponse 생성
+                    node_pool_response = NodePoolResponse(
+                        {"resource": node_pool_resource}
                     )
 
-                    collected_cloud_services.append(node_group_response)
+                    collected_cloud_services.append(node_pool_response)
                     _LOGGER.info(
                         f"Successfully processed node group: {node_pool_name} (v1beta1)"
                     )
