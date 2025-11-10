@@ -21,7 +21,7 @@ class FilestoreBackupData(BaseResource):
     labels = ListType(DictType(StringType), default=[])
     capacity_gb = StringType(deserialize_from="capacityGb", serialize_when_none=False)
     storage_bytes = StringType(
-        deserialize_from="storageBytes", serialize_when_none=False
+        deserialize_from="storageBytes", serialize_when_none=False, default=0
     )
     source_instance = StringType(serialize_when_none=False)
     source_instance_id = StringType(serialize_when_none=False)
@@ -32,7 +32,7 @@ class FilestoreBackupData(BaseResource):
         deserialize_from="sourceInstanceTier", serialize_when_none=False
     )
     download_bytes = StringType(
-        deserialize_from="downloadBytes", serialize_when_none=False
+        deserialize_from="downloadBytes", serialize_when_none=False, default=0
     )
     kms_key = StringType(deserialize_from="kmsKey", serialize_when_none=False)
     file_system_protocol = StringType(
