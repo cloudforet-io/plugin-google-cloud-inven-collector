@@ -84,6 +84,9 @@ class FilestoreBackupManager(GoogleCloudManager):
                             "source_instance": source_instance,
                             "source_instance_id": source_instance_id,
                             "labels": labels,
+                            "google_cloud_logging": self.set_google_cloud_logging(
+                                "Filestore", "Backup", project_id, backup_id
+                            ),
                         }
                     )
 
