@@ -34,7 +34,6 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.params = kwargs  # params를 인스턴스 변수로 저장
-        self.api_version = "v1beta1"
 
     def list_node_pools(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         """GKE 노드풀 목록을 조회합니다 (v1beta1 API).
@@ -804,7 +803,6 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                         "initial_node_count": int(node_group.get("initialNodeCount", 0))
                         if node_group.get("initialNodeCount")
                         else 0,
-                        "api_version": "v1beta1",
                         "self_link": node_group.get("selfLink", ""),
                         "instance_group_urls": node_group.get("instanceGroupUrls", []),
                         "pod_ipv4_cidr_size": int(node_group.get("podIpv4CidrSize", 0))

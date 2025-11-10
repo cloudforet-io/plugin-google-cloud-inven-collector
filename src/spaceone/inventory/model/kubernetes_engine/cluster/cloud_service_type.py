@@ -53,30 +53,26 @@ cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
             },
         ),
         TextDyField.data_source("Kubernetes Version", "data.current_master_version"),
-        TextDyField.data_source("Node Count", "data.current_node_count"),
+        TextDyField.data_source("총 노드 수", "data.current_node_count"),
+        TextDyField.data_source("총 vCPU", "data.total_cpu"),
+        TextDyField.data_source("총 메모리", "data.total_memory_gb"),
         TextDyField.data_source("Network", "data.network"),
         TextDyField.data_source("Subnetwork", "data.subnetwork"),
         TextDyField.data_source("Cluster IPV4 CIDR", "data.cluster_ipv4_cidr"),
         TextDyField.data_source("Services IPV4 CIDR", "data.services_ipv4_cidr"),
         DateTimeDyField.data_source("Created", "data.create_time"),
-        TextDyField.data_source("API Version", "data.api_version"),
-        TextDyField.data_source("Fleet Info", "data.fleet_info"),
-        TextDyField.data_source("Membership Info", "data.membership_info"),
-        TextDyField.data_source("Resource Limits Count", "data.resource_limits"),
     ],
     search=[
         SearchField.set(name="Cluster Name", key="data.name"),
         SearchField.set(name="Location", key="data.location"),
         SearchField.set(name="Status", key="data.status"),
         SearchField.set(name="Kubernetes Version", key="data.current_master_version"),
+        SearchField.set(name="Total CPU", key="data.total_cpu"),
+        SearchField.set(name="Total Memory", key="data.total_memory_gb"),
         SearchField.set(name="Network", key="data.network"),
         SearchField.set(name="Subnetwork", key="data.subnetwork"),
         SearchField.set(name="Project ID", key="data.project_id"),
         SearchField.set(name="Created", key="data.create_time", data_type="datetime"),
-        SearchField.set(name="API Version", key="data.api_version"),
-        SearchField.set(name="Fleet Info", key="data.fleet_info"),
-        SearchField.set(name="Membership Info", key="data.membership_info"),
-        SearchField.set(name="Resource Limits", key="data.resource_limits"),
     ],
     widget=[
         CardWidget.set(**get_data_from_yaml(total_count_conf)),
@@ -87,10 +83,6 @@ cst_gke_cluster._metadata = CloudServiceTypeMeta.set_meta(
     ],
 )
 
-# Export unified version
-CLOUD_SERVICE_TYPES = [
-    CloudServiceTypeResponse({"resource": cst_gke_cluster}),
-]
 # Export unified version
 CLOUD_SERVICE_TYPES = [
     CloudServiceTypeResponse({"resource": cst_gke_cluster}),

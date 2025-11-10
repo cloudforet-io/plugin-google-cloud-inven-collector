@@ -41,7 +41,6 @@ cst_app_engine_service.tags = {
 
 cst_app_engine_service._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Service", "data.name"),
         TextDyField.data_source("Service ID", "data.service_id"),
         EnumDyField.data_source(
             "Serving Status",
@@ -54,24 +53,16 @@ cst_app_engine_service._metadata = CloudServiceTypeMeta.set_meta(
         ),
         TextDyField.data_source("Versions", "data.version_count"),
         TextDyField.data_source("Instance Count", "data.instance_count"),
-        TextDyField.data_source("Labels", "data.labels"),
-        TextDyField.data_source("VPC Access Name", "data.vpc_access_connector.name"),
-        TextDyField.data_source(
-            "VPC Egress Setting", "data.vpc_access_connector.egress_setting"
-        ),
         TextDyField.data_source(
             "Last Version Deployed", "data.latest_version_deployed"
         ),
     ],
     search=[
-        SearchField.set(name="Service", key="data.name"),
         SearchField.set(name="Service ID", key="data.service_id"),
         SearchField.set(name="Project", key="data.project_id"),
         SearchField.set(name="Serving Status", key="data.serving_status"),
         SearchField.set(name="Versions", key="data.version_count"),
         SearchField.set(name="Instance Count", key="data.instance_count"),
-        SearchField.set(name="Labels", key="data.labels"),
-        SearchField.set(name="VPC Access Name", key="data.vpc_access_connector.name"),
         SearchField.set(
             name="Last Version Deployed", key="data.latest_version_deployed"
         ),
@@ -82,11 +73,6 @@ cst_app_engine_service._metadata = CloudServiceTypeMeta.set_meta(
         ChartWidget.set(**get_data_from_yaml(count_by_serving_status_conf)),
     ],
 )
-
-# Export
-CLOUD_SERVICE_TYPES = [
-    CloudServiceTypeResponse({"resource": cst_app_engine_service}),
-]
 
 # Export
 CLOUD_SERVICE_TYPES = [

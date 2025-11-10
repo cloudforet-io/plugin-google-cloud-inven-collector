@@ -42,7 +42,8 @@ cst_app_engine_instance.tags = {
 
 cst_app_engine_instance._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Instance ID", "data.instance_id"),
+        TextDyField.data_source("Service ID", "data.service_id"),
+        TextDyField.data_source("Version ID", "data.version_id"),
         TextDyField.data_source("QPS", "data.qps"),
         TextDyField.data_source("Latency", "data.average_latency"),
         TextDyField.data_source("Requests", "data.request_count"),
@@ -50,8 +51,6 @@ cst_app_engine_instance._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Memory (MB)", "data.memory_usage"),
         DateTimeDyField.data_source("Start Time", "data.start_time"),
         TextDyField.data_source("Availability", "data.availability.liveness"),
-        TextDyField.data_source("Service ID", "data.service_id"),
-        TextDyField.data_source("Version ID", "data.version_id"),
         EnumDyField.data_source(
             "VM Status",
             "data.vm_status",
@@ -65,7 +64,6 @@ cst_app_engine_instance._metadata = CloudServiceTypeMeta.set_meta(
         DateTimeDyField.data_source("Created", "data.create_time"),
     ],
     search=[
-        SearchField.set(name="Instance ID", key="data.instance_id"),
         SearchField.set(name="Service ID", key="data.service_id"),
         SearchField.set(name="Version ID", key="data.version_id"),
         SearchField.set(name="Project", key="data.project_id"),

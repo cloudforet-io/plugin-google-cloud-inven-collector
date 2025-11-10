@@ -140,6 +140,137 @@ class GKEClusterV1Manager(GoogleCloudManager):
             _LOGGER.error(f"Failed to get GKE resource limits: {e}")
             return []
 
+    def calculate_cluster_resources(
+        self, cluster_name: str, location: str, params: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Calculate total CPU and memory for a cluster by aggregating node pool information.
+
+        Args:
+            cluster_name: Cluster name
+            location: Cluster location
+            params: Query parameters
+
+        Returns:
+            Dictionary containing total CPU and memory information
+        """
+        try:
+            from spaceone.inventory.connector.kubernetes_engine.cluster_v1 import (
+                GKEClusterV1Connector,
+            )
+
+            cluster_connector: GKEClusterV1Connector = self.locator.get_connector(
+                self.connector_name, **params
+            )
+
+            # Get node pools for this cluster
+            node_pools = cluster_connector.list_node_pools(cluster_name, location)
+
+            total_cpu = 0
+            total_memory_gb = 0
+            total_nodes = 0
+
+            # Machine type to CPU/Memory mapping (common GCP machine types)
+            machine_type_specs = {
+                # Standard machine types
+                "n1-standard-1": {"cpu": 1, "memory_gb": 3.75},
+                "n1-standard-2": {"cpu": 2, "memory_gb": 7.5},
+                "n1-standard-4": {"cpu": 4, "memory_gb": 15},
+                "n1-standard-8": {"cpu": 8, "memory_gb": 30},
+                "n1-standard-16": {"cpu": 16, "memory_gb": 60},
+                "n1-standard-32": {"cpu": 32, "memory_gb": 120},
+                "n1-standard-64": {"cpu": 64, "memory_gb": 240},
+                "n1-standard-96": {"cpu": 96, "memory_gb": 360},
+                # High-memory machine types
+                "n1-highmem-2": {"cpu": 2, "memory_gb": 13},
+                "n1-highmem-4": {"cpu": 4, "memory_gb": 26},
+                "n1-highmem-8": {"cpu": 8, "memory_gb": 52},
+                "n1-highmem-16": {"cpu": 16, "memory_gb": 104},
+                "n1-highmem-32": {"cpu": 32, "memory_gb": 208},
+                "n1-highmem-64": {"cpu": 64, "memory_gb": 416},
+                "n1-highmem-96": {"cpu": 96, "memory_gb": 624},
+                # High-CPU machine types
+                "n1-highcpu-16": {"cpu": 16, "memory_gb": 14.4},
+                "n1-highcpu-32": {"cpu": 32, "memory_gb": 28.8},
+                "n1-highcpu-64": {"cpu": 64, "memory_gb": 57.6},
+                "n1-highcpu-96": {"cpu": 96, "memory_gb": 86.4},
+                # E2 machine types
+                "e2-standard-2": {"cpu": 2, "memory_gb": 8},
+                "e2-standard-4": {"cpu": 4, "memory_gb": 16},
+                "e2-standard-8": {"cpu": 8, "memory_gb": 32},
+                "e2-standard-16": {"cpu": 16, "memory_gb": 64},
+                "e2-standard-32": {"cpu": 32, "memory_gb": 128},
+                # N2 machine types
+                "n2-standard-2": {"cpu": 2, "memory_gb": 8},
+                "n2-standard-4": {"cpu": 4, "memory_gb": 16},
+                "n2-standard-8": {"cpu": 8, "memory_gb": 32},
+                "n2-standard-16": {"cpu": 16, "memory_gb": 64},
+                "n2-standard-32": {"cpu": 32, "memory_gb": 128},
+                "n2-standard-48": {"cpu": 48, "memory_gb": 192},
+                "n2-standard-64": {"cpu": 64, "memory_gb": 256},
+                "n2-standard-80": {"cpu": 80, "memory_gb": 320},
+                "n2-standard-128": {"cpu": 128, "memory_gb": 512},
+            }
+
+            for node_pool in node_pools:
+                try:
+                    # Get node count
+                    current_node_count = node_pool.get(
+                        "currentNodeCount", 0
+                    ) or node_pool.get("initialNodeCount", 0)
+                    if not current_node_count:
+                        continue
+
+                    total_nodes += current_node_count
+
+                    # Get machine type from node config
+                    node_config = node_pool.get("config", {})
+                    machine_type = node_config.get("machineType", "")
+
+                    if machine_type in machine_type_specs:
+                        specs = machine_type_specs[machine_type]
+                        total_cpu += specs["cpu"] * current_node_count
+                        total_memory_gb += specs["memory_gb"] * current_node_count
+                    else:
+                        # For unknown machine types, try to parse from name
+                        # e.g., "n1-standard-4" -> 4 CPUs
+                        try:
+                            if "-" in machine_type:
+                                parts = machine_type.split("-")
+                                if len(parts) >= 3 and parts[-1].isdigit():
+                                    cpu_count = int(parts[-1])
+                                    # Estimate memory based on CPU (rough approximation)
+                                    if "highmem" in machine_type:
+                                        memory_gb = cpu_count * 6.5  # High memory ratio
+                                    elif "highcpu" in machine_type:
+                                        memory_gb = cpu_count * 0.9  # High CPU ratio
+                                    else:
+                                        memory_gb = cpu_count * 3.75  # Standard ratio
+
+                                    total_cpu += cpu_count * current_node_count
+                                    total_memory_gb += memory_gb * current_node_count
+                        except Exception:
+                            _LOGGER.debug(
+                                f"Could not parse machine type: {machine_type}"
+                            )
+
+                except Exception as e:
+                    _LOGGER.debug(
+                        f"Error processing node pool {node_pool.get('name', 'unknown')}: {e}"
+                    )
+                    continue
+
+            return {
+                "total_cpu": int(total_cpu),
+                "total_memory_gb": round(total_memory_gb, 1),
+                "total_nodes": total_nodes,
+            }
+
+        except Exception as e:
+            _LOGGER.debug(
+                f"Failed to calculate cluster resources for {cluster_name}: {e}"
+            )
+            return {"total_cpu": 0, "total_memory_gb": 0, "total_nodes": 0}
+
     def collect_cloud_service(
         self, params: Dict[str, Any]
     ) -> Tuple[List[Any], List[ErrorResourceResponse]]:
@@ -172,6 +303,13 @@ class GKEClusterV1Manager(GoogleCloudManager):
             try:
                 # NodePool 정보는 별도의 NodePoolManager에서 처리
 
+                # Calculate total cluster resources
+                cluster_name = cluster.get("name", "")
+                cluster_location = cluster.get("location", "")
+                cluster_resources = self.calculate_cluster_resources(
+                    cluster_name, cluster_location, params
+                )
+
                 # 기본 클러스터 데이터 준비
                 cluster_data = {
                     "name": str(cluster.get("name", "")),
@@ -190,7 +328,9 @@ class GKEClusterV1Manager(GoogleCloudManager):
                     "resourceLabels": {
                         k: str(v) for k, v in cluster.get("resourceLabels", {}).items()
                     },
-                    "api_version": "v1",
+                    # Add calculated total resources
+                    "total_cpu": str(cluster_resources.get("total_cpu", 0)),
+                    "total_memory_gb": str(cluster_resources.get("total_memory_gb", 0)),
                 }
 
                 # 네트워크 설정 추가
@@ -371,5 +511,7 @@ class GKEClusterV1Manager(GoogleCloudManager):
                     )
                 )
 
+        _LOGGER.debug("** GKE Cluster V1 END **")
+        return collected_cloud_services, error_responses
         _LOGGER.debug("** GKE Cluster V1 END **")
         return collected_cloud_services, error_responses

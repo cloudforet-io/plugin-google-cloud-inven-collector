@@ -33,7 +33,6 @@ class GKENodePoolV1Manager(GoogleCloudManager):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.params = kwargs  # params를 인스턴스 변수로 저장
-        self.api_version = "v1"
 
     def list_node_pools(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         """GKE 노드풀 목록을 조회합니다 (v1 API).
@@ -717,7 +716,6 @@ class GKENodePoolV1Manager(GoogleCloudManager):
                         "initial_node_count": int(node_group.get("initialNodeCount", 0))
                         if node_group.get("initialNodeCount")
                         else 0,
-                        "api_version": "v1",
                         "self_link": node_group.get("selfLink", ""),
                     }
 

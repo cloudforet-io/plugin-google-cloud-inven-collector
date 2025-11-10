@@ -60,9 +60,6 @@ cst_app_engine_application._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Default Bucket", "data.default_bucket"),
         TextDyField.data_source("Service Account", "data.service_account"),
         TextDyField.data_source("SSL Policy", "data.ssl_policy"),
-        TextDyField.data_source("Feature Settings", "data.feature_settings"),
-        TextDyField.data_source("IAP Settings", "data.iap"),
-        TextDyField.data_source("Dispatch Rules", "data.dispatch_rules"),
     ],
     search=[
         SearchField.set(name="Name", key="data.name"),
