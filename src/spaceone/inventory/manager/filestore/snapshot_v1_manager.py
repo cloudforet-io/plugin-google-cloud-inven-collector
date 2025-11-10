@@ -83,6 +83,9 @@ class FilestoreSnapshotManager(GoogleCloudManager):
                             "location": location,
                             "instance_id": instance_id,
                             "labels": labels,
+                            "google_cloud_logging": self.set_google_cloud_logging(
+                                "Filestore", "Snapshot", project_id, snapshot_id
+                            ),
                         }
                     )
 
