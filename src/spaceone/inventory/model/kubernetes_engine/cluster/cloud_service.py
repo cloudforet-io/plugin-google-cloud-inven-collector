@@ -91,15 +91,6 @@ addons_config = ItemDynamicLayout.set_fields(
     ],
 )
 
-labels = TableDynamicLayout.set_fields(
-    "Labels",
-    root_path="data.resource_labels",
-    fields=[
-        TextDyField.data_source("Key", "key"),
-        TextDyField.data_source("Value", "value"),
-    ],
-)
-
 # Fleet 정보 (v1beta1 전용)
 fleet_info = ItemDynamicLayout.set_fields(
     "Fleet Information",
@@ -138,7 +129,6 @@ gke_cluster_meta = CloudServiceMeta.set_layouts(
         gke_cluster,
         network_config,
         addons_config,
-        labels,
         fleet_info,
         membership_info,
         resource_limits,
