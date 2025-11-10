@@ -41,7 +41,6 @@ cst_app_engine_service.tags = {
 
 cst_app_engine_service._metadata = CloudServiceTypeMeta.set_meta(
     fields=[
-        TextDyField.data_source("Service", "data.name"),
         TextDyField.data_source("Service ID", "data.service_id"),
         EnumDyField.data_source(
             "Serving Status",
@@ -64,7 +63,6 @@ cst_app_engine_service._metadata = CloudServiceTypeMeta.set_meta(
         ),
     ],
     search=[
-        SearchField.set(name="Service", key="data.name"),
         SearchField.set(name="Service ID", key="data.service_id"),
         SearchField.set(name="Project", key="data.project_id"),
         SearchField.set(name="Serving Status", key="data.serving_status"),
@@ -82,11 +80,6 @@ cst_app_engine_service._metadata = CloudServiceTypeMeta.set_meta(
         ChartWidget.set(**get_data_from_yaml(count_by_serving_status_conf)),
     ],
 )
-
-# Export
-CLOUD_SERVICE_TYPES = [
-    CloudServiceTypeResponse({"resource": cst_app_engine_service}),
-]
 
 # Export
 CLOUD_SERVICE_TYPES = [
