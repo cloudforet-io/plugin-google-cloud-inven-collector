@@ -3,10 +3,9 @@ import os
 from spaceone.inventory.conf.cloud_service_conf import ASSET_URL
 from spaceone.inventory.libs.common_parser import *
 from spaceone.inventory.libs.schema.metadata.dynamic_field import (
-    TextDyField,
-    SearchField,
-    DateTimeDyField,
     EnumDyField,
+    SearchField,
+    TextDyField,
 )
 from spaceone.inventory.libs.schema.cloud_service_type import CloudServiceTypeResource, CloudServiceTypeResponse, CloudServiceTypeMeta
 from spaceone.inventory.libs.schema.metadata.dynamic_widget import (
@@ -58,8 +57,6 @@ cst_gke_node_pool._metadata = CloudServiceTypeMeta.set_meta(
         TextDyField.data_source("Max Node Count", "data.autoscaling.max_node_count"),
         TextDyField.data_source("Auto Upgrade", "data.management.auto_upgrade"),
         TextDyField.data_source("Auto Repair", "data.management.auto_repair"),
-        DateTimeDyField.data_source("Created", "data.create_time"),
-        DateTimeDyField.data_source("Updated", "data.update_time"),
     ],
     search=[
         SearchField.set(name="NodePool Name", key="data.name"),
@@ -70,8 +67,6 @@ cst_gke_node_pool._metadata = CloudServiceTypeMeta.set_meta(
         SearchField.set(name="Image Type", key="data.config.image_type"),
         SearchField.set(name="Project ID", key="data.project_id"),
         SearchField.set(name="Preemptible", key="data.config.preemptible"),
-        SearchField.set(name="Created", key="data.create_time", data_type="datetime"),
-        SearchField.set(name="Updated", key="data.update_time", data_type="datetime"),
         SearchField.set(name="API Version", key="data.api_version"),
     ],
     widget=[

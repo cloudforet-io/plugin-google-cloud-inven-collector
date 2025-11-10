@@ -10,10 +10,7 @@ from spaceone.inventory.libs.schema.metadata.dynamic_field import (
     ListDyField,
     TextDyField,
 )
-from spaceone.inventory.libs.schema.metadata.dynamic_layout import (
-    ItemDynamicLayout,
-    TableDynamicLayout,
-)
+from spaceone.inventory.libs.schema.metadata.dynamic_layout import ItemDynamicLayout
 from spaceone.inventory.model.kubernetes_engine.node_pool.data import NodePool
 
 """
@@ -125,9 +122,9 @@ oauth_scopes = ItemDynamicLayout.set_fields(
     "OAuth Scopes",
     fields=[
         ListDyField.data_source(
-            "Scopes", 
-            "data.config.oauth_scopes", 
-            default_badge={"type": "outline", "delimiter": "<br>"}
+            "Scopes",
+            "data.config.oauth_scopes",
+            default_badge={"type": "outline", "delimiter": "<br>"},
         ),
     ],
 )

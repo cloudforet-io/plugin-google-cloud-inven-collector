@@ -809,8 +809,6 @@ class GKENodePoolV1BetaManager(GoogleCloudManager):
                         else 0,
                         "api_version": "v1beta1",
                         "self_link": node_group.get("selfLink", ""),
-                        "create_time": convert_datetime(node_group.get("createTime")),
-                        "update_time": convert_datetime(node_group.get("updateTime")),
                         "instance_group_urls": node_group.get("instanceGroupUrls", []),
                         "pod_ipv4_cidr_size": int(node_group.get("podIpv4CidrSize", 0))
                         if node_group.get("podIpv4CidrSize")
