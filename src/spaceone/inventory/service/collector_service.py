@@ -1,17 +1,18 @@
+import concurrent.futures
+import json
+import logging
 import os
 import time
-import logging
-import json
-import concurrent.futures
-from spaceone.inventory.connector.resource_manager.project import ProjectConnector
-from spaceone.inventory.libs.manager import GoogleCloudManager
+
 from spaceone.core import utils
 from spaceone.core.service import *
-from spaceone.inventory.libs.schema.cloud_service import (
-    ErrorResourceResponse,
-    CloudServiceResponse,
-)
 from spaceone.inventory.conf.cloud_service_conf import *
+from spaceone.inventory.connector.resource_manager.project import ProjectConnector
+from spaceone.inventory.libs.manager import GoogleCloudManager
+from spaceone.inventory.libs.schema.cloud_service import (
+    CloudServiceResponse,
+    ErrorResourceResponse,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -97,7 +98,12 @@ class CollectorService(BaseService):
 
         start_time = time.time()
 
-        _LOGGER.debug(f"EXECUTOR START: Google Cloud Service")
+        _LOGGER.debug("EXECUTOR START: Google Cloud Service")
+        proxy_env = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+        if proxy_env:
+            _LOGGER.debug(
+                f"** Using proxy in environment variable HTTPS_PROXY/https_proxy: {proxy_env}"
+            )  # src/spaceone/inventory/libs/connector.py _create_http_client
         # Get target manager to collect
         try:
             self.execute_managers = self._get_target_execute_manager(
@@ -214,7 +220,6 @@ class CollectorService(BaseService):
         namespace=None,
         resource_type: str = "inventory.Metric",
     ) -> dict:
-
         response = {
             "state": "SUCCESS",
             "resource_type": resource_type,

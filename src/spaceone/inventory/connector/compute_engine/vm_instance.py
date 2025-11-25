@@ -1,8 +1,5 @@
 import logging
 import os
-import google.oauth2.service_account
-import googleapiclient
-import googleapiclient.discovery
 
 from spaceone.inventory.libs.connector import GoogleCloudConnector
 
@@ -34,14 +31,6 @@ class VMInstanceConnector(GoogleCloudConnector):
             - ...
         """
         self.project_id = secret_data.get("project_id")
-        credentials = (
-            google.oauth2.service_account.Credentials.from_service_account_info(
-                secret_data
-            )
-        )
-        self.client = googleapiclient.discovery.build(
-            "compute", "v1", credentials=credentials
-        )
 
     def list_regions(self):
         result = self.client.regions().list(project=self.project_id).execute()
@@ -342,7 +331,7 @@ class VMInstanceConnector(GoogleCloudConnector):
         )
         # NoneType error occurs sometimes. To prevent them insert default value.
         if response is None:
-            _LOGGER.debug(f"[get_instance_in_group] response is None")
+            _LOGGER.debug("[get_instance_in_group] response is None")
             response = {"items": []}
         else:
             _LOGGER.debug(f"[get_instance_in_group] response => {response}")

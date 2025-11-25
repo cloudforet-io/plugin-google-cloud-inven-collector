@@ -14,7 +14,7 @@
 #   limitations under the License.
 
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open("VERSION", "r") as f:
     VERSION = f.read().strip()
@@ -39,6 +39,7 @@ setup(
         "google-cloud-storage",
         "requests",
         "beautifulsoup4",
+        "PySocks",
     ],
     package_data={
         "spaceone": [

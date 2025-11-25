@@ -5,3 +5,4 @@ google-cloud-storage
 requests
 beautifulsoup4
 grpcio
+PySocks # for proxy support
